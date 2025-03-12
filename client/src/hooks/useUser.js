@@ -11,19 +11,28 @@ import {
  * 1. FETCH ALL USERS
  */
 const fetchUsers = async ({ queryKey }) => {
-  // v5 still supplies an object to 'queryFn'. 
-  // Inside that object, you can destructure `queryKey` if needed.
-  const [_key, { page, limit, search }] = queryKey;
+  const [_key, { page, limit, search, role }] = queryKey;
+  let url = `http://localhost:8080/users/all-users?page=${page}&limit=${limit}&search=${search}`;
 
-  const res = await axios.get(
-    `http://localhost:8080/users/all-users?page=${page}&limit=${limit}&search=${search}`
-  );
-  return res.data; // e.g. { users, totalCount, totalPages }
+  if (role) {
+    url += `&role=${role}`;
+  }
+  // Retrieve company_id from localStorage
+  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
+  console.log("companyId",companyId);
+
+  const res = await axios.get(url, {
+    headers: {
+      'company_id': companyId  // Sending company_id in headers
+    }
+  });
+
+  return res.data;
 };
 
-export const useUsers = ({ page, limit = 5, search = '' }) => {
+export const useUsers = ({ page, limit = 5, search = '', role }) => {
   return useQuery({
-    queryKey: ['users', { page, limit, search }],
+    queryKey: ['users', { page, limit, search, role }],
     queryFn: fetchUsers,
     keepPreviousData: true,
     // Optionally configure staleTime, cacheTime, refetchOnWindowFocus, etc.

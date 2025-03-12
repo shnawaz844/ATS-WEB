@@ -4,14 +4,11 @@ import User from '../../models/User.js';
 
 const getUsers = async (req, res) => {
   try {
-    // Default values for page & limit
-    let { page = 1, limit = 10, search = '' } = req.query;
-
-    // Convert page & limit to numbers
+    let { page = 1, limit = 10, search = '', role } = req.query;
+    const { company_id } = req.headers;
     page = parseInt(page);
     limit = parseInt(limit);
 
-    // Build a query for searching userName or email
     const query = {
       $or: [
         { userName: { $regex: search, $options: 'i' } },
@@ -19,17 +16,21 @@ const getUsers = async (req, res) => {
       ],
     };
 
-    // Count total documents that match the query
-    const totalCount = await User.countDocuments(query);
+    // If role is provided (e.g., role=admin for super users), add a filter.
+    if (role) {
+      query.role = role;
+    }
+    if(company_id){
+      query.company_id = company_id
+    }
 
-    // Find users with pagination and search
-    const users = await User.find(query)
-      .sort( { createdAt: -1 } )
+    const totalCount = await User.countDocuments(query);
+    const users = await User.find({ ...query })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // Send back users array and totalCount
-    res.status(200).json({ 
+    res.status(200).json({
       users,
       totalCount,
       currentPage: page,

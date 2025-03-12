@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userName, email, password, gender, address, role } = req.body;
+    const { userName, email, password, gender, address, role, company_id } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
@@ -23,6 +23,7 @@ const updateUser = async (req, res) => {
     if (gender !== undefined) user.gender = gender;
     if (address !== undefined) user.address = address;
     if (role !== undefined) user.role = role;
+    if (company_id !== undefined) user.company_id = company_id;
 
     await user.save();
 

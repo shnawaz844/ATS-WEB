@@ -65,14 +65,14 @@ const CompanyListing = () => {
     const fetchCompanies = async () => {
         try {
             const response = await fetch(
-                `/api/companies?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(
+                `http://localhost:8080/companies/get?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(
                     searchTerm
                 )}`
             )
             if (response.ok) {
                 const data = await response.json()
-                setCompanies(data.companies)
-                setTotalCompanies(data.total)
+                setCompanies(data.Companies)
+                setTotalCompanies(data.totalCount)
             } else {
                 // Fallback to dummy data if API responds with error status
                 setCompanies(dummyCompanies)
@@ -140,7 +140,7 @@ const CompanyListing = () => {
     // Open dialog to edit an existing company (populate form)
     const openEditDialog = (company) => {
         setIsEditing(true)
-        setEditId(company.id)
+        setEditId(company._id)
         setFormData({
             CompanyUserName: company.CompanyUserName,
             name: company.name,
@@ -174,14 +174,14 @@ const CompanyListing = () => {
             !formData.phone ||
             !formData.website
         ) {
-            alert('Please fill all required fields.')
+            alert('Please fill all required fields with "*"')
             return
         }
 
         if (isEditing) {
             // Update existing company via PUT API call
             try {
-                const response = await fetch(`/api/companies/${editId}`, {
+                const response = await fetch(`http://localhost:8080/companies/update/${editId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
@@ -199,7 +199,7 @@ const CompanyListing = () => {
         } else {
             // Add a new company via POST API call
             try {
-                const response = await fetch('/api/companies', {
+                const response = await fetch('http://localhost:8080/companies/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData),
