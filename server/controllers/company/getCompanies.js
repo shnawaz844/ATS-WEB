@@ -23,13 +23,13 @@ const getCompanies = async (req, res) => {
     const totalCount = await Company.countDocuments(query);
 
     // Find Companys with pagination and search
-    const Companys = await Company.find(query)
+    const Companies = await Company.find(query)
       .skip((page - 1) * limit)
       .limit(limit);
 
     // Send back Companys array and totalCount
     res.status(200).json({ 
-      Companys,
+      Companies,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit)
