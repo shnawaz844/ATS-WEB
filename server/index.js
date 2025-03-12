@@ -4,6 +4,7 @@ import connectDB from "./config/connectDB.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+
 const app = express();
 dotenv.config();
 const port = process.env.PORT || 8080;
@@ -27,6 +28,7 @@ import Auth from './routes/Auth.js'
 import applicationTypesRoutes from "./routes/applicationTypeRoutes.js";
 import interviewerappRoutes from "./routes/interviewerappRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js"
+import applicationlistRoutes from './routes/applicationlistRoutes.js'
 
 // Use routes
 app.use("/jobs", jobRoutes);
@@ -39,6 +41,8 @@ app.use("/application-types", applicationTypesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
 app.use("/companies", companyRoutes)
+app.use("/applicationscheduledlist", applicationlistRoutes);
+
 
 // Routes
 app.get("/", (req, res) => {

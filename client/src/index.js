@@ -16,8 +16,10 @@ root.render(
     <BrowserRouter>
       {/* Provide the client to your app */}
       <QueryClientProvider client={queryClient}>
-        <App />
-        <ToastContainer />
+        <>
+          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+          <App />
+        </>
       </QueryClientProvider>
     </BrowserRouter>
   </Context>

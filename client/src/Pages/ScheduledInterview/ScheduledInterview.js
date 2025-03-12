@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const dummyScheduledInterviews = [
     {
@@ -45,6 +45,10 @@ const dummyScheduledInterviews = [
 export const ScheduledInterview = () => {
     const [interviews, setInterviews] = useState(dummyScheduledInterviews);
     const [editingId, setEditingId] = useState(null);
+    const [interviewers, setInterviewers] = useState([]);
+
+    const [assignments, setAssignments] = useState({});
+    const tableDataCss = "border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4";
     const [editForm, setEditForm] = useState({
         time: "",
         date: "",
@@ -58,6 +62,7 @@ export const ScheduledInterview = () => {
         feedback: "",
         attachment: null
     });
+
 
     const statusOptions = ["pending", "complete", "cancel", "postpone"];
     const interviewTypes = ["online", "walkin"];
@@ -134,6 +139,25 @@ export const ScheduledInterview = () => {
             postpone: "bg-blue-100 text-blue-800"
         };
         return colors[status] || colors.pending;
+    };
+    useEffect(() => {
+        const fetchInterviewers = async () => {
+            try {
+                const response = await fetch('http://localhost:8080/users/interviewers');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                setInterviewers(data);
+            } catch (error) {
+                console.error('Error fetching interviewers:', error.message);
+            }
+        };
+
+        fetchInterviewers();
+    }, []);
+    const handleAssign = (candidateId, interviewerId) => {
+        setAssignments((prev) => ({ ...prev, [candidateId]: interviewerId }));
     };
 
     return (
@@ -231,6 +255,21 @@ export const ScheduledInterview = () => {
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
+
+                            <td className={`${tableDataCss}`}>
+                                {/* Dropdown for Assigning Interviewer */}
+                                <select
+                                    className="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    onChange={(e) => handleAssign(e.target.value)}
+                                >
+                                    <option value="">Select Interviewer</option>
+                                    {interviewers.map((interviewer) => (
+                                        <option key={interviewer._id} value={interviewer._id}>
+                                            {interviewer.userName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </td>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Interview Type</label>

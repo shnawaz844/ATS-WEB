@@ -11,7 +11,7 @@ import { getApplication } from '../controllers/Application/getApplication.js';
 import { getAllApplicationsGroupedByJob } from '../controllers/Application/groupedByJob.js'
 import { getApplicationsByJobId } from '../controllers/Application/getApplicationByJobId.js'
 import { getCandidateAppDetail } from '../controllers/Application/getCandidateAppDetail.js';
-import { getApplicationByEmail } from '../controllers/Application/getApplicationByemail.js';
+import { getApplicationByEmail} from '../controllers/Application/getApplicationByEmail.js';
 
 
 router.post("/add-application", upload.single("resume"), addApplication);
