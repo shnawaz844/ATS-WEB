@@ -6,9 +6,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
  */
 const fetchApplicationTypes = async ({ filters, page, limit }) => {
   const queryParams = new URLSearchParams(filters).toString();
-  console.log(" filters, page, limit", filters, queryParams)
+  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
   const res = await fetch(
-    `http://localhost:8080/application-types/all-application-types?${queryParams}`
+    `http://localhost:8080/application-types/all-application-types?${queryParams}`,
+    {
+      headers: {
+        'company_id': companyId // Sending company_id in headers
+      }
+    }
   );
   if (!res.ok) {
     throw new Error("Error fetching applications");

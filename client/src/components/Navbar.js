@@ -1,50 +1,61 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet, NavLink, Link } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
-  UserPen, LogOut
+  UserPen, 
+  LogOut,
+  Menu,
+  X,
+  Home,
+  Users,
+  Building,
+  LayoutDashboard,
+  FileText,
+  Briefcase,
+  Calendar,
+  UserCheck,
+  ChevronDown
 } from "lucide-react";
-import atslogo1URL from "../assets/img/logo1.png"
+import atslogo1URL from "../assets/img/logo1.png";
 
-// Navigation Arrays
+// Navigation Arrays with icons
 const superNavItems = [
-  { label: "Users", path: "/all-users" },
-  { label: "Companies", path: "/all-companies" }
+  { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
+  { label: "Companies", path: "/all-companies", icon: <Building className="w-5 h-5" /> }
 ];
 
 const adminNavItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Users", path: "/all-users" },
-  { label: "Application Types", path: "/application-types" },
-  { label: "Interview Rounds", path: "/interview-rounds" },
+  { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
+  { label: "Application Types", path: "/application-types", icon: <FileText className="w-5 h-5" /> },
+  { label: "Interview Rounds", path: "/interview-rounds", icon: <Calendar className="w-5 h-5" /> },
 ];
 
 const hiringManagerNavItems = [
-  { label: "Dashboard", path: "/hiring_manager" },
-  { label: "Application List", path: "/application-list" },
-  { label: "Assigned Interviews", path: "/assigned-interviews" },
+  { label: "Dashboard", path: "/hiring_manager", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { label: "Application List", path: "/application-list", icon: <FileText className="w-5 h-5" /> },
+  { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="w-5 h-5" /> },
 ];
 
 const interviewerNavItems = [
-  { label: "Home", path: "/" },
-  // { label: "Dashboard", path: "/interviewer/review" },
-  { label: " Scheduled Interviews", path: "/scheduled-interview" },
-  { label: "Applications", path: "/shortlist" },
+  { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
+  { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="w-5 h-5" /> },
+  { label: "Applications", path: "/shortlist", icon: <FileText className="w-5 h-5" /> },
 ];
 
 const recruiterNavItems = [
-  { label: "Home", path: "/recruiter-dashboard" },
-  { label: "Jobs", path: "/all-jobs" },
-  { label: "Applications", path: "/all-applications" },
+  { label: "Home", path: "/recruiter-dashboard", icon: <Home className="w-5 h-5" /> },
+  { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="w-5 h-5" /> },
+  { label: "Applications", path: "/all-applications", icon: <FileText className="w-5 h-5" /> },
 ];
 
 const candidateNavItems = [
-  { label: "All Jobs", path: "/all-posted-jobs" },
-  { label: "Applied Jobs", path: `/my-jobs` },
+  { label: "All Jobs", path: "/all-posted-jobs", icon: <Briefcase className="w-5 h-5" /> },
+  { label: "Applied Jobs", path: `/my-jobs`, icon: <UserCheck className="w-5 h-5" /> },
 ];
 
 const normalNavItem = [
-  { label: "Home", path: "/" },
-  { label: "All Jobs", path: "/all-posted-jobs" },
+  { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
+  { label: "All Jobs", path: "/all-posted-jobs", icon: <Briefcase className="w-5 h-5" /> },
 ];
 
 export const Navbar = () => {
@@ -125,148 +136,186 @@ export const Navbar = () => {
         }
       });
   };
+  
   return (
-    <div className="w-full ">
-      <nav className="flex justify-between items-center py-6 px-4 text-clearWhite bg-gradient-to-r from-slate-600 to-slate-700">
-        {/* BRAND */}
-        <NavLink
-          to="/"
-          className="flex items-center gap-2 text-2xl text-[#e1e5df]"
-        >
-          <a
-            href="/"
-            className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
-        >
-            <img
-                src={atslogo1URL}
-                className="rounded-full h-12 md:h-16"
-                alt="Flowbite Logo"
-            />
-        </a>
-          {/* <span className="text-clearWhite ml-8 font-extrabold text-xl md:text-3xl transition-transform duration-200 hover:scale-105">
-            A T S
-          </span> */}
-        </NavLink>
-
-        {/* MAIN MENU - Centered for large screens */}
-        <div className="hidden md:flex justify-center flex-grow gap-12 font-bold">
-          {navItems.map(({ label, path }) => (
-            <li
-              key={path}
-              className="text-lg text-clearWhite transition-transform duration-100 hover:scale-105"
-            >
+    <div className="w-full sticky top-0 z-50">
+      <nav className="bg-gradient-to-r from-slate-600 to-slate-700 relative z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20">
+            {/* BRAND */}
+            <div className="flex items-center">
               <NavLink
-                to={path}
-                className={({ isActive }) =>
-                  isActive ? "text-mediumGray" : ""
-                }
+                to="/"
+                className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
-                <span>{label}</span>
+                <img
+                  src={atslogo1URL}
+                  className="rounded-full h-12 md:h-14 border-2 border-gray-300"
+                  alt="ATS Logo"
+                />
+                <span className="text-white font-extrabold text-xl md:text-2xl ml-2 hidden sm:block">
+                  ATS Portal
+                </span>
               </NavLink>
-            </li>
-          ))}
-        </div>
+            </div>
 
-        {/* User info or Login/Signup */}
-        <div>
-          {loginData ? (
-            <div className="hidden md:block relative" ref={dropdownRef}>
-              <button
-                onClick={toggleDropdown}
-                className="py-2 px-5 bg-mediumGray text-clearWhite rounded hover:bg-white hover:text-black hover:border-clearWhite transition-all duration-100"
-              >
-                {loginData?.userName}
-              </button>
-              {isDropdownOpen && (
+            {/* MAIN MENU - Desktop */}
+            <div className="hidden md:flex items-center justify-center space-x-8">
+              {navItems.map(({ label, path, icon }) => (
+                <NavLink
+                  key={path}
+                  to={path}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${
+                      isActive 
+                        ? "text-white bg-slate-600" 
+                        : "text-gray-300 hover:text-white"
+                    }`
+                  }
+                >
+                  {icon}
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </div>
 
-                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-lg  transition-colors"
-                  >
-                    <UserPen className="w-4 h-4 mr-2 text-gray-600" />
-                    <span>Profile</span>
-                  </Link>
+            {/* User info or Login/Signup - Desktop */}
+            <div className="hidden md:flex items-center">
+              {loginData ? (
+                <div className="relative flex items-center space-x-4" ref={dropdownRef}>
                   <button
-                    onClick={logoutHandler}
-                    className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:rounded-lg transition-colors"
+                    onClick={toggleDropdown}
+                    className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
                   >
-                    <LogOut className="w-4 h-4 mr-2 text-gray-600" />
-                    Logout
+                    <UserCheck className="w-5 h-5 mr-2" />
+                    <span>{loginData?.userName}</span>
+                    <ChevronDown className="w-4 h-4 ml-2" />
                   </button>
+                  
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 top-12 w-48 mt-2 bg-white rounded-md shadow-lg z-100 py-1 ring-1 ring-black ring-opacity-5 transform origin-top-right transition-all">
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <UserPen className="w-4 h-4 mr-3 text-gray-600" />
+                        <span>Profile</span>
+                      </Link>
+                      <hr className="my-1 border-gray-200" />
+                      <button
+                        onClick={logoutHandler}
+                        className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 mr-3 text-gray-600" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                  >
+                    Sign Up
+                  </Link>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="text-base text-primary font-medium space-x-5 hidden md:block">
-              <Link
-                to="/login"
-                className="py-2 px-5 rounded bg-mediumGray text-clearWhite hover:border-2 hover:border-clearWhite transition-all duration-100"
+
+            {/* HAMBURGER MENU */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={handlerIsMenuOpen}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="py-2 px-5 rounded bg-mediumGray text-clearWhite hover:border-2 hover:border-clearWhite transition-all duration-100"
-              >
-                Sign Up
-              </Link>
+                {isMenuOpen ? (
+                  <X className="block h-6 w-6" />
+                ) : (
+                  <Menu className="block h-6 w-6" />
+                )}
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* HAMBURGER MENU */}
-        <div className="text-primary md:hidden flex justify-end items-center gap-2">
-          <box-icon
-            name={isMenuOpen ? "x" : "menu"}
-            size="md"
-            color="text-primary"
-            onClick={handlerIsMenuOpen}
-          ></box-icon>
-        </div>
-      </nav >
-
-
-      {/* MAIN MENU sm device */}
-      <div div
-        className={` ${isMenuOpen ? "" : "hidden"
-          } font-bold px-4 bg-gray-200 py-5 rounded`}
-      >
-        <ul className="md:hidden sm:flex flex-col">
-          {isMenuOpen &&
-            navItems.map(({ label, path }) => (
-              <li
-                key={path}
-                className="text-base text-primary first:text-black py-1"
-              >
-                <NavLink
-                  to={path}
-                  className={({ isActive }) => (isActive ? "active" : "")}
-                >
-                  <span onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                    {label}
-                  </span>
-                </NavLink>
-              </li>
-            ))}
-          {/* Login/signup sm-device */}
-          <div>
-            {loginData ? (
-              <div onClick={logoutHandler} className="py-2 px-5 border rounded">
-                Logout
-              </div>
-            ) : (
-              <li onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                <Link to="/login" className="py-1 text-primary">
-                  Login
-                </Link>
-              </li>
-            )}
           </div>
-        </ul>
-      </div >
+        </div>
 
-      <Outlet />
-    </div >
+        {/* MOBILE MENU */}
+        <div className={`${isMenuOpen ? "block" : "hidden"} md:hidden`}>
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-slate-800">
+            {navItems.map(({ label, path, icon }) => (
+              <NavLink
+                key={path}
+                to={path}
+                onClick={() => setIsMenuOpen(false)}
+                className={({ isActive }) =>
+                  `flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium ${
+                    isActive
+                      ? "text-white bg-slate-600"
+                      : "text-gray-300 hover:text-white hover:bg-slate-600"
+                  }`
+                }
+              >
+                {icon}
+                <span>{label}</span>
+              </NavLink>
+            ))}
+            
+            {/* User actions - Mobile */}
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              {loginData ? (
+                <div className="space-y-2">
+                  <div className="flex items-center px-3 py-2 text-base font-medium text-gray-300">
+                    <UserCheck className="w-5 h-5 mr-3" />
+                    <span>Signed in as {loginData?.userName}</span>
+                  </div>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
+                  >
+                    <UserPen className="w-5 h-5 mr-3" />
+                    <span>Profile</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logoutHandler();
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
+                  >
+                    <LogOut className="w-5 h-5 mr-3" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
   );
 };
