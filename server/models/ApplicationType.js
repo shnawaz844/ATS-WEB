@@ -9,6 +9,10 @@ const ApplicationTypeSchema = new mongoose.Schema( {
     type: String,
     required: true,
   },
+  company_id: {
+    type: String,
+    required: true,
+  },
 
 },
   { timestamps: true }

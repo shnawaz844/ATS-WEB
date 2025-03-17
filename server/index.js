@@ -27,6 +27,7 @@ import fileUploadRoute from './routes/fileUploadRoute.js'
 import Auth from './routes/Auth.js'
 import applicationTypesRoutes from "./routes/applicationTypeRoutes.js";
 import interviewerappRoutes from "./routes/interviewerappRoutes.js";
+import companyRoutes from "./routes/companyRoutes.js"
 import applicationlistRoutes from './routes/applicationlistRoutes.js'
 
 // Use routes
@@ -39,6 +40,7 @@ app.use("/auth", Auth);
 app.use("/application-types", applicationTypesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
+app.use("/companies", companyRoutes)
 app.use("/applicationscheduledlist", applicationlistRoutes);
 
 

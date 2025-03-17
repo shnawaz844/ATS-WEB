@@ -4,13 +4,17 @@ const getApplicationTypes = async (req, res) => {
   try {
     // Default values for page & limit
     let { page = 1, limit = 10, search = "" } = req.query;
-
+    const { company_id } = req.headers;
     // Convert page & limit to numbers
     page = parseInt(page);
     limit = parseInt(limit);
 
     // Build a query for searching application types
     let query = {};
+
+    if(company_id){
+      query.company_id = company_id;  
+    }
     
     if (search) {
       // Check if search is a number (for applicationStep)

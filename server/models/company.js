@@ -21,11 +21,11 @@ const CompanySchema = new mongoose.Schema({
         required: true,
     },
     phone: {
-        type: Boolean,
+        type: String,
         default: false
     },
     website: {
-        type: Boolean,
+        type: String,
         default: false
     }
 });
