@@ -34,6 +34,7 @@ import CandidateDetailsPage from './Pages/Recruiter/CandidateDetailsPage';
 import ShortlistedApplications from './Pages/Application/ShortlistedApplication/ShortlistedApplications';
 import { useAuth } from './hooks/useAuth';
 import CompanyListing from './Pages/company/CompanyListing';
+import AllInterviews from './Pages/Employer/AllInterviews';
 
 function App() {
   useAuth();
@@ -47,6 +48,7 @@ function App() {
           <Route path='*' element={<Home />} />
           <Route path='/post-job' element={<PostJob />} />
           <Route path='/all-jobs' element={<AllJobs />} />
+          <Route path='/all-interviews' element={<AllInterviews />} />
           <Route path='/login' element={<Login />} />
           <Route path='/signup' element={<Register />} />
           <Route path='/dashboard' element={<Dashboard />} />

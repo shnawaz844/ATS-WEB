@@ -22,6 +22,7 @@ const hiringManagerNavItems = [
   { label: "Dashboard", path: "/hiring_manager" },
   { label: "Application List", path: "/application-list" },
   { label: "Assigned Interviews", path: "/assigned-interviews" },
+  { label: "Interviews", path: "/all-interviews" },
 ];
 
 const interviewerNavItems = [
@@ -35,6 +36,8 @@ const recruiterNavItems = [
   { label: "Home", path: "/recruiter-dashboard" },
   { label: "Jobs", path: "/all-jobs" },
   { label: "Applications", path: "/all-applications" },
+  { label: "Interviews", path: "/all-interviews" },
+  
 ];
 
 const candidateNavItems = [

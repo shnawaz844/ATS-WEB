@@ -18,10 +18,11 @@ export const ScheduledInterview = () => {
 
     // ✅ Correctly using the custom hook inside the component
     const { ScheduledInterviews, error, isLoading, refetchScheduledInterviews } = useScheduledInterview(page, limit, interviewerEmail);
-
+    console.log("ScheduledInterviews", ScheduledInterviews)
     const [editingId, setEditingId] = useState(null);
     const [interviewers, setInterviewers] = useState([]);
     const [detailedInterview, setDetailedInterview] = useState(null);
+    // const[selectedInterview,setSelectedInterview] =useState({});
 
     const tableDataCss = "border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4";
     const [editForm, setEditForm] = useState({
@@ -30,7 +31,8 @@ export const ScheduledInterview = () => {
         interviewType: "",
         meetingLink: "",
         status: "",
-        interviewerID: ""
+        interviewerID: "",
+        reasonRescheduled: "",
     });
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -53,7 +55,6 @@ export const ScheduledInterview = () => {
         "Excellent",
         "Above Expectation"
     ];
-
 
     // Handle click outside modal to close it
     useEffect(() => {
@@ -94,7 +95,10 @@ export const ScheduledInterview = () => {
             interviewType: interview.interviewerType || "",
             meetingLink: interview.meetingLink || "",
             status: interview.status || "scheduled",
-            interviewerID: interview.interviewerID || ""
+            interviewerID: interview.interviewerID || "",
+            reasonRescheduled: interview.reasonRescheduled || "",
+            // feedbackTitle: interview.feedbackTitle || "",
+            // feedback: interview.feedback || "",
         });
         setIsEditModalOpen(true);
     };
@@ -117,6 +121,10 @@ export const ScheduledInterview = () => {
             toast.error('Please provide meeting link for online interview');
             return false;
         }
+        if (editForm.status === 'rescheduled' && !editForm.reasonRescheduled) {
+            toast.error('Please provide a reason for rescheduling interview');
+            return false;
+        }
         return true;
     };
 
@@ -126,6 +134,8 @@ export const ScheduledInterview = () => {
             toast.error("Interview details not found");
             return;
         }
+        console.log("detailedInterview", detailedInterview)
+
 
         if (!validateForm()) {
             return; // Stop if validation fails
@@ -148,6 +158,7 @@ export const ScheduledInterview = () => {
                         meetingLink: editForm.meetingLink,
                         status: editForm.status,
                         interviewerID: editForm.interviewerID,
+                        reasonRescheduled: editForm.reasonRescheduled,
                     }),
                 }
             );
@@ -168,14 +179,49 @@ export const ScheduledInterview = () => {
         }
     };
 
-    const handleFeedbackClick = (interview) => {
-        setDetailedInterview(interview);
-        setFeedbackForm({
-            feedbackTitle: interview.feedbackTitle || "",
-            feedback: interview.feedback || "",
-            attachment: interview.attachment || null
-        });
+    const handleFeedbackClick = async (selectedInterview) => {
+        setDetailedInterview(selectedInterview);
+        console.log("selectedInterview", selectedInterview)
+
+        try {
+            const response = await fetch(`http://localhost:8080/interviewerfeedback/get-feedback/${selectedInterview._id}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch feedback");
+            }
+
+            const feedbackData = await response.json();
+            console.log("Fetched Feedback Data:", feedbackData);
+
+            setFeedbackForm({
+                _id: feedbackData?._id || selectedInterview?._id || "",
+                feedbackTitle: feedbackData?.feedbackTitle || selectedInterview?.feedbackTitle || "",
+                feedback: feedbackData?.feedback || selectedInterview?.feedback || "",
+                attachment: feedbackData?.attachment || selectedInterview?.attachment || null
+            });
+
+        } catch (error) {
+            console.error("Error fetching feedback:", error);
+            toast.error("Error fetching feedback details");
+
+            // If fetching feedback fails, set the initial data from the interview
+            setFeedbackForm({
+                feedbackTitle: selectedInterview?.feedbackTitle || "",
+                feedback: selectedInterview?.feedback || "",
+                attachment: selectedInterview?.attachment || null
+            });
+        }
+
         setIsFeedbackModalOpen(true);
+    };
+
+    const getStatusColor = (status) => {
+        const colors = {
+            scheduled: "bg-blue-100 text-blue-800",
+            completed: "bg-green-100 text-green-800",
+            cancelled: "bg-red-100 text-red-800",
+            rescheduled: "bg-yellow-100 text-yellow-800"
+        };
+        return colors[status?.toLowerCase()] || "bg-gray-100 text-gray-800";
     };
 
     const handleFeedbackSubmit = async () => {
@@ -187,29 +233,48 @@ export const ScheduledInterview = () => {
         const loadingToast = toast.loading("Submitting feedback...");
 
         try {
-            const response = await fetch(
-                `http://localhost:8080/applicationscheduledlist/update-feedback/${detailedInterview._id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        feedbackTitle: feedbackForm.feedbackTitle,
-                        feedback: feedbackForm.feedback,
-                        // We'll need to handle file upload separately if needed
-                    }),
-                }
-            );
+            const isUpdate = feedbackForm?._id;
+            const url = isUpdate
+                ? `http://localhost:8080/interviewerfeedback/update-feedback/${feedbackForm._id}`
+                : `http://localhost:8080/interviewerfeedback/create-feedback`;
+
+            // const formData = new FormData();
+            // formData.append("feedbackTitle", feedbackForm.feedbackTitle);
+            // formData.append("feedback", feedbackForm.feedback);
+            // formData.append("interviewId", detailedInterview._id);
+
+            // if (detailedInterview?.applicationID?._id) {
+            //     formData.append("applicationId", detailedInterview.applicationID._id);
+            // }
+
+            // if (feedbackForm.attachment) {
+            //     formData.append("attachment", feedbackForm.attachment);
+            // }
+
+            const response = await fetch(url, {
+                method: isUpdate ? "PUT" : "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    feedbackTitle: feedbackForm.feedbackTitle,
+                    feedback: feedbackForm.feedback,
+                    interviewId: detailedInterview._id,
+                    applicationID: detailedInterview.applicationID._id,
+
+                }),
+            });
+
+            const responseData = await response.json();
+            console.log("API Response:", responseData);
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to submit feedback");
+                throw new Error(responseData.message || "Failed to submit feedback");
             }
 
-            await refetchScheduledInterviews(); // Refresh list after update
+            await refetchScheduledInterviews();
             toast.dismiss(loadingToast);
-            toast.success("Feedback submitted successfully!");
+            toast.success(`Feedback ${isUpdate ? "updated" : "submitted"} successfully!`);
             setIsFeedbackModalOpen(false);
         } catch (error) {
             console.error("Error submitting feedback:", error);
@@ -218,19 +283,43 @@ export const ScheduledInterview = () => {
         }
     };
 
+    // Handle file selection
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
-        setFeedbackForm({ ...feedbackForm, attachment: file });
+        setFeedbackForm((prev) => ({ ...prev, attachment: file }));
     };
 
-    const getStatusColor = (status) => {
-        const colors = {
-            scheduled: "bg-blue-100 text-blue-800",
-            completed: "bg-green-100 text-green-800",
-            cancelled: "bg-red-100 text-red-800",
-            rescheduled: "bg-yellow-100 text-yellow-800"
-        };
-        return colors[status?.toLowerCase()] || "bg-gray-100 text-gray-800";
+    // Fetch feedback details (if needed)
+    const fetchFeedbackDetails = async (interviewId) => {
+        try {
+            if (!interviewId) {
+                toast.error("Interview ID is required.");
+                return;
+            }
+
+            console.log("Fetching feedback for interviewId:", interviewId);
+
+            const response = await fetch(`http://localhost:8080/interviewerfeedback/get-feedback/${interviewId}`);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || "No feedback found");
+            }
+
+            const data = await response.json();
+            console.log("Fetched feedback:", data);
+
+            // Populate the feedback form if data exists
+            setFeedbackForm({
+                feedbackTitle: data.feedbackTitle || "",
+                feedback: data.feedback || "",
+                attachment: data.attachment || null,
+            });
+
+        } catch (error) {
+            console.error("Error fetching feedback:", error);
+            // toast.error(error.message || "Failed to fetch feedback details.");
+        }
     };
 
     // Format date for better display
@@ -452,6 +541,19 @@ export const ScheduledInterview = () => {
                                     ))}
                                 </select>
                             </div>
+
+                            {editForm.status === 'rescheduled' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Why Interview Rescheduled?</label>
+                                    <input
+                                        type="url"
+                                        value={editForm.reasonRescheduled}
+                                        onChange={(e) => setEditForm({ ...editForm, reasonRescheduled: e.target.value })}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Why Interview Rescheduled?"
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-6 flex justify-end space-x-2">
@@ -560,7 +662,7 @@ export const ScheduledInterview = () => {
                                 onClick={handleFeedbackSubmit}
                                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                             >
-                                Submit Feedback
+                                {feedbackForm._id ? "Update Feedback" : "Submit Feedback"}
                             </button>
                         </div>
                     </div>

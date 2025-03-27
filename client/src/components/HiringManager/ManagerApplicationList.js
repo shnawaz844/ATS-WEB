@@ -18,7 +18,8 @@ const ApplicationList = () => {
         time: "",
         interviewType: "",
         meetingLink: "",
-        interviewerId: ""
+        interviewerId: "",
+        status: "",
     });
     const [editingId, setEditingId] = useState(null);
     const [page, setPage] = useState(1);
@@ -150,7 +151,9 @@ const ApplicationList = () => {
             date: editForm.date,
             scheduledTime: editForm.time,
             interviewerType: editForm.interviewType,
-            meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : ""
+            meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
+            status: "Scheduled"
+
         };
 
         try {
