@@ -33,7 +33,7 @@ export const getInterviews = async (req, res) => {
             .find(filter) // Apply filter dynamically
             .populate({
                 path: 'applicationID',
-                select: 'jobID',
+                select: 'jobID resume',
                 populate: [
                     {
                         path: 'jobID',
@@ -47,7 +47,7 @@ export const getInterviews = async (req, res) => {
             })
             .populate({
                 path: 'interviewerID', // Populate interviewer details
-                select: 'email name', // Fetch only necessary fields
+                select: 'email name interviewer userName', // Fetch only necessary fields
             })
             .skip(skip) // Skip records based on pagination
             .limit(limit); // Limit results per page

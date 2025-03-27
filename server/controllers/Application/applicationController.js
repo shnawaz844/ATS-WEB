@@ -29,6 +29,7 @@ const getCandidateApplications = async (req, res) => {
     const applications = await Application.find(filter)
       .populate('candidateID')
       .populate('jobID')
+      .populate('resume')
       .skip(skip)
       .limit(limit);
 
