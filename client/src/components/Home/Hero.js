@@ -68,14 +68,14 @@ export const Hero = () => {
               </button>
             </div>
           </div>
-          <div className="relative hidden md:block">
-            <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-600/30 rounded-full filter blur-3xl"></div>
-            <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/20 rounded-full filter blur-3xl"></div>
-            <div className="relative z-10">
+          <div className="hidden md:block">
+            {/* <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-600/30 rounded-full filter blur-3xl"></div>
+            <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-600/20 rounded-full filter blur-3xl"></div> */}
+            <div className="z-0">
               <img
                 src={require("../../assets/img/banner_1.png") || "/placeholder.svg"}
                 alt="Applicant Tracking System"
-                className="rounded-lg"
+                className="rounded-lg z-0"
               />
             </div>
           </div>

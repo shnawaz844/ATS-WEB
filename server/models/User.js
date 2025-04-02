@@ -31,6 +31,10 @@ const UserSchema = new mongoose.Schema({
     head: {
         type: Boolean,
         default: false
+    },
+    company_id: {
+        type: String,
+        required: true
     }
 },
     { timestamps: true }

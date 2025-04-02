@@ -1,18 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange, handleFormSubmit }) => {
-    const userRole = JSON.parse(localStorage.getItem('user')).role
+const UserDialog = ({ 
+    handleCloseDialog, 
+    dialogMode, 
+    formData, 
+    handleFormChange, 
+    handleFormSubmit, 
+    loggedInUser, 
+    companies 
+}) => {
+    const userRole = JSON.parse(localStorage.getItem('user')).role;
+    const [errors, setErrors] = useState({});
+
+    // Function to validate the form fields
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.userName || formData.userName.trim() === '') {
+            newErrors.userName = 'User Name is required';
+        }
+        if (!formData.email || formData.email.trim() === '') {
+            newErrors.email = 'Email is required';
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
+            newErrors.email = 'Invalid email address';
+        }
+        if (dialogMode === 'add' && (!formData.password || formData.password.trim() === '')) {
+            newErrors.password = 'Password is required';
+        }
+        // Add additional validations if needed (e.g., for gender, address, etc.)
+        return newErrors;
+    };
+
+    // Updated submit handler that performs validation
+    const onSubmit = (e) => {
+        e.preventDefault();
+        const formErrors = validateForm();
+        if (Object.keys(formErrors).length > 0) {
+            setErrors(formErrors);
+        } else {
+            setErrors({});
+            handleFormSubmit(e);
+        }
+    };
 
     // Close the dialog when clicking outside (on the overlay)
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
-            handleCloseDialog(); // Ensure handleCloseDialog is called
+            handleCloseDialog();
         }
     };
 
     console.log("userRole", userRole);
-
 
     return (
         <div
@@ -29,8 +67,9 @@ const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange,
                     </h2>
                 </div>
 
-                <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+                <form onSubmit={onSubmit} className="p-6 space-y-6">
                     <div className="space-y-4">
+                        {/* User Name Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 User Name
@@ -43,22 +82,30 @@ const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange,
                                 required
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                             />
+                            {errors.userName && (
+                                <p className="text-red-500 text-sm mt-1">{errors.userName}</p>
+                            )}
                         </div>
 
+                        {/* Email Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Email
                             </label>
                             <input
-                                type="email"
+                                type="text"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleFormChange}
                                 required
                                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                             />
+                            {errors.email && (
+                                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                            )}
                         </div>
 
+                        {/* Password Field (only in 'add' mode) */}
                         {dialogMode === 'add' && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -72,9 +119,13 @@ const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange,
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                 />
+                                {errors.password && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                                )}
                             </div>
                         )}
 
+                        {/* Gender Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Gender
@@ -92,6 +143,7 @@ const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange,
                             </select>
                         </div>
 
+                        {/* Address Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Address
@@ -105,28 +157,57 @@ const UserDialog = ({ handleCloseDialog, dialogMode, formData, handleFormChange,
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Role
-                            </label>
-                            <select
-                                name="role"
-                                value={formData.role || ''}
-                                onChange={handleFormChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                            >
-                                <option value="">Select Role</option>
-                                <option value="super">Super Admin</option>
-                                <option value="admin">Admin</option>
-                                {userRole !== "super" && <>
+                        {/* Company Dropdown (visible for super users) */}
+                        {loggedInUser.role === 'super' && (
+                            <div className="mb-4">
+                                <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                                    Company
+                                </label>
+                                <select
+                                    id="company"
+                                    name="company_id"
+                                    value={formData.company_id || ''}
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                >
+                                    <option value="">Select a company</option>
+                                    {companies?.map((company) => (
+                                        <option key={company._id} value={company._id}>
+                                            {company.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Role Field */}
+                        {loggedInUser.role === 'super' ? (
+                            <>
+                                <input type="hidden" name="role" value="admin" />
+                                <p className="mb-4 text-gray-700">Role: Admin</p>
+                            </>
+                        ) : (
+                            <div className="mb-4">
+                                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                                    Role
+                                </label>
+                                <select
+                                    id="role"
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleFormChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                >
+                                    <option value="admin">Admin</option>
                                     <option value="recruiter_manager">Recruiter Manager</option>
                                     <option value="hiring_manager">Hiring Manager</option>
                                     <option value="interviewer">Interviewer</option>
-                                    <option value="candidate">Candidate</option> </>}
-                            </select>
-                        </div>
+                                    <option value="candidate">Candidate</option>
+                                </select>
+                            </div>
+                        )}
 
-                        {/* Conditionally render the checkbox only if the selected role is Recruter manager */}
+                        {/* Conditional checkbox for recruiter_manager */}
                         {formData.role === 'recruiter_manager' && (
                             <div className="flex items-center">
                                 <input
@@ -174,10 +255,13 @@ UserDialog.propTypes = {
         address: PropTypes.string,
         role: PropTypes.string,
         head: PropTypes.bool,
+        company_id: PropTypes.string,
     }).isRequired,
     handleFormChange: PropTypes.func.isRequired,
     handleFormSubmit: PropTypes.func.isRequired,
     handleCloseDialog: PropTypes.func.isRequired,
+    loggedInUser: PropTypes.object.isRequired,
+    companies: PropTypes.array,
 };
 
 export default UserDialog;

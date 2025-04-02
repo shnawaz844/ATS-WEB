@@ -1,14 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useUsers, useAddUser, useUpdateUser } from '../../hooks/useUser';
 import UserDialog from '../../components/UserDialog';
+import { Search, Plus, Edit, MapPin, User, Users, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 
 const UserListing = () => {
-  const [ currentPage, setCurrentPage ] = useState( 1 );
-  const [ search, setSearch ] = useState( '' );
-  const [ isDialogOpen, setIsDialogOpen ] = useState( false );
-  const [ dialogMode, setDialogMode ] = useState( 'add' );
-  const [ selectedUser, setSelectedUser ] = useState( null );
-  const [ formData, setFormData ] = useState( {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [companies, setCompanies] = useState([]);
+  const [search, setSearch] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState('add');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [formData, setFormData] = useState({
     userName: '',
     email: '',
     password: '',
@@ -16,18 +18,16 @@ const UserListing = () => {
     address: '',
     role: '',
     head: false,
-  } );
+  });
 
-  const {
-    data: usersData,
-    isLoading,
-    isError,
-    error,
-  } = useUsers( {
+  const loggedInUser = JSON.parse(localStorage.getItem("user")) // Replace with your auth logic
+
+  const { data: usersData, isLoading, isError, error } = useUsers({
     page: currentPage,
     limit: 9,
     search,
-  } );
+    role: loggedInUser.role === 'super' ? "admin" : null
+  });
 
   const { mutate: addUser } = useAddUser();
   const { mutate: updateUser } = useUpdateUser();
@@ -35,22 +35,14 @@ const UserListing = () => {
   const users = usersData?.users || [];
   const totalPages = usersData?.totalPages || 1;
 
-  const handleSearchChange = ( e ) => {
-    setSearch( e.target.value );
-    setCurrentPage( 1 );
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
   };
 
-  // Memoize the filtered users
-  const filteredUsers = useMemo( () => {
-    return users.filter( ( user ) =>
-      user.name?.toLowerCase().includes( search.toLowerCase() )
-    );
-  }, [ users, search ] );
-
-
   const handleOpenAddDialog = () => {
-    setDialogMode( 'add' );
-    setFormData( {
+    setDialogMode('add');
+    setFormData({
       userName: '',
       email: '',
       password: '',
@@ -58,14 +50,15 @@ const UserListing = () => {
       address: '',
       role: '',
       head: false,
-    } );
-    setIsDialogOpen( true );
+      company_id: loggedInUser.role === "admin" ? loggedInUser.company_id : '',
+    });
+    setIsDialogOpen(true);
   };
 
-  const handleOpenEditDialog = ( user ) => {
-    setDialogMode( 'edit' );
-    setSelectedUser( user );
-    setFormData( {
+  const handleOpenEditDialog = (user) => {
+    setDialogMode('edit');
+    setSelectedUser(user);
+    setFormData({
       userName: user.userName || '',
       email: user.email || '',
       password: '',
@@ -73,50 +66,71 @@ const UserListing = () => {
       address: user.address || '',
       role: user.role || '',
       head: user.head || false,
-    } );
-    setIsDialogOpen( true );
+      company_id: user.company_id || ''
+    });
+    setIsDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
-    setIsDialogOpen( false ); // Close the dialog
+    setIsDialogOpen(false);
   };
 
-  const handleFormChange = ( e ) => {
+  const handleFormChange = (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData( ( prev ) => ( {
+    setFormData((prev) => ({
       ...prev,
-      [ e.target.name ]: value,
-    } ) );
-  };
-  const capitalizeFirstLetter = ( str ) => {
-    if ( !str ) return '';
-    return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
+      [e.target.name]: value,
+    }));
   };
 
-  const formatRole = ( role ) => {
-    if ( !role ) return '';
+  const capitalizeFirstLetter = (str) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
+
+  const formatRole = (role) => {
+    if (!role) return '';
     return role
-      .split( '_' ) // Split by underscore
-      .map( ( word ) => word.charAt( 0 ).toUpperCase() + word.slice( 1 ).toLowerCase() ) // Capitalize each word
-      .join( ' ' ); // Join with space
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   };
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/companies/get`
+      )
+      if (response.ok) {
+        const data = await response.json()
+        setCompanies(data.Companies)
+      } else {
+        setCompanies([])
+      }
+    } catch (error) {
+      console.error('Error fetching companies:', error)
+    }
+  }
 
-  const handleFormSubmit = ( e ) => {
+  useEffect(() => {
+    fetchCompanies();
+  }, [])
+
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    if ( dialogMode === 'add' ) {
-      addUser( formData, {
+    if (dialogMode === 'add') {
+      addUser(formData, {
         onSuccess: () => {
           handleCloseDialog();
         },
-        onError: ( error ) => {
-          console.error( 'Failed to add user:', error );
+        onError: (error) => {
+          console.error('Failed to add user:', error);
         },
-      } );
+      });
     } else {
-      if ( !selectedUser ) return;
+      if (!selectedUser) return;
       const updatedData = { ...formData };
-      if ( !formData.password ) {
+      if (!formData.password) {
         delete updatedData.password;
       }
       updateUser(
@@ -125,161 +139,192 @@ const UserListing = () => {
           onSuccess: () => {
             handleCloseDialog();
           },
-          onError: ( error ) => {
-            console.error( 'Failed to update user:', error );
+          onError: (error) => {
+            console.error('Failed to update user:', error);
           },
         }
       );
     }
+  }
+
+  // Get role-based badge color
+  const getRoleBadgeColor = (role) => {
+    if (!role) return 'bg-gray-100 text-gray-800';
+
+    const roleLower = role.toLowerCase();
+    if (roleLower.includes('admin')) return 'bg-indigo-100 text-indigo-800';
+    if (roleLower.includes('manager')) return 'bg-blue-100 text-blue-800';
+    if (roleLower.includes('super')) return 'bg-purple-100 text-purple-800';
+    return 'bg-blue-100 text-blue-800';
   };
 
-  if ( isLoading ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if ( isError ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-50 p-4 rounded-lg">
-          <p className="text-red-600">Error: { error.message }</p>
-        </div>
-      </div>
-    );
-  }
+  console.log("formData", formData);
 
   return (
-    <div className="w-screen mx-auto px-4 py-8 h-full">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-          <h1 className="text-[1.8rem] font-bold text-gray-900 mb-4 sm:mb-0">User Management</h1>
-          
-            <div className="relative ml-[50vw]">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                🔍
-              </span>
+    <div className="max-w-full mx-auto px-4 py-6 h-full bg-gray-50">
+      <div className="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <div className="flex items-center space-x-2">
+            <Users className="h-6 w-6 text-indigo-600" />
+            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+          </div>
+
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search users..."
-                value={ search }
-                onChange={ ( e ) => handleSearchChange( e ) }
-              className="w-full pl-10 pr-4 py-2 rounded-lg  focus:border-transparent hover:bg-lightGray bg-gray-100"
+                value={search}
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               />
-              {/* Display filtered users */ }
-              <ul>
-                { filteredUsers.map( ( user ) => (
-                  <li key={ user.id }>{ user.name }</li>
-                ) ) }
-              </ul>
             </div>
 
-          <button
-            onClick={ handleOpenAddDialog }
-            className="flex items-center px-4 py-2 text-deepBlack rounded-lg hover:bg-lightGray bg-gray-100"
-          >
-            <span className="mr-2"><strong>+</strong></span>
-            <strong>Add New User</strong>
-          </button>
+            <button
+              onClick={handleOpenAddDialog}
+              className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="font-medium">Add User</span>
+            </button>
+          </div>
         </div>
 
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          { users.map( ( user ) => (
-            <div
-              key={ user._id }
-              className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 "
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-                    { user.userName.charAt( 0 ).toUpperCase() }
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{ user.userName }</h3>
-                    <p className="text-sm text-gray-600">{ user.email }</p>
-                  </div>
-                </div>
-                <button
-                  onClick={ () => handleOpenEditDialog( user ) }
-                  className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader className="h-8 w-8 text-indigo-600 animate-spin" />
+          </div>
+        ) : isError ? (
+          <div className="bg-red-50 p-4 rounded-lg border border-red-200 my-6">
+            <p className="text-red-600 flex items-center">
+              <span className="mr-2">⚠️</span>
+              Error: {error.message}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {users.map((user) => (
+                <div
+                  key={user._id}
+                  className="bg-white p-5 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200 flex flex-col"
                 >
-                  ✏️
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                        {user.userName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-lg">{user.userName}</h3>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleOpenEditDialog(user)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      aria-label="Edit user"
+                    >
+                      <Edit className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {user.role && (
+                      <span className={`px-3 py-1 text-sm rounded-full font-medium ${getRoleBadgeColor(user.role)}`}>
+                        {formatRole(user.role)}
+                      </span>
+                    )}
+
+                    {user.head && (
+                      <span className="px-3 py-1 text-sm rounded-full bg-emerald-100 text-emerald-800 font-medium">
+                        Head
+                      </span>
+                    )}
+
+                    {user.gender && (
+                      <span className="px-3 py-1 text-sm rounded-full bg-pink-100 text-pink-800 font-medium">
+                        {capitalizeFirstLetter(user.gender)}
+                      </span>
+                    )}
+                  </div>
+
+                  {user.address && (
+                    <p className="mt-3 text-sm text-gray-600 flex items-center">
+                      <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                      {user.address}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Empty state */}
+            {users.length === 0 && !isLoading && (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <User className="h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
+                <p className="text-gray-500 mb-4">Try adjusting your search or add a new user</p>
+                <button
+                  onClick={handleOpenAddDialog}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  <Plus className="h-4 w-4 inline mr-2" />
+                  Add User
                 </button>
               </div>
+            )}
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800">
-                  { user.role && formatRole( user.role ) }
-                </span>
+            {/* Pagination */}
+            {users.length > 0 && (
+              <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-4">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className={`flex items-center px-4 py-2 text-sm rounded-lg border ${currentPage <= 1
+                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </button>
 
-                { user.head && (
-                  <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">
-                    Head
+                <div className="flex items-center">
+                  <span className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 font-medium rounded-lg">
+                    Page {currentPage} of {totalPages}
                   </span>
-                ) }
-                { user.gender && (
-                  <span className="px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-800">
-                    { user.gender && capitalizeFirstLetter( user.gender ) }
-                  </span>
+                </div>
 
-                ) }
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className={`flex items-center px-4 py-2 text-sm rounded-lg border ${currentPage >= totalPages
+                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </button>
               </div>
-              { user.address && (
-                <p className="mt-2 text-sm text-gray-600">
-                  📍 { user.address }
-                </p>
-              ) }
-            </div>
-          ) ) }
-        </div>
-
-        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-          {/* Previous Button or Placeholder */ }
-          { currentPage > 1 ? (
-            <button
-              onClick={ () => setCurrentPage( ( p ) => Math.max( 1, p - 1 ) ) }
-              className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              ← Previous
-            </button>
-          ) : (
-            <div className="w-[84px]"></div> // Placeholder to maintain spacing
-          ) }
-
-          {/* Page Information */ }
-          <span className="text-sm text-gray-600">
-            Page { currentPage } of { totalPages }
-          </span>
-
-          {/* Next Button or Placeholder */ }
-          { currentPage < totalPages ? (
-            <button
-              onClick={ () => setCurrentPage( ( p ) => Math.min( totalPages, p + 1 ) ) }
-              className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Next →
-            </button>
-          ) : (
-            <div className="w-[84px]"></div> // Placeholder to maintain spacing
-          ) }
-        </div>
-
+            )}
+          </>
+        )}
       </div>
 
-      { isDialogOpen && (
+      {isDialogOpen && (
         <UserDialog
-          dialogMode={ dialogMode }
-          formData={ formData }
-          handleFormChange={ handleFormChange }
-          handleFormSubmit={ handleFormSubmit }
-          handleCloseDialog={ handleCloseDialog } // Ensure this is passed here
-          isOpen={ isDialogOpen }
+          dialogMode={dialogMode}
+          formData={formData}
+          handleFormChange={handleFormChange}
+          handleFormSubmit={handleFormSubmit}
+          handleCloseDialog={handleCloseDialog}
+          isOpen={isDialogOpen}
+          loggedInUser={loggedInUser}
+          companies={companies}
         />
-      ) }
-
+      )}
     </div>
   );
 };
