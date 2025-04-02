@@ -34,6 +34,7 @@ const hiringManagerNavItems = [
   { label: "Dashboard", path: "/hiring_manager", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Application List", path: "/application-list", icon: <FileText className="w-5 h-5" /> },
   { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="w-5 h-5" /> },
+  { label: "Interviews", path: "/all-interviews" },
 ];
 
 const interviewerNavItems = [
@@ -46,6 +47,7 @@ const recruiterNavItems = [
   { label: "Home", path: "/recruiter-dashboard", icon: <Home className="w-5 h-5" /> },
   { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="w-5 h-5" /> },
   { label: "Applications", path: "/all-applications", icon: <FileText className="w-5 h-5" /> },
+  { label: "Interviews", path: "/all-interviews" },
 ];
 
 const candidateNavItems = [

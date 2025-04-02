@@ -1,35 +1,38 @@
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const fetchAssignedInterviews = async ({ queryKey }) => {
-    const [, page, limit] = queryKey;
-    console.log("Fetching data with params:", { page, limit });
+const fetchScheduledInterviews = async ({ queryKey }) => {
+    const [, page, limit, interviewerEmail] = queryKey;
+    console.log("Fetching data with params:", { page, limit, interviewerEmail });
 
     const response = await axios.get("http://localhost:8080/applicationscheduledlist/scheduled-interviewer-app", {
-        params: { page, limit },
+        params: { page, limit, interviewerEmail },
     });
 
     console.log("Response Data:", response.data);
     return response.data;
 };
 
-
-const useScheduledInterview = (page , limit ) => {
+const useScheduledInterview = (page, limit, interviewerEmail) => {
     const queryClient = useQueryClient();
 
-    // Fetch assigned interviews with pagination
-    const { data: assignedInterviews = [], error, isLoading } = useQuery({
-        queryKey: ["assignedInterviews", page, limit], // Include page & limit in the queryKey
-        queryFn: fetchAssignedInterviews,
-        keepPreviousData: true, // Helps with smooth pagination
+    // Fetch Scheduled Interviews with pagination
+    const { data, error, isLoading } = useQuery({
+        queryKey: ["ScheduledInterviews", page, limit, interviewerEmail],
+        queryFn: fetchScheduledInterviews,
+        keepPreviousData: true, // Prevents flickering when paginating
     });
 
+    // Ensure data is properly extracted
+    const ScheduledInterviews = data?.data || data || [];
+
     // Mutation for refetching after updates
-    const refetchAssignedInterviews = () => {
-        queryClient.invalidateQueries(["assignedInterviews"]);
+    const refetchScheduledInterviews = () => {
+        console.log("Refetching Scheduled Interviews...");
+        queryClient.invalidateQueries({ queryKey: ["ScheduledInterviews", page, limit, interviewerEmail] });
     };
 
-    return { assignedInterviews, error, isLoading, refetchAssignedInterviews };
+    return { ScheduledInterviews, error, isLoading, refetchScheduledInterviews };
 };
 
 export default useScheduledInterview;

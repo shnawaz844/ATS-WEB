@@ -3,13 +3,13 @@ import InterviewSchedule from "../../models/Applicationlist.js";
 export const updateInterview = async (req, res) => {
     try {
         const { id } = req.params;
-        const { date, scheduledTime, interviewerType, meetingLink, interviewerID } = req.body;
+        const { date, scheduledTime, interviewerType, meetingLink, interviewerID, status, reasonRescheduled } = req.body;
 
         console.log("id", id)
 
         const updatedInterview = await InterviewSchedule.findByIdAndUpdate(
             id,
-            { date, scheduledTime, interviewerType, meetingLink, interviewerID },
+            { date, scheduledTime, interviewerType, meetingLink, interviewerID, status, reasonRescheduled },
             { new: true } // Returns the updated document
         );
 

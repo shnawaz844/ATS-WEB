@@ -1,21 +1,39 @@
 import InterviewSchedule from "../../models/Applicationlist.js";
+import User from "../../models/User.js"; // Import the User model
 
 // Function to fetch interviews
 export const getInterviews = async (req, res) => {
     try {
-
-        // Extract page and limit from query parameters, with defaults
+        // Extract parameters from query
         const page = parseInt(req.query.page) || 1; // Default to page 1
         const limit = parseInt(req.query.limit) || 10; // Default limit to 10
+        const interviewerEmail = req.query.interviewerEmail
+            ? decodeURIComponent(req.query.interviewerEmail)
+            : null; // Decode email safely
 
-        // Calculate the number of documents to skip
+        // Pagination calculation
         const skip = (page - 1) * limit;
 
+        let filter = {}; // Default: fetch all interviews
+
+        if (interviewerEmail) {
+            // Find the interviewer by email to get their ObjectId
+            const interviewer = await User.findOne({ email: interviewerEmail });
+            if (interviewer) {
+                filter.interviewerID = interviewer._id; // Filter by interviewer ObjectId
+            } else {
+                return res.status(404).json({ message: "Interviewer not found" });
+            }
+        }
+
+        console.log("Filter Applied:", filter);
+
+        // Fetch interviews based on filter
         const interviews = await InterviewSchedule
-            .find()
+            .find(filter) // Apply filter dynamically
             .populate({
                 path: 'applicationID',
-                select: 'jobID',
+                select: 'jobID resume',
                 populate: [
                     {
                         path: 'jobID',
@@ -23,22 +41,21 @@ export const getInterviews = async (req, res) => {
                     },
                     {
                         path: 'candidateID',
-                        select: 'userName' // Selecting only the title from Job model
+                        select: 'userName' // Selecting only the userName from Candidate model
                     },
                 ],
-                // populate:{
-                //     path: 'candidateID',
-                //     select: 'userName'
-                // }
+            })
+            .populate({
+                path: 'interviewerID', // Populate interviewer details
+                select: 'email name interviewer userName', // Fetch only necessary fields
             })
             .skip(skip) // Skip records based on pagination
             .limit(limit); // Limit results per page
 
+        // Get total count with applied filter
+        const totalInterviews = await InterviewSchedule.countDocuments(filter);
 
-        // Get total count for pagination
-        const totalInterviews = await InterviewSchedule.countDocuments();
-
-
+        // Send response
         res.status(200).json({
             totalPages: Math.ceil(totalInterviews / limit),
             currentPage: page,

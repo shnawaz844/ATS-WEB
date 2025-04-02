@@ -2,15 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useScheduledInterview from "../../hooks/useScheduledInterview";
+import useAssignedInterview from "../../hooks/useAssignedInterview";
 
 const AssignedInterviews = () => {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const itemsPerPage = 1; // Number of interviews per page
-    const limit = 1; // Set the number of items per page
-
-    const { assignedInterviews, error, isLoading, refetchAssignedInterviews } = useScheduledInterview(page, limit);
+    const limit = 4; // Set the number of items per page
+    const { assignedInterviews, error, isLoading, refetchAssignedInterviews } = useAssignedInterview(page, limit);
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [interviewers, setInterviewers] = useState([]);
@@ -28,9 +27,9 @@ const AssignedInterviews = () => {
 
     // Filter interviews based on search and status filter
     const filteredInterviews = assignedInterviews?.interviews
-        
+
     const totalPages = assignedInterviews?.totalPages;
-  
+
     const modalRef = useRef();
     const interviewTypes = ["online", "walkin"];
     const interviewStatuses = ["scheduled", "completed", "cancelled", "rescheduled"];
@@ -88,8 +87,6 @@ const AssignedInterviews = () => {
 
     console.log("interviewers", interviewers)
 
-
-
     // Handle Pagination
     const handleNextPage = () => {
         if (page < totalPages) {
@@ -102,8 +99,6 @@ const AssignedInterviews = () => {
             setPage(prevPage => prevPage - 1);
         }
     };
-
-
 
     // Handle updating interview details
     const handleUpdateInterview = async () => {
@@ -201,8 +196,6 @@ const AssignedInterviews = () => {
         }
     };
 
-
-
     // Check if interview date is today
     const isToday = (dateString) => {
         const today = new Date();
@@ -216,6 +209,7 @@ const AssignedInterviews = () => {
 
     console.log("interviewers", interviewers)
     console.log("assignedInterviews:", assignedInterviews);
+    console.log("editform", editForm)
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -456,13 +450,13 @@ const AssignedInterviews = () => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {editForm.interviewerID
-                                        ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm.interviewerID)?.userName || "Not Found"}`
+                                        ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm.interviewerID._id)?.userName || "Not Found"}`
                                         : "Assign Interviewer"}
                                 </label>
 
                                 <select
                                     className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editForm.interviewerID || ""}
+                                    value={editForm.interviewerID._id || ""}
                                     onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
                                     required
                                 >
