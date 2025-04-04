@@ -8,6 +8,7 @@ export const createInterview = async (req, res) => {
 
         // Validate required fields
         if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
+        if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
             return res.status(400).json({ message: "All fields are required" });
         }
 

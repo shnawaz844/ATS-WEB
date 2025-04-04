@@ -1,5 +1,6 @@
 import InterviewSchedule from "../../models/Applicationlist.js";
 import User from "../../models/User.js"; // Import the User model
+import User from "../../models/User.js"; // Import the User model
 
 // Function to fetch interviews
 export const getInterviews = async ( req, res ) => {
@@ -43,6 +44,7 @@ export const getInterviews = async ( req, res ) => {
             .populate( {
                 path: 'applicationID',
                 select: 'jobID resume',
+                select: 'jobID resume',
                 populate: [
                     {
                         path: 'jobID',
@@ -50,6 +52,7 @@ export const getInterviews = async ( req, res ) => {
                     },
                     {
                         path: 'candidateID',
+                        select: 'userName' // Selecting only the userName from Candidate model
                         select: 'userName' // Selecting only the userName from Candidate model
                     },
                 ],
@@ -78,3 +81,4 @@ export const getInterviews = async ( req, res ) => {
 };
 
 export default getInterviews;
+

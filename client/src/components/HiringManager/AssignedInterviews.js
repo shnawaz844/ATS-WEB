@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
+import useAssignedInterview from "../../hooks/useAssignedInterview";
 
 const AssignedInterviews = () => {
     const navigate = useNavigate();
@@ -38,7 +39,9 @@ const AssignedInterviews = () => {
     // Filter interviews based on search and status filter
     const filteredInterviews = assignedInterviews?.interviews
 
+
     const totalPages = assignedInterviews?.totalPages;
+
 
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
