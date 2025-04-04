@@ -20,6 +20,7 @@ const addApplicationType = async (req, res) => {
       applicationStep,
       applicationStatus,
       company_id,
+      company_id,
     });
 
     await newApplicationType.save();

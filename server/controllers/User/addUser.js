@@ -2,8 +2,8 @@ import User from '../../models/User.js';
 
 const addUser = async (req, res) => {
     try {
-        const { userName, email, password, gender, address, role } = req.body;
-
+        const { userName, email, password, gender, address, role, company_id } = req.body;
+        console.log("company_id", company_id);
         // Check if email already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -24,6 +24,7 @@ const addUser = async (req, res) => {
             gender,
             address,
             role: role || "candidate",
+            company_id
         });
 
         await newUser.save();

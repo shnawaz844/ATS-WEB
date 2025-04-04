@@ -3,12 +3,14 @@ import User from '../../models/User.js';
 
 const addInterview = async (req, res) => {
   try {
-    const { roundName, roundNumber } = req.body;
+    const { roundName, roundNumber, company_id } = req.body;
 
     // Check if roundName already exists
     const existingRoundName = await Interview.findOne({ roundName });
     if (existingRoundName) {
-      return res.status(409).json({ message: "Round Name already registered." });
+      return res
+      .status(409)
+      .json({ message: "Round Name already registered." });
     }
 
     // // Validate role field against allowed enum values
@@ -21,6 +23,7 @@ const addInterview = async (req, res) => {
     const newInterview = new Interview({
       roundName,
       roundNumber,
+      company_id
     });
 
     await newInterview.save();
