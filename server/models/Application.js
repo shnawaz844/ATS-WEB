@@ -34,6 +34,14 @@ const ApplicationSchema = new mongoose.Schema({
     answers:{
         type: Array,
         required: false,
+    },
+     contactInfo:{
+        type: String,
+        required: true,
+    },
+    company_id: {
+        type: String,
+        required: true
     }
 },
     { timestamps: true } 

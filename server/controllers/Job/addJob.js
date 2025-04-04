@@ -2,6 +2,7 @@ import Job from '../../models/Job.js';
 import uniqid from 'uniqid';
 
 const addJob = async (req, res) => {
+
     const {
         // Directly mapping to the Job schema fields
         title,
@@ -23,7 +24,8 @@ const addJob = async (req, res) => {
         hiringManagerEmail,
         hiringManagerName,
         applicationForm,
-        applicants
+        applicants,
+        company_id
     } = req.body;
 
     console.log("Data on backend", req.body);
@@ -49,7 +51,8 @@ const addJob = async (req, res) => {
         hiringManagerEmail,
         hiringManagerName,
         applicationForm,
-        applicants
+        applicants,
+        company_id 
     });
 
     try {

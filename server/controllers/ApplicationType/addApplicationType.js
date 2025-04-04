@@ -3,7 +3,7 @@ import ApplicationType from "../../models/ApplicationType.js";
 
 const addApplicationType = async (req, res) => {
   try {
-    const { applicationStep, applicationStatus } = req.body;
+    const { applicationStep, applicationStatus, company_id } = req.body;
 
     // Check if email already exists
     const existingApplicationType = await ApplicationType.findOne({
@@ -19,6 +19,7 @@ const addApplicationType = async (req, res) => {
     const newApplicationType = new ApplicationType({
       applicationStep,
       applicationStatus,
+      company_id,
     });
 
     await newApplicationType.save();
