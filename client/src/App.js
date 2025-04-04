@@ -33,6 +33,8 @@ import CandidateDetailsPage from './Pages/Recruiter/CandidateDetailsPage';
 import ShortlistedApplications from './Pages/Application/ShortlistedApplication/ShortlistedApplications';
 import { useAuth } from './hooks/useAuth';
 import CompanyListing from './Pages/company/CompanyListing';
+import AllInterviews from './Pages/Employer/AllInterviews';
+import { useEffect } from 'react';
 
 // Layout component to ensure Navbar and Footer appear on all pages
 const Layout = () => {
@@ -48,31 +50,33 @@ const Layout = () => {
 };
 
 function App() {
-  useAuth();
+    useAuth();
 
   return (
     <div className="App">
       <Routes>
         <Route element={<Layout />}>
-          {/* Home routes */}
+          {/* Home */}
           <Route path="/" element={<Home />} />
+          <Route path="*" element={<Home />} />
 
-          {/* Authentication routes */}
+          {/* Authentication */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Register />} />
 
-          {/* Dashboard routes */}
+          {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
 
-          {/* Job management routes */}
+          {/* Job management */}
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/all-jobs" element={<AllJobs />} />
+          <Route path="/all-interviews" element={<AllInterviews />} />
           <Route path="/all-posted-jobs" element={<AllPostedJobs />} />
           <Route path="/current-job/:id" element={<JobDetails />} />
           <Route path="/job-detail/:id" element={<ApplicationJobDetail />} />
 
-          {/* Application routes */}
+          {/* Applications */}
           <Route path="/application-form/:id" element={<ApplicationForm />} />
           <Route path="/shortlist" element={<Applications />} />
           <Route path="/shortlist/details/:candidate_id/:job_id" element={<ShortlistedDetails />} />
@@ -81,27 +85,24 @@ function App() {
           <Route path="/my-jobs" element={<MyJobs />} />
           <Route path="/application-types" element={<ApplicationListing />} />
 
-          {/* User management routes */}
+          {/* User Management */}
           <Route path="/all-users" element={<UserListing />} />
           <Route path="/all-companies" element={<CompanyListing />} />
 
-          {/* Role-specific dashboards */}
+          {/* Role-specific Dashboards */}
           <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
           <Route path="/coordinator/review" element={<CoordinatorDashboard />} />
           <Route path="/hiring_manager" element={<HiringManagerDashboard />} />
 
-          {/* Interview routes */}
+          {/* Interviews */}
           <Route path="/interview-rounds" element={<InterviewListing />} />
           <Route path="/scheduled-interview" element={<ScheduledInterview />} />
           <Route path="/assigned-interviews" element={<AssignedInterviews />} />
           <Route path="/application-list" element={<ManagerApplicationList />} />
 
-          {/* Candidate routes */}
+          {/* Candidate */}
           <Route path="/candidate-details/:candidateId/:jobId" element={<CandidateDetailsPage />} />
           <Route path="/assign-recruiter/:id" element={<AssignRecruiter />} />
-
-          {/* Catch all route */}
-          <Route path="*" element={<Home />} />
         </Route>
       </Routes>
     </div>

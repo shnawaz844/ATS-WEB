@@ -16,7 +16,10 @@ const CandidateApplication = () => {
         scheduleType: '',
         hireType: '',
         locationType: '',
+        company_id: "",
     });
+
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
 
     const [debouncedFilters, setDebouncedFilters] = useState(formInputs);
     const [showFilters, setShowFilters] = useState(false);
@@ -53,7 +56,7 @@ const CandidateApplication = () => {
 
     // Fetch jobs with active filters
     const { data: jobData, isLoading, isError } = useApplicationTypes(
-        debouncedFilters, currentPage, jobsPerPage
+        debouncedFilters, currentPage, jobsPerPage, companyId
     );
 
     // Handle input changes for filters

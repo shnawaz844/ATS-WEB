@@ -31,6 +31,7 @@ export const PostJob = () => {
     // Fetch the recruiter role from localStorage
     const user = JSON.parse( localStorage.getItem( 'user' ) ); // Parse user object from localStorage
     const recruiterRole = user?.head || '';
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     // const recruiterName = user?.userName || '';
 
     
@@ -63,6 +64,7 @@ export const PostJob = () => {
                 question: questions.map((q) => q.question),
                 answer: questions.map((q) => q.answer),
             },
+            company_id: companyId    
         },
     });
 
@@ -101,6 +103,7 @@ export const PostJob = () => {
             city: selectedCity,
             compensation: String(data.compensation),
             experienceRequired: String(data.experienceRequired),
+            company_id : companyId,
             applicationForm: {
                 question: questions.map((q) => q.question),
                 answer: questions.map((q) => q.answer),
@@ -165,6 +168,7 @@ export const PostJob = () => {
             selectedCity={selectedCity}
             setSelectedCity={setSelectedCity}
             recruiterRole={ recruiterRole }
+            companyId={ companyId }
             // recruiterName={ recruiterName }
         />
     );

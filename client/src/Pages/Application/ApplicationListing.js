@@ -20,7 +20,6 @@ const ApplicationListing = () => {
   });
 
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-
   const {
     data: applicationTypesData,
     isLoading,
@@ -79,6 +78,7 @@ const ApplicationListing = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (dialogMode === "add") {
+      formData.company_id = companyId;
       addApplicationType(formData, {
         onSuccess: handleCloseDialog,
         onError: (error) => console.error("Failed to add application:", error),
@@ -170,11 +170,11 @@ const ApplicationListing = () => {
                 <p>No application types found. Try adding a new one.</p>
               </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 {applicationTypes.map((application) => (
                   <div
                     key={application._id}
-                    className="bg-white p-5 rounded-xl border border-gray-200 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200"
+                    className="bg-white p-5 rounded-xl border border-gray-100 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
@@ -198,7 +198,6 @@ const ApplicationListing = () => {
                         <span className="text-sm font-medium">{application.applicationStatus}</span>
                       </div>
                     </div>
-                    
                     
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex justify-between text-xs text-gray-500">

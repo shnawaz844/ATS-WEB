@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import logo from "../../assets/img/logo1.png"
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +48,8 @@ export const Login = () => {
 
       <div className="w-full max-w-md bg-black/40 backdrop-blur-sm border border-gray-800 rounded-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-6xl font-bold text-white mb-8 tracking-widest">A T S</h1>
+          <img className="w-25 h-20 mx-auto" src={logo} alt="logo"/>
+          <h1 className="text-4xl font-bold text-white mb-8 tracking-widest">A T S</h1>
 
           <p className="text-gray-400 mt-2">Please sign in to continue</p>
         </div>

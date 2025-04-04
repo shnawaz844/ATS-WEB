@@ -4,58 +4,63 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 /**
  * 1. FETCH ALL APPLICATIONS
  */
-const fetchApplicationTypes = async ({ filters, page, limit }) => {
-  const queryParams = new URLSearchParams(filters).toString();
-  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
+const fetchApplicationTypes = async ( { filters, page, limit } ) => {
+  const queryParams = new URLSearchParams( filters ).toString();
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   const res = await fetch(
-    `http://localhost:8080/application-types/all-application-types?${queryParams}`,
+    `http://localhost:8080/application-types/all-application-types?${ queryParams }`,
     {
       headers: {
         'company_id': companyId // Sending company_id in headers
       }
     }
   );
-  if (!res.ok) {
-    throw new Error("Error fetching applications");
+  if ( !res.ok ) {
+    throw new Error( "Error fetching applications" );
   }
   return res.json();
 };
 
-export const useApplicationTypes = (filters, page, limit) => {
-  return useQuery({
-    queryKey: ["applicationTypes", filters, page],
-    queryFn: () => fetchApplicationTypes({ filters, page, limit }),
+export const useApplicationTypes = ( filters, page, limit ) => {
+  return useQuery( {
+    queryKey: [ "applicationTypes", filters, page ],
+    queryFn: () => fetchApplicationTypes( { filters, page, limit } ),
     keepPreviousData: true,
-  });
+  } );
 };
 
 /**
  * 2. ADD APPLICATION
  */
-const addApplication = async (formData) => {
+const addApplication = async ( formData ) => {
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   await axios.post(
     "http://localhost:8080/application-types/add-application-type",
-    formData
+    formData,{
+    headers: {
+    'company_id': companyId // Send company_id in headers
+  }
+}
   );
 };
 
 export const useAddApplication = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation( {
     mutationFn: addApplication,
     onSuccess: () => {
-      queryClient.invalidateQueries(["applications"]);
+      queryClient.invalidateQueries( [ "applications" ] );
     },
-  });
+  } );
 };
 
 /**
  * 3. UPDATE APPLICATION
  */
-const updateApplicationType = async ({ applicationTypeId, formData }) => {
+const updateApplicationType = async ( { applicationTypeId, formData } ) => {
   await axios.put(
-    `http://localhost:8080/application-types/update-application-type/${applicationTypeId}`,
+    `http://localhost:8080/application-types/update-application-type/${ applicationTypeId }`,
     formData
   );
 };
@@ -63,10 +68,10 @@ const updateApplicationType = async ({ applicationTypeId, formData }) => {
 export const useUpdateApplicationType = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation( {
     mutationFn: updateApplicationType,
     onSuccess: () => {
-      queryClient.invalidateQueries(["applicationTypes"]);
+      queryClient.invalidateQueries( [ "applicationTypes" ] );
     },
-  });
+  } );
 };
