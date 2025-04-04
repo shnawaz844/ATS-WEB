@@ -8,7 +8,6 @@ export const createInterview = async (req, res) => {
 
         // Validate required fields
         if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
-        if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -30,5 +29,6 @@ export const createInterview = async (req, res) => {
         console.error("Error saving interview:", error);
         res.status(500).json({ message: "Internal server error" });
     }
-};
+}
+
 export default createInterview;
