@@ -16,7 +16,6 @@ import { ApplicationForm } from './Pages/Candidate/ApplicationForm';
 import { AssignRecruiter } from './Pages/Coordinator/AssignRecruiter';
 import { Footer } from './components/Footer';
 import AllPostedJobs from './components/AllPostedJobs';
-import AllPostedJobs from './components/AllPostedJobs';
 import { LoginContext } from './components/ContextProvider/Context';
 import MyJobs from './Pages/Candidate/MyJobs';
 import UserListing from './Pages/User/UserListing';
@@ -25,9 +24,7 @@ import ApplicationListing from "./Pages/Application/ApplicationListing";
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/Profile/Profile';
 import ScheduledInterview from './Pages/ScheduledInterview/ScheduledInterview';
-import ScheduledInterview from './Pages/ScheduledInterview/ScheduledInterview';
 import HiringManagerDashboard from './components/HiringManager/HiringManagerDashboard';
-import ManagerApplicationList from './components/HiringManager/ManagerApplicationList';
 import ManagerApplicationList from './components/HiringManager/ManagerApplicationList';
 import AssignedInterviews from './components/HiringManager/AssignedInterviews';
 import CandidateApplication from './Pages/Application/CandidateApplication';
@@ -58,24 +55,6 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route element={<Layout />}>
-          {/* Home */}
-          <Route path="/" element={<Home />} />
-          <Route path="*" element={<Home />} />
-
-          {/* Authentication */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register />} />
-
-          {/* Dashboard */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-
-          {/* Job management */}
-          <Route path="/post-job" element={<PostJob />} />
-          <Route path="/all-jobs" element={<AllJobs />} />
-          <Route path="/all-interviews" element={<AllInterviews />} />
-          <Route path="/all-posted-jobs" element={<AllPostedJobs />} />
         <Route element={<Layout />}>
           {/* Home */}
           <Route path="/" element={<Home />} />
@@ -152,9 +131,7 @@ function App() {
         </Route>
       </Routes>
     </div>
-        </Route>
-      </Routes>
-    </div>
+    
   );
 }
 

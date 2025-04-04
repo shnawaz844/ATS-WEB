@@ -26,19 +26,10 @@ const useScheduledInterview = ( page, limit, interviewerEmail ) => {
         queryKey: ["ScheduledInterviews", page, limit, interviewerEmail],
         queryFn: fetchScheduledInterviews,
         keepPreviousData: true, // Prevents flickering when paginating
-    // Fetch Scheduled Interviews with pagination
-    const { data, error, isLoading } = useQuery({
-        queryKey: ["ScheduledInterviews", page, limit, interviewerEmail],
-        queryFn: fetchScheduledInterviews,
-        keepPreviousData: true, // Prevents flickering when paginating
     });
 
     // Ensure data is properly extracted
     const ScheduledInterviews = data?.data || data || [];
-
-    // Ensure data is properly extracted
-    const ScheduledInterviews = data?.data || data || [];
-
     // Mutation for refetching after updates
     const refetchScheduledInterviews = () => {
         console.log("Refetching Scheduled Interviews...");
