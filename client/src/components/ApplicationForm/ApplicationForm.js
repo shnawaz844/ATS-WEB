@@ -13,12 +13,14 @@ import {
     Lock
 } from "lucide-react";
 
-export const ApplicationForm = ({ job, loginData, applicationTypesData }) => {
+export const ApplicationForm = ( { job, loginData, applicationTypesData, company_id }) => {
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
 
+      // Fetch company_id from localStorage (or use the passed prop)
+    const companyId = company_id || JSON.parse( localStorage.getItem( "user" ) )?.company_id;
     const {
         register,
         handleSubmit,
@@ -35,6 +37,7 @@ export const ApplicationForm = ({ job, loginData, applicationTypesData }) => {
             additionalDocuments: null,
             questions: [],
             answers: [],
+            companyId: companyId,
         },
     });
 
@@ -77,10 +80,14 @@ export const ApplicationForm = ({ job, loginData, applicationTypesData }) => {
         formData.append("additionalDocuments", data.additionalDocuments);
         formData.append("questions", JSON.stringify(job.applicationForm.question));
         formData.append("answers", JSON.stringify(data.answers));
+        formData.append( "company_id", companyId ); 
 
         try {
             const response = await fetch("http://localhost:8080/application/add-application", {
                 method: "POST",
+                headers: {
+                    "company_id": companyId,  // Add company_id to the headers
+                },
                 body: formData,
             });
             const result = await response.json();

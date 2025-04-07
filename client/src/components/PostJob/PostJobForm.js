@@ -210,6 +210,7 @@ export const PostJobForm = ( {
 } ) => {
   const [ isHead, setIsHead ] = React.useState( false );
   const [ recruitersList, setRecruitersList ] = useState( [] );
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id; 
   // console.log( "recruiterRole>>>>", recruiterRole )
 
 
@@ -226,7 +227,11 @@ export const PostJobForm = ( {
   useEffect( () => {
     const fetchRecruiters = async () => {
       try {
-        const response = await fetch( 'http://localhost:8080/recruiter/all-recruiter' ); // Adjust this to your API endpoint
+        const response = await fetch( 'http://localhost:8080/recruiter/all-recruiter', {
+          headers: {
+            'company_id': companyId  // Pass company_id in headers
+          }
+        } );
         const data = await response.json();
         console.log( 'Fetched Recruiters:', data );
         setRecruitersList( data ); // Assuming response contains a list of recruiters

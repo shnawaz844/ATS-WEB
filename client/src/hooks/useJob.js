@@ -3,10 +3,16 @@ import axios from 'axios';
 // import axios from 'axios';
 
 // Fetch all jobs with filters
-const fetchJobs = async ( { filters, page, limit } ) => {
+const fetchJobs = async ( { filters, page, limit, headers } ) => {
     const queryParams = new URLSearchParams( { ...filters, page, limit } ).toString();
-    const response = await fetch( `http://localhost:8080/jobs/all-jobs?${ queryParams }`
-    );
+
+    const response = await fetch( `http://localhost:8080/jobs/all-jobs?${ queryParams }`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers,  // This will include the company_id header
+        },
+    } );
     if ( !response.ok ) {
         throw new Error( "Error fetching jobs" );
     }
@@ -39,13 +45,22 @@ const updateJob = async ( jobData ) => {
     return response.json();
 };
 
-export const useJobs = ( filters, page = 1, limit = 6 ) => {
+export const useJobs = ( filters, page = 1, limit = 6) => {
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     return useQuery( {
         queryKey: [ 'jobs', filters, page ],
-        queryFn: () => fetchJobs( { filters, page, limit } ),
+        queryFn: () => fetchJobs( {
+            filters,
+            page,
+            limit,
+            headers: {
+                'company_id': companyId,  // Ensure company_id is sent here
+            }
+        } ),
         keepPreviousData: true,
     } );
 };
+
 
 
 export const usePostJob = () => {

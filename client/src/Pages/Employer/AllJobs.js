@@ -18,6 +18,7 @@ export const AllJobs = () => {
     const [jobsPerPage] = useState(6);
     const [isFilterOpen, setIsFilterOpen] = useState(true);
 
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     // Debounce search input
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -58,7 +59,7 @@ export const AllJobs = () => {
     if (scheduleType) filterParams.scheduleType = scheduleType.value;
 
     // Fetch jobs with filters
-    const { data: allJobs = [], isLoading } = useJobs(filterParams, currentPage, jobsPerPage);
+    const { data: allJobs = [], isLoading } = useJobs( filterParams, currentPage, jobsPerPage, companyId );
     const navigate = useNavigate();
 
     // Calculate pagination

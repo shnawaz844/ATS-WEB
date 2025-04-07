@@ -3,10 +3,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const fetchAssignedInterviews = async ({ queryKey }) => {
     const [, page, limit] = queryKey;
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     console.log("Fetching data with params:", { page, limit });
 
     const response = await axios.get("http://localhost:8080/applicationscheduledlist/scheduled-interviewer-app", {
         params: { page, limit },
+        headers: {
+            'company_id': companyId,
+        }
     });
 
     console.log("Response Data:", response.data);
@@ -16,7 +20,6 @@ const fetchAssignedInterviews = async ({ queryKey }) => {
 
 const useScheduledInterview = (page, limit) => {
     const queryClient = useQueryClient();
-
     // Fetch assigned interviews with pagination
     const { data: assignedInterviews = [], error, isLoading } = useQuery({
         queryKey: ["assignedInterviews", page, limit], // Include page & limit in the queryKey

@@ -3,7 +3,7 @@ import Job from '../../models/Job.js';
 const getJobs = async ( req, res ) => {
     try {
         let { page = 1, limit = 6, title, locationType, type, scheduleType, hireType, city } = req.query;
-
+        let { company_id } = req.headers;
         // Convert page & limit to numbers safely
         const pageNumber = parseInt( page, 10 ) || 1;
         const limitNumber = parseInt( limit, 10 ) || 6;
@@ -18,6 +18,8 @@ const getJobs = async ( req, res ) => {
         if ( scheduleType ) filter.scheduleType = { $regex: scheduleType, $options: 'i' };
         if ( hireType ) filter.hireType = { $regex: hireType, $options: 'i' };
 
+        if ( company_id ) filter.company_id = company_id;
+        
         const totalCount = await Job.countDocuments( filter );
 
         const jobs = await Job.find( filter )

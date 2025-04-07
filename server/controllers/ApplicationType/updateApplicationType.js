@@ -6,7 +6,7 @@ import ApplicationType from "../../models/ApplicationType.js";
 const updateApplicationType = async ( req, res ) => {
   try {
     const { id } = req.params; // Get the ID from the route parameter
-    const { applicationStep, applicationStatus } = req.body; // Get the fields from the request body
+    const { applicationStep, applicationStatus,company_id } = req.body; // Get the fields from the request body
 
     // Find the application type by ID
     const applicationType = await ApplicationType.findById( id );
@@ -20,6 +20,7 @@ const updateApplicationType = async ( req, res ) => {
     // Update the fields
     applicationType.applicationStep = applicationStep;
     applicationType.applicationStatus = applicationStatus;
+    applicationType.company_id = company_id;
 
     // Save the updated document
     await applicationType.save();

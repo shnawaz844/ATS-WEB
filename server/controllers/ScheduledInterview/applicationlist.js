@@ -4,8 +4,10 @@ import InterviewSchedule from "../../models/Applicationlist.js";
 export const createInterview = async (req, res) => {
     try {
         const { applicationID, interviewerID, date, scheduledTime, interviewerType, meetingLink, status } = req.body;
+        const { company_id } = req.headers;
 
         // Validate required fields
+        if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
         if (!applicationID || !interviewerID || !date || !scheduledTime || !interviewerType || !status) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -18,6 +20,7 @@ export const createInterview = async (req, res) => {
             interviewerType,
             meetingLink,
             status,
+            company_id,
         });
 
         await newInterview.save();

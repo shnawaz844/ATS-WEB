@@ -4,6 +4,7 @@ import Job from '../../models/Job.js';
 const getAllApplicationsGroupedByJob = async ( req, res ) => {
     try {
         let { page = 1, limit = 6, title, city, locationType, type, scheduleType, hireType } = req.query;
+        let { company_id } = req.headers;
 
         const pageNumber = parseInt( page, 10 ) || 1;
         const limitNumber = parseInt( limit, 10 ) || 6;
@@ -19,6 +20,8 @@ const getAllApplicationsGroupedByJob = async ( req, res ) => {
         if ( scheduleType ) jobFilter.scheduleType = { $regex: scheduleType, $options: 'i' };
         if ( hireType ) jobFilter.hireType = { $regex: hireType, $options: 'i' };
 
+        if ( company_id ) jobFilter.company_id = company_id;
+        
         // Step 2: Get all jobs based on filters (or all jobs if no filters)
         let filteredJobs = [];
         if ( Object.keys( jobFilter ).length > 0 ) {

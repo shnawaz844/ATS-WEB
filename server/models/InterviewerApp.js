@@ -26,7 +26,12 @@ const InterviewerAppSchema = new mongoose.Schema({
     meetingLink: {
         type: String,
         required: true
-    }
+    },
+    // company_id: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Company',
+    //     required: true,
+    // },
 });
 
 const InterviewerApp = mongoose.model('InterviewerApp', InterviewerAppSchema);

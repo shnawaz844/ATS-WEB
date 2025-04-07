@@ -16,8 +16,10 @@ const ApplicationListing = () => {
   const [formData, setFormData] = useState({
     applicationStep: 0,
     applicationStatus: "",
+    company_id: "",
   });
 
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   const {
     data: applicationTypesData,
     isLoading,
@@ -45,6 +47,7 @@ const ApplicationListing = () => {
     setFormData({
       applicationStep: "",
       applicationStatus: "",
+      company_id: companyId,
     });
     setIsDialogOpen(true);
   };
@@ -55,6 +58,7 @@ const ApplicationListing = () => {
     setFormData({
       applicationStep: application.applicationStep || "",
       applicationStatus: application.applicationStatus || "",
+      company_id: application.company_id || "",
     });
     setIsDialogOpen(true);
   };
@@ -74,6 +78,7 @@ const ApplicationListing = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (dialogMode === "add") {
+      formData.company_id = companyId;
       addApplicationType(formData, {
         onSuccess: handleCloseDialog,
         onError: (error) => console.error("Failed to add application:", error),

@@ -14,6 +14,11 @@ const InterviewSchema = new mongoose.Schema(
                 return this.status === 'rescheduled';
             }
         },
+        company_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Company",  // Assuming you have a "Company" model
+            required: true  // Set to true if company_id is mandatory for every interview
+        },
 
     },
     { timestamps: true } // Adds createdAt and updatedAt timestamps

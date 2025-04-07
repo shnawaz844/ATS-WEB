@@ -93,7 +93,9 @@ const JobSchema = new mongoose.Schema({
             enum: ['active', 'inactive', 'shortlist', 'rejected'],
             default: 'active'
         }
-    }]
+    }],
+    company_id: { type: String, required: true }
+
 });
 
 const Job = mongoose.model('Job', JobSchema);

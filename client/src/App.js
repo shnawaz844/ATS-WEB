@@ -37,20 +37,20 @@ import AllInterviews from './Pages/Employer/AllInterviews';
 import { useEffect } from 'react';
 
 // Layout component to ensure Navbar and Footer appear on all pages
-const Layout = () => (
-  <>
-    <Navbar />
-    <main className="min-h-screen">
-      <Outlet />
-    </main>
-    <Footer />
-  </>
-);
+const Layout = () => {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen">
+        <Outlet />
+      </main>
+      <Footer />
+    </>
+  );
+};
 
 function App() {
-  useEffect(() => {
     useAuth();
-  }, []);
 
   return (
     <div className="App">
@@ -74,6 +74,9 @@ function App() {
           <Route path="/all-interviews" element={<AllInterviews />} />
           <Route path="/all-posted-jobs" element={<AllPostedJobs />} />
           <Route path="/current-job/:id" element={<JobDetails />} />
+          <Route path="/job-detail/:id" element={<ApplicationJobDetail />} />
+
+          {/* Applications */}
           <Route path="/job-detail/:id" element={<ApplicationJobDetail />} />
 
           {/* Applications */}
@@ -101,11 +104,34 @@ function App() {
           <Route path="/application-list" element={<ManagerApplicationList />} />
 
           {/* Candidate */}
+          <Route path="/shortlist/details/:candidate_id/:job_id" element={<ShortlistedDetails />} />
+          <Route path="/all-applications" element={<CandidateApplication />} />
+          <Route path="/shortlisted-applications" element={<ShortlistedApplications />} />
+          <Route path="/my-jobs" element={<MyJobs />} />
+          <Route path="/application-types" element={<ApplicationListing />} />
+
+          {/* User Management */}
+          <Route path="/all-users" element={<UserListing />} />
+          <Route path="/all-companies" element={<CompanyListing />} />
+
+          {/* Role-specific Dashboards */}
+          <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
+          <Route path="/coordinator/review" element={<CoordinatorDashboard />} />
+          <Route path="/hiring_manager" element={<HiringManagerDashboard />} />
+
+          {/* Interviews */}
+          <Route path="/interview-rounds" element={<InterviewListing />} />
+          <Route path="/scheduled-interview" element={<ScheduledInterview />} />
+          <Route path="/assigned-interviews" element={<AssignedInterviews />} />
+          <Route path="/application-list" element={<ManagerApplicationList />} />
+
+          {/* Candidate */}
           <Route path="/candidate-details/:candidateId/:jobId" element={<CandidateDetailsPage />} />
           <Route path="/assign-recruiter/:id" element={<AssignRecruiter />} />
         </Route>
       </Routes>
     </div>
+    
   );
 }
 

@@ -12,9 +12,15 @@ const fetchInterviewDetails = async ({ queryKey }) => {
   // v5 still supplies an object to 'queryFn'. 
   // Inside that object, you can destructure `queryKey` if needed.
   const [_key, { page, limit, search }] = queryKey;
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
 
   const res = await axios.get(
-    `http://localhost:8080/interviews/all-interviews?page=${page}&limit=${limit}&search=${search}`
+    `http://localhost:8080/interviews/all-interviews?page=${page}&limit=${limit}&search=${search}`,
+     {
+      headers: {
+        'company_id': companyId // Sending company_id in headers
+      }
+    }
   );
   return res.data; // e.g. { interviews, totalCount, totalPages }
 };
