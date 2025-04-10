@@ -8,12 +8,13 @@ const register = async (req, res) => {
       userName,
       email,
       password,
-      gender,
       address,
+      gender,
       role,
       head,
-      company_id
     } = req.body;
+
+    const { company_id } = req.headers;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {

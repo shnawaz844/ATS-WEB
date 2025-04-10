@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/connectDB.js";
-import cors from "cors";
 import cookieParser from "cookie-parser";
+import cors from 'cors';
 
 
 const app = express();
@@ -14,7 +14,7 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use( cors() );
 app.use(cookieParser());
 
 // Import routes
