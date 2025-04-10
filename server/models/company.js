@@ -27,7 +27,8 @@ const CompanySchema = new mongoose.Schema({
     website: {
         type: String,
         default: false
-    }
+    },
+
 });
 
 const Company = mongoose.model('Company', CompanySchema);

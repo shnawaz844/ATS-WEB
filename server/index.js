@@ -41,8 +41,7 @@ app.use("/auth", Auth);
 app.use("/application-types", applicationTypesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
-app.use("/companies", companyRoutes)
-app.use("/companies", companyRoutes)
+app.use("/companies", companyRoutes),
 app.use("/applicationscheduledlist", applicationlistRoutes);
 app.use("/interviewerfeedback", feedbackRoutes);
 // app.use("/interview-result", resultRoutes)
