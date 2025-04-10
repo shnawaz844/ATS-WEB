@@ -13,7 +13,8 @@ export const useAuth = () => {
         const isPublicRoute = publicRoutes.includes( location.pathname ) ||
             location.pathname.startsWith( '/current-job/' ) ||
             location.pathname.includes( '/all-posted-jobs' ) ||
-            location.pathname.match( /^\/[a-zA-Z0-9-]+$/ );
+            location.pathname.match( /^\/[a-zA-Z0-9-]+$/ ) ||
+            location.pathname.match('/sign')
 
 
         if ( isPublicRoute ) {

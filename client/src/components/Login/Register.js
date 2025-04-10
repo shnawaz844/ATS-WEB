@@ -1,15 +1,40 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 export const Register = () => {
+  const { companyUserName } = useParams();
+
+  // 1) State for company details & ID
+  const [ companyDetails, setCompanyDetails ] = useState( null );
+  const companyId = companyDetails?._id;
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
     password: "",
-    gender: "",
     address: "",
+    gender: "",
     role: "candidate",
     head: false,
   });
+
+
+  // Fetch company details based on companyUserName
+  useEffect( () => {
+    const stored = localStorage.getItem( "companyUserName" );
+    const company = companyUserName || stored;
+    if ( !company ) return;
+
+    axios
+      .get( `http://localhost:8080/companies/companies/${ company }` )
+      .then( ( res ) => {
+        setCompanyDetails( res.data );
+        localStorage.setItem( "companyUserName", company );
+      } )
+      .catch( ( err ) => {
+        console.error( "Error fetching company details:", err );
+      } );
+  }, [ companyUserName ] );
 
   const [showPassword, setShowPassword] = useState(false);
   const [redirect, setRedirect] = useState(false);
@@ -41,9 +66,12 @@ export const Register = () => {
     try {
       const response = await fetch("http://localhost:8080/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+        headers: {
+          "Content-Type": "application/json",
+          "company_id": companyId  // Add company_id to headers
+        },
+        body: JSON.stringify( formData )
+      } );
 
       if (response.ok) {
         const result = await response.json();

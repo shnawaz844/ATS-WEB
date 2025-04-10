@@ -58,13 +58,13 @@ function App() {
       <Routes>
         <Route element={ <Layout /> }>
           {/* Home */ }
-          {/* <Route path="/" element={ <Home /> } /> */}
+          <Route path="/" element={ <Home /> } />
           <Route path="*" element={ <Home /> } />
           <Route path="/:companyUserName" element={ <Home /> } />
 
           {/* Authentication */ }
           <Route path="/login" element={ <Login /> } />
-          <Route path="/signup" element={ <Register /> } />
+          <Route path="/:companyUserName/signup" element={ <Register /> } />
 
           {/* Dashboard */ }
           <Route path="/dashboard" element={ <Dashboard /> } />
@@ -72,8 +72,8 @@ function App() {
 
           {/* Job management */ }
           <Route path="/post-job" element={ <PostJob /> } />
-          <Route path="/all-jobs" element={ <AllJobs /> } />
-          <Route path="/all-interviews" element={ <AllInterviews /> } />
+          <Route path="/:companyUserName/all-jobs" element={ <AllJobs /> } />
+          <Route path="/:companyUserName/all-interviews" element={ <AllInterviews /> } />
           <Route path="/current-job/:id" element={ <JobDetails /> } />
           <Route path="/job-detail/:id" element={ <ApplicationJobDetail /> } />
 
@@ -84,28 +84,28 @@ function App() {
           <Route path="/job-detail/:id" element={ <ApplicationJobDetail /> } />
 
           {/* Applications */ }
-          <Route path="/application-form/:id" element={ <ApplicationForm /> } />
-          <Route path="/shortlist" element={ <Applications /> } />
-          <Route path="/shortlist/details/:candidate_id/:job_id" element={ <ShortlistedDetails /> } />
-          <Route path="/all-applications" element={ <CandidateApplication /> } />
-          <Route path="/shortlisted-applications" element={ <ShortlistedApplications /> } />
-          <Route path="/my-jobs" element={ <MyJobs /> } />
-          <Route path="/application-types" element={ <ApplicationListing /> } />
+          <Route path="/:companyUserName/application-form/:id" element={ <ApplicationForm /> } />
+          <Route path="/:companyUserName/shortlist" element={ <Applications /> } />
+          <Route path="/:companyUserName/shortlist/details/:candidate_id/:job_id" element={ <ShortlistedDetails /> } />
+          <Route path="/:companyUserName/all-applications" element={ <CandidateApplication /> } />
+          <Route path="/:companyUserName/shortlisted-applications" element={ <ShortlistedApplications /> } />
+          <Route path="/:companyUserName/my-jobs" element={ <MyJobs /> } />
+          <Route path="/:companyUserName/application-types" element={ <ApplicationListing /> } />
 
           {/* User Management */ }
-          <Route path="/all-users" element={ <UserListing /> } />
+          <Route path="/:companyUserName/all-users" element={ <UserListing /> } />
           <Route path="/all-companies" element={ <CompanyListing /> } />
 
           {/* Role-specific Dashboards */ }
-          <Route path="/recruiter-dashboard" element={ <RecruiterDashboard /> } />
-          <Route path="/coordinator/review" element={ <CoordinatorDashboard /> } />
-          <Route path="/hiring_manager" element={ <HiringManagerDashboard /> } />
+          <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />
+          <Route path="/:companyUserName/coordinator/review" element={ <CoordinatorDashboard /> } />
+          <Route path="/:companyUserName/hiring_manager" element={ <HiringManagerDashboard /> } />
 
           {/* Interviews */ }
-          <Route path="/interview-rounds" element={ <InterviewListing /> } />
-          <Route path="/scheduled-interview" element={ <ScheduledInterview /> } />
-          <Route path="/assigned-interviews" element={ <AssignedInterviews /> } />
-          <Route path="/application-list" element={ <ManagerApplicationList /> } />
+          <Route path="/:companyUserName/interview-rounds" element={ <InterviewListing /> } />
+          <Route path="/:companyUserName/scheduled-interview" element={ <ScheduledInterview /> } />
+          <Route path="/:companyUserName/assigned-interviews" element={ <AssignedInterviews /> } />
+          <Route path="/:companyUserName/application-list" element={ <ManagerApplicationList /> } />
 
           {/* Candidate */ }
           <Route path="/shortlist/details/:candidate_id/:job_id" element={ <ShortlistedDetails /> } />
@@ -119,19 +119,19 @@ function App() {
           <Route path="/all-companies" element={ <CompanyListing /> } />
 
           {/* Role-specific Dashboards */ }
-          <Route path="/recruiter-dashboard" element={ <RecruiterDashboard /> } />
-          <Route path="/coordinator/review" element={ <CoordinatorDashboard /> } />
-          <Route path="/hiring_manager" element={ <HiringManagerDashboard /> } />
+          <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />
+          <Route path="/:companyUserName/coordinator/review" element={ <CoordinatorDashboard /> } />
+          <Route path="/:companyUserName/hiring_manager" element={ <HiringManagerDashboard /> } />
 
           {/* Interviews */ }
-          <Route path="/interview-rounds" element={ <InterviewListing /> } />
-          <Route path="/scheduled-interview" element={ <ScheduledInterview /> } />
-          <Route path="/assigned-interviews" element={ <AssignedInterviews /> } />
-          <Route path="/application-list" element={ <ManagerApplicationList /> } />
+          <Route path="/:companyUserName/interview-rounds" element={ <InterviewListing /> } />
+          <Route path="/:companyUserName/scheduled-interview" element={ <ScheduledInterview /> } />
+          <Route path="/:companyUserName/assigned-interviews" element={ <AssignedInterviews /> } />
+          <Route path="/:companyUserName/application-list" element={ <ManagerApplicationList /> } />
 
           {/* Candidate */ }
-          <Route path="/candidate-details/:candidateId/:jobId" element={ <CandidateDetailsPage /> } />
-          <Route path="/assign-recruiter/:id" element={ <AssignRecruiter /> } />
+          <Route path="/:companyUserName/candidate-details/:candidateId/:jobId" element={ <CandidateDetailsPage /> } />
+          <Route path="/:companyUserName/assign-recruiter/:id" element={ <AssignRecruiter /> } />
         </Route>
       </Routes>
     </div>

@@ -26,7 +26,8 @@ const scheduleTypeOptions = [
 ];
 
 const AllPostedJobs = () => {
-  const { companyUserName } = useParams();
+  // const { companyUserName } = useParams();
+  const companyUserName = localStorage.getItem( "companyUserName" );
   const [ companyDetails, setCompanyDetails ] = useState( null );
   const [ selectedJob, setSelectedJob ] = useState( null );
   const [ page, setPage ] = useState( 1 );

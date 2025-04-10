@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, Link, useParams } from "react-router-dom";
 import {
-  UserPen, 
+  UserPen,
   LogOut,
   Menu,
   X,
@@ -61,99 +61,99 @@ const normalNavItem = [
 ];
 
 export const Navbar = () => {
-  const { companyUserName } = useParams();
-  const [loginData, setLoginData] = useState(null);
-  const [navItems, setNavItems] = useState(normalNavItem);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const companyUserName = localStorage.getItem( "companyUserName" );
+  const [ loginData, setLoginData ] = useState( null );
+  const [ navItems, setNavItems ] = useState( normalNavItem );
+  const [ isMenuOpen, setIsMenuOpen ] = useState( false );
+  const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const basePath = companyUserName ? `/${ companyUserName }` : "";
 
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef( null );
 
-  const handlerIsMenuOpen = () => setIsMenuOpen(!isMenuOpen);
+  const handlerIsMenuOpen = () => setIsMenuOpen( !isMenuOpen );
 
   const toggleDropdown = () => {
-    setIsDropdownOpen((prev) => !prev);
+    setIsDropdownOpen( ( prev ) => !prev );
   };
 
-  const closeDropdown = (e) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setIsDropdownOpen(false);
+  const closeDropdown = ( e ) => {
+    if ( dropdownRef.current && !dropdownRef.current.contains( e.target ) ) {
+      setIsDropdownOpen( false );
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("click", closeDropdown);
+  useEffect( () => {
+    document.addEventListener( "click", closeDropdown );
     return () => {
-      document.removeEventListener("click", closeDropdown);
+      document.removeEventListener( "click", closeDropdown );
     };
-  }, []);
+  }, [] );
 
-  useEffect(() => {
-    const token = localStorage.getItem("user");
-    if (token) {
-      const user = JSON.parse(token);
-      setLoginData(user);
+  useEffect( () => {
+    const token = localStorage.getItem( "user" );
+    if ( token ) {
+      const user = JSON.parse( token );
+      setLoginData( user );
     }
-  }, []);
+  }, [] );
 
-  useEffect(() => {
-    if (loginData) {
-      switch (loginData.role) {
+  useEffect( () => {
+    if ( loginData ) {
+      switch ( loginData.role ) {
         case "super":
-          setNavItems(superNavItems);
+          setNavItems( superNavItems );
           break;
         case "admin":
-          setNavItems(adminNavItems);
+          setNavItems( adminNavItems );
           break;
         case "hiring_manager":
-          setNavItems(hiringManagerNavItems);
+          setNavItems( hiringManagerNavItems );
           break;
         case "interviewer":
-          setNavItems(interviewerNavItems);
+          setNavItems( interviewerNavItems );
           break;
         case "recruiter_manager":
-          setNavItems(recruiterNavItems);
+          setNavItems( recruiterNavItems );
           break;
         case "candidate":
-          setNavItems(candidateNavItems);
+          setNavItems( candidateNavItems );
           break;
         default:
-          setNavItems(normalNavItem);
+          setNavItems( normalNavItem );
       }
     } else {
-      setNavItems(normalNavItem);
+      setNavItems( normalNavItem );
     }
-  }, [loginData]);
+  }, [ loginData ] );
 
   const logoutHandler = async () => {
-    await fetch("http://localhost:8080/auth/logout", {
+    await fetch( "http://localhost:8080/auth/logout", {
       method: "POST",
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success) {
-          setLoginData(null);
-          localStorage.removeItem("usertoken");
-          localStorage.removeItem("user");
+    } )
+      .then( ( res ) => res.json() )
+      .then( ( result ) => {
+        if ( result.success ) {
+          setLoginData( null );
+          localStorage.removeItem( "usertoken" );
+          localStorage.removeItem( "user" );
           window.location.href = "/";
         }
-      });
+      } );
   };
-  
+
   return (
     <div className="w-full sticky top-0 z-50">
       <nav className="bg-gradient-to-r from-slate-600 to-slate-700 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
-            {/* BRAND */}
+            {/* BRAND */ }
             <div className="flex items-center">
               <NavLink
                 to={ companyUserName ? `/${ companyUserName }` : "/" }
                 className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
                 <img
-                  src={atslogo1URL}
+                  src={ atslogo1URL }
                   className="rounded-full h-12 md:h-14 border-2 border-gray-300"
                   alt="ATS Logo"
                 />
@@ -192,20 +192,20 @@ export const Navbar = () => {
               } ) }
             </div>
 
-            {/* User info or Login/Signup - Desktop */}
+            {/* User info or Login/Signup - Desktop */ }
             <div className="hidden md:flex items-center">
-              {loginData ? (
-                <div className="relative flex items-center space-x-4" ref={dropdownRef}>
+              { loginData ? (
+                <div className="relative flex items-center space-x-4" ref={ dropdownRef }>
                   <button
-                    onClick={toggleDropdown}
+                    onClick={ toggleDropdown }
                     className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
                   >
                     <UserCheck className="w-5 h-5 mr-2" />
-                    <span>{loginData?.userName}</span>
+                    <span>{ loginData?.userName }</span>
                     <ChevronDown className="w-4 h-4 ml-2" />
                   </button>
-                  
-                  {isDropdownOpen && (
+
+                  { isDropdownOpen && (
                     <div className="absolute right-0 top-12 w-48 mt-2 bg-white rounded-md shadow-lg z-100 py-1 ring-1 ring-black ring-opacity-5 transform origin-top-right transition-all">
                       <Link
                         to="/profile"
@@ -216,14 +216,14 @@ export const Navbar = () => {
                       </Link>
                       <hr className="my-1 border-gray-200" />
                       <button
-                        onClick={logoutHandler}
+                        onClick={ logoutHandler }
                         className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <LogOut className="w-4 h-4 mr-3 text-gray-600" />
                         <span>Logout</span>
                       </button>
                     </div>
-                  )}
+                  ) }
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
@@ -234,73 +234,72 @@ export const Navbar = () => {
                     Login
                   </Link>
                   <Link
-                    to="/signup"
+                    to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
                     className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
                   >
                     Sign Up
                   </Link>
                 </div>
-              )}
+              ) }
             </div>
 
-            {/* HAMBURGER MENU */}
+            {/* HAMBURGER MENU */ }
             <div className="md:hidden flex items-center">
               <button
-                onClick={handlerIsMenuOpen}
+                onClick={ handlerIsMenuOpen }
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               >
-                {isMenuOpen ? (
+                { isMenuOpen ? (
                   <X className="block h-6 w-6" />
                 ) : (
                   <Menu className="block h-6 w-6" />
-                )}
+                ) }
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOBILE MENU */}
-        <div className={`${isMenuOpen ? "block" : "hidden"} md:hidden`}>
+        {/* MOBILE MENU */ }
+        <div className={ `${ isMenuOpen ? "block" : "hidden" } md:hidden` }>
           <div className="px-2 pt-2 pb-3 space-y-1 bg-slate-800">
-            {navItems.map(({ label, path, icon }) => (
+            { navItems.map( ( { label, path, icon } ) => (
               <NavLink
-                key={path}
+                key={ path }
                 to={ `${ basePath }${ path }` }
-                onClick={() => setIsMenuOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium ${
-                    isActive
-                      ? "text-white bg-slate-600"
-                      : "text-gray-300 hover:text-white hover:bg-slate-600"
+                onClick={ () => setIsMenuOpen( false ) }
+                className={ ( { isActive } ) =>
+                  `flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium ${ isActive
+                    ? "text-white bg-slate-600"
+                    : "text-gray-300 hover:text-white hover:bg-slate-600"
                   }`
                 }
               >
-                {icon}
-                <span>{label}</span>
+                { icon }
+                <span>{ label }</span>
               </NavLink>
-            ))}
-            
-            {/* User actions - Mobile */}
+            ) ) }
+
+            {/* User actions - Mobile */ }
             <div className="mt-4 pt-4 border-t border-gray-700">
-              {loginData ? (
+              { loginData ? (
                 <div className="space-y-2">
                   <div className="flex items-center px-3 py-2 text-base font-medium text-gray-300">
                     <UserCheck className="w-5 h-5 mr-3" />
-                    <span>Signed in as {loginData?.userName}</span>
+                    <span>Signed in as { loginData?.userName }</span>
                   </div>
                   <Link
                     to="/profile"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={ () => setIsMenuOpen( false ) }
                     className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
                   >
                     <UserPen className="w-5 h-5 mr-3" />
                     <span>Profile</span>
                   </Link>
                   <button
-                    onClick={() => {
+                    onClick={ () => {
                       logoutHandler();
-                      setIsMenuOpen(false);
-                    }}
+                      setIsMenuOpen( false );
+                    } }
                     className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
                   >
                     <LogOut className="w-5 h-5 mr-3" />
@@ -311,24 +310,24 @@ export const Navbar = () => {
                 <div className="space-y-2">
                   <Link
                     to="/login"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={ () => setIsMenuOpen( false ) }
                     className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
                   >
                     Login
                   </Link>
                   <Link
-                    to="/signup"
-                    onClick={() => setIsMenuOpen(false)}
+                    to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
+                    onClick={ () => setIsMenuOpen( false ) }
                     className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500"
                   >
                     Sign Up
                   </Link>
                 </div>
-              )}
+              ) }
             </div>
           </div>
         </div>
       </nav>
     </div>
   );
-};
+}
