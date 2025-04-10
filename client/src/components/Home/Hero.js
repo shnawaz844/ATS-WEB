@@ -1,6 +1,7 @@
 import { useEffect, useRef, Suspense, lazy } from "react";
 
 import Particles from "../Login/Particles";  // Make sure the Particles component is imported
+import { useNavigate, useParams } from "react-router-dom";
 
 // Lazy load components
 const HeroSection = lazy( () => import( "./HeroSection" ) );
@@ -10,12 +11,30 @@ const Jobs = lazy( () => import( "./Jobs" ) );
 const Testimonials = lazy( () => import( "./Testimonials" ) );
 const Cta = lazy( () => import( "./Cta" ) );
 
-
 export const Hero = () => {
   const featuresRef = useRef( null )
   const statsRef = useRef( null )
   const testimonialsRef = useRef( null )
   const ctaRef = useRef( null )
+  const { companyUserName } = useParams();
+  const navigate = useNavigate();
+
+  useEffect( () => {
+    if ( companyUserName ) {
+      localStorage.setItem( "companyUserName", companyUserName );
+      console.log( "Saved companyUserName to localStorage:", companyUserName );
+    }
+  }, [ companyUserName ] );
+
+  useEffect( () => {
+    if ( !companyUserName ) {
+      const stored = localStorage.getItem( "companyUserName" );
+      if ( stored ) {
+        console.log( "🔄 Redirecting to stored company:", stored );
+        navigate( `/${ stored }`, { replace: true } );
+      }
+    }
+  }, [ companyUserName, navigate ] );
 
   useEffect( () => {
     // Simple intersection observer for scroll animations

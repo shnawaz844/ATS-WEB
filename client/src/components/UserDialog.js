@@ -183,7 +183,7 @@ const UserDialog = ({
                         {/* Role Field */}
                         {loggedInUser.role === 'super' ? (
                             <>
-                                <input type="hidden" name="role" value="admin" />
+                                <input type="hidden" name="role" value={ formData.role = "admin" } />
                                 <p className="mb-4 text-gray-700">Role: Admin</p>
                             </>
                         ) : (

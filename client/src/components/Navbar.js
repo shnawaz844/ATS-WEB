@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, Link } from "react-router-dom";
+import { NavLink, Link, useParams } from "react-router-dom";
 import {
   UserPen, 
   LogOut,
@@ -61,10 +61,12 @@ const normalNavItem = [
 ];
 
 export const Navbar = () => {
+  const { companyUserName } = useParams();
   const [loginData, setLoginData] = useState(null);
   const [navItems, setNavItems] = useState(normalNavItem);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const basePath = companyUserName ? `/${ companyUserName }` : "";
 
   const dropdownRef = useRef(null);
 
@@ -147,7 +149,7 @@ export const Navbar = () => {
             {/* BRAND */}
             <div className="flex items-center">
               <NavLink
-                to="/"
+                to={ companyUserName ? `/${ companyUserName }` : "/" }
                 className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
                 <img
@@ -161,24 +163,33 @@ export const Navbar = () => {
               </NavLink>
             </div>
 
-            {/* MAIN MENU - Desktop */}
+            {/* MAIN MENU - Desktop */ }
             <div className="hidden md:flex items-center justify-center space-x-8">
-              {navItems.map(({ label, path, icon }) => (
-                <NavLink
-                  key={path}
-                  to={path}
-                  className={({ isActive }) =>
-                    `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${
-                      isActive 
-                        ? "text-white bg-slate-600" 
+              { navItems.map( ( { label, path, icon } ) => {
+                // special-case Home to respect companyUserName
+                const to =
+                  path === "/"
+                    ? companyUserName
+                      ? `/${ companyUserName }`
+                      : "/"
+                    : `${ basePath }${ path }`;
+
+                return (
+                  <NavLink
+                    key={ path }
+                    to={ to }
+                    className={ ( { isActive } ) =>
+                      `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ isActive
+                        ? "text-white bg-slate-600"
                         : "text-gray-300 hover:text-white"
-                    }`
-                  }
-                >
-                  {icon}
-                  <span>{label}</span>
-                </NavLink>
-              ))}
+                      }`
+                    }
+                  >
+                    { icon }
+                    <span>{ label }</span>
+                  </NavLink>
+                );
+              } ) }
             </div>
 
             {/* User info or Login/Signup - Desktop */}
@@ -254,7 +265,7 @@ export const Navbar = () => {
             {navItems.map(({ label, path, icon }) => (
               <NavLink
                 key={path}
-                to={path}
+                to={ `${ basePath }${ path }` }
                 onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium ${
