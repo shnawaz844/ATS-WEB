@@ -41,6 +41,11 @@ const ApplicationJobDetail = () => {
         fetchData();
     }, [id, page, limit, search]);
 
+    const capitalizeFirstLetter = ( str ) => {
+        if ( !str ) return '';
+        return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
+    };
+
     // if (loading) {
     //     return (
     //         <div className="min-h-screen flex items-center justify-center">
@@ -97,7 +102,7 @@ const ApplicationJobDetail = () => {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div className="mb-4 md:mb-0">
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                {title || 'Untitled Job'}
+                                { capitalizeFirstLetter(title) || 'Untitled Job'}
                             </h1>
                             <div className="flex flex-wrap gap-3">
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`}>

@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 
 const Modal = ({ getStatusColor, isOpen, onClose, app }) => {
     const [activeTab, setActiveTab] = useState('details'); // 'details' or 'resume'
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
 
     if (!isOpen) return null;
 
@@ -49,7 +52,7 @@ const Modal = ({ getStatusColor, isOpen, onClose, app }) => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm text-gray-500">Title</p>
-                                        <p>{app?.jobID?.title}</p>
+                                        <p>{ capitalizeFirstLetter(app?.jobID?.title)}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Location</p>
@@ -69,7 +72,7 @@ const Modal = ({ getStatusColor, isOpen, onClose, app }) => {
                             <div>
                                 <h3 className="font-semibold mb-2">Application Status</h3>
                                 <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(app.applicationStatus)}`}>
-                                    {app.applicationStatus}
+                                    { capitalizeFirstLetter(app.applicationStatus)}
                                 </span>
                             </div>
 
@@ -82,7 +85,7 @@ const Modal = ({ getStatusColor, isOpen, onClose, app }) => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">Experience</p>
-                                        <p>{app.experience}</p>
+                                        <p>{ capitalizeFirstLetter(app.experience)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -91,7 +94,7 @@ const Modal = ({ getStatusColor, isOpen, onClose, app }) => {
                                 <h3 className="font-semibold mb-2">Application Questions</h3>
                                 {JSON.parse(app.questions[0]).map((question, index) => (
                                     <div key={index} className="mb-3">
-                                        <p className="text-sm font-medium">{question}</p>
+                                        <p className="text-sm font-medium">{ capitalizeFirstLetter(question)}</p>
                                         <p className="text-gray-600">{JSON.parse(app.answers[0])[index]}</p>
                                     </div>
                                 ))}

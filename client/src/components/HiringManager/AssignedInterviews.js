@@ -8,7 +8,7 @@ const AssignedInterviews = () => {
     const navigate = useNavigate();
     const [ page, setPage ] = useState( 1 );
     const itemsPerPage = 1; // Number of interviews per page
-    const limit = 4; // Set the number of items per page
+    const limit = 9; // Set the number of items per page
     // Fetch company_id from localStorage
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const {
@@ -16,9 +16,7 @@ const AssignedInterviews = () => {
         error,
         isLoading,
         refetchAssignedInterviews
-    } = useAssignedInterview( page, limit,companyId );
-
- 
+    } = useAssignedInterview( page, limit, companyId );
 
     const [ search, setSearch ] = useState( "" );
     const [ filterStatus, setFilterStatus ] = useState( "all" );
@@ -37,14 +35,18 @@ const AssignedInterviews = () => {
 
     // Filter interviews based on search and status filter
     const filteredInterviews = assignedInterviews?.interviews
-
-
     const totalPages = assignedInterviews?.totalPages;
-
 
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
     const interviewStatuses = [ "scheduled", "completed", "cancelled", "rescheduled" ];
+
+    const capitalizeFirstLetter = ( string ) => {
+        if ( string ) {
+            return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        }
+        return;
+    };
 
     // Handle click outside modal to close it
     useEffect( () => {
@@ -97,6 +99,7 @@ const AssignedInterviews = () => {
                 setInterviewers( data );
             } catch ( error ) {
                 console.error( "Error fetching interviewers:", error.message );
+                // setInterviewers( data );
             }
         };
 
@@ -329,17 +332,17 @@ const AssignedInterviews = () => {
                                     onClick={ () => handleInterviewClick( interview ) }
                                 >
                                     <div className="flex justify-between items-start mb-3">
-                                        <h3 className="text-lg font-semibold text-gray-800">{ interview?.applicationID?.jobID?.title || "N/A" }</h3>
+                                        <h3 className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</h3>
                                         <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( interview.status ) }` }>
                                             { interview.status || "Scheduled" }
                                         </span>
                                     </div>
                                     <div className="space-y-2">
                                         <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Applicant:</span> { interview.applicationID?.candidateID?.userName || "N/A" }
+                                            <span className="font-medium">Applicant:</span> { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
                                         </p>
                                         <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Type:</span> { interview.interviewerType || "N/A" }
+                                            <span className="font-medium">Type:</span> { capitalizeFirstLetter( interview.interviewerType ) || "N/A" }
                                         </p>
                                         <p className="text-sm text-gray-600">
                                             <span className="font-medium">Date:</span> { formatDate( interview.date ) }
@@ -537,7 +540,6 @@ const AssignedInterviews = () => {
                     Next
                 </button>
             </div>
-            {/* )} */ }
 
         </div>
     );

@@ -4,7 +4,7 @@ import { useApplicationTypes } from '../../hooks/useApplicationTypes';
 import Select from "react-select";
 import {
     Search, Filter, Briefcase, MapPin, Clock, RefreshCw, ChevronLeft,
-    ChevronRight, Plus, Calendar, Users, DollarSign, Building,
+    ChevronRight, Plus, Calendar, Users, DollarSign, IndianRupee,
     ChevronDown, Tag, X, Eye
 } from 'lucide-react';
 
@@ -24,8 +24,9 @@ const CandidateApplication = () => {
     const [debouncedFilters, setDebouncedFilters] = useState(formInputs);
     const [showFilters, setShowFilters] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [jobsPerPage] = useState(6); // Number of jobs per page
+    const [jobsPerPage] = useState(9); // Number of jobs per page
     const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+    const companyUserName = localStorage.getItem( "companyUserName" );
 
     const types = [
         { value: '', label: 'Select Employment Type' },
@@ -97,6 +98,11 @@ const CandidateApplication = () => {
     // Handle pagination
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
+    };
+
+    const capitalizeFirstLetter = ( str ) => {
+        if ( !str ) return '';
+        return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
     };
 
     // Render active filter chips
@@ -215,7 +221,7 @@ const CandidateApplication = () => {
                                         type="text"
                                         name="title"
                                         id="title"
-                                        value={formInputs.title}
+                                        value={ capitalizeFirstLetter(formInputs.title)}
                                         onChange={handleFilterChange}
                                         placeholder="Job Title"
                                         className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -378,7 +384,7 @@ const CandidateApplication = () => {
                                             {allJobs?.length > 0 && (
                                                 allJobs.map((job) => (
                                                     <tr key={job.jobID} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="px-6 py-4 font-medium text-gray-900">{job.title || 'N/A'}</td>
+                                                        <td className="px-6 py-4 font-medium text-gray-900">{ capitalizeFirstLetter(job.title) || 'N/A'}</td>
                                                         <td className="px-6 py-4 text-gray-700">
                                                             <div className="flex items-center">
                                                                 <MapPin className="w-4 h-4 text-gray-500 mr-1" />
@@ -399,7 +405,7 @@ const CandidateApplication = () => {
                                                         <td className="px-6 py-4 text-gray-700">{job.hireType || 'N/A'}</td>
                                                         <td className="px-6 py-4 text-gray-700">
                                                             <div className="flex items-center">
-                                                                <DollarSign className="w-4 h-4 text-gray-500 mr-1" />
+                                                                <IndianRupee className="w-4 h-4 text-gray-500 mr-1" />
                                                                 {job.compensation || 'N/A'}
                                                             </div>
                                                         </td>
@@ -410,7 +416,7 @@ const CandidateApplication = () => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <button
-                                                                onClick={() => navigate(`/job-detail/${job.jobID}`)}
+                                                                onClick={() => navigate(`/${companyUserName}/job-detail/${job.jobID}`)}
                                                                 className="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg transition-all duration-300 transform hover:scale-105 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none animate-custom-shake shadow-lg hover:shadow-xl"
                                                             >
                                                                 <Eye className="w-4 h-4 mr-1" />

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 export const ApplicationForm = ( { job, loginData, applicationTypesData, company_id }) => {
+    const companyUserName = localStorage.getItem("companyUserName");
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
             applicationStatus: "",
             resume: null,
             contactInfo: "",
+            emailInfo:"",
             experience: "",
             additionalDocuments: null,
             questions: [],
@@ -76,6 +78,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
         formData.append("applicationStatus", data.applicationStatus);
         formData.append("resume", file);
         formData.append("contactInfo", data.contactInfo);
+        formData.append( "emailInfo", data.emailInfo );
         formData.append("experience", data.experience);
         formData.append("additionalDocuments", data.additionalDocuments);
         formData.append("questions", JSON.stringify(job.applicationForm.question));
@@ -95,7 +98,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
             if (response.ok) {
                 setSuccessMessage("Application submitted successfully!");
                 setTimeout(() => {
-                    navigate(`/application-details/${result.applicationID}`);
+                    navigate(`/${companyUserName}/my-jobs`);
                 }, 1500);
             } else {
                 alert("Failed to submit application.");
@@ -115,7 +118,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
                 <h3 className="text-lg font-medium text-gray-800 mb-2">Login Required</h3>
                 <p className="text-gray-600 mb-4">Please log in to apply for this position</p>
                 <button
-                    onClick={() => navigate("/login", { state: { returnUrl: window.location.pathname } })}
+                    onClick={() => navigate(`/${companyUserName}/login`, { state: { returnUrl: window.location.pathname } })}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                     Go to Login
@@ -183,6 +186,26 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
                         Contact information is required
                     </p>
                 )}
+            </div>
+            {/* Email Info */ }
+            <div className="space-y-2">
+                <label className="flex items-center text-gray-700 font-medium">
+                    <Mail size={ 18 } className="mr-2 text-blue-500" />
+                    Email Information
+                </label>
+                <input
+                    type="string"
+                    { ...register( "emailInfo", { required: true } ) }
+                    placeholder="Email"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                />
+                { errors.emailInfo && (
+                    <p className="flex items-center text-red-500 text-sm">
+                        <AlertCircle size={ 14 } className="mr-1" />
+                        Contact information is required
+                    </p>
+                ) }
             </div>
 
             {/* Experience */}

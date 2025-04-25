@@ -21,8 +21,7 @@ const ParticlesComponent = (props) => {
     () => ({
       background: {
         color: {
-          // Set the particles canvas background to transparent
-          value: "transparent",
+          value: "red", // Set the background color to red
         },
       },
       fpsLimit: 120,

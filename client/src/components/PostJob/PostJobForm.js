@@ -37,6 +37,10 @@ const FORM_OPTIONS = {
   ]
 };
 
+const capitalizeFirstLetter = ( string ) => {
+  return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+};
+
 const FormField = ( {
   label,
   error,
@@ -265,7 +269,7 @@ export const PostJobForm = ( {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormInput
-                    label="Title"
+                    label={ capitalizeFirstLetter("Title")}
                     register={ register }
                     name="title"
                     error={ errors?.title }
@@ -372,9 +376,7 @@ export const PostJobForm = ( {
                       </select>
                     </FormField>
                   ) }
-
-
-
+                  
                   <FormInput
                     label="Hiring Manager Email"
                     register={ register }

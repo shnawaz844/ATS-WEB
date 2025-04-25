@@ -23,11 +23,15 @@ const ApplicationList = () => {
     } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-    // console.log( "companyId>>>>>>", companyId )
+    const companyUserName = localStorage.getItem( "companyUserName" );
+
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
 
     const [ editingId, setEditingId ] = useState( null );
     const [ page, setPage ] = useState( 1 );
-    const limit = 10; // Increased from 2 to 5 for better UX
+    const limit = 9; // Increased from 2 to 5 for better UX
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
     const storedUser = localStorage.getItem( "user" );
@@ -99,6 +103,7 @@ const ApplicationList = () => {
         return jobTitleMatch && searchMatch;
     } );
 
+
     // Validate form before submission
     const validateForm = () => {
         if ( !editForm.date ) {
@@ -138,6 +143,19 @@ const ApplicationList = () => {
         } );
         setEditingId( application._id );
         setIsEditModalOpen( true );
+    };
+
+    // Handle Pagination
+    const handleNextPage = () => {
+        if ( page < totalPages ) {
+            setPage( prevPage => prevPage + 1 );
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if ( page > 1 ) {
+            setPage( prevPage => prevPage - 1 );
+        }
     };
 
     // Handle assigning interviewer and scheduling interview
@@ -181,11 +199,15 @@ const ApplicationList = () => {
             }
 
             toast.dismiss( loadingToast );
-            toast.success( 'Interview scheduled successfully! 🎉' );
+            toast.success( 'Interview scheduled successfully! 🎉 Redirecting to Assigned interviews to ' );
+            setTimeout( () => {
+                navigate( `/${ companyUserName }/assigned-interviews` )
+            }, 2000 )
 
             // Close modal and refetch applications
             setIsEditModalOpen( false );
             refetch();
+
         } catch ( error ) {
             console.error( "Error assigning interviewer:", error );
             toast.dismiss( loadingToast );
@@ -215,6 +237,7 @@ const ApplicationList = () => {
                 return 'bg-gray-100 text-gray-800';
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -274,14 +297,14 @@ const ApplicationList = () => {
                                 onClick={ () => handleApplicationClick( app ) }
                             >
                                 <div className="flex justify-between items-start mb-3">
-                                    <h3 className="text-lg font-semibold text-gray-800">{ app.jobDetails?.title || "Untitled Position" }</h3>
+                                    <h3 className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( app.jobDetails?.title ) || "Untitled Position" }</h3>
                                     <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( app.applicationStatus ) }` }>
-                                        { app.applicationStatus || "Unknown" }
+                                        { capitalizeFirstLetter( app.applicationStatus ) || "Unknown" }
                                     </span>
                                 </div>
                                 <div className="space-y-2">
                                     <p className="text-sm text-gray-600">
-                                        <span className="font-medium">Applicant:</span> { app.candidateDetails?.userName || "N/A" }
+                                        <span className="font-medium">Applicant:</span> { capitalizeFirstLetter( app.candidateDetails?.userName || "N/A" ) }
                                     </p>
                                     <p className="text-sm text-gray-600">
                                         <span className="font-medium">Email:</span> { app.candidateDetails?.email || "N/A" }
@@ -346,11 +369,11 @@ const ApplicationList = () => {
                             <div className="grid grid-cols-2 gap-3 text-sm">
                                 <div>
                                     <p className="text-gray-600">Job Title:</p>
-                                    <p className="font-medium">{ detailedApplication?.jobDetails?.title || "N/A" }</p>
+                                    <p className="font-medium">{ capitalizeFirstLetter( detailedApplication?.jobDetails?.title ) || "N/A" }</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Applicant:</p>
-                                    <p className="font-medium">{ detailedApplication?.candidateDetails?.userName || "N/A" }</p>
+                                    <p className="font-medium">{ capitalizeFirstLetter( detailedApplication?.candidateDetails?.userName ) || "N/A" }</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Email:</p>
@@ -358,7 +381,7 @@ const ApplicationList = () => {
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Status:</p>
-                                    <p className="font-medium">{ detailedApplication?.applicationStatus || "N/A" }</p>
+                                    <p className="font-medium">{ capitalizeFirstLetter( detailedApplication?.applicationStatus ) || "N/A" }</p>
                                 </div>
                                 <div>
                                     <p className="text-gray-600">Company ID:</p>
@@ -460,6 +483,7 @@ const ApplicationList = () => {
                 </div>
             ) }
             <ToastContainer position="top-right" autoClose={ 3000 } hideProgressBar={ false } newestOnTop closeOnClick rtl={ false } pauseOnFocusLoss draggable pauseOnHover />
+          
         </div>
     );
 };

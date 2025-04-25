@@ -1,7 +1,8 @@
 import { useEffect, useRef, Suspense, lazy } from "react";
 
-import Particles from "../Login/Particles";  // Make sure the Particles component is imported
+import Particles from "../../components/Particles";  // Make sure the Particles component is imported
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 // Lazy load components
 const HeroSection = lazy( () => import( "./HeroSection" ) );
@@ -20,24 +21,51 @@ export const Hero = () => {
   const navigate = useNavigate();
 
   useEffect( () => {
-    if ( companyUserName ) {
-      localStorage.setItem( "companyUserName", companyUserName );
-      console.log( "Saved companyUserName to localStorage:", companyUserName );
+    if ( companyUserName && companyUserName !== "null" ) {
+      console.log( "this runs", companyUserName !== "null", companyUserName)
+      const storedCompanyUserName = localStorage.getItem( "companyUserName" );
+      const storedCompanyId = localStorage.getItem( "companyId" );
+
+      axios
+        .get( `http://localhost:8080/companies/companies/${ companyUserName }` )
+        .then( res => {
+          const companyFromApi = res.data;
+
+          // If stored company ID exists but doesn't match API result, redirect to 404
+          if ( storedCompanyId && companyFromApi._id !== storedCompanyId ) {
+            console.error( "Company ID mismatch, invalid access." );
+            navigate( "/404" );
+            return;
+          }
+
+          // If stored username is not set or different, only then update localStorage
+          if ( !storedCompanyUserName || storedCompanyUserName !== companyUserName ) {
+            localStorage.setItem( "companyUserName", companyUserName );
+            localStorage.setItem( "companyId", companyFromApi._id );
+          }
+
+          // Optionally: You can also set state if needed
+          // setCompanyDetails(companyFromApi);
+          // setCompanyLoading(false);
+        } )
+        .catch( err => {
+          console.error( "Invalid company slug:", err );
+          navigate( "/404" );
+        } );
     }
-  }, [ companyUserName ] );
+  }, [ companyUserName, navigate ] );
+
 
   useEffect( () => {
-    if ( !companyUserName ) {
+    if ( !companyUserName  ) {
       const stored = localStorage.getItem( "companyUserName" );
-      if ( stored ) {
-        console.log( "🔄 Redirecting to stored company:", stored );
+      if ( stored && stored !== "" ) {
         navigate( `/${ stored }`, { replace: true } );
       }
     }
   }, [ companyUserName, navigate ] );
 
   useEffect( () => {
-    // Simple intersection observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
       rootMargin: "0px 0px -100px 0px",

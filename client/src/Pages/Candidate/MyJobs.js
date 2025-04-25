@@ -30,7 +30,7 @@ const MyJobs = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [updatedApplication, setUpdatedApplication] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const limit = 3;
+    const limit = 9;
 
     const fetchApplications = async () => {
         try {
@@ -157,6 +157,10 @@ const MyJobs = () => {
         fetchApplications();
     }, [loginData, currentPage]);
 
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
+
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -175,17 +179,17 @@ const MyJobs = () => {
                         <div key={app._id} className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-3">
-                                    <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">{app?.jobID?.title}</h2>
-                                    <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(app.applicationStatus)}`}>
+                                    <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">{ capitalizeFirstLetter(app?.jobID?.title)}</h2>
+                                    <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${(getStatusColor(app.applicationStatus))}`}>
                                         {getStatusIcon(app.applicationStatus)}
-                                        {app.applicationStatus}
+                                        { capitalizeFirstLetter(app.applicationStatus)}
                                     </span>
                                 </div>
 
                                 <div className="space-y-2 mb-4">
                                     <p className="text-sm text-gray-600 flex items-center">
                                         <Briefcase className="h-4 w-4 mr-2 text-gray-500" />
-                                        {app?.jobID?.locationType}
+                                        {(app?.jobID?.locationType)}
                                     </p>
                                     <p className="text-sm text-gray-700 flex items-center">
                                         <MapPin className="h-4 w-4 mr-2 text-gray-500" />

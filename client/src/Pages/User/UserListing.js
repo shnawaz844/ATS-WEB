@@ -216,7 +216,7 @@ const UserListing = () => {
                         {user.userName.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{user.userName}</h3>
+                        <h3 className="font-semibold text-gray-900 text-lg">{ capitalizeFirstLetter(user.userName)}</h3>
                         <p className="text-sm text-gray-600">{user.email}</p>
                       </div>
                     </div>

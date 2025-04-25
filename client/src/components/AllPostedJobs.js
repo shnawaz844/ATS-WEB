@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 import JobDescriptionModal from "./JobDescriptionModal";
@@ -25,19 +25,20 @@ const scheduleTypeOptions = [
   { value: "Night Shift", label: "Night Shift" },
 ];
 
+
+
 const AllPostedJobs = () => {
-  // const { companyUserName } = useParams();
   const companyUserName = localStorage.getItem( "companyUserName" );
   const [ companyDetails, setCompanyDetails ] = useState( null );
   const [ selectedJob, setSelectedJob ] = useState( null );
   const [ page, setPage ] = useState( 1 );
-  const [ limit, setLimit ] = useState( 3 );
+  const [ limit, setLimit ] = useState( 12 );
   const [ search, setSearch ] = useState( "" );
   const [ debouncedSearch, setDebouncedSearch ] = useState( "" );
   const [ jobType, setJobType ] = useState( "" );
   const [ locationType, setLocationType ] = useState( "" );
   const [ scheduleType, setScheduleType ] = useState( "" );
-  const companyId = companyDetails?._id
+  const companyId = companyDetails?._id;
 
   console.log( "companyId", companyId )
   // Debounce search input
@@ -86,10 +87,13 @@ const AllPostedJobs = () => {
   if ( isError ) return <div>Error fetching jobs</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto px-4 py-8">
       <h1 className="text-center text-2xl md:text-3xl font-bold text-primary mb-8">
         Explore Our Opportunities
       </h1>
+      <p className="text-center text-primary mb-8">
+        Find your perfect role from our wide range of positions across different departments and locations.
+      </p>
 
       {/* Filters */ }
       <div className="mb-6 flex flex-wrap justify-center items-center gap-4 w-full max-w-6xl mx-auto">
@@ -136,7 +140,7 @@ const AllPostedJobs = () => {
       {/* Jobs List */ }
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
         { data?.jobs.map( ( job ) => (
-          <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } />
+          <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
         ) ) }
       </div>
 
@@ -169,17 +173,21 @@ const AllPostedJobs = () => {
   );
 };
 
-const Card = ( { job, onViewDetails } ) => {
+const Card = ( { job, onViewDetails, companyUserName } ) => {
+  const capitalizeFirstLetter = ( string ) => {
+    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  };
+  
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
       <div className="p-5">
         <h2 className="text-lg font-bold text-gray-800 capitalize">{ job.title || "Software Engineer" }</h2>
-        <p className="text-sm text-gray-600">{ job.type } | { job.scheduleType }</p>
-        <p className="text-sm text-gray-700">{ job.city }, { job.state } | { job.locationType }</p>
-        <p className="text-sm text-gray-600">₹{ job.compensation }/Annum</p>
+        <p className="text-[1rem] text-gray-600 pt-2">{ job.type } | { job.scheduleType }</p>
+        <p className="text-sm text-gray-700 pt-2">{ job.city }, { job.state } | { job.locationType }</p>
+        <p className="text-sm text-gray-600 pt-2">₹{ job.compensation }/Annum</p>
 
-        <div className="text-sm text-gray-700 mb-4 line-clamp-3">
-          <div dangerouslySetInnerHTML={ { __html: job.description } } />
+        <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">
+          <div dangerouslySetInnerHTML={ { __html: capitalizeFirstLetter(job.description) } } />
         </div>
 
         <div className="flex justify-between items-center">
@@ -188,7 +196,7 @@ const Card = ( { job, onViewDetails } ) => {
             <button onClick={ onViewDetails } className="bg-purple-100 text-purple-700 px-3 py-2 rounded-md hover:bg-purple-200 transition-colors text-sm">
               View Details
             </button>
-            <Link to={ `/current-job/${ job._id }` }>
+            <Link to={ `/${ companyUserName }/current-job/${ job._id }` }>
               <button className="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800 transition-colors">
                 Apply Now
               </button>
@@ -201,13 +209,3 @@ const Card = ( { job, onViewDetails } ) => {
 };
 
 export default AllPostedJobs;
-
-
-
-
-
-
-
-
-
-

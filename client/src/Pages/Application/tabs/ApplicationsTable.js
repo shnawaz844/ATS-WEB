@@ -33,6 +33,11 @@ const ApplicationsTable = ({
         };
     };
 
+    const capitalizeFirstLetter = ( str ) => {
+        if ( !str ) return '';
+        return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
+    };
+
     // Create a debounced version of setSearch
     const debouncedSetSearch = useCallback(
         debounce((value) => {
@@ -147,7 +152,7 @@ const ApplicationsTable = ({
                                                         to={`/candidate-details/${candidateId}/${jobId}`}
                                                         className="text-sm font-medium text-blue-600 hover:underline"
                                                     >
-                                                        {app.candidateID?.userName || 'N/A'}
+                                                        { capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
                                                     </Link>
                                                 </div>
                                             </div>
@@ -160,11 +165,11 @@ const ApplicationsTable = ({
                                                     color: getColorStyles(statusColor, 800)
                                                 }}
                                             >
-                                                {app.applicationStatus}
+                                                { capitalizeFirstLetter(app.applicationStatus)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {app.contactInfo || 'N/A'}
+                                            { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <button

@@ -45,7 +45,7 @@ export const Register = () => {
   useEffect(() => {
     if (redirect) {
       setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href = `/${ companyUserName}/login`;
       }, 4000);
     }
   }, [redirect]);
@@ -62,6 +62,12 @@ export const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    // Construct the payload to include the company_id from companyDetails
+    const payload = {
+      ...formData,
+      company_id: companyId, // include the company_id in the body
+    };
     
     try {
       const response = await fetch("http://localhost:8080/auth/register", {
@@ -70,12 +76,13 @@ export const Register = () => {
           "Content-Type": "application/json",
           "company_id": companyId  // Add company_id to headers
         },
-        body: JSON.stringify( formData )
+       body: JSON.stringify(payload),
       } );
 
       if (response.ok) {
         const result = await response.json();
         console.log(result);
+        localStorage.setItem( "company_id", companyId );
         setSuccess("Sign up successful! Redirecting to login...");
         setRedirect(true);
       } else if (response.status === 409) {
@@ -229,7 +236,7 @@ export const Register = () => {
 
           <div className="text-center mt-4">
             <a 
-              href="/login"
+              href={`/${companyUserName}/login`}
               className="text-gray-400 hover:text-white transition-colors duration-200"
             >
               Already registered? <span className="text-blue-400">Login here!</span>

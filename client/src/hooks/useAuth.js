@@ -14,6 +14,7 @@ export const useAuth = () => {
             location.pathname.startsWith( '/current-job/' ) ||
             location.pathname.includes( '/all-posted-jobs' ) ||
             location.pathname.match( /^\/[a-zA-Z0-9-]+$/ ) ||
+            location.pathname.match( '/*' ) ||
             location.pathname.match('/sign')
 
 
@@ -22,6 +23,18 @@ export const useAuth = () => {
         }
 
         const token = localStorage.getItem( 'usertoken' );
+        const storedCompanyUserName = localStorage.getItem( 'companyUserName' );
+
+        // Check if the companyUserName is stored in localStorage
+        if ( storedCompanyUserName ) {
+            // If the current URL has a different companyUserName, redirect to the correct one
+            const currentCompanyUserName = location.pathname.split( '/' )[ 1 ]; // Assuming the companyUserName is the first part of the URL
+            if ( currentCompanyUserName !== storedCompanyUserName ) {
+                navigate( `/${ storedCompanyUserName }${ location.pathname.slice( currentCompanyUserName.length ) }` );
+                return;
+            }
+        }
+
 
         if ( token ) {
             try {

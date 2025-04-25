@@ -215,7 +215,7 @@ export const ScheduledInterview = () => {
 
         } catch ( error ) {
             console.error( "Error fetching feedback:", error );
-            toast.error( "Error fetching feedback details" );
+            // toast.error( "Error fetching feedback details" );
 
             // If fetching feedback fails, set the initial data from the interview
             setFeedbackForm( {
@@ -251,19 +251,6 @@ export const ScheduledInterview = () => {
             const url = isUpdate
                 ? `http://localhost:8080/interviewerfeedback/update-feedback/${ feedbackForm._id }`
                 : `http://localhost:8080/interviewerfeedback/create-feedback`;
-
-            // const formData = new FormData();
-            // formData.append("feedbackTitle", feedbackForm.feedbackTitle);
-            // formData.append("feedback", feedbackForm.feedback);
-            // formData.append("interviewId", detailedInterview._id);
-
-            // if (detailedInterview?.applicationID?._id) {
-            //     formData.append("applicationId", detailedInterview.applicationID._id);
-            // }
-
-            // if (feedbackForm.attachment) {
-            //     formData.append("attachment", feedbackForm.attachment);
-            // }
 
             const response = await fetch( url, {
                 method: isUpdate ? "PUT" : "POST",
@@ -365,6 +352,10 @@ export const ScheduledInterview = () => {
         }
     };
 
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
+
     return (
         <div className="max-w-screen-xl mx-auto p-4 min-h-screen">
             <h1 className="text-2xl font-bold mb-6">Scheduled Interviews</h1>
@@ -395,8 +386,8 @@ export const ScheduledInterview = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                             { ScheduledInterviews?.interviews?.map( ( interview ) => (
                                 <tr key={ interview._id } className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ interview?.applicationID?.jobID?.title || "N/A" }</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ interview?.applicationID?.candidateID?.userName || "N/A" }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ formatDate( interview.date ) }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
