@@ -6,7 +6,7 @@ export const getInterviews = async ( req, res ) => {
     try {
         // Extract parameters from query
         const page = parseInt( req.query.page ) || 1; // Default to page 1
-        const limit = parseInt( req.query.limit ) || 10; // Default limit to 10
+        const limit = parseInt( req.query.limit ) || 9; // Default limit to 10
         const interviewerEmail = req.query.interviewerEmail
             ? decodeURIComponent( req.query.interviewerEmail )
             : null; // Decode email safely
@@ -58,6 +58,7 @@ export const getInterviews = async ( req, res ) => {
                 path: 'interviewerID', // Populate interviewer details
                 select: 'email name interviewer userName', // Fetch only necessary fields
             } )
+            .sort( { createdAt: -1 } )
             .skip( skip ) // Skip records based on pagination
             .limit( limit ); // Limit results per page
 

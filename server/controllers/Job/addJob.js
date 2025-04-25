@@ -25,7 +25,7 @@ const addJob = async (req, res) => {
         hiringManagerName,
         applicationForm,
         applicants,
-        company_id
+        company_id,
     } = req.body;
 
     console.log("Data on backend", req.body);
@@ -52,7 +52,7 @@ const addJob = async (req, res) => {
         hiringManagerName,
         applicationForm,
         applicants,
-        company_id 
+        company_id ,
     });
 
     try {

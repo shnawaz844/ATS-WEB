@@ -5,11 +5,11 @@ import Application from '../../models/Application.js';
 const getCandidateApplications = async (req, res) => {
   try {
     const { candidateId } = req.params;      // e.g., /api/applications/candidate/:candidateId
-    let { page = 1, limit = 10, search = '' } = req.query;
+    let { page = 1, limit = 9, search = '' } = req.query;
 
     // Convert to numbers
     page = parseInt(page, 10);
-    limit = parseInt(limit, 10);
+    limit = parseInt(limit, 9);
 
     // Define a filter
     // Only applications for this candidate
@@ -27,6 +27,7 @@ const getCandidateApplications = async (req, res) => {
 
     // Retrieve applications with pagination & population
     const applications = await Application.find(filter)
+      .sort( { createdAt: -1 } )
       .populate('candidateID')
       .populate('jobID')
       .populate('resume')

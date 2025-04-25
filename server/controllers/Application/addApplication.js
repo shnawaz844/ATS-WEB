@@ -2,9 +2,9 @@ import Application from "../../models/Application.js";
 import upload, { uploadToS3 } from "../../middleware/upload.js";
 
 const addApplication = async (req, res) => {
-  const { jobID, candidateID, applicationStatus, contactInfo, experience, questions, answers,company_id } = req.body;
+  const { jobID, candidateID, applicationStatus, contactInfo,emailInfo, experience, questions, answers,company_id } = req.body;
   try {
-    if ( !jobID || !candidateID || !applicationStatus || !contactInfo || !experience || !company_id ) {
+    if ( !jobID || !candidateID || !applicationStatus || !contactInfo || !emailInfo || !experience || !company_id ) {
       return res.status(400).json({ message: "All required fields must be provided." });
     }
 
@@ -24,6 +24,7 @@ const addApplication = async (req, res) => {
       applicationStatus,
       resume: resumeUrl, // Store S3 file URL
       contactInfo,
+      emailInfo,
       experience,
       questions: questions || [],
       answers: answers || [],
