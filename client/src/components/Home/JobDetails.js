@@ -32,6 +32,10 @@ export const JobDetails = () => {
     }
   }, [] );
 
+  const capitalizeFirstLetter = ( string ) => {
+    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  };
+
   // 2. Fetch the job details
   useEffect( () => {
     fetch( `http://localhost:8080/jobs/current-job/${ id }` )
@@ -93,7 +97,7 @@ export const JobDetails = () => {
                     <span>{ job.department || "Full-time" }</span>
                   </div>
                   <h1 className="text-3xl font-bold text-white mb-3">
-                    { job.title }
+                    { capitalizeFirstLetter(job.title) }
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 text-white text-sm mb-4">
                     <div className="flex items-center">
