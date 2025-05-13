@@ -10,6 +10,9 @@ export const getInterviews = async ( req, res ) => {
         const interviewerEmail = req.query.interviewerEmail
             ? decodeURIComponent( req.query.interviewerEmail )
             : null; // Decode email safely
+        const searchTerm = req.query.searchTerm || '';
+        const filterStatus = req.query.filterStatus || '';
+        console.log( "page>>>>>", page, limit, searchTerm, filterStatus );
 
         // Extract company_id from headers
         const { company_id } = req.headers;
@@ -17,11 +20,12 @@ export const getInterviews = async ( req, res ) => {
         // Pagination calculation
         const skip = ( page - 1 ) * limit;
 
-        let filter = {}; // Default: fetch all interviews
+        // Build the base filter
+        let filter = {};
 
         // If company_id is provided in the headers, add it to the filter
         if ( company_id ) {
-            filter.company_id = company_id; // Filter by company_id from headers
+            filter.company_id = company_id;
         }
 
         // Add filter for interviewerEmail if provided
@@ -35,35 +39,65 @@ export const getInterviews = async ( req, res ) => {
             }
         }
 
-        console.log( "Filter Applied:", filter );
+        // Add status filter if provided directly to the initial database query
+        if ( filterStatus && filterStatus.trim() !== '' ) {
+            filter.status = filterStatus;
+        }
 
-        // Fetch interviews based on filter
-        const interviews = await InterviewSchedule
-            .find( filter ) // Apply filter dynamically
+        // Get interviews that match the base filter (without search term)
+        // We'll do the search term filtering after populating the fields
+        const interviewsQuery = InterviewSchedule
+            .find( filter )
             .populate( {
                 path: 'applicationID',
-                select: 'jobID resume',
+                select: 'jobID candidateID resume',
                 populate: [
                     {
                         path: 'jobID',
-                        select: 'title' // Selecting only the title from Job model
+                        select: 'title'
                     },
                     {
                         path: 'candidateID',
-                        select: 'userName' // Selecting only the userName from Candidate model
+                        select: 'userName'
                     },
                 ],
             } )
             .populate( {
-                path: 'interviewerID', // Populate interviewer details
-                select: 'email name interviewer userName', // Fetch only necessary fields
+                path: 'interviewerID',
+                select: 'email name interviewer userName',
             } )
-            .sort( { createdAt: -1 } )
-            .skip( skip ) // Skip records based on pagination
-            .limit( limit ); // Limit results per page
+            .sort( { createdAt: -1 } );
 
-        // Get total count with applied filter
-        const totalInterviews = await InterviewSchedule.countDocuments( filter );
+        // Get total count before applying search term
+        const totalInterviewsBeforeSearch = await InterviewSchedule.countDocuments( filter );
+
+        // Get all interviews that match the base filter
+        let allInterviews = await interviewsQuery.exec();
+
+        // Filter by search term if provided (after population)
+        if ( searchTerm && searchTerm.trim() !== '' ) {
+            const searchRegex = new RegExp( searchTerm, 'i' );
+            allInterviews = allInterviews.filter( interview => {
+                // Check job title
+                const jobTitle = interview.applicationID?.jobID?.title || '';
+
+                // Check candidate username
+                const candidateUserName = interview.applicationID?.candidateID?.userName || '';
+
+                // Check interviewer name
+                const interviewerName = interview.interviewerID?.userName || '';
+
+                return searchRegex.test( jobTitle ) ||
+                    searchRegex.test( candidateUserName ) ||
+                    searchRegex.test( interviewerName );
+            } );
+        }
+
+        // Calculate total after search filter
+        const totalInterviews = allInterviews.length;
+
+        // Apply pagination to filtered results
+        const interviews = allInterviews.slice( skip, skip + limit );
 
         // Send response
         res.status( 200 ).json( {
@@ -79,4 +113,3 @@ export const getInterviews = async ( req, res ) => {
 };
 
 export default getInterviews;
-
