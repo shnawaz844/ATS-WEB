@@ -262,9 +262,9 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full flex items-center justify-center py-3 px-4 rounded-md text-white font-medium transition duration-200 ${isSubmitting
+                className={`w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition duration-200 ${isSubmitting
                         ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 transform hover:-translate-y-1 shadow-md hover:shadow-lg"
+                        : "bg-gray-700 hover:bg-gray-400 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
                     }`}
             >
                 {isSubmitting ? (

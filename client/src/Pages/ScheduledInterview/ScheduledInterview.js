@@ -1,20 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
-import { Brush } from 'lucide-react';
 import useScheduledInterview from '../../hooks/useScheduledInterview';
 
 export const ScheduledInterview = () => {
     const [ page, setPage ] = useState( 1 );
     const limit = 10; // Number of interviews per page
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-    console.log( "companyId>>>>>>", companyId )
-    // Retrieve interviewer's email from localStorage
     const storedUser = localStorage.getItem( "user" );
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerEmail = interviewer?.email || "";
-    console.log( "Logged-in Interviewer's Email:", interviewerEmail );
+    const [ statuses, setStatuses ] = useState( [] );
 
     // ✅ Correctly using the custom hook inside the component
     const {
@@ -62,6 +58,14 @@ export const ScheduledInterview = () => {
         "Excellent",
         "Above Expectation"
     ];
+
+    // Fetch statuses from the API
+    useEffect( () => {
+        fetch( "http://localhost:8080/application-types/all-application-types" )
+            .then( response => response.json() )
+            .then( data => setStatuses( data.applicationTypes ) )
+            .catch( error => console.error( "Error fetching statuses:", error ) );
+    }, [] );
 
     // Handle click outside modal to close it
     useEffect( () => {
@@ -353,11 +357,14 @@ export const ScheduledInterview = () => {
     };
 
     const capitalizeFirstLetter = ( string ) => {
+        if ( !string ) return "N/A";
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
 
     return (
-        <div className="max-w-screen-xl mx-auto p-4 min-h-screen">
+        <div className="px-8 py-10 w-full min-h-screen"
+            style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+        >
             <h1 className="text-2xl font-bold mb-6">Scheduled Interviews</h1>
 
             { isLoading ? (
@@ -370,26 +377,26 @@ export const ScheduledInterview = () => {
                     <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                 </div>
             ) : (
-                <div className="overflow-x-auto bg-white rounded-lg shadow">
+                <div className="overflow-x-auto rounded-t-xl shadow">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gray-700">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job Title</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Candidate</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Time</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Feedback</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200">
                             { ScheduledInterviews?.interviews?.map( ( interview ) => (
-                                <tr key={ interview._id } className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ formatDate( interview.date ) }</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ interview.scheduledTime }</td>
+                                <tr key={ interview._id } className="group hover:bg-gray-700 ">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ formatDate( interview.date ) }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( interview.status ) }` }>
                                             { interview.status?.charAt( 0 ).toUpperCase() + interview.status?.slice( 1 ) || "Scheduled" }
@@ -398,7 +405,7 @@ export const ScheduledInterview = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <button
                                             onClick={ () => handleFeedbackClick( interview ) }
-                                            className="text-blue-600 hover:text-blue-900"
+                                            className="text-blue-600 hover:text-blue-900 group-hover:text-white"
                                         >
                                             { interview.feedbackTitle || "Add Feedback" }
                                         </button>
@@ -406,7 +413,7 @@ export const ScheduledInterview = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <button
                                             onClick={ () => handleEdit( interview ) }
-                                            className="text-blue-600 hover:text-blue-900"
+                                            className="text-blue-600 hover:text-blue-900 group-hover:text-white"
                                         >
                                             Edit
                                         </button>
@@ -443,136 +450,197 @@ export const ScheduledInterview = () => {
 
             {/* Edit Modal */ }
             { isEditModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div ref={ modalRef } className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold">Edit Interview Details</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300">
+                    <div ref={ modalRef } className="bg-white rounded-xl max-w-4xl w-full max-h-[97vh] overflow-hidden shadow-2xl transform transition-all duration-300 border border-gray-200">
+                        {/* Header */ }
+                        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-gray-700 to-gray-800 rounded-t-xl">
+                            <div className="flex items-center">
+                                <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <h2 className="text-xl text-white font-bold">Edit Interview Details</h2>
+                            </div>
                             <button
                                 onClick={ () => setIsEditModalOpen( false ) }
-                                className="text-gray-500 hover:text-gray-700"
+                                className="text-white hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <h3 className="font-semibold text-lg text-gray-800 mb-2">Application Details</h3>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <p className="text-gray-600">Job Title:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.jobID?.title || "N/A" }</p>
+                        <div className="overflow-y-auto p-6 max-h-[calc(90vh-120px)]">
+                            {/* Application Details Card */ }
+                            <div className="bg-gray-50 p-5 rounded-lg mb-6 border border-gray-200 shadow-sm">
+                                <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Application Details
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Job Title</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A" }</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Applicant</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A" }</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Email</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Current Status</p>
+                                        <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs mt-1` }>
+                                            { capitalizeFirstLetter(detailedInterview?.status) || "Scheduled" }
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-gray-600">Applicant:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.userName || "N/A" }</p>
+                            </div>
+
+                            {/* Edit Form */ }
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="date"
+                                                value={ editForm.date }
+                                                onChange={ ( e ) => setEditForm( { ...editForm, date: e.target.value } ) }
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                min={ new Date().toISOString().split( 'T' )[ 0 ] }
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="time"
+                                                value={ editForm.time }
+                                                onChange={ ( e ) => setEditForm( { ...editForm, time: e.target.value } ) }
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div>
-                                    <p className="text-gray-600">Email:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
+                                    <div className="relative">
+                                        <select
+                                            value={ editForm.interviewType }
+                                            onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
+                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                        >
+                                            <option value="">Select Interview Type</option>
+                                            { interviewTypes.map( type => (
+                                                <option key={ type } value={ type }>
+                                                    { type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                { editForm.interviewType === 'online' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="url"
+                                                value={ editForm.meetingLink }
+                                                onChange={ ( e ) => setEditForm( { ...editForm, meetingLink: e.target.value } ) }
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                    </div>
+                                ) }
+
                                 <div>
-                                    <p className="text-gray-600">Current Status:</p>
-                                    <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs` }>
-                                        { detailedInterview?.status || "Scheduled" }
-                                    </p>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <div className="relative">
+                                        <select
+                                            value={ editForm.status }
+                                            onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
+                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                        >
+                                            { statuses.map( status => (
+                                                <option key={ status.applicationStatus } value={ status.applicationStatus }>
+                                                    { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                { editForm.status === 'rescheduled' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Why Interview Rescheduled?</label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={ editForm.reasonRescheduled }
+                                                onChange={ ( e ) => setEditForm( { ...editForm, reasonRescheduled: e.target.value } ) }
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Why Interview Rescheduled?"
+                                            />
+                                        </div>
+                                    </div>
+                                ) }
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Date</label>
-                                    <input
-                                        type="date"
-                                        value={ editForm.date }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, date: e.target.value } ) }
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                        min={ new Date().toISOString().split( 'T' )[ 0 ] }
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Time</label>
-                                    <input
-                                        type="time"
-                                        value={ editForm.time }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, time: e.target.value } ) }
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Interview Type</label>
-                                <select
-                                    value={ editForm.interviewType }
-                                    onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Select Interview Type</option>
-                                    { interviewTypes.map( type => (
-                                        <option key={ type } value={ type }>
-                                            { type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
-                                        </option>
-                                    ) ) }
-                                </select>
-                            </div>
-
-                            { editForm.interviewType === 'online' && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Meeting Link</label>
-                                    <input
-                                        type="url"
-                                        value={ editForm.meetingLink }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, meetingLink: e.target.value } ) }
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="https://..."
-                                    />
-                                </div>
-                            ) }
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Status</label>
-                                <select
-                                    value={ editForm.status }
-                                    onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    { statusOptions.map( status => (
-                                        <option key={ status } value={ status }>
-                                            { status.charAt( 0 ).toUpperCase() + status.slice( 1 ) }
-                                        </option>
-                                    ) ) }
-                                </select>
-                            </div>
-
-                            { editForm.status === 'rescheduled' && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Why Interview Rescheduled?</label>
-                                    <input
-                                        type="url"
-                                        value={ editForm.reasonRescheduled }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, reasonRescheduled: e.target.value } ) }
-                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Why Interview Rescheduled?"
-                                    />
-                                </div>
-                            ) }
-                        </div>
-
-                        <div className="mt-6 flex justify-end space-x-2">
+                        {/* Footer with Actions */ }
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
                             <button
                                 onClick={ () => setIsEditModalOpen( false ) }
-                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                className="px-4 py-2 bg-gray-400 border border-gray-300 rounded-xl text-black font-medium hover:bg-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={ handleUpdate }
-                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                className="px-5 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-400 hover:text-black transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
                             >
+                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
                                 Save Changes
                             </button>
                         </div>
@@ -582,92 +650,129 @@ export const ScheduledInterview = () => {
 
             {/* Feedback Modal */ }
             { isFeedbackModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div ref={ modalRef } className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-bold">Interview Feedback</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300">
+                    <div className="bg-white rounded-xl max-w-4xl w-full max-h-[97vh] overflow-hidden shadow-2xl transform transition-all duration-300 border border-gray-200">
+                        {/* Header */ }
+                        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-gray-700 to-gray-800 rounded-t-xl">
+                            <div className="flex items-center">
+                                <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <h2 className="text-xl text-white font-bold">Interview Feedback</h2>
+                            </div>
                             <button
                                 onClick={ () => setIsFeedbackModalOpen( false ) }
-                                className="text-gray-500 hover:text-gray-700"
+                                className="text-white hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <h3 className="font-semibold text-lg text-gray-800 mb-2">Candidate Details</h3>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <p className="text-gray-600">Job Title:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.jobID?.title || "N/A" }</p>
+                        <div className="overflow-y-auto p-6 max-h-[calc(90vh-120px)]">
+                            {/* Candidate Details Card */ }
+                            <div className="bg-gray-50 p-5 rounded-lg mb-6 border border-gray-200 shadow-sm">
+                                <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
+                                    <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    Candidate Details
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Job Title</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A" }</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Applicant</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A" }</p>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Interview Date</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ formatDate( detailedInterview?.date ) }</p>
+                                    </div>
                                 </div>
+                            </div>
+
+                            {/* Feedback Form */ }
+                            <div className="space-y-6">
                                 <div>
-                                    <p className="text-gray-600">Applicant:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.userName || "N/A" }</p>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Rating</label>
+                                    <div className="relative">
+                                        <select
+                                            value={ feedbackForm.feedbackTitle }
+                                            onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedbackTitle: e.target.value } ) }
+                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                        >
+                                            <option value="">Select a rating</option>
+                                            { feedbackTitles.map( title => (
+                                                <option key={ title } value={ title }>
+                                                    { title }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div>
-                                    <p className="text-gray-600">Interview Date:</p>
-                                    <p className="font-medium">{ formatDate( detailedInterview?.date ) }</p>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Feedback</label>
+                                    <textarea
+                                        value={ feedbackForm.feedback }
+                                        onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedback: e.target.value } ) }
+                                        rows="5"
+                                        className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                        placeholder="Provide specific examples and constructive feedback about the candidate's performance..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
+                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                                        <div className="space-y-1 text-center">
+                                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            <div className="flex text-sm text-gray-600">
+                                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                                    <span>Upload a file</span>
+                                                    <input
+                                                        id="file-upload"
+                                                        name="file-upload"
+                                                        type="file"
+                                                        className="sr-only"
+                                                        onChange={ handleFileUpload }
+                                                    />
+                                                </label>
+                                                <p className="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Feedback Title</label>
-                                <select
-                                    value={ feedbackForm.feedbackTitle }
-                                    onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedbackTitle: e.target.value } ) }
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">Select a rating</option>
-                                    { feedbackTitles.map( title => (
-                                        <option key={ title } value={ title }>
-                                            { title }
-                                        </option>
-                                    ) ) }
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Detailed Feedback</label>
-                                <textarea
-                                    value={ feedbackForm.feedback }
-                                    onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedback: e.target.value } ) }
-                                    rows="4"
-                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Enter detailed feedback..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Attachment</label>
-                                <input
-                                    type="file"
-                                    onChange={ handleFileUpload }
-                                    className="mt-1 block w-full text-sm text-gray-500
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-md file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-blue-50 file:text-blue-700
-                            hover:file:bg-blue-100"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-end space-x-2">
+                        {/* Footer with Actions */ }
+                        <div className="px-6 py-4 bg-gray-50 border-t rounded-xl border-gray-200 flex justify-end gap-3">
                             <button
                                 onClick={ () => setIsFeedbackModalOpen( false ) }
-                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                                className="px-4 py-2 bg-white border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={ handleFeedbackSubmit }
-                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                className="px-5 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-400 hover:text-black transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
                             >
+                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
                                 { feedbackForm._id ? "Update Feedback" : "Submit Feedback" }
                             </button>
                         </div>

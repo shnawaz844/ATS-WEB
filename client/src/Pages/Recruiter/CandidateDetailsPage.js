@@ -52,15 +52,17 @@ const CandidateDetailsPage = () => {
 
     return (
         
-        <div className="py-3 px-6  bg-white border border-gray-200 rounded-lg shadow-md ">
+        <div className="px-8 py-10 w-full min-h-screen"
+            style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+        >
             <button
-                className="flex items-center text-blue-600 hover:text-blue-800 transition-colors mb-5"
+                className="flex items-center text-gray-700 hover:text-blue-800 transition-colors mb-5"
                 onClick={() => window.history.back()}
             >
                 <ChevronLeft size={18} />
-                <span className="ml-1">Back</span>
+                <span className="ml-1 text-gray-700">Back</span>
             </button>
-            <h1 className="text-2xl font-bold mb-4">Candidate Details</h1>
+            <h1 className="text-3xl font-bold mb-4">Candidate Details</h1>
             <CandidateInfo applicationData={applicationData} />
             <ApplicationTabs activeTab={activeTab} setActiveTab={setActiveTab} applicationData={applicationData} />
         </div>

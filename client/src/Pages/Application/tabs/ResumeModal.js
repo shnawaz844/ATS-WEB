@@ -52,14 +52,14 @@ const ResumeModal = ({ isOpen, onClose, resumeData }) => {
     return (
         <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onClick={onClose}></div>
 
                 <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
                     &#8203;
                 </span>
 
                 <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-5xl sm:align-middle">
-                    <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <div className="bg-gray-500 px-4 pt-5 pb-4 sm:p-6">
                         <div className="sm:flex sm:items-start">
                             <div className="w-full">
                                 <div className="flex justify-between items-center mb-4">
@@ -97,7 +97,7 @@ const ResumeModal = ({ isOpen, onClose, resumeData }) => {
                     <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                         <button
                             type="button"
-                            className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                            className="inline-flex w-full justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                             onClick={onClose}
                         >
                             Close
@@ -106,7 +106,7 @@ const ResumeModal = ({ isOpen, onClose, resumeData }) => {
                             href={resume}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-3 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            className="mt-3 inline-flex w-full justify-center rounded-xl border border-transparent bg-gray-700 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-gray-300 hover:text-black focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                             download
                         >
                             Download

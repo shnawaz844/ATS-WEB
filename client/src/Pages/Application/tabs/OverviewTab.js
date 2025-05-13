@@ -98,12 +98,12 @@ const OverviewTab = ({ job, applications }) => {
     return (
         <div className="space-y-8">
             {/* Summary Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-slate-300 rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 className="text-lg font-semibold mb-4">Application Summary</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="bg-blue-50 rounded-xl p-4">
                         <div className="flex items-center">
-                            <div className="p-2 bg-blue-100 rounded-lg">
+                            <div className="p-2 bg-blue-100 rounded-xl">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                 </svg>
@@ -115,9 +115,9 @@ const OverviewTab = ({ job, applications }) => {
                         </div>
                     </div>
                     
-                    <div className="bg-green-50 rounded-lg p-4">
+                    <div className="bg-green-50 rounded-xl p-4">
                         <div className="flex items-center">
-                            <div className="p-2 bg-green-100 rounded-lg">
+                            <div className="p-2 bg-green-100 rounded-xl">
                                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                 </svg>
@@ -129,9 +129,9 @@ const OverviewTab = ({ job, applications }) => {
                         </div>
                     </div>
                     
-                    <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="bg-purple-50 rounded-xl p-4">
                         <div className="flex items-center">
-                            <div className="p-2 bg-purple-100 rounded-lg">
+                            <div className="p-2 bg-purple-100 rounded-xl">
                                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -148,16 +148,16 @@ const OverviewTab = ({ job, applications }) => {
             </div>
 
             {/* Stages Grid */}
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+            <div className="bg-slate-300 rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 className="text-lg font-semibold mb-6">Application Stages</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {stages.map((stage) => (
                         <div
                             key={stage.name}
-                            className={`relative rounded-lg ring-1 ${getColorClasses(stage.color)} p-4`}
+                            className={`relative rounded-xl ring-1 ${getColorClasses(stage.color)} p-4`}
                         >
                             <div className="flex items-center">
-                                <div className={`p-2 rounded-lg ${stage.color}-100`}>
+                                <div className={`p-2 rounded-xl bg-slate-300 ${stage.color}-100`}>
                                     {stage.icon}
                                 </div>
                                 <div className="ml-4">

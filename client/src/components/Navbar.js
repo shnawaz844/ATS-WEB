@@ -44,7 +44,7 @@ const interviewerNavItems = [
 ];
 
 const recruiterNavItems = [
-  { label: "Home", path: "/recruiter-dashboard", icon: <Home className="w-5 h-5" /> },
+  { label: "Home", path: "/recruiter-dashboard", icon: <Home className="w-5 h-5 " /> },
   { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="w-5 h-5" /> },
   { label: "Applications", path: "/all-applications", icon: <FileText className="w-5 h-5" /> },
   { label: "Interviews", path: "/all-interviews" },
@@ -213,7 +213,7 @@ export const Navbar = () => {
                     key={ path }
                     to={ to }
                     className={ ( { isActive } ) =>
-                      `flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ isActive
+                      `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ isActive
                         ? "text-white bg-slate-600"
                         : "text-gray-300 hover:text-white"
                       }`
@@ -232,7 +232,7 @@ export const Navbar = () => {
                 <div className="relative flex items-center space-x-4" ref={ dropdownRef }>
                   <button
                     onClick={ toggleDropdown }
-                    className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                    className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
                   >
                     <UserCheck className="w-5 h-5 mr-2" />
                     <span>{ loginData?.userName }</span>
@@ -253,7 +253,7 @@ export const Navbar = () => {
                         onClick={ logoutHandler }
                         className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
-                        <LogOut className="w-4 h-4 mr-3 text-gray-600" />
+                        <LogOut className="w-4 h-4 mr-3 text-gray-600 rounded" />
                         <span>Logout</span>
                       </button>
                     </div>
@@ -265,13 +265,13 @@ export const Navbar = () => {
                     <>
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/login` : "/login" }
-                        className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                        className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-white rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
                       >
                         Login
                       </Link>
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
-                        className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-md hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                          className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-white rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
                       >
                         Sign Up
                       </Link>

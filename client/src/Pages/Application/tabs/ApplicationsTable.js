@@ -38,6 +38,8 @@ const ApplicationsTable = ({
         return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
     };
 
+    const companyUserName = localStorage.getItem( "companyUserName" ); 
+
     // Create a debounced version of setSearch
     const debouncedSetSearch = useCallback(
         debounce((value) => {
@@ -84,7 +86,7 @@ const ApplicationsTable = ({
                     </div>
                     <input
                         type="search"
-                        className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-xl bg-white"
                         placeholder="Search by name..."
                         value={searchInput}
                         onChange={handleSearchChange}
@@ -94,7 +96,7 @@ const ApplicationsTable = ({
                     <label htmlFor="limit" className="text-sm text-gray-600">Show:</label>
                     <select
                         id="limit"
-                        className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
+                        className="border border-gray-300 text-gray-900 text-sm rounded-xl p-2"
                         value={limit}
                         onChange={handleLimitChange}
                     >
@@ -107,28 +109,28 @@ const ApplicationsTable = ({
             </div>
 
             {/* Applications Table */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-700">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Candidate
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Status
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Contact
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Resume
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-gray-300 divide-y divide-gray-200">
                         {filteredApps.length > 0 ? (
                             filteredApps.map((app) => {
                                 // Prepare candidateID & jobID for the link
@@ -137,7 +139,7 @@ const ApplicationsTable = ({
                                 const statusColor = getStatusColor(app.applicationStatus);
 
                                 return (
-                                    <tr key={app._id} className="hover:bg-gray-50">
+                                    <tr key={app._id} className="group hover:bg-gray-700 ">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
@@ -149,8 +151,8 @@ const ApplicationsTable = ({
                                                 </div>
                                                 <div className="ml-4">
                                                     <Link
-                                                        to={`/candidate-details/${candidateId}/${jobId}`}
-                                                        className="text-sm font-medium text-blue-600 hover:underline"
+                                                        to={ `/${ companyUserName}/candidate-details/${candidateId}/${jobId}`}
+                                                        className="text-sm font-medium text-blue-600 hover:underline group-hover:text-white"
                                                     >
                                                         { capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
                                                     </Link>
@@ -168,13 +170,13 @@ const ApplicationsTable = ({
                                                 { capitalizeFirstLetter(app.applicationStatus)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
                                             { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <button
                                                 onClick={() => onViewResume(app)}
-                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
                                             >
                                                 View Resume
                                             </button>

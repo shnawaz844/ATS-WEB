@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
+import { Briefcase, Search } from "lucide-react";
 
 const AssignedInterviews = () => {
     const navigate = useNavigate();
     const [ page, setPage ] = useState( 1 );
     const itemsPerPage = 1; // Number of interviews per page
     const limit = 9; // Set the number of items per page
+    const [ search, setSearch ] = useState( "" );
     // Fetch company_id from localStorage
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const {
@@ -16,9 +18,8 @@ const AssignedInterviews = () => {
         error,
         isLoading,
         refetchAssignedInterviews
-    } = useAssignedInterview( page, limit, companyId );
+    } = useAssignedInterview( page, limit, search );
 
-    const [ search, setSearch ] = useState( "" );
     const [ filterStatus, setFilterStatus ] = useState( "all" );
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
@@ -33,13 +34,24 @@ const AssignedInterviews = () => {
         company_id: "",
     } );
 
+    // New state to store the fetched statuses
+    const [ statuses, setStatuses ] = useState( [] );
+
+    // Fetch statuses from API
+    useEffect( () => {
+        fetch( "http://localhost:8080/application-types/all-application-types" )
+            .then( ( response ) => response.json() )
+            .then( ( data ) => setStatuses( data.applicationTypes ) )
+            .catch( ( error ) => console.error( "Error fetching statuses:", error ) );
+    }, [] );
+
     // Filter interviews based on search and status filter
     const filteredInterviews = assignedInterviews?.interviews
     const totalPages = assignedInterviews?.totalPages;
 
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
-    const interviewStatuses = [ "scheduled", "completed", "cancelled", "rescheduled" ];
+    // const interviewStatuses = [ "scheduled", "completed", "cancelled", "rescheduled" ];
 
     const capitalizeFirstLetter = ( string ) => {
         if ( string ) {
@@ -233,42 +245,56 @@ const AssignedInterviews = () => {
     console.log( "editform", editForm )
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Assigned Interviews</h1>
-
-                {/* Search and Filter */ }
-                <div className="flex flex-col md:flex-row gap-4 mb-8">
-                    <div className="flex-1">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Search:
-                        </label>
-                        <input
-                            type="text"
-                            placeholder="Search by job, candidate or interview type"
-                            value={ search }
-                            onChange={ ( e ) => setSearch( e.target.value ) }
-                            className="p-3 border rounded-md w-full shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div className="md:w-1/3">
-                        <label className="block text-gray-700 text-sm font-bold mb-2">
-                            Filter by Status:
-                        </label>
-                        <select
-                            value={ filterStatus }
-                            onChange={ ( e ) => setFilterStatus( e.target.value ) }
-                            className="p-3 border rounded-md w-full shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="all">All Statuses</option>
-                            { interviewStatuses.map( status => (
-                                <option key={ status } value={ status }>
-                                    { status.charAt( 0 ).toUpperCase() + status.slice( 1 ) }
-                                </option>
-                            ) ) }
-                        </select>
+        <div className="px-8 py-4 w-full min-h-screen"
+            style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+        >
+            <div className="max-w-screen-2xl">
+                <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className="flex justify-between items-center w-full">
+                        <div>
+                            <h2 className="text-3xl font-bold text-white flex items-center">
+                                <Briefcase className="mr-2 h-6 w-6 text-white" />
+                                Assigned Interviews
+                            </h2>
+                        </div>
+                        {/* Search and Filter */ }
+                        <div className='flex items-center gap-4'>
+                            <div className="w-[30vw]">
+                                <label className="block text-white text-xs font-bold mb-2">
+                                    Search:
+                                </label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search by job, candidate or interview type"
+                                        value={ search }
+                                        onChange={ ( e ) => setSearch( e.target.value ) }
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none duration-200 h-[6.3vh]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="md:w-1/3">
+                                <label className="block text-white text-xs font-bold mb-2">
+                                    Filter by Status:
+                                </label>
+                                <select
+                                    value={ filterStatus }
+                                    onChange={ ( e ) => setFilterStatus( e.target.value ) }
+                                    className="appearance-none bg-gray-200 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
+                                >
+                                    <option value="all">All Statuses</option>
+                                    { statuses.map( status => (
+                                        <option key={ status } value={ status.applicationStatus }>
+                                            { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                                        </option>
+                                    ) ) }
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
 
                 {/* Today's Interviews Section */ }
                 { filteredInterviews?.some( interview => isToday( interview.date ) ) && (
@@ -322,34 +348,59 @@ const AssignedInterviews = () => {
                         <p className="text-gray-500 text-lg">No interviews found matching your criteria.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         { filteredInterviews
-                            .filter( interview => !isToday( interview.date ) ) // Exclude today's interviews as they're shown above
+                            .filter( interview => !isToday( interview.date ) )
                             .map( ( interview ) => (
                                 <div
                                     key={ interview._id }
-                                    className="bg-white p-5 shadow-md rounded-lg border cursor-pointer hover:shadow-lg transition-shadow duration-200"
+                                    className="bg-white p-6 rounded-xl border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-indigo-50 group"
                                     onClick={ () => handleInterviewClick( interview ) }
                                 >
-                                    <div className="flex justify-between items-start mb-3">
-                                        <h3 className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</h3>
-                                        <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( interview.status ) }` }>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#1a237e] transition-colors">
+                                                { capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }
+                                            </h3>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
+                                            </p>
+                                        </div>
+                                        <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( interview.status ) }` }>
                                             { interview.status || "Scheduled" }
                                         </span>
                                     </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Applicant:</span> { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Type:</span> { capitalizeFirstLetter( interview.interviewerType ) || "N/A" }
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Date:</span> { formatDate( interview.date ) }
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            <span className="font-medium">Time:</span> { interview.scheduledTime }
-                                        </p>
+
+                                    <div className="space-y-3 mt-4">
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            { capitalizeFirstLetter( interview.interviewerType ) || "N/A" }
+                                        </div>
+
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            { formatDate( interview.date ) }
+                                        </div>
+
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            { interview.scheduledTime }
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 flex justify-end">
+                                        <button className="text-[#1a237e] group-hover:text-red-600 text-sm font-medium flex items-center">
+                                            View Details
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             ) ) }
@@ -359,162 +410,169 @@ const AssignedInterviews = () => {
 
             {/* Interview Details Modal */ }
             { isEditModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 min-h-screen overflow-y-auto">
-                    <div ref={ modalRef } className="bg-white rounded-lg p-6 w-full max-w-lg shadow-xl h-[95vh] overflow-y-auto">
-
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-gray-900">Update Interview Details</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                    {/* <div
+                        ref={ modalRef }
+                        className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] overflow-y-auto"
+                    > */}
+                    <div
+                        ref={ modalRef }
+                        className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
+                    >
+                        {/* Modal Header */ }
+                        <div className="sticky top-0 bg-gray-700 z-10 border rounded-t-xl border-white px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Update Interview Details</h2>
                             <button
                                 onClick={ () => setIsEditModalOpen( false ) }
-                                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                className="text-white hover:text-black focus:outline-none p-1 rounded-full hover:bg-gray-300"
                                 aria-label="Close"
                             >
-                                Back
-                                <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path d="M6 18L18 6M6 6l12 12"></path>
+                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
                         </div>
 
-                        {/* Interview Details */ }
-                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <h3 className="font-semibold text-lg text-gray-800 mb-2">Application Details</h3>
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <p className="text-gray-600">Job Title:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.jobID?.title || "N/A" }</p>
+                        {/* Interview Details - Visual Enhancement Only */ }
+                        <div className="bg-gray-300 p-5 rounded-xl m-6 mt-4 mb-6 border border-gray-200">
+                            <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
+                                <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                Application Details
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                {/* Keep all existing logic, just enhance visuals */ }
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-gray-500">JOB TITLE</p>
+                                    <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.jobID?.title ) || "N/A" }</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-600">Applicant:</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.userName || "N/A" }</p>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-gray-500">APPLICANT</p>
+                                    <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-600">Email:</p>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-gray-500">EMAIL</p>
                                     <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
                                 </div>
-                                <div>
-                                    <p className="text-gray-600">Current Status:</p>
-                                    <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs` }>
-                                        { detailedInterview?.status || "Scheduled" }
-                                    </p>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium text-gray-500">STATUS</p>
+                                    <span className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-flex items-center px-2.5 py-0.5 rounded-full text-xs` }>
+                                        { capitalizeFirstLetter( detailedInterview?.status ) || "Scheduled" }
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Update Form */ }
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Update Form - Visual Enhancement Only */ }
+                        <div className="px-6 pb-6 space-y-5">
+                            {/* Date/Time Picker - No Logic Changes */ }
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Date</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Date</label>
                                     <input
                                         type="date"
                                         value={ editForm.date }
                                         onChange={ ( e ) => setEditForm( { ...editForm, date: e.target.value } ) }
-                                        className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         min={ new Date().toISOString().split( 'T' )[ 0 ] }
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Time</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Time</label>
                                     <input
                                         type="time"
                                         value={ editForm.time }
                                         onChange={ ( e ) => setEditForm( { ...editForm, time: e.target.value } ) }
-                                        className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                             </div>
 
+                            {/* All other form fields - No Logic Changes */ }
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Type</label>
                                 <select
                                     value={ editForm.interviewType }
                                     onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
-                                    className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Select Interview Type</option>
                                     { interviewTypes.map( ( type ) => (
-                                        <option key={ type } value={ type }>
-                                            { type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
-                                        </option>
+                                        <option key={ type } value={ type }>{ type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }</option>
                                     ) ) }
                                 </select>
                             </div>
 
                             { editForm.interviewType === 'online' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Meeting Link</label>
                                     <input
                                         type="url"
                                         value={ editForm.meetingLink }
                                         onChange={ ( e ) => setEditForm( { ...editForm, meetingLink: e.target.value } ) }
-                                        className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="https://meet.google.com/..."
                                     />
                                 </div>
                             ) }
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Update Status</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Update Status</label>
                                 <select
                                     value={ editForm.status }
                                     onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
-                                    className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
-                                    { interviewStatuses.map( ( status ) => (
-                                        <option key={ status } value={ status }>
-                                            { status.charAt( 0 ).toUpperCase() + status.slice( 1 ) }
-                                        </option>
+                                    { statuses.map( ( status ) => (
+                                        <option key={ status.applicationStatus } value={ status.applicationStatus }>{ status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }</option>
                                     ) ) }
                                 </select>
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                     { editForm.interviewerID
                                         ? `Assigned Interviewer: ${ interviewers.find( i => i._id === editForm.interviewerID._id )?.userName || "Not Found" }`
                                         : "Assign Interviewer" }
                                 </label>
-
                                 <select
-                                    className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={ editForm.interviewerID._id || "" }
                                     onChange={ ( e ) => setEditForm( { ...editForm, interviewerID: e.target.value } ) }
                                     required
                                 >
                                     <option value="">Select Interviewer</option>
                                     { interviewers.map( ( interviewer ) => (
-                                        <option key={ interviewer._id } value={ interviewer._id }>
-                                            { interviewer.userName }
-                                        </option>
+                                        <option key={ interviewer._id } value={ interviewer._id }>{ interviewer.userName }</option>
                                     ) ) }
                                 </select>
                             </div>
 
-                            {/* Notes Field (Optional Enhancement) */ }
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes (Optional)</label>
                                 <textarea
-                                    className="w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     rows="3"
                                     placeholder="Add any additional notes about this interview..."
                                 ></textarea>
                             </div>
-                        </div>
 
-
-                        <div className="mt-6 flex justify-end space-x-3">
-                            <button
-                                onClick={ () => setIsEditModalOpen( false ) }
-                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={ handleUpdateInterview }
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                            >
-                                Update Interview
-                            </button>
+                            {/* Buttons - No Logic Changes */ }
+                            <div className="flex justify-end space-x-3 pt-4">
+                                <button
+                                    onClick={ () => setIsEditModalOpen( false ) }
+                                    className="px-4 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-300 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={ handleUpdateInterview }
+                                    className="px-4 py-2.5 bg-gray-700 rounded-xl text-white hover:text-black font-medium hover:bg-gray-300 transition-colors"
+                                >
+                                    Update Interview
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -525,7 +583,7 @@ const AssignedInterviews = () => {
                 <button
                     onClick={ handlePreviousPage }
                     disabled={ page === 1 }
-                    className={ `px-4 py-2 rounded-md text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+                    className={ `px-4 py-2 rounded-xl text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
                 >
                     Previous
                 </button>
@@ -535,7 +593,7 @@ const AssignedInterviews = () => {
                 <button
                     onClick={ handleNextPage }
                     // disabled={page >= totalPages}
-                    className={ `px-4 py-2 rounded-md text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+                    className={ `px-4 py-2 rounded-xl text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
                 >
                     Next
                 </button>

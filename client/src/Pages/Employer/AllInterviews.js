@@ -5,9 +5,9 @@ import useScheduledInterview from '../../hooks/useAssignedInterview';
 
 const AllInterviews = () => {
   const [ activeTab, setActiveTab ] = useState( 'interviews' );
+  const [ searchTerm, setSearchTerm ] = useState( '' );
   const [ isDetailModalOpen, setIsDetailModalOpen ] = useState( false );
   const [ isFeedbackModalOpen, setIsFeedbackModalOpen ] = useState( false );
-  const [ searchTerm, setSearchTerm ] = useState( '' );
   const [ filterStatus, setFilterStatus ] = useState( 'all' );
   const [ detailedInterview, setDetailedInterview ] = useState( null );
   const [ pdfUrl, setPdfUrl ] = useState( null );
@@ -15,6 +15,8 @@ const AllInterviews = () => {
   const [ pdfPreviewUrl, setPdfPreviewUrl ] = useState( '' );
   const [ isFeedbackExpanded, setIsFeedbackExpanded ] = useState( false );
   const [ isStatus, setIsStatus ] = useState( false );
+  const [ debouncedSearch, setDebouncedSearch ] = useState( '' );
+  const [ debouncedStatus, setDebouncedStatus ] = useState( '' );
 
   const [ feedbackForm, setFeedbackForm ] = useState( {
     feedbackTitle: '',
@@ -22,8 +24,33 @@ const AllInterviews = () => {
     attachment: null,
     status: ''
   } );
+
+  const [ statuses, setStatuses ] = useState( [] );
   const [ page, setPage ] = useState( 1 );
-  const limit = 9; // Adjust limit as needed
+  const limit = 10; // Adjust limit as needed
+
+  // Fetch statuses from API
+  useEffect( () => {
+    fetch( "http://localhost:8080/application-types/all-application-types" )
+      .then( response => response.json() )
+      .then( data => setStatuses( data.applicationTypes ) )
+      .catch( error => console.error( "Error fetching statuses:", error ) );
+  }, [] );
+
+
+  // Implement search debounce
+  useEffect( () => {
+    // Set a timer to update the debouncedSearch after 500ms of no typing
+    const timer = setTimeout( () => {
+      setDebouncedSearch( searchTerm );
+      setDebouncedStatus( filterStatus )
+      // Reset to page 1 when search term changes
+      setPage( 1 );
+    }, 500 );
+
+    // Clear the timer if searchTerm changes before 500ms
+    return () => clearTimeout( timer );
+  }, [ searchTerm, filterStatus ] );
 
   // Fetch feedbacks
   const { feedbacks, total: totalFeedbacks, error: feedbackError, isLoading: feedbackLoading } = useFeedbacks( page, limit );
@@ -38,15 +65,10 @@ const AllInterviews = () => {
 
 
   // Fetch scheduled interviews
-  const { assignedInterviews, error: interviewError, isLoading: interviewLoading, refetchAssignedInterviews } = useScheduledInterview( page, limit );
+  const { assignedInterviews, error: interviewError, isLoading: interviewLoading, refetchAssignedInterviews } = useScheduledInterview( page, limit, debouncedSearch, debouncedStatus );
 
-  const totalPages = assignedInterviews.totalPages;
-
+  const totalPages = assignedInterviews?.totalPages || 1;
   const interviewList = assignedInterviews?.interviews || [];
-
-  if ( feedbackLoading || interviewLoading ) return <p>Loading data...</p>;
-  if ( feedbackError ) return <p>Error loading feedbacks: { feedbackError.message }</p>;
-  if ( interviewError ) return <p>Error loading interviews: { interviewError.message }</p>;
 
   console.log( "assignedInterviews", assignedInterviews );
 
@@ -185,23 +207,7 @@ const AllInterviews = () => {
   };
 
 
-  const filteredInterviews = interviewList.filter( interview => {
-    const matchesSearch =
-      interview?.applicationID?.candidateID?.userName?.toLowerCase().includes( searchTerm.toLowerCase() ) ||
-      interview?.jobTitle?.toLowerCase().includes( searchTerm.toLowerCase() ) ||
-      interview?.interviewerName?.toLowerCase().includes( searchTerm.toLowerCase() );
-
-    const matchesFilter = filterStatus === 'all' || interview.status === filterStatus;
-
-    return matchesSearch && matchesFilter;
-  } );
-
-
-  const filteredFeedbacks = ( feedbacks || [] ).filter( feedback =>
-    ( feedback?.candidateName || "" ).toLowerCase().includes( searchTerm.toLowerCase() ) ||
-    ( feedback?.jobTitle || "" ).toLowerCase().includes( searchTerm.toLowerCase() ) ||
-    ( feedback?.feedbackTitle || "" ).toLowerCase().includes( searchTerm.toLowerCase() )
-  );
+  const filteredInterviews = interviewList
 
   const handleStatusChange = async ( feedbackId, newStatus ) => {
     try {
@@ -248,59 +254,103 @@ const AllInterviews = () => {
   };
 
   const capitalizeFirstLetter = ( string ) => {
+    if ( !string ) return '';
     return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  };
+
+  const handleSearchChange = ( e ) => {
+    setSearchTerm( e.target.value );
+  };
+
+  const handleSearchSubmit = ( e ) => {
+    e.preventDefault();
+    // The debounce effect will handle the actual search
   };
 
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Interview Management</h1>
-        </div>
+    <div className="px-8 py-4 w-full min-h-screen"
+      style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+    >
+      <div className="max-w-screen-2xl">
 
-        {/* Search and Filter */ }
-        <div className="bg-white rounded-xl shadow-sm mb-6 p-4">
-          <div className="flex flex-col md:flex-row md:justify-between gap-4">
-            <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={ 18 } className="text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search by name, job title or interviewer..."
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                value={ searchTerm }
-                onChange={ ( e ) => setSearchTerm( e.target.value ) }
-              />
+        <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+          <div className="flex justify-between items-center w-full">
+            <div>
+
+              <h2 className="text-3xl font-bold text-white flex items-center">
+                <Briefcase className="mr-2 h-6 w-6 text-white" />
+                Interview Management
+              </h2>
             </div>
-            <div className="flex gap-2">
-              <div className="relative">
-                <select
-                  className="appearance-none bg-white border border-gray-300 rounded-lg py-2 pl-4 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={ filterStatus }
-                  onChange={ ( e ) => setFilterStatus( e.target.value ) }
-                >
-                  <option value="all">All Status</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="In Process">In Process</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <ChevronDown size={ 16 } className="text-gray-500" />
+            {/* Search and Filter */ }
+            <div className='flex items-center gap-4'>
+              <div className="flex flex-col md:flex-row md:justify-between gap-4 w-[40vw]">
+                <div className="lg:col-span-2 w-[30vw]">
+                  <label className="block text-white text-xs font-bold mb-2">
+                    Search:
+                  </label>
+                  <form onSubmit={ handleSearchSubmit } autoComplete="off">
+                    <div className="relative rounded-full">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        name="search"
+                        value={ searchTerm }
+                        onChange={ handleSearchChange }
+                        placeholder="Search by candidate name, job title, interviewer..."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
+                      />
+                      { searchTerm && (
+                        <button
+                          type="button"
+                          onClick={ () => setSearchTerm( '' ) }
+                          className="absolute inset-y-0 right-3 flex items-center"
+                        >
+                          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                        </button>
+                      ) }
+                    </div>
+                  </form>
+                </div>
+                <div className="flex gap-2">
+                  <div className="relative">
+                    <label className="block text-white text-xs font-bold mb-2">
+                      Filter by Status:
+                    </label>
+                    <select
+                      className="appearance-none bg-gray-200 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
+                      value={ filterStatus }
+                      onChange={ ( e ) => setFilterStatus( e.target.value ) }
+                    >
+                      <option value="all">All Status</option>
+                      { statuses.map( ( status ) => (
+                        <option key={ status } value={ status.applicationStatus }>
+                          { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                        </option>
+                      ) ) }
+                    </select>
+                    <div className="absolute inset-y-0 right-0 top-6 flex items-center pr-2 pointer-events-none">
+                      <ChevronDown size={ 16 } className="text-gray-500" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+
+
         {/* Tabs */ }
-        <div className="bg-white rounded-t-xl shadow-sm">
-          <div className="flex border-b">
+        <div className=" rounded-xl shadow-sm">
+          <div className="flex border-b rounded-t-xl">
             <button
               onClick={ () => setActiveTab( 'interviews' ) }
               className={ `px-6 py-4 font-medium text-sm focus:outline-none ${ activeTab === 'interviews'
-                ? 'border-b-2 border-indigo-500 text-indigo-600'
+                ? 'border-b-2 border-indigo-500 text-black text-xl'
                 : 'text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:border-b-2'
                 }` }
             >
@@ -310,9 +360,9 @@ const AllInterviews = () => {
         </div>
 
         {/* Content */ }
-        <div className="bg-white rounded-b-xl shadow-sm p-6">
+        <div className=" rounded-t-xl shadow-sm p-6">
           { activeTab === 'interviews' && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-t-xl">
               { filteredInterviews.length === 0 ? (
                 <div className="text-center py-10">
                   <div className="text-gray-400 mb-2">
@@ -322,96 +372,119 @@ const AllInterviews = () => {
                 </div>
               ) : (
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job & Candidate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interviewer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <thead>
+                    <tr className='bg-gray-700'>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date & Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  { assignedInterviews?.interviews?.length > 0 ? (
-                    assignedInterviews.interviews.map( ( feedback ) => (
-                      <tr key={ feedback._id } className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <User size={ 20 } className="text-indigo-600" />
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
-                              </div>
-                              <div className="text-sm text-gray-500">{ capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }</div>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                { feedback.skills?.map( ( skill, index ) => (
-                                  <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700"> { skill }
-                                  </span>
-                                ) ) || <span className="text-xs text-gray-500">No skills listed</span> }
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            { feedback.date ? formatDate( feedback.date ) : "No date" }
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
-                          </div>
-                        </td>
 
-
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            value={ feedback.status || "" } // <- This is the key part!
-                            onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
-                            className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
-                          >
-                            <option value="" >Select status</option>
-                            <option value="Selected">Selected</option>
-                            <option value="Rejected">Rejected</option>
-                            <option value="Hold">Hold</option>
-                          </select>
-                        </td>
-
-
-
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={ () => {
-                              setDetailedInterview( feedback );
-                              setIsDetailModalOpen( true );
-                            } }
-                            className="text-indigo-600 hover:text-indigo-900 mr-3"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={ () => {
-                              setDetailedInterview( feedback );
-                              handleFeedbackClick( feedback );
-                            } }
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Feedback
-                          </button>
-                        </td>
+                  { feedbackLoading || interviewLoading ? (
+                    <tbody>
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">Loading data...</td>
                       </tr>
+                    </tbody>
+                  ) : feedbackError ? (
+                    <tbody>
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-red-500">Error loading feedbacks: { feedbackError.message }</td>
+                      </tr>
+                    </tbody>
+                  ) : interviewError ? (
+                    <tbody>
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-red-500">Error loading interviews: { interviewError.message }</td>
+                      </tr>
+                    </tbody>
+                  ) : assignedInterviews?.interviews?.length > 0 ? (
+                    assignedInterviews.interviews.map( ( feedback ) => (
+                      <tbody key={ feedback._id }>
+                        <tr className="group hover:bg-gray-700">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <User size={ 20 } className="text-indigo-600" />
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">
+                                  { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
+                                </div>
+                                <div className="text-sm text-gray-700 group-hover:text-white">
+                                  { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  { feedback.skills?.map( ( skill, index ) => (
+                                    <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                                      { skill }
+                                    </span>
+                                  ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 group-hover:text-white">
+                              { feedback.date ? formatDate( feedback.date ) : "No date" }
+                            </div>
+                            <div className="text-xs text-gray-500 group-hover:text-white">
+                              { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <select
+                              value={ feedback.status || "" }
+                              onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
+                              className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
+                            >
+                              <option value="">Select status</option>
+                              { statuses.map( ( status ) => (
+                                <option key={ status } value={ status.applicationStatus }>
+                                  { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                                </option>
+                              ) ) }
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={ () => {
+                                setDetailedInterview( feedback );
+                                setIsDetailModalOpen( true );
+                              } }
+                              className="text-indigo-600 hover:text-indigo-900 group-hover:text-white mr-3"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={ () => {
+                                setDetailedInterview( feedback );
+                                handleFeedbackClick( feedback );
+                              } }
+                              className="text-indigo-600 group-hover:text-white hover:text-indigo-900"
+                            >
+                              Feedback
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
                     ) )
                   ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                        No interviews found.
-                      </td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                          No interviews found.
+                        </td>
+                      </tr>
+                    </tbody>
                   ) }
-
                 </table>
+
               ) }
             </div>
           ) }
@@ -419,50 +492,73 @@ const AllInterviews = () => {
 
         {/* interview Detail Modal */ }
         { isDetailModalOpen && detailedInterview && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-hidden">
-              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4">
-                <h2 className="text-xl font-semibold text-gray-800">Interview Details</h2>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
+              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Interview Details</h2>
+                </div>
                 <button
                   onClick={ () => setIsDetailModalOpen( false ) }
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-white hover:text-gray-200 transition-colors"
                 >
                   <X size={ 20 } />
                 </button>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Candidate</h3>
-                    <p className="text-lg font-medium">{ detailedInterview.applicationID?.candidateID?.userName }</p>
+              {/* Candidate */ }
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Candidate</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( detailedInterview.applicationID?.candidateID?.userName ) }</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Position</h3>
-                    <p className="text-lg font-medium">{ detailedInterview.applicationID?.jobID?.title }</p>
+
+                  {/* Position */ }
+
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Position</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.applicationID?.jobID?.title }</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Interviewer</h3>
-                    <p className="text-lg font-medium">{ detailedInterview?.interviewerID?.userName }</p>
+
+                  {/* Interviewer */ }
+
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Interviewer</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( detailedInterview?.interviewerID?.userName ) }</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
-                    <span className={ `px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${ getStatusColor( detailedInterview.status ) }` }>
-                      { detailedInterview.status }
-                    </span>
+
+                  {/* Status */ }
+
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Status</h3>
+                    <div className="mt-1">
+                      <span className={ `px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${ getStatusColor( detailedInterview.status ) }` }>
+                        { detailedInterview.status }
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Date & Time</h3>
-                    <p className="text-lg font-medium">{ formatDate( detailedInterview.date ) }</p>
+
+                  {/* Date & Time */ }
+
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Date & Time</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ formatDate( detailedInterview.date ) }</p>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Duration</h3>
-                    <p className="text-lg font-medium">{ detailedInterview.duration }</p>
+
+                  {/* Duration */ }
+
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.duration }</p>
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Required Skills</h3>
+                {/* Skills Section */ }
+
+                <div className="bg-gray-200 rounded-xl p-4">
+                  <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Required Skills</h3>
                   <div className="flex flex-wrap gap-2">
                     { detailedInterview.skills?.map( ( skill, index ) => (
                       <span key={ index } className="px-3 py-1 text-sm rounded-full bg-indigo-100 text-indigo-800">
@@ -472,11 +568,12 @@ const AllInterviews = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end mt-8 gap-3">
-                  {/* Close Button */ }
+                {/* Close Button */ }
+
+                <div className="flex justify-end gap-3 pt-4">
                   <button
                     onClick={ () => setIsDetailModalOpen( false ) } // Closes the modal
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                    className="px-5 py-2 border border-gray-300 rounded-xl hover:bg-gray-300 text-gray-700 transition-colors font-medium"
                   >
                     Close
                   </button>
@@ -487,7 +584,7 @@ const AllInterviews = () => {
                       setPdfPreviewUrl( detailedInterview?.applicationID?.resume );
                       setIsPdfModalOpen( true ); // Opens the PDF modal
                     } }
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    className="px-5 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-300 hover:text-black transition-colors font-medium flex items-center gap-2"
                   >
                     View Resume
                   </button>
@@ -522,19 +619,24 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */ }
         { isFeedbackModalOpen && detailedInterview && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col">
-              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-50">
-                <h2 className="text-xl font-semibold text-gray-800">Interview Feedback</h2>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
+              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
+                  <p className="text-sm text-white mt-1">Review and submit your evaluation</p>
+                </div>
                 <button
                   onClick={ () => setIsFeedbackModalOpen( false ) }
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
                 >
                   <X size={ 20 } />
                 </button>
               </div>
 
               <div className="p-6 overflow-y-auto flex-grow">
+
+                {/* Candidate Info */ }
                 <div className="flex items-center mb-4">
                   <div>
                     <h3 className="font-medium">{ detailedInterview.candidateName }</h3>
@@ -544,22 +646,22 @@ const AllInterviews = () => {
 
                 <form className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Title</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Feedback Title</label>
                     <input
                       type="text"
                       readOnly
-                      className="w-full border border-gray-200 bg-gray-100 rounded-lg p-2 text-gray-700"
+                      className="w-full px-4 py-2 border border-gray-200 bg-gray-300 rounded-xl text-black focus:ring-2 focus:ring-indigo-100"
                       value={ feedbackForm.feedbackTitle }
                       placeholder="e.g., Strong Technical Skills"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Feedback</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
                     <div className="relative">
                       <textarea
-                        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none bg-gray-100"
-                        value={ feedbackForm.feedback }
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
+                        value={ capitalizeFirstLetter( feedbackForm.feedback ) }
                         readOnly
                         rows={ isFeedbackExpanded ? 6 : 2 }
                         style={ { overflow: 'hidden' } }
@@ -567,10 +669,10 @@ const AllInterviews = () => {
                       { feedbackForm.feedback && feedbackForm.feedback.split( '\n' ).length > 2 && (
                         <button
                           type="button"
-                          className="text-indigo-600 text-sm mt-1"
+                          className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                           onClick={ () => setIsFeedbackExpanded( !isFeedbackExpanded ) }
                         >
-                          { isFeedbackExpanded ? 'View Less' : 'View More' }
+                          { isFeedbackExpanded ? 'Show less' : 'Show more' }
                         </button>
                       ) }
                     </div>
@@ -613,13 +715,13 @@ const AllInterviews = () => {
                     <button
                       type="button"
                       onClick={ () => setIsFeedbackModalOpen( false ) }
-                      className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                      className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-200"
                     >
                       Close
                     </button>
                     <button
                       type="button"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-300 hover:text-black"
                       onClick={ handleSaveStatus }
                     >
                       Save Status
@@ -637,7 +739,7 @@ const AllInterviews = () => {
         <button
           onClick={ handlePreviousPage }
           disabled={ page === 1 }
-          className={ `px-4 py-2 rounded-md text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+          className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
         >
           Previous
         </button>
@@ -647,7 +749,7 @@ const AllInterviews = () => {
         <button
           onClick={ handleNextPage }
           // disabled={page >= totalPages}
-          className={ `px-4 py-2 rounded-md text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+          className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
         >
           Next
         </button>

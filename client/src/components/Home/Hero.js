@@ -1,6 +1,6 @@
 import { useEffect, useRef, Suspense, lazy } from "react";
 
-import Particles from "../../components/Particles";  // Make sure the Particles component is imported
+import ParticlesComponent from '../../components/Login/Particles'; 
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -98,7 +98,7 @@ export const Hero = () => {
     <div className="relative min-h-screen overflow-hidden">
       {/* Particles Background */ }
       <div className="absolute top-0 left-0 w-full h-full -z-10">
-        <Particles />
+        <ParticlesComponent />
       </div>
 
       {/* All Sections */ }

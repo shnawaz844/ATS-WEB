@@ -39,6 +39,7 @@ const AllPostedJobs = () => {
   const [ locationType, setLocationType ] = useState( "" );
   const [ scheduleType, setScheduleType ] = useState( "" );
   const companyId = companyDetails?._id;
+  const [ isFilterOpen, setIsFilterOpen ] = useState( false );
 
   console.log( "companyId", companyId )
   // Debounce search input
@@ -87,89 +88,119 @@ const AllPostedJobs = () => {
   if ( isError ) return <div>Error fetching jobs</div>;
 
   return (
-    <div className="mx-auto px-4 py-8">
-      <h1 className="text-center text-2xl md:text-3xl font-bold text-primary mb-8">
-        Explore Our Opportunities
-      </h1>
-      <p className="text-center text-primary mb-8">
-        Find your perfect role from our wide range of positions across different departments and locations.
-      </p>
+    <div className="px-8 py-4 w-full min-h-screen"
+      style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+    >
+      <div className="max-w-screen-2xl">
+        <div>
+          {/* Header Section */ }
+          <div className="mb-6 h-[25vh] relative flex items-center rounded-xl p-4 bg-gray-700">
+            {/* Main content centered */ }
+            <div className="flex justify-center items-center w-full">
+              <div className="text-center">
+                <h1 className="text-2xl md:text-4xl font-bold text-white mb-6">
+                  Explore Our Opportunities
+                </h1>
+                <p className="text-white mb-8">
+                  Find your perfect role from our wide range of positions across different departments and locations.
+                </p>
+              </div>
+            </div>
 
-      {/* Filters */ }
-      <div className="mb-6 flex flex-wrap justify-center items-center gap-4 w-full max-w-6xl mx-auto">
-        {/* Search Bar */ }
-        <input
-          type="text"
-          placeholder="Search jobs..."
-          value={ search }
-          onChange={ ( e ) => setSearch( e.target.value ) }
-          className="w-full sm:w-64 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-        />
+            {/* Filter button positioned absolutely in the top right */ }
+            <div className="absolute top-4 right-4">
+              <button
+                className="inline-flex border items-center px-4 py-2.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
+                onClick={ () => setIsFilterOpen( !isFilterOpen ) }
+              >
+                { isFilterOpen ? "Hide Filters" : "Show Filters" }
+              </button>
+            </div>
+          </div>
 
-        {/* Job Type Dropdown */ }
-        <Select
-          options={ jobTypeOptions }
-          value={ jobType }
-          onChange={ setJobType }
-          className="w-full sm:w-48"
-          placeholder="Job Type"
-          isClearable
-        />
+          {/* Filters */ }
+          <div className={ `flex items-center justify-evenly transition-all duration-300 ${ isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100 backdrop-blur-full' }` }>
+            <div className={ isFilterOpen ? 'block' : 'hidden' }>
+                <div className="mb-6 flex flex-wrap justify-center items-center gap-4 w-full max-w-6xl mx-auto">
+                  {/* Search Bar */ }
+                  <input
+                    type="text"
+                    placeholder="Search jobs..."
+                    value={ search }
+                    onChange={ ( e ) => setSearch( e.target.value ) }
+                    className="w-full sm:w-64 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 h-[6.3vh]"
+                  />
 
-        {/* Location Type Dropdown */ }
-        <Select
-          options={ locationTypeOptions }
-          value={ locationType }
-          onChange={ setLocationType }
-          className="w-full sm:w-48"
-          placeholder="Location Type"
-          isClearable
-        />
+                  {/* Job Type Dropdown */ }
+                  <Select
+                    options={ jobTypeOptions }
+                    value={ jobType }
+                    onChange={ setJobType }
+                    className="w-full sm:w-48"
+                    placeholder="Job Type"
+                    isClearable
+                  />
 
-        {/* Schedule Type Dropdown */ }
-        <Select
-          options={ scheduleTypeOptions }
-          value={ scheduleType }
-          onChange={ setScheduleType }
-          className="w-full sm:w-48"
-          placeholder="Schedule Type"
-          isClearable
-        />
+                  {/* Location Type Dropdown */ }
+                  <Select
+                    options={ locationTypeOptions }
+                    value={ locationType }
+                    onChange={ setLocationType }
+                    className="w-full sm:w-48"
+                    placeholder="Location Type"
+                    isClearable
+                  />
+
+                  {/* Schedule Type Dropdown */ }
+                  <Select
+                    options={ scheduleTypeOptions }
+                    value={ scheduleType }
+                    onChange={ setScheduleType }
+                    className="w-full sm:w-48"
+                    placeholder="Schedule Type"
+                    isClearable
+                  />
+                </div>
+            </div>
+          </div>
+
+
+          {/* Jobs List */ }
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            { data?.jobs.map( ( job ) => (
+              <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
+            ) ) }
+          </div>
+
+          {/* Pagination Controls */ }
+          <div className="flex justify-center mt-8 space-x-4">
+            <button
+              onClick={ () => setPage( ( old ) => Math.max( old - 1, 1 ) ) }
+              disabled={ page === 1 }
+              className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2">
+              Page { page } of { data?.totalPages }
+            </span>
+            <button
+              onClick={ () => setPage( ( old ) => old + 1 ) }
+              disabled={ page >= data?.totalPages }
+              className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
+            >
+              Next
+            </button>
+          </div>
+
+          {/* Job Description Modal */ }
+          { selectedJob && (
+            <JobDescriptionModal job={ selectedJob } isOpen={ !!selectedJob } onClose={ () => setSelectedJob( null ) } />
+          ) }
+        </div>
       </div>
-
-      {/* Jobs List */ }
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-        { data?.jobs.map( ( job ) => (
-          <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
-        ) ) }
-      </div>
-
-      {/* Pagination Controls */ }
-      <div className="flex justify-center mt-8 space-x-4">
-        <button
-          onClick={ () => setPage( ( old ) => Math.max( old - 1, 1 ) ) }
-          disabled={ page === 1 }
-          className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
-        >
-          Previous
-        </button>
-        <span className="px-4 py-2">
-          Page { page } of { data?.totalPages }
-        </span>
-        <button
-          onClick={ () => setPage( ( old ) => old + 1 ) }
-          disabled={ page >= data?.totalPages }
-          className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Job Description Modal */ }
-      { selectedJob && (
-        <JobDescriptionModal job={ selectedJob } isOpen={ !!selectedJob } onClose={ () => setSelectedJob( null ) } />
-      ) }
     </div>
+
   );
 };
 
@@ -177,7 +208,7 @@ const Card = ( { job, onViewDetails, companyUserName } ) => {
   const capitalizeFirstLetter = ( string ) => {
     return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
   };
-  
+
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
       <div className="p-5">
@@ -186,18 +217,19 @@ const Card = ( { job, onViewDetails, companyUserName } ) => {
         <p className="text-sm text-gray-700 pt-2">{ job.city }, { job.state } | { job.locationType }</p>
         <p className="text-sm text-gray-600 pt-2">₹{ job.compensation }/Annum</p>
 
+
         <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">
-          <div dangerouslySetInnerHTML={ { __html: capitalizeFirstLetter(job.description) } } />
+          <div dangerouslySetInnerHTML={ { __html: capitalizeFirstLetter( job.description ) } } />
         </div>
 
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-500">{ job.experienceRequired } Years Experience.</div>
           <div className="flex space-x-2">
-            <button onClick={ onViewDetails } className="bg-purple-100 text-purple-700 px-3 py-2 rounded-md hover:bg-purple-200 transition-colors text-sm">
+            <button onClick={ onViewDetails } className="bg-gray-300 text-black px-3 py-2 rounded-xl hover:bg-gray-400 hover:text-black transition-colors text-sm">
               View Details
             </button>
             <Link to={ `/${ companyUserName }/current-job/${ job._id }` }>
-              <button className="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800 transition-colors">
+              <button className="bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-400 hover:text-black transition-colors">
                 Apply Now
               </button>
             </Link>

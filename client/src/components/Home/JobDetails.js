@@ -68,10 +68,12 @@ export const JobDetails = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50">
+    <div className="px-8 py-4 w-full min-h-screen"
+      style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+    >
       <div className="mb-6">
         <button
-          className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
           onClick={ () => window.history.back() }
         >
           <ChevronLeft size={ 18 } />
@@ -82,18 +84,18 @@ export const JobDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* -- Left: Job Details Section -- */ }
         <div className="lg:col-span-8 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="border-b border-gray-100">
+          <div className="border-b border-gray-100 bg-gray-700">
             <div className="p-8">
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium mb-2">
+                  <div className="flex items-center space-x-2 text-sm text-white font-medium mb-2">
                     <Briefcase size={ 16 } />
                     <span>{ job.department || "Full-time" }</span>
                   </div>
-                  <h1 className="text-3xl font-bold text-gray-800 mb-3">
+                  <h1 className="text-3xl font-bold text-white mb-3">
                     { job.title }
                   </h1>
-                  <div className="flex flex-wrap items-center gap-3 text-gray-600 text-sm mb-4">
+                  <div className="flex flex-wrap items-center gap-3 text-white text-sm mb-4">
                     <div className="flex items-center">
                       <Building size={ 16 } className="mr-1" />
                       <span>{ job.companyName || "Company Name" }</span>
@@ -131,7 +133,7 @@ export const JobDetails = () => {
           </div>
 
           <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-blue-50 p-6 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-200 p-6 rounded-xl">
               <div className="flex items-start">
                 <DollarSign size={ 20 } className="text-blue-500 mr-3 mt-1" />
                 <div>

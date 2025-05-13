@@ -16,14 +16,12 @@ const fetchAssignedInterviews = async ( { queryKey } ) => {
     };
 
     // Only add searchTerm if it's not empty
-    if ( searchTerm && searchTerm.trim() !== '' )
-    {
+    if ( searchTerm && searchTerm.trim() !== '' ) {
         params.searchTerm = searchTerm;
     }
 
     // Only add filterStatus if it's not 'all'
-    if ( filterStatus && filterStatus !== 'all' )
-    {
+    if ( filterStatus && filterStatus !== 'all' ) {
         params.filterStatus = filterStatus;
     }
 

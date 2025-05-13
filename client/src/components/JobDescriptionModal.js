@@ -1,57 +1,93 @@
+import { Briefcase, Building, Calendar, CircleX, Clock, IndianRupee, MapPinHouse, MapPinned, Navigation } from 'lucide-react';
 import React from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-const JobDescriptionModal = ({ job, isOpen, onClose }) => {
-    if (!isOpen) return null;
+const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
+    const companyUserName = localStorage.getItem( "companyUserName" );
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
+
+    if ( !isOpen ) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm p-4">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-indigo-100/50 transform transition-all duration-300 ease-in-out hover:shadow-3xl">
+                {/* Close Button */ }
                 <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition-colors"
+                    onClick={ onClose }
+                    className="absolute top-5 right-5 z-10 text-gray-500 hover:text-indigo-600 transition-all duration-300 group"
                 >
-                    {/* <X className="w-6 h-6" /> */}
-                    <div className="w-6 h-6">x</div>
+                    <CircleX className="w-8 h-8 text-gray-400 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
                 </button>
 
-                <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800 capitalize mb-2">
-                        {job.title}
+                {/* Job Title Section */ }
+                <div className="bg-gray-700 flex items-center justify-center text-white p-6 rounded-t-2xl">
+                    <h2 className="text-3xl font-bold tracking-tight">
+                        { capitalizeFirstLetter( job.title ) }
                     </h2>
-                    <div className="flex items-center space-x-4 text-gray-600 mb-4">
-                        <div className="flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
-                            <span>{job.city}, {job.state} | {job.locationType}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.038-.775-1.038-2.041 0-2.816.952-.765 2.508-.765 3.461 0l.808.529m0 0a.75.75 0 0 1 1.052.14l.933 1.13.434-.217a.75.75 0 0 1 1.007.322l.558 1.116.34-.17c.448-.223.851-.526 1.201-.907l.579-.55-.764-.538a.75.75 0 0 1-.285-.803l.333-1.005-.871-.496c-.268-.153-.47-.456-.47-.805V9.456c0-.347.202-.65.47-.805l.87-.496-.333-1.005a.75.75 0 0 1 .285-.804l.764-.538-.579-.55a4.75 4.75 0 0 0-1.2-.907l-.34-.17-.558 1.116a.75.75 0 0 1-1.008.322l-.434-.217-.933 1.13a.75.75 0 0 1-1.052.14l-.808-.529" />
-                            </svg>
-                            <span>₹{job.compensation}/Annum</span>
+                </div>
+
+                {/* Compensation Section */ }
+                <div className="p-6 bg-gray-100 border-b border-indigo-100">
+                    <div className="flex items-center space-x-4">
+                        <IndianRupee className="w-6 h-6 text-indigo-600" />
+                        <div>
+                            <p className="text-sm text-gray-500 uppercase tracking-wider">Annual Compensation</p>
+                            <p className="text-2xl font-bold text-indigo-800">{ job.compensation }/Annum</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="prose max-w-none">
-                    <ReactQuill
-                        value={job.description}
-                        readOnly={true}
-                        theme={"bubble"}
-                    />
+                {/* Job Details Grid */ }
+                <div className="grid grid-cols-3 gap-6 p-6 bg-white">
+                    { [
+                        { icon: Briefcase, label: 'Job Type', value: job.type },
+                        { icon: Calendar, label: 'Schedule', value: job.scheduleType },
+                        { icon: Clock, label: 'Shift Hours', value: `${ job.shiftStart } - ${ job.shiftEnd }` },
+                        { icon: Building, label: 'Hire Type', value: job.hireType },
+                        { icon: MapPinHouse, label: 'Location Type', value: job.locationType },
+                        { icon: Building, label: 'Schedule Type', value: job.scheduleType },
+                        { icon: MapPinned, label: 'Country', value: job.country },
+                        { icon: MapPinned, label: 'State', value: job.state },
+                        { icon: Navigation, label: 'City', value: job.city }
+                    ].map( ( { icon: Icon, label, value }, index ) => (
+                        <div key={ index } className="flex items-start space-x-3 bg-gray-200 p-3 rounded-xl hover:bg-indigo-100/50 transition-colors">
+                            <Icon className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase tracking-wider">{ label }</p>
+                                <p className="text-sm font-medium text-gray-800">{ value }</p>
+                            </div>
+                        </div>
+                    ) ) }
                 </div>
 
-                <div className="mt-6 flex justify-between items-center border-t pt-4">
-                    <div className="text-sm text-gray-500">
-                        {job.experienceRequired} years experience
+                {/* Job Description */ }
+                <div className="rounded-xl">
+                    <div className="prose max-w-none bg-gray-200 p-4 rounded-xl">
+                        <ReactQuill
+                            value={ job.description }
+                            readOnly={ true }
+                            theme="bubble"
+                            className="job-description"
+                        />
+                    </div>
+                </div>
+
+                {/* Footer */ }
+                <div className="bg-gray-100 p-6 rounded-b-2xl flex justify-between items-center">
+                    <div className="text-sm text-gray-600 flex items-center space-x-2">
+                        <span className="font-medium text-black text-lg">{ job.experienceRequired } Years</span>
+                        <span>Experience Required</span>
                     </div>
                     <a
-                        href={`/current-job/${job._id}`}
-                        className="bg-purple-700 text-white px-6 py-2 rounded-md hover:bg-purple-800 transition-colors"
+                        href={ `/${companyUserName}/current-job/${ job._id }` }
+                        className="px-8 py-3 bg-gray-700 text-white rounded-xl 
+                        hover:bg-gray-400 hover:text-black 
+                        transition-all duration-300 
+                        shadow-md hover:shadow-lg 
+                        transform hover:-translate-y-1"
                     >
                         Apply Now
                     </a>
