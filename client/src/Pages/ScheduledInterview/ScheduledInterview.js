@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useScheduledInterview from '../../hooks/useScheduledInterview';
+import { Briefcase } from 'lucide-react';
 
 export const ScheduledInterview = () => {
     const [ page, setPage ] = useState( 1 );
@@ -365,7 +366,16 @@ export const ScheduledInterview = () => {
         <div className="px-8 py-10 w-full min-h-screen"
             style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
         >
-            <h1 className="text-2xl font-bold mb-6">Scheduled Interviews</h1>
+            <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                <div className="flex justify-between items-center w-full">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white flex items-center">
+                            <Briefcase className="mr-2 h-6 w-6 text-gray-100" />
+                            Scheduled Interviews
+                        </h1>
+                    </div>
+                </div>
+            </div>
 
             { isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -472,7 +482,7 @@ export const ScheduledInterview = () => {
 
                         <div className="overflow-y-auto p-6 max-h-[calc(90vh-120px)]">
                             {/* Application Details Card */ }
-                            <div className="bg-gray-50 p-5 rounded-lg mb-6 border border-gray-200 shadow-sm">
+                            <div className="bg-gray-300 p-5 rounded-xl mb-6 border border-gray-200 shadow-sm">
                                 <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
                                     <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -480,22 +490,22 @@ export const ScheduledInterview = () => {
                                     Application Details
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Job Title</p>
-                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A" }</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter( detailedInterview?.applicationID?.jobID?.title ) || "N/A" }</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Applicant</p>
-                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A" }</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Email</p>
                                         <p className="font-medium text-gray-800 mt-1">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Current Status</p>
                                         <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs mt-1` }>
-                                            { capitalizeFirstLetter(detailedInterview?.status) || "Scheduled" }
+                                            { capitalizeFirstLetter( detailedInterview?.status ) || "Scheduled" }
                                         </p>
                                     </div>
                                 </div>
@@ -672,7 +682,7 @@ export const ScheduledInterview = () => {
 
                         <div className="overflow-y-auto p-6 max-h-[calc(90vh-120px)]">
                             {/* Candidate Details Card */ }
-                            <div className="bg-gray-50 p-5 rounded-lg mb-6 border border-gray-200 shadow-sm">
+                            <div className="bg-gray-300 p-5 rounded-xl mb-6 border border-gray-200 shadow-sm">
                                 <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
                                     <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -680,15 +690,15 @@ export const ScheduledInterview = () => {
                                     Candidate Details
                                 </h3>
                                 <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Job Title</p>
-                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A" }</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter( detailedInterview?.applicationID?.jobID?.title ) || "N/A" }</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Applicant</p>
-                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A" }</p>
+                                        <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Interview Date</p>
                                         <p className="font-medium text-gray-800 mt-1">{ formatDate( detailedInterview?.date ) }</p>
                                     </div>

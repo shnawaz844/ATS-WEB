@@ -14,7 +14,8 @@ import {
   Building,
   Share2,
   Bookmark,
-  ChevronLeft
+  ChevronLeft,
+  IndianRupee
 } from "lucide-react";
 
 export const JobDetails = () => {
@@ -57,6 +58,29 @@ export const JobDetails = () => {
   const toggleBookmark = () => {
     setIsBookmarked( !isBookmarked );
     // Here you would add logic to save bookmark to user's profile
+  };
+
+  const formatIndianRupee = ( num ) => {
+    if ( !num ) return "0";
+
+    // Convert to string and remove any non-digit characters
+    const numStr = num.toString().replace( /[^\d]/g, "" );
+
+    // Handle the case if it's just 0
+    if ( parseInt( numStr ) === 0 ) return "0";
+
+    let lastThree = numStr.substring( numStr.length - 3 );
+    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+    if ( otherNumbers !== '' ) {
+      // Add commas after every two digits in the other numbers part
+      lastThree = ',' + lastThree;
+    }
+
+    // Format remaining digits with commas after every 2 digits
+    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+    return formattedOtherNumbers + lastThree;
   };
 
   if ( !job ) {
@@ -139,10 +163,10 @@ export const JobDetails = () => {
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-200 p-6 rounded-xl">
               <div className="flex items-start">
-                <DollarSign size={ 20 } className="text-blue-500 mr-3 mt-1" />
+                <IndianRupee size={ 20 } className="text-blue-500 mr-3 mt-1" />
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Compensation</p>
-                  <p className="font-semibold text-gray-800">₹{ job.compensation }</p>
+                  <p className="font-semibold text-gray-800">₹{ formatIndianRupee(job.compensation) }</p>
                 </div>
               </div>
               <div className="flex items-start">

@@ -6,6 +6,30 @@ const JobDetailsTab = ({ job }) => {
     return string ? string.charAt( 0 ).toUpperCase() + string.slice( 1 ) : '';
   };
 
+  // Function to format number in Indian Rupee format (e.g., 1,00,000)
+  const formatIndianRupee = ( num ) => {
+    if ( !num ) return "0";
+
+    // Convert to string and remove any non-digit characters
+    const numStr = num.toString().replace( /[^\d]/g, "" );
+
+    // Handle the case if it's just 0
+    if ( parseInt( numStr ) === 0 ) return "0";
+
+    let lastThree = numStr.substring( numStr.length - 3 );
+    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+    if ( otherNumbers !== '' ) {
+      // Add commas after every two digits in the other numbers part
+      lastThree = ',' + lastThree;
+    }
+
+    // Format remaining digits with commas after every 2 digits
+    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+    return formattedOtherNumbers + lastThree;
+  };
+
   if (!job) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
@@ -162,7 +186,7 @@ const JobDetailsTab = ({ job }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Compensation</p>
-                <p className="font-medium">{compensation || 'N/A'}</p>
+                <p className="font-medium">{ formatIndianRupee(compensation) || 'N/A'}</p>
               </div>
             </div>
           </section>

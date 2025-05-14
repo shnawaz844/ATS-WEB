@@ -133,14 +133,14 @@ const CandidateApplication = () => {
                         <div className="flex justify-between items-center w-full">
                             <div>
                                 <h2 className="text-3xl font-bold text-white flex items-center">
-                                    <Briefcase className="mr-2 h-6 w-6 text-blue-600" />
+                                    <Briefcase className="mr-2 h-6 w-6 text-white" />
                                     Candidate Applications
                                 </h2>
                             </div>
 
                             <div>
                                 <button
-                                    className="inline-flex border items-center px-4 py-2.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
+                                    className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                     onClick={ () => setIsFilterOpen( !isFilterOpen ) } // Toggle filter visibility
                                 >
                                     { isFilterOpen ? "Hide Filters" : "Show Filters" }

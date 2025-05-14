@@ -78,7 +78,7 @@ export const Login = () => {
         <div className="text-center mb-10">
           {/* Logo placeholder */ }
           <div className="w-14 h-14 mx-auto mb-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <span className="text-3xl font-bold text-white">ATS</span>
+            <span className="text-2xl font-bold text-white">ATS</span>
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-2 tracking-wider">Access Portal</h1>

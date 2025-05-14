@@ -9,6 +9,30 @@ const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
 
+    // Function to format number in Indian Rupee format (e.g., 1,00,000)
+    const formatIndianRupee = ( num ) => {
+        if ( !num ) return "0";
+
+        // Convert to string and remove any non-digit characters
+        const numStr = num.toString().replace( /[^\d]/g, "" );
+
+        // Handle the case if it's just 0
+        if ( parseInt( numStr ) === 0 ) return "0";
+
+        let lastThree = numStr.substring( numStr.length - 3 );
+        let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+        if ( otherNumbers !== '' ) {
+            // Add commas after every two digits in the other numbers part
+            lastThree = ',' + lastThree;
+        }
+
+        // Format remaining digits with commas after every 2 digits
+        const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+        return formattedOtherNumbers + lastThree;
+    };
+
     if ( !isOpen ) return null;
 
     return (
@@ -19,7 +43,7 @@ const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
                     onClick={ onClose }
                     className="absolute top-5 right-5 z-10 text-gray-500 hover:text-indigo-600 transition-all duration-300 group"
                 >
-                    <CircleX className="w-8 h-8 text-gray-400 group-hover:text-indigo-600 group-hover:scale-110 transition-all" />
+                    <CircleX className="w-8 h-8 text-gray-400 group-hover:text-white group-hover:scale-110 transition-all" />
                 </button>
 
                 {/* Job Title Section */ }
@@ -35,7 +59,7 @@ const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
                         <IndianRupee className="w-6 h-6 text-indigo-600" />
                         <div>
                             <p className="text-sm text-gray-500 uppercase tracking-wider">Annual Compensation</p>
-                            <p className="text-2xl font-bold text-indigo-800">{ job.compensation }/Annum</p>
+                            <p className="text-2xl font-bold text-indigo-800">{ formatIndianRupee(job.compensation) }/Annum</p>
                         </div>
                     </div>
                 </div>

@@ -114,12 +114,12 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
     if (!loginData) {
         return (
             <div className="flex flex-col items-center justify-center p-6 bg-blue-50 rounded-lg text-center">
-                <Lock size={32} className="text-blue-500 mb-3" />
+                <Lock size={32} className="text-red-600 mb-3" />
                 <h3 className="text-lg font-medium text-gray-800 mb-2">Login Required</h3>
                 <p className="text-gray-600 mb-4">Please log in to apply for this position</p>
                 <button
                     onClick={() => navigate(`/${companyUserName}/login`, { state: { returnUrl: window.location.pathname } })}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-400 hover:text-black transition-colors"
                 >
                     Go to Login
                 </button>
@@ -263,7 +263,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
                 type="submit"
                 disabled={isSubmitting}
                 className={`w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition duration-200 ${isSubmitting
-                        ? "bg-blue-400 cursor-not-allowed"
+                    ? "bg-gradient-to-r from-gray-700 to-gray-100 cursor-not-allowed"
                         : "bg-gray-700 hover:bg-gray-400 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
                     }`}
             >

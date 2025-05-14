@@ -108,7 +108,7 @@ const AllPostedJobs = () => {
             </div>
 
             {/* Filter button positioned absolutely in the top right */ }
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-[6rem] right-4">
               <button
                 className="inline-flex border items-center px-4 py-2.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                 onClick={ () => setIsFilterOpen( !isFilterOpen ) }
@@ -205,8 +205,33 @@ const AllPostedJobs = () => {
 };
 
 const Card = ( { job, onViewDetails, companyUserName } ) => {
+
   const capitalizeFirstLetter = ( string ) => {
     return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  };
+
+  // Function to format number in Indian Rupee format (e.g., 1,00,000)
+  const formatIndianRupee = ( num ) => {
+    if ( !num ) return "0";
+
+    // Convert to string and remove any non-digit characters
+    const numStr = num.toString().replace( /[^\d]/g, "" );
+
+    // Handle the case if it's just 0
+    if ( parseInt( numStr ) === 0 ) return "0";
+
+    let lastThree = numStr.substring( numStr.length - 3 );
+    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+    if ( otherNumbers !== '' ) {
+      // Add commas after every two digits in the other numbers part
+      lastThree = ',' + lastThree;
+    }
+
+    // Format remaining digits with commas after every 2 digits
+    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+    return formattedOtherNumbers + lastThree;
   };
 
   return (
@@ -215,7 +240,7 @@ const Card = ( { job, onViewDetails, companyUserName } ) => {
         <h2 className="text-lg font-bold text-gray-800 capitalize">{ job.title || "Software Engineer" }</h2>
         <p className="text-[1rem] text-gray-600 pt-2">{ job.type } | { job.scheduleType }</p>
         <p className="text-sm text-gray-700 pt-2">{ job.city }, { job.state } | { job.locationType }</p>
-        <p className="text-sm text-gray-600 pt-2">₹{ job.compensation }/Annum</p>
+        <p className="text-sm text-gray-600 pt-2">₹{ formatIndianRupee(job.compensation) }/Annum</p>
 
 
         <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">

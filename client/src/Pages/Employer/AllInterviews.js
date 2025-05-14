@@ -301,7 +301,7 @@ const AllInterviews = () => {
                         value={ searchTerm }
                         onChange={ handleSearchChange }
                         placeholder="Search by candidate name, job title, interviewer..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
+                        className="w-full pl-10 pr-4 py-1.5 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
                       />
                       { searchTerm && (
                         <button
@@ -321,7 +321,7 @@ const AllInterviews = () => {
                       Filter by Status:
                     </label>
                     <select
-                      className="appearance-none bg-gray-200 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
+                      className="appearance-none bg-gray-200 rounded-xl py-1.5 pl-4 pr-10 focus:outline-none focus:ring-none"
                       value={ filterStatus }
                       onChange={ ( e ) => setFilterStatus( e.target.value ) }
                     >

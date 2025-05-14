@@ -86,6 +86,30 @@ export const AllJobs = () => {
         setCurrentPage( 1 );
     };
 
+    // Function to format number in Indian Rupee format (e.g., 1,00,000)
+    const formatIndianRupee = ( num ) => {
+        if ( !num ) return "0";
+
+        // Convert to string and remove any non-digit characters
+        const numStr = num.toString().replace( /[^\d]/g, "" );
+
+        // Handle the case if it's just 0
+        if ( parseInt( numStr ) === 0 ) return "0";
+
+        let lastThree = numStr.substring( numStr.length - 3 );
+        let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+        if ( otherNumbers !== '' ) {
+            // Add commas after every two digits in the other numbers part
+            lastThree = ',' + lastThree;
+        }
+
+        // Format remaining digits with commas after every 2 digits
+        const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+        return formattedOtherNumbers + lastThree;
+    };
+
     // Custom styles for react-select
     const customSelectStyles = {
         control: ( provided ) => ( {
@@ -158,14 +182,14 @@ export const AllJobs = () => {
                             </div>
                             <div className='flex gap-4'>
                                 <button
-                                    className="inline-flex border items-center px-4 py-2.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
+                                    className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                     onClick={ () => setIsFilterOpen( !isFilterOpen ) } // Toggle filter visibility
                                 >
                                     { isFilterOpen ? "Hide Filters" : "Show Filters" }
                                 </button>
                                 <Link
                                     to={ `/${ companyUserName }/post-job` }
-                                    className="inline-flex border items-center px-4 py-2.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
+                                    className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                 >
                                     <Plus className="mr-2 h-5 w-5" />
                                     Post New Job
@@ -312,7 +336,7 @@ export const AllJobs = () => {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
-                                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">₹{ job.compensation }</div>
+                                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">₹{ formatIndianRupee(job.compensation) }</div>
                                                 <div className="text-xs text-gray-500 mt-1 group-hover:text-white">{ job.scheduleType || "Full day" }</div>
                                             </td>
                                             <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">

@@ -215,7 +215,7 @@ export const Navbar = () => {
                     className={ ( { isActive } ) =>
                       `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ isActive
                         ? "text-white bg-slate-600"
-                        : "text-gray-300 hover:text-white"
+                        : "text-gray-300 hover:text-white hover:border hover:border-white"
                       }`
                     }
                   >
@@ -265,13 +265,13 @@ export const Navbar = () => {
                     <>
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/login` : "/login" }
-                        className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-white rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                          className="px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:border hover:border-white rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
                       >
                         Login
                       </Link>
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
-                          className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-white rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                          className="px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:border hover:border-white rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
                       >
                         Sign Up
                       </Link>
