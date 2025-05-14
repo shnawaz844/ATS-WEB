@@ -12,6 +12,7 @@ import {
     FilterX,
     Phone,
     Globe,
+    ChartNoAxesCombined,
 } from 'lucide-react'
 
 const CompanyListing = () => {
@@ -224,61 +225,56 @@ const CompanyListing = () => {
         >
             <div className="max-w-screen-2xl">
                 {/* Header Section */ }
-                <div className='mb-6 h-[15vh] rounded-xl p-4 bg-gray-700'>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-white">
-                                Company Directory
-                            </h1>
-                            <p className="text-white mt-2">
-                                Showing{ ' ' }
-                                { companies.length > 0
-                                    ? `${ indexOfFirstItem + 1 }-${ Math.min(
-                                        indexOfLastItem,
-                                        totalCompanies
-                                    ) }`
-                                    : 0 }{ ' ' }
-                                of { totalCompanies } companies
-                            </p>
-                        </div>
-
-                        <div className='flex gap-4 items-center'>
-                            {/* Search Bar */ }
-                            <div className="relative">
-                                <Search
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                    size={ 20 }
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Search by company name, email, or address..."
-                                    value={ searchTerm }
-                                    onChange={ handleSearch }
-                                    className="w-[30vw] pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
-                                />
-                                { isSearching && (
-                                    <button
-                                        onClick={ clearSearch }
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
-                                        title="Clear search"
-                                    >
-                                        <FilterX
-                                            size={ 20 }
-                                            className="text-gray-400 hover:text-gray-600"
-                                        />
-                                    </button>
-                                ) }
-                            </div>
-                            <button
-                                onClick={ openAddDialog }
-                                className="flex items-center gap-2 bg-gray-700 text-white px-6 py-2.5 border border-white rounded-xl hover:bg-gray-600 transition-colors duration-200 shadow-sm hover:shadow-md"
-                            >
-                                <Plus size={ 20 } />
-                                Add Company
-                            </button>
-                        </div>
-
+                <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className="flex items-center w-full gap-4">
+                        <ChartNoAxesCombined className="h-6 w-6 text-white" />
+                        <h1 className="text-3xl font-bold text-white">Company Directory</h1>
                     </div>
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="relative flex-grow">
+                            <Search
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <input
+                                type="text"
+                                placeholder="Search by company name, email, or address..."
+                                value={ searchTerm }
+                                onChange={ handleSearch }
+                                className="w-[30vw] pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            />
+                            { isSearching && (
+                                <button
+                                    onClick={ clearSearch }
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
+                                    title="Clear search"
+                                >
+                                    <FilterX
+                                        size={ 20 }
+                                        className="text-gray-400 hover:text-gray-600"
+                                    />
+                                </button>
+                            ) }
+                        </div>
+                        <button
+                            onClick={ openAddDialog }
+                            className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-600 hover:text-white border border-white transition-colors duration-200 whitespace-nowrap shadow-sm"
+                        >
+                            <Plus size={ 20 } />
+                            Add Company
+                        </button>
+                    </div>
+
+                </div>
+                <div className='pb-4 ml-4'>
+                    <p className="text-white text-sm">
+                        Showing{ ' ' }
+                        { companies.length > 0
+                            ? `${ indexOfFirstItem + 1 }-${ Math.min(
+                                indexOfLastItem,
+                                totalCompanies
+                            ) }`
+                            : 0 }{ ' ' }
+                        of { totalCompanies } companies
+                    </p>
                 </div>
 
                 {/* Company Cards Grid */ }
@@ -406,112 +402,112 @@ const CompanyListing = () => {
                                 </div>
 
                                 <div className="max-h-[calc(90vh-150px)] overflow-y-auto">
-                                <form onSubmit={ handleSubmit } className="space-y-5 p-10">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Unique Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="CompanyUserName"
-                                            value={ formData.CompanyUserName }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter Unique Campany name"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Company Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={ formData.name }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter company name"
-                                        />
-                                    </div>
+                                    <form onSubmit={ handleSubmit } className="space-y-5 p-10">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Unique Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="CompanyUserName"
+                                                value={ formData.CompanyUserName }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter Unique Campany name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Company Name <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                value={ formData.name }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter company name"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Email Address <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={ formData.email }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter email address"
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Email Address <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={ formData.email }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter email address"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Address <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            value={ formData.address }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter company address"
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Address <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="address"
+                                                value={ formData.address }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter company address"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Phone Number <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="phone"
-                                            value={ formData.phone }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter phone number"
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Phone Number <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="phone"
+                                                value={ formData.phone }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter phone number"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Website URL <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="url"
-                                            name="website"
-                                            value={ formData.website }
-                                            onChange={ handleChange }
-                                            required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                            placeholder="Enter website URL"
-                                        />
-                                    </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Website URL <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="url"
+                                                name="website"
+                                                value={ formData.website }
+                                                onChange={ handleChange }
+                                                required
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                                placeholder="Enter website URL"
+                                            />
+                                        </div>
 
-                                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                                        <button
-                                            type="button"
-                                            onClick={ closeDialog }
-                                            className="px-4 py-2.5 text-black bg-gray-400 hover:bg-gray-300 rounded-xl transition-colors duration-200"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            className="px-6 py-2.5 bg-gray-700 text-white rounded-xl hover:bg-gray-400 hover:text-black transition-colors duration-200"
-                                        >
-                                            { isEditing ? 'Save Changes' : 'Add Company' }
-                                        </button>
-                                    </div>
-                                </form>
+                                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                                            <button
+                                                type="button"
+                                                onClick={ closeDialog }
+                                                className="px-4 py-2.5 text-black bg-gray-400 hover:bg-gray-300 rounded-xl transition-colors duration-200"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="px-6 py-2.5 bg-gray-700 text-white rounded-xl hover:bg-gray-400 hover:text-black transition-colors duration-200"
+                                            >
+                                                { isEditing ? 'Save Changes' : 'Add Company' }
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>

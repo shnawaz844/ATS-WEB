@@ -214,7 +214,7 @@ const UserListing = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                      <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold text-lg shadow-md">
                         {user.userName.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -293,7 +293,7 @@ const UserListing = () => {
                 </button>
 
                 <div className="flex items-center">
-                  <span className="px-3 py-1 text-sm text-indigo-700 font-medium rounded-lg">
+                  <span className="px-3 py-1 text-sm bg-gray-200 text-black font-medium rounded-xl">
                     Page {currentPage} of {totalPages}
                   </span>
                 </div>

@@ -19,7 +19,8 @@ import {
     FileUp,
     CircleUser,
     Mail,
-    FolderDown
+    FolderDown,
+    BookText
 } from 'lucide-react';
 
 const MyJobs = () => {
@@ -218,8 +219,10 @@ const MyJobs = () => {
                                         { app?.jobID?.shiftStart } - { app?.jobID?.shiftEnd }
                                     </p>
                                     <p className="text-sm text-gray-600 flex items-center">
-                                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                                        { capitalizeFirstLetter( app?.experience ) }
+                                        <div className="h-14 overflow-y-auto pr-1 transition-all duration-300 flex">
+                                            <BookText className="h-4 w-4 mr-2 text-gray-500" />
+                                            { capitalizeFirstLetter( app?.experience || 'No experience specified' ) }
+                                        </div>
                                     </p>
 
                                     { app.submittedAt && (

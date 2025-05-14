@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 import JobDescriptionModal from "./JobDescriptionModal";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Dropdown Options
 const jobTypeOptions = [
@@ -121,46 +122,46 @@ const AllPostedJobs = () => {
           {/* Filters */ }
           <div className={ `flex items-center justify-evenly transition-all duration-300 ${ isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100 backdrop-blur-full' }` }>
             <div className={ isFilterOpen ? 'block' : 'hidden' }>
-                <div className="mb-6 flex flex-wrap justify-center items-center gap-4 w-full max-w-6xl mx-auto">
-                  {/* Search Bar */ }
-                  <input
-                    type="text"
-                    placeholder="Search jobs..."
-                    value={ search }
-                    onChange={ ( e ) => setSearch( e.target.value ) }
-                    className="w-full sm:w-64 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 h-[6.3vh]"
-                  />
+              <div className="mb-6 flex flex-wrap justify-center items-center gap-4 w-full max-w-6xl mx-auto">
+                {/* Search Bar */ }
+                <input
+                  type="text"
+                  placeholder="Search jobs..."
+                  value={ search }
+                  onChange={ ( e ) => setSearch( e.target.value ) }
+                  className="w-full sm:w-64 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 h-[6.3vh]"
+                />
 
-                  {/* Job Type Dropdown */ }
-                  <Select
-                    options={ jobTypeOptions }
-                    value={ jobType }
-                    onChange={ setJobType }
-                    className="w-full sm:w-48"
-                    placeholder="Job Type"
-                    isClearable
-                  />
+                {/* Job Type Dropdown */ }
+                <Select
+                  options={ jobTypeOptions }
+                  value={ jobType }
+                  onChange={ setJobType }
+                  className="w-full sm:w-48"
+                  placeholder="Job Type"
+                  isClearable
+                />
 
-                  {/* Location Type Dropdown */ }
-                  <Select
-                    options={ locationTypeOptions }
-                    value={ locationType }
-                    onChange={ setLocationType }
-                    className="w-full sm:w-48"
-                    placeholder="Location Type"
-                    isClearable
-                  />
+                {/* Location Type Dropdown */ }
+                <Select
+                  options={ locationTypeOptions }
+                  value={ locationType }
+                  onChange={ setLocationType }
+                  className="w-full sm:w-48"
+                  placeholder="Location Type"
+                  isClearable
+                />
 
-                  {/* Schedule Type Dropdown */ }
-                  <Select
-                    options={ scheduleTypeOptions }
-                    value={ scheduleType }
-                    onChange={ setScheduleType }
-                    className="w-full sm:w-48"
-                    placeholder="Schedule Type"
-                    isClearable
-                  />
-                </div>
+                {/* Schedule Type Dropdown */ }
+                <Select
+                  options={ scheduleTypeOptions }
+                  value={ scheduleType }
+                  onChange={ setScheduleType }
+                  className="w-full sm:w-48"
+                  placeholder="Schedule Type"
+                  isClearable
+                />
+              </div>
             </div>
           </div>
 
@@ -173,23 +174,34 @@ const AllPostedJobs = () => {
           </div>
 
           {/* Pagination Controls */ }
-          <div className="flex justify-center mt-8 space-x-4">
+          <div className="flex items-center justify-between border-t border-gray-200 pt-6 mt-2">
             <button
               onClick={ () => setPage( ( old ) => Math.max( old - 1, 1 ) ) }
               disabled={ page === 1 }
-              className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
+              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
+                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                }` }
             >
+              <ChevronLeft className="mr-1 h-4 w-4" />
               Previous
             </button>
-            <span className="px-4 py-2">
-              Page { page } of { data?.totalPages }
-            </span>
+
+            <div className="flex items-center gap-1">
+              <span className="px-3 py-1 bg-gray-300 text-black rounded-full font-medium">{ page }</span>
+              <span className="text-sm text-gray-500">of { data?.totalPages }</span>
+            </div>
+
             <button
-              onClick={ () => setPage( ( old ) => old + 1 ) }
-              disabled={ page >= data?.totalPages }
-              className="w-24 px-4 py-2 bg-gray-500 text-white rounded-md disabled:bg-gray-300 disabled:cursor-not-allowed text-center"
+              onClick={ () => setPage( ( old ) => Math.min( data?.totalPages, old + 1 ) ) }
+              disabled={ page === data?.totalPages }
+              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === data?.totalPages
+                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                }` }
             >
               Next
+              <ChevronRight className="ml-1 h-4 w-4" />
             </button>
           </div>
 
@@ -240,7 +252,7 @@ const Card = ( { job, onViewDetails, companyUserName } ) => {
         <h2 className="text-lg font-bold text-gray-800 capitalize">{ job.title || "Software Engineer" }</h2>
         <p className="text-[1rem] text-gray-600 pt-2">{ job.type } | { job.scheduleType }</p>
         <p className="text-sm text-gray-700 pt-2">{ job.city }, { job.state } | { job.locationType }</p>
-        <p className="text-sm text-gray-600 pt-2">₹{ formatIndianRupee(job.compensation) }/Annum</p>
+        <p className="text-sm text-gray-600 pt-2">₹{ formatIndianRupee( job.compensation ) }/Annum</p>
 
 
         <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">
