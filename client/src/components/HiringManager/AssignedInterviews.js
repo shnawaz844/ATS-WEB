@@ -33,6 +33,7 @@ const AssignedInterviews = () => {
         interviewerID: "",
         company_id: "",
     } );
+    console.log( "detailedInterview>>>>>>>", detailedInterview );
 
     // New state to store the fetched statuses
     const [ statuses, setStatuses ] = useState( [] );
@@ -160,7 +161,7 @@ const AssignedInterviews = () => {
                         interviewerType: editForm.interviewType,
                         meetingLink: editForm.meetingLink,
                         status: editForm.status || detailedInterview.status,
-                        interviewerID: editForm.interviewerID, // Ensure interviewerId is sent
+                        interviewerID: editForm.interviewerID,
                     } ),
                 }
             );
@@ -452,8 +453,8 @@ const AssignedInterviews = () => {
                                     <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-xs font-medium text-gray-500">EMAIL</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
+                                    <p className="text-xs font-medium text-gray-500">Candidtae Id</p>
+                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?._id || "N/A" }</p>
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">STATUS</p>
@@ -474,7 +475,7 @@ const AssignedInterviews = () => {
                                         type="date"
                                         value={ editForm.date }
                                         onChange={ ( e ) => setEditForm( { ...editForm, date: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         min={ new Date().toISOString().split( 'T' )[ 0 ] }
                                     />
                                 </div>
@@ -484,7 +485,7 @@ const AssignedInterviews = () => {
                                         type="time"
                                         value={ editForm.time }
                                         onChange={ ( e ) => setEditForm( { ...editForm, time: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                             </div>
@@ -495,7 +496,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={ editForm.interviewType }
                                     onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Select Interview Type</option>
                                     { interviewTypes.map( ( type ) => (
@@ -511,7 +512,7 @@ const AssignedInterviews = () => {
                                         type="url"
                                         value={ editForm.meetingLink }
                                         onChange={ ( e ) => setEditForm( { ...editForm, meetingLink: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="https://meet.google.com/..."
                                     />
                                 </div>
@@ -522,7 +523,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={ editForm.status }
                                     onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     { statuses.map( ( status ) => (
                                         <option key={ status.applicationStatus } value={ status.applicationStatus }>{ status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }</option>
@@ -537,7 +538,7 @@ const AssignedInterviews = () => {
                                         : "Assign Interviewer" }
                                 </label>
                                 <select
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={ editForm.interviewerID._id || "" }
                                     onChange={ ( e ) => setEditForm( { ...editForm, interviewerID: e.target.value } ) }
                                     required
@@ -552,7 +553,7 @@ const AssignedInterviews = () => {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes (Optional)</label>
                                 <textarea
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     rows="3"
                                     placeholder="Add any additional notes about this interview..."
                                 ></textarea>

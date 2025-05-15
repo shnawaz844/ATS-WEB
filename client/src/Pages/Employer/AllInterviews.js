@@ -22,7 +22,8 @@ const AllInterviews = () => {
     feedbackTitle: '',
     feedback: '',
     attachment: null,
-    status: ''
+    status: '',
+    starRating: ''
   } );
 
   const [ statuses, setStatuses ] = useState( [] );
@@ -54,15 +55,6 @@ const AllInterviews = () => {
 
   // Fetch feedbacks
   const { feedbacks, total: totalFeedbacks, error: feedbackError, isLoading: feedbackLoading } = useFeedbacks( page, limit );
-  console.log( "feedbacks", feedbacks )
-
-  const [ localFeedbacks, setLocalFeedbacks ] = useState( [] );
-
-
-  useEffect( () => {
-    setLocalFeedbacks( feedbacks ); // when original props/data changes
-  }, [ feedbacks ] );
-
 
   // Fetch scheduled interviews
   const { assignedInterviews, error: interviewError, isLoading: interviewLoading, refetchAssignedInterviews } = useScheduledInterview( page, limit, debouncedSearch, debouncedStatus );
@@ -70,34 +62,7 @@ const AllInterviews = () => {
   const totalPages = assignedInterviews?.totalPages || 1;
   const interviewList = assignedInterviews?.interviews || [];
 
-  console.log( "assignedInterviews", assignedInterviews );
-
-  const fetchFeedbackDetails = async ( interviewId ) => {
-    try {
-      if ( !interviewId ) {
-        console.error( "Interview ID is required." );
-        return;
-      }
-
-      console.log( "Fetching feedback for interviewId:", interviewId );
-
-      // Simulate API call with our sample data
-      const foundFeedback = feedbacks.find( f => f._id === interviewId );
-
-      if ( !foundFeedback ) {
-        throw new Error( "No feedback found" );
-      }
-
-      setFeedbackForm( {
-        feedbackTitle: foundFeedback.feedbackTitle || "",
-        feedback: foundFeedback.feedback || "",
-        attachment: foundFeedback.attachment || null,
-      } );
-
-    } catch ( error ) {
-      console.error( "Error fetching feedback:", error );
-    }
-  };
+  // console.log( "assignedInterviews", assignedInterviews );
 
   const viewPDF = ( resumeUrl ) => {
     setPdfUrl( resumeUrl );
@@ -112,7 +77,7 @@ const AllInterviews = () => {
     }
 
     // Example: You can use fetch or axios to send to backend
-    console.log( "Saving candidate status:", feedbackForm.status );
+    // console.log( "Saving candidate status:", feedbackForm.status );
 
     // Optional: Close modal or show confirmation
     setIsFeedbackModalOpen( false );
@@ -138,20 +103,19 @@ const AllInterviews = () => {
 
     try {
       // Find feedback for the selected interview
-      const feedbackData = feedbacks.find(
-        ( f ) => f.interviewId._id === selectedInterview._id
-      );
+      let feedbackData = feedbacks.filter( f => f?.interviewId?._id === selectedInterview._id );
 
-      if ( !feedbackData ) {
+      if ( !feedbackData.length ) {
         throw new Error( "No feedback found for this interview" );
       }
 
+      feedbackData = feedbackData[ 0 ];
       setFeedbackForm( {
         _id: feedbackData._id,
         feedbackTitle: feedbackData.feedbackTitle || "",
         feedback: feedbackData.feedback || "",
-        rating: feedbackData.rating || 0, // if rating exists in your data
-        attachment: feedbackData.attachment || null,
+        starRating: feedbackData.starRating || 0, // if rating exists in your data
+        // attachment: feedbackData.attachment || null,
       } );
     } catch ( error ) {
       console.error( "Error fetching feedback:", error );
@@ -160,8 +124,8 @@ const AllInterviews = () => {
       setFeedbackForm( {
         feedbackTitle: "",
         feedback: "",
-        rating: 0,
-        attachment: null,
+        starRating: "",
+        // attachment: null,
       } );
     }
 
@@ -232,8 +196,6 @@ const AllInterviews = () => {
       alert( "Failed to update status" );
     }
   };
-
-
 
   const getStatusColor = ( status ) => {
     switch ( status ) {
@@ -682,14 +644,7 @@ const AllInterviews = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
                     <div className="flex items-center space-x-1">
-                      { Array( 5 ).fill( 0 ).map( ( _, i ) => (
-                        <span
-                          key={ i }
-                          className={ `text-2xl ${ i < ( feedbackForm.rating || 0 ) ? 'text-yellow-500' : 'text-gray-300' }` }
-                        >
-                          ★
-                        </span>
-                      ) ) }
+                      { getRatingStars( feedbackForm.starRating ) }
                     </div>
                   </div>
 

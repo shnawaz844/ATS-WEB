@@ -12,6 +12,8 @@ export const ScheduledInterview = () => {
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerEmail = interviewer?.email || "";
     const [ statuses, setStatuses ] = useState( [] );
+    const [ file, setFile ] = useState( null );
+    const [ preview, setPreview ] = useState( null );
 
     // ✅ Correctly using the custom hook inside the component
     const {
@@ -26,7 +28,6 @@ export const ScheduledInterview = () => {
     const [ detailedInterview, setDetailedInterview ] = useState( null );
     // const[selectedInterview,setSelectedInterview] =useState({});
 
-    const tableDataCss = "border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4";
     const [ editForm, setEditForm ] = useState( {
         date: "",
         time: "",
@@ -35,7 +36,9 @@ export const ScheduledInterview = () => {
         status: "",
         interviewerID: "",
         reasonRescheduled: "",
-        company_id: ""
+        company_id: "",
+        starRating: "",
+        attachment: ""
     } );
 
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
@@ -43,7 +46,8 @@ export const ScheduledInterview = () => {
     const [ feedbackForm, setFeedbackForm ] = useState( {
         feedbackTitle: "",
         feedback: "",
-        attachment: null
+        attachment: "",
+        starRating: "",
     } );
 
     const modalRef = useRef();
@@ -115,8 +119,6 @@ export const ScheduledInterview = () => {
             status: interview.status || "scheduled",
             interviewerID: interview.interviewerID || "",
             reasonRescheduled: interview.reasonRescheduled || "",
-            // feedbackTitle: interview.feedbackTitle || "",
-            // feedback: interview.feedback || "",
         } );
         setIsEditModalOpen( true );
     };
@@ -178,6 +180,8 @@ export const ScheduledInterview = () => {
                         status: editForm.status,
                         interviewerID: editForm.interviewerID,
                         reasonRescheduled: editForm.reasonRescheduled,
+                        starRating: feedbackForm.starRating,
+                        attachment: feedbackForm.attachment,
                     } ),
                 }
             );
@@ -214,8 +218,9 @@ export const ScheduledInterview = () => {
             setFeedbackForm( {
                 _id: feedbackData?._id || selectedInterview?._id || "",
                 feedbackTitle: feedbackData?.feedbackTitle || selectedInterview?.feedbackTitle || "",
-                feedback: feedbackData?.feedback || selectedInterview?.feedback || "",
-                attachment: feedbackData?.attachment || selectedInterview?.attachment || null
+                feedback: feedbackForm?.feedback || selectedInterview?.feedback || "",
+                attachment: feedbackForm?.attachment || selectedInterview?.attachment || null,
+                starRating: feedbackForm?.starRating || selectedInterview?.starRating || "",
             } );
 
         } catch ( error ) {
@@ -226,12 +231,15 @@ export const ScheduledInterview = () => {
             setFeedbackForm( {
                 feedbackTitle: selectedInterview?.feedbackTitle || "",
                 feedback: selectedInterview?.feedback || "",
-                attachment: selectedInterview?.attachment || null
+                attachment: selectedInterview?.attachment || "",
+
             } );
         }
 
         setIsFeedbackModalOpen( true );
     };
+
+
 
     const getStatusColor = ( status ) => {
         const colors = {
@@ -257,19 +265,22 @@ export const ScheduledInterview = () => {
                 ? `http://localhost:8080/interviewerfeedback/update-feedback/${ feedbackForm._id }`
                 : `http://localhost:8080/interviewerfeedback/create-feedback`;
 
+            const formData = {
+                feedbackTitle: feedbackForm.feedbackTitle,
+                feedback: feedbackForm.feedback,
+                starRating: feedbackForm.starRating,
+                attachment: feedbackForm.attachment || null, // Include this safely
+                interviewId: detailedInterview._id,
+                applicationID: detailedInterview.applicationID._id,
+            };
+
             const response = await fetch( url, {
                 method: isUpdate ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "company_id": companyId,
                 },
-                body: JSON.stringify( {
-                    feedbackTitle: feedbackForm.feedbackTitle,
-                    feedback: feedbackForm.feedback,
-                    interviewId: detailedInterview._id,
-                    applicationID: detailedInterview.applicationID._id,
-
-                } ),
+                body: JSON.stringify( formData ),
             } );
 
             const responseData = await response.json();
@@ -320,7 +331,9 @@ export const ScheduledInterview = () => {
             setFeedbackForm( {
                 feedbackTitle: data.feedbackTitle || "",
                 feedback: data.feedback || "",
-                attachment: data.attachment || null,
+                attachment: data.attachment || "",
+                starRating: data.starRating || "",
+
             } );
 
         } catch ( error ) {
@@ -702,31 +715,50 @@ export const ScheduledInterview = () => {
                                         <p className="text-gray-500 text-xs uppercase font-medium">Interview Date</p>
                                         <p className="font-medium text-gray-800 mt-1">{ formatDate( detailedInterview?.date ) }</p>
                                     </div>
+
                                 </div>
                             </div>
 
                             {/* Feedback Form */ }
                             <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Rating</label>
-                                    <div className="relative">
+                                <div className='flex justify-between'>
+                                    <div className='w-[48%]'>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Rating</label>
+                                        <div className="relative">
+                                            <select
+                                                value={ feedbackForm.feedbackTitle }
+                                                onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedbackTitle: e.target.value } ) }
+                                                className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                            >
+                                                <option value="">Select a rating</option>
+                                                { feedbackTitles.map( title => (
+                                                    <option key={ title } value={ title }>
+                                                        { title }
+                                                    </option>
+                                                ) ) }
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className='w-[48%]'>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Star Rating</label>
                                         <select
-                                            value={ feedbackForm.feedbackTitle }
-                                            onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedbackTitle: e.target.value } ) }
-                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                            value={ feedbackForm.starRating || "" }
+                                            onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, starRating: Number( e.target.value ) } ) }
+                                            className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="">Select a rating</option>
-                                            { feedbackTitles.map( title => (
-                                                <option key={ title } value={ title }>
-                                                    { title }
+                                            <option value="">Select rating (1 to 5)</option>
+                                            { [ 1, 2, 3, 4, 5 ].map( ( star ) => (
+                                                <option key={ star } value={ star }>
+                                                    { `${ star } Star${ star > 1 ? "s" : "" }` }
                                                 </option>
                                             ) ) }
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -736,35 +768,63 @@ export const ScheduledInterview = () => {
                                         value={ feedbackForm.feedback }
                                         onChange={ ( e ) => setFeedbackForm( { ...feedbackForm, feedback: e.target.value } ) }
                                         rows="5"
-                                        className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
                                         placeholder="Provide specific examples and constructive feedback about the candidate's performance..."
                                     />
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
-                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                                        <div className="space-y-1 text-center">
-                                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                            </svg>
-                                            <div className="flex text-sm text-gray-600">
-                                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                    <span>Upload a file</span>
-                                                    <input
-                                                        id="file-upload"
-                                                        name="file-upload"
-                                                        type="file"
-                                                        className="sr-only"
-                                                        onChange={ handleFileUpload }
-                                                    />
-                                                </label>
-                                                <p className="pl-1">or drag and drop</p>
+                                    <div className="mt-1 flex flex-col space-y-4">
+                                        <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                                            <div className="space-y-1 text-center">
+                                                { !preview && (
+                                                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                ) }
+
+                                                { preview && (
+                                                    <div className="relative">
+                                                        <img
+                                                            src={ preview }
+                                                            alt="Preview"
+                                                            className="mx-auto h-32 w-auto object-contain rounded-md"
+                                                        />
+                                                        <button
+                                                            onClick={ () => { setFile( null ); setPreview( null ); } }
+                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ) }
+
+                                                <div className="flex text-sm text-gray-600 justify-center">
+                                                    <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                                        <span>{ file ? "Replace file" : "Upload a file" }</span>
+                                                        <input
+                                                            id="file-upload"
+                                                            name="file-upload"
+                                                            type="file"
+                                                            className="sr-only"
+                                                            onChange={ "" }
+                                                            accept="image/*, application/pdf, .doc, .docx"
+                                                        />
+                                                    </label>
+                                                    { !file && <p className="pl-1">or drag and drop</p> }
+                                                </div>
+
+                                                { file && (
+                                                    <p className="text-sm text-gray-500 mt-2">
+                                                        Selected: { file.name } ({ ( file.size / 1024 ).toFixed( 1 ) } KB)
+                                                    </p>
+                                                ) }
+                                                { !file && <p className="text-xs text-gray-500">PDF, DOC, DOCX, Images up to 10MB</p> }
                                             </div>
-                                            <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
