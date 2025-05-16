@@ -38,7 +38,6 @@ export const ScheduledInterview = () => {
         reasonRescheduled: "",
         company_id: "",
         starRating: "",
-        attachment: ""
     } );
 
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
@@ -46,7 +45,6 @@ export const ScheduledInterview = () => {
     const [ feedbackForm, setFeedbackForm ] = useState( {
         feedbackTitle: "",
         feedback: "",
-        attachment: "",
         starRating: "",
     } );
 
@@ -181,7 +179,6 @@ export const ScheduledInterview = () => {
                         interviewerID: editForm.interviewerID,
                         reasonRescheduled: editForm.reasonRescheduled,
                         starRating: feedbackForm.starRating,
-                        attachment: feedbackForm.attachment,
                     } ),
                 }
             );
@@ -219,7 +216,6 @@ export const ScheduledInterview = () => {
                 _id: feedbackData?._id || selectedInterview?._id || "",
                 feedbackTitle: feedbackData?.feedbackTitle || selectedInterview?.feedbackTitle || "",
                 feedback: feedbackForm?.feedback || selectedInterview?.feedback || "",
-                attachment: feedbackForm?.attachment || selectedInterview?.attachment || null,
                 starRating: feedbackForm?.starRating || selectedInterview?.starRating || "",
             } );
 
@@ -231,8 +227,6 @@ export const ScheduledInterview = () => {
             setFeedbackForm( {
                 feedbackTitle: selectedInterview?.feedbackTitle || "",
                 feedback: selectedInterview?.feedback || "",
-                attachment: selectedInterview?.attachment || "",
-
             } );
         }
 
@@ -269,7 +263,6 @@ export const ScheduledInterview = () => {
                 feedbackTitle: feedbackForm.feedbackTitle,
                 feedback: feedbackForm.feedback,
                 starRating: feedbackForm.starRating,
-                attachment: feedbackForm.attachment || null, // Include this safely
                 interviewId: detailedInterview._id,
                 applicationID: detailedInterview.applicationID._id,
             };
@@ -298,47 +291,6 @@ export const ScheduledInterview = () => {
             console.error( "Error submitting feedback:", error );
             toast.dismiss( loadingToast );
             toast.error( error.message || "Error submitting feedback. Please try again." );
-        }
-    };
-
-    // Handle file selection
-    const handleFileUpload = ( e ) => {
-        const file = e.target.files[ 0 ];
-        setFeedbackForm( ( prev ) => ( { ...prev, attachment: file } ) );
-    };
-
-    // Fetch feedback details (if needed)
-    const fetchFeedbackDetails = async ( interviewId ) => {
-        try {
-            if ( !interviewId ) {
-                toast.error( "Interview ID is required." );
-                return;
-            }
-
-            console.log( "Fetching feedback for interviewId:", interviewId );
-
-            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/get-feedback/${ interviewId }` );
-
-            if ( !response.ok ) {
-                const errorData = await response.json().catch( () => null );
-                throw new Error( errorData?.message || "No feedback found" );
-            }
-
-            const data = await response.json();
-            console.log( "Fetched feedback:", data );
-
-            // Populate the feedback form if data exists
-            setFeedbackForm( {
-                feedbackTitle: data.feedbackTitle || "",
-                feedback: data.feedback || "",
-                attachment: data.attachment || "",
-                starRating: data.starRating || "",
-
-            } );
-
-        } catch ( error ) {
-            console.error( "Error fetching feedback:", error );
-            // toast.error(error.message || "Failed to fetch feedback details.");
         }
     };
 
@@ -825,6 +777,7 @@ export const ScheduledInterview = () => {
                                         </div>
                                     </div>
                                 </div> */}
+
                             </div>
                         </div>
 
