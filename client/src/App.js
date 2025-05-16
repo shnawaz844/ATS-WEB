@@ -39,7 +39,8 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import axios from 'axios';
 import Banner from './components/Home/Banner/Banner'
 
-const BASE_URL = process.env.REACT_APP_BASE_URL
+
+
 // Layout component to ensure Navbar and Footer appear on all pages
 const Layout = () => {
   return (
@@ -60,6 +61,8 @@ function App() {
   const [ companyLoading, setCompanyLoading ] = useState( true );
   const [ companyError, setCompanyError ] = useState( false );
   const [ isClearing, setIsClearing ] = useState( true );
+  const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 
   const slug = location.pathname.split( '/' )[ 1 ];
   const companyUserNameFromStorage = localStorage.getItem( 'companyUserName' );
@@ -109,7 +112,7 @@ function App() {
 
     // Fetch company details from API using companyUserName
     axios
-      .get( `${ process.env.BASE_URL }/companies/companies/${ slug }` )
+      .get( `${ BASE_URL }/companies/companies/${ slug }` )
 
       .then( res => {
         // Verify if the company ID from API matches the stored on
@@ -131,7 +134,7 @@ function App() {
       } );
   }, [ slug, companyUserNameFromStorage, companyIdFromStorage, navigate ] );
 
-  console.log( "process.env.REACT_APP_BASE_URL", process.env.REACT_APP_BASE_URL, BASE_URL )
+  console.log( "process.env.REACT_APP_BASE_URL", process.env.REACT_APP_BASE_URL )
 
   useAuth();
 

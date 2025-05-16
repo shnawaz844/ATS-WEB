@@ -12,7 +12,7 @@ import {
  */
 const fetchUsers = async ({ queryKey }) => {
   const [_key, { page, limit, search, role }] = queryKey;
-  let url = `${ process.env.BASE_URL }/users/all-users?page=${page}&limit=${limit}&search=${search}`;
+  let url = `${ process.env.REACT_APP_BASE_URL }/users/all-users?page=${page}&limit=${limit}&search=${search}`;
 
   if (role) {
     url += `&role=${role}`;
@@ -43,7 +43,7 @@ export const useUsers = ({ page, limit = 5, search = '', role }) => {
  * 2. ADD USER
  */
 const addUser = async (formData) => {
-  await axios.post(`${ process.env.BASE_URL }/auth/register`, formData);
+  await axios.post(`${ process.env.REACT_APP_BASE_URL }/auth/register`, formData);
 };
 
 export const useAddUser = () => {
@@ -63,7 +63,7 @@ export const useAddUser = () => {
  */
 const updateUser = async ({ userId, formData }) => {
   await axios.put(
-    `${ process.env.BASE_URL }/users/update-user/${userId}`,
+    `${ process.env.REACT_APP_BASE_URL }/users/update-user/${userId}`,
     formData
   );
 };

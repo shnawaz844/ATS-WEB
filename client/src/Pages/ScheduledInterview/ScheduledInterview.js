@@ -66,7 +66,7 @@ export const ScheduledInterview = () => {
 
     // Fetch statuses from the API
     useEffect( () => {
-        fetch( `${ process.env.BASE_URL }/application-types/all-application-types` )
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
             .then( response => response.json() )
             .then( data => setStatuses( data.applicationTypes ) )
             .catch( error => console.error( "Error fetching statuses:", error ) );
@@ -89,7 +89,7 @@ export const ScheduledInterview = () => {
     useEffect( () => {
         const fetchInterviewers = async () => {
             try {
-                const response = await fetch( `${ process.env.BASE_URL }/users/interviewers`, {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/users/interviewers`, {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
@@ -165,7 +165,7 @@ export const ScheduledInterview = () => {
 
         try {
             const response = await fetch(
-                `${ process.env.BASE_URL }/applicationscheduledlist/update-interview/${ detailedInterview._id }`,
+                `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/update-interview/${ detailedInterview._id }`,
                 {
                     method: "PUT",
                     headers: {
@@ -207,7 +207,7 @@ export const ScheduledInterview = () => {
         console.log( "selectedInterview", selectedInterview )
 
         try {
-            const response = await fetch( `${ process.env.BASE_URL }/interviewerfeedback/get-feedback/${ selectedInterview._id }` );
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/get-feedback/${ selectedInterview._id }` );
             if ( !response.ok ) {
                 throw new Error( "Failed to fetch feedback" );
             }
@@ -262,8 +262,8 @@ export const ScheduledInterview = () => {
         try {
             const isUpdate = feedbackForm?._id;
             const url = isUpdate
-                ? `${ process.env.BASE_URL }/interviewerfeedback/update-feedback/${ feedbackForm._id }`
-                : `${ process.env.BASE_URL }/interviewerfeedback/create-feedback`;
+                ? `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/update-feedback/${ feedbackForm._id }`
+                : `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/create-feedback`;
 
             const formData = {
                 feedbackTitle: feedbackForm.feedbackTitle,
@@ -317,7 +317,7 @@ export const ScheduledInterview = () => {
 
             console.log( "Fetching feedback for interviewId:", interviewId );
 
-            const response = await fetch( `${ process.env.BASE_URL }/interviewerfeedback/get-feedback/${ interviewId }` );
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/get-feedback/${ interviewId }` );
 
             if ( !response.ok ) {
                 const errorData = await response.json().catch( () => null );

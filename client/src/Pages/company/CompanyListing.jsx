@@ -66,7 +66,7 @@ const CompanyListing = () => {
     const fetchCompanies = async () => {
         try {
             const response = await fetch(
-                `${ process.env.BASE_URL }/companies/get?page=${ currentPage }&limit=${ itemsPerPage }&search=${ encodeURIComponent(
+                `${ process.env.REACT_APP_BASE_URL }/companies/get?page=${ currentPage }&limit=${ itemsPerPage }&search=${ encodeURIComponent(
                     searchTerm
                 ) }`
             )
@@ -182,7 +182,7 @@ const CompanyListing = () => {
         if ( isEditing ) {
             // Update existing company via PUT API call
             try {
-                const response = await fetch( `${ process.env.BASE_URL }/companies/update/${ editId }`, {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/companies/update/${ editId }`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify( formData ),
@@ -200,7 +200,7 @@ const CompanyListing = () => {
         } else {
             // Add a new company via POST API call
             try {
-                const response = await fetch( `${ process.env.BASE_URL }/companies/create`, {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/companies/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify( formData ),

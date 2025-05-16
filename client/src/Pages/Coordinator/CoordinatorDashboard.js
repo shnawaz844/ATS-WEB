@@ -11,9 +11,9 @@ export const CoordinatorDashboard = () => {
 
     useEffect(() => {
         try {
-            fetch( `${ process.env.BASE_URL }/jobs/all-jobs`).then((res) => res.json()).then((data) => setJobs(data))
+            fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/all-jobs`).then((res) => res.json()).then((data) => setJobs(data))
 
-            fetch( `${ process.env.BASE_URL }/users/all-users`).then((res) => res.json()).then((data) => {
+            fetch( `${ process.env.REACT_APP_BASE_URL }/users/all-users`).then((res) => res.json()).then((data) => {
                 let recruiterData = data.filter((user) => user.userType === 1 );
                 setRecruiters(recruiterData);
             })

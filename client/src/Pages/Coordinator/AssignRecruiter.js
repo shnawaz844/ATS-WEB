@@ -20,8 +20,8 @@ export const AssignRecruiter = () => {
 
     useEffect(() => {
         try {
-            fetch( `${ process.env.BASE_URL }/jobs/current-job/${id}`).then((res) => res.json()).then((data) => setJob(data))
-            fetch( `${ process.env.BASE_URL }/users/all-users`).then((res) => res.json()).then((data) => {
+            fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/current-job/${id}`).then((res) => res.json()).then((data) => setJob(data))
+            fetch( `${ process.env.REACT_APP_BASE_URL }/users/all-users`).then((res) => res.json()).then((data) => {
                 let recruiterData = data.filter((user) => user.isAssigned === false && user.role === "recruiter");
                 setRecruiters(recruiterData);
             })
@@ -46,7 +46,7 @@ export const AssignRecruiter = () => {
         console.log("Form submitted");
         const newData = {...data, jobID:id};
         console.log(newData);
-        fetch(`${ process.env.BASE_URL }/recruiter/post-recruiter`, {
+        fetch(`${ process.env.REACT_APP_BASE_URL }/recruiter/post-recruiter`, {
             method: "POST",
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(newData)
@@ -58,13 +58,13 @@ export const AssignRecruiter = () => {
 
         console.log(data.recruiterID);
 
-        fetch( `${ process.env.BASE_URL }/users/user/${data.recruiterID}`).then((res) => res.json()).then((data) => {
+        fetch( `${ process.env.REACT_APP_BASE_URL }/users/user/${data.recruiterID}`).then((res) => res.json()).then((data) => {
             let recruiterData = data
             setSelectedRecruiter(recruiterData);
             // console.log(data);
         })
         
-        fetch( `${ process.env.BASE_URL }/users/update-user/${data.recruiterID}`, {
+        fetch( `${ process.env.REACT_APP_BASE_URL }/users/update-user/${data.recruiterID}`, {
             method: "PUT",
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({

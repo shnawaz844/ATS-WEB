@@ -153,7 +153,7 @@ export const Navbar = () => {
   }, [ location, loginData ] );
   const logoutHandler = async () => {
     try {
-      const res = await fetch( `${ process.env.BASE_URL }/auth/logout`, {
+      const res = await fetch( `${ process.env.REACT_APP_BASE_URL }/auth/logout`, {
         method: "POST",
       } )
       const result = await res.json()

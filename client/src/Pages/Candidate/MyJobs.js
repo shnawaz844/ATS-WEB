@@ -41,7 +41,7 @@ const MyJobs = () => {
             setIsLoading( true );
             if ( !loginData?._id ) return;
             const res = await fetch(
-                `${ process.env.BASE_URL }/application/candidate/${ loginData._id }?page=${ currentPage }&limit=${ limit }`
+                `${ process.env.REACT_APP_BASE_URL }/application/candidate/${ loginData._id }?page=${ currentPage }&limit=${ limit }`
             );
             const data = await res.json();
             setApplications( data.applications );
@@ -132,7 +132,7 @@ const MyJobs = () => {
             }
 
             const response = await fetch(
-                `${ process.env.BASE_URL }/application/update-candidate-application/${ selectedApp._id }`,
+                `${ process.env.REACT_APP_BASE_URL }/application/update-candidate-application/${ selectedApp._id }`,
                 {
                     method: 'PUT',
                     body: formData

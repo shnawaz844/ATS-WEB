@@ -15,7 +15,7 @@ const CandidateDetailsPage = () => {
     useEffect(() => {
         const fetchApplicationDetails = async () => {
             try {
-                const response = await fetch( `${ process.env.BASE_URL }/application/candidate-details/${candidateId}/${jobId}`);
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/candidate-details/${candidateId}/${jobId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Failed to fetch application data');

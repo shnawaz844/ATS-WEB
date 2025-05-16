@@ -25,7 +25,7 @@ const fetchAssignedInterviews = async ( { queryKey } ) => {
         params.filterStatus = filterStatus;
     }
 
-    const response = await axios.get( `${ process.env.BASE_URL }/applicationscheduledlist/scheduled-interviewer-app`, {
+    const response = await axios.get( `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app`, {
         params,
         headers: {
             'company_id': companyId,

@@ -32,7 +32,7 @@ const AllInterviews = () => {
 
   // Fetch statuses from API
   useEffect( () => {
-    fetch( `${ process.env.BASE_URL }/application-types/all-application-types` )
+    fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
       .then( response => response.json() )
       .then( data => setStatuses( data.applicationTypes ) )
       .catch( error => console.error( "Error fetching statuses:", error ) );
@@ -175,7 +175,7 @@ const AllInterviews = () => {
 
   const handleStatusChange = async ( feedbackId, newStatus ) => {
     try {
-      const response = await fetch( `${ process.env.BASE_URL }/applicationscheduledlist/update-interview/${ feedbackId }`, {
+      const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/update-interview/${ feedbackId }`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
