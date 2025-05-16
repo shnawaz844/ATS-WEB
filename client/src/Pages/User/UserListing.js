@@ -99,7 +99,7 @@ const UserListing = () => {
   const fetchCompanies = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/companies/get`
+        `${ process.env.BASE_URL }/companies/get`
       )
       if (response.ok) {
         const data = await response.json()

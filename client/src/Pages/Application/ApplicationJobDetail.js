@@ -20,11 +20,11 @@ const ApplicationJobDetail = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const jobRes = await fetch(`http://localhost:8080/jobs/current-job/${id}`);
+                const jobRes = await fetch( `${ process.env.BASE_URL }/jobs/current-job/${id}`);
                 if (!jobRes.ok) throw new Error('Error fetching job data');
                 const jobData = await jobRes.json();
 
-                const appsRes = await fetch(`http://localhost:8080/application/job/${id}?page=${page}&limit=${limit}&search=${search}`);
+                const appsRes = await fetch( `${ process.env.BASE_URL }/application/job/${id}?page=${page}&limit=${limit}&search=${search}`);
                 if (!appsRes.ok) throw new Error('Error fetching applications');
                 const appsData = await appsRes.json();
 

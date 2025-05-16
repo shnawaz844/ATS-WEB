@@ -4,7 +4,7 @@ const fetchFeedbacks = async ({ queryKey }) => {
     const [, page, limit] = queryKey;
     console.log("Fetching feedbacks with params:", { page, limit });
 
-    const response = await fetch(`http://localhost:8080/interviewerfeedback/get-feedbacks?page=${page}&limit=${limit}`);
+    const response = await fetch( `${ process.env.BASE_URL }/interviewerfeedback/get-feedbacks?page=${page}&limit=${limit}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch feedbacks");

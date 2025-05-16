@@ -68,7 +68,7 @@ const ApplicationList = () => {
     useEffect( () => {
         const fetchInterviewers = async () => {
             try {
-                const response = await fetch( "http://localhost:8080/users/interviewers", {
+                const response = await fetch( `${ process.env.BASE_URL }/users/interviewers`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -185,7 +185,7 @@ const ApplicationList = () => {
         };
 
         try {
-            const response = await fetch( "http://localhost:8080/applicationscheduledlist/interviewer-app", {
+            const response = await fetch( `${ process.env.BASE_URL }/applicationscheduledlist/interviewer-app`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -39,7 +39,7 @@ export const JobDetails = () => {
 
   // 2. Fetch the job details
   useEffect( () => {
-    fetch( `http://localhost:8080/jobs/current-job/${ id }` )
+    fetch( `${ process.env.BASE_URL }/jobs/current-job/${ id }` )
       .then( ( res ) => res.json() )
       .then( ( data ) => setJob( data ) )
       .catch( ( err ) => console.error( "Error fetching job data:", err ) );
