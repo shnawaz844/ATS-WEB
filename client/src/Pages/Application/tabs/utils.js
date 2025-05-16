@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 // Map Tailwind color names to actual color values
 export const getStatusColor = (status) => {
     const colorMapping = {
@@ -27,6 +29,51 @@ export const getStatusColor = (status) => {
     // Ensure a positive index within fallbackColors array bounds.
     const index = Math.abs(hash) % fallbackColors.length;
     return fallbackColors[index];
+};
+
+export const CustomSelect = ( { options, selected, setSelected } ) => {
+    const [ open, setOpen ] = useState( false );
+
+    return (
+        <div className="relative w-64">
+            <button
+                onClick={ () => setOpen( !open ) }
+                className="w-full bg-gray-200 text-left px-4 py-2 rounded-xl focus:outline-none"
+            >
+                { selected || "Select an option" }
+            </button>
+
+            { open && (
+                <ul className="absolute z-10 w-full mt-1 bg-white border rounded-xl shadow-lg max-h-60 overflow-auto">
+                    { options.map( ( option, index ) => {
+                        const colorName = getStatusColor( option );
+                        const bgColor = getColorStyles( colorName, 100 ); // background on idle
+                        const hoverColor = getColorStyles( colorName, 500 ); // background on hover
+                        const textColor = getColorStyles( colorName, 800 ); // text color
+
+                        return (
+                            <li
+                                key={ index }
+                                onClick={ () => {
+                                    setSelected( option );
+                                    setOpen( false );
+                                } }
+                                style={ {
+                                    backgroundColor: bgColor,
+                                    color: textColor,
+                                } }
+                                className="px-4 py-2 cursor-pointer transition-colors"
+                                onMouseEnter={ ( e ) => ( e.currentTarget.style.backgroundColor = hoverColor ) }
+                                onMouseLeave={ ( e ) => ( e.currentTarget.style.backgroundColor = bgColor ) }
+                            >
+                                { option }
+                            </li>
+                        );
+                    } ) }
+                </ul>
+            ) }
+        </div>
+    );
 };
 
 // Map Tailwind color names to actual color values

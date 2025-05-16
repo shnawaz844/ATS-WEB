@@ -1,8 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/connectDB.js";
-import cors from "cors";
 import cookieParser from "cookie-parser";
+import cors from 'cors';
 
 
 const app = express();
@@ -14,7 +14,7 @@ connectDB();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use( cors() );
 app.use(cookieParser());
 
 // Import routes
@@ -41,8 +41,7 @@ app.use("/auth", Auth);
 app.use("/application-types", applicationTypesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
-app.use("/companies", companyRoutes)
-app.use("/companies", companyRoutes)
+app.use("/companies", companyRoutes),
 app.use("/applicationscheduledlist", applicationlistRoutes);
 app.use("/interviewerfeedback", feedbackRoutes);
 // app.use("/interview-result", resultRoutes)

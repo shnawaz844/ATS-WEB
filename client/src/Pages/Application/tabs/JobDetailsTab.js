@@ -1,6 +1,35 @@
 import React from 'react';
 
 const JobDetailsTab = ({ job }) => {
+
+  const capitalizeFirstLetter = ( string ) => {
+    return string ? string.charAt( 0 ).toUpperCase() + string.slice( 1 ) : '';
+  };
+
+  // Function to format number in Indian Rupee format (e.g., 1,00,000)
+  const formatIndianRupee = ( num ) => {
+    if ( !num ) return "0";
+
+    // Convert to string and remove any non-digit characters
+    const numStr = num.toString().replace( /[^\d]/g, "" );
+
+    // Handle the case if it's just 0
+    if ( parseInt( numStr ) === 0 ) return "0";
+
+    let lastThree = numStr.substring( numStr.length - 3 );
+    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+    if ( otherNumbers !== '' ) {
+      // Add commas after every two digits in the other numbers part
+      lastThree = ',' + lastThree;
+    }
+
+    // Format remaining digits with commas after every 2 digits
+    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+    return formattedOtherNumbers + lastThree;
+  };
+
   if (!job) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
@@ -53,10 +82,10 @@ const JobDetailsTab = ({ job }) => {
       <div className="mb-8 border-b pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{title || 'N/A'}</h1>
-            <p className="mt-1 text-sm text-gray-500">Job ID: {jobID || 'N/A'}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{ capitalizeFirstLetter(title )|| 'N/A'}</h1>
+            <p className="mt-1 text-sm text-black">Job ID: {jobID || 'N/A'}</p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(status)}`}>
+          <span className={`px-3 py-1 bg-slate-700 rounded-full text-sm text-white font-medium ${getStatusStyle(status)}`}>
             {status || 'N/A'}
           </span>
         </div>
@@ -66,7 +95,7 @@ const JobDetailsTab = ({ job }) => {
         {/* Main Details Section */}
         <div className="md:col-span-2 space-y-6">
           {/* Job Overview */}
-          <section className="bg-white rounded-lg border p-6 space-y-4">
+          <section className="bg-slate-50 rounded-xl border p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -95,7 +124,7 @@ const JobDetailsTab = ({ job }) => {
           </section>
 
           {/* Location Details */}
-          <section className="bg-white rounded-lg border p-6">
+          <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -125,7 +154,7 @@ const JobDetailsTab = ({ job }) => {
           </section>
 
           {/* Job Description */}
-          <section className="bg-white rounded-lg border p-6">
+          <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -139,7 +168,7 @@ const JobDetailsTab = ({ job }) => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Requirements Card */}
-          <section className="bg-white rounded-lg border p-6">
+          <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -157,13 +186,13 @@ const JobDetailsTab = ({ job }) => {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Compensation</p>
-                <p className="font-medium">{compensation || 'N/A'}</p>
+                <p className="font-medium">{ formatIndianRupee(compensation) || 'N/A'}</p>
               </div>
             </div>
           </section>
 
           {/* Contact Card */}
-          <section className="bg-white rounded-lg border p-6">
+          <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

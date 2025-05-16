@@ -161,12 +161,14 @@ const UserListing = () => {
   console.log("formData", formData);
 
   return (
-    <div className="max-w-full mx-auto px-4 py-6 h-full bg-gray-50">
-      <div className="bg-white rounded-xl shadow-md p-6 transition-all duration-300 hover:shadow-lg">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <div className="flex items-center space-x-2">
-            <Users className="h-6 w-6 text-indigo-600" />
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+    <div className="px-8 py-4 w-full min-h-screen"
+      style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+    >
+      <div className="max-w-screen-2xl">
+        <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+          <div className="flex items-center w-full gap-4">
+            <Users className="h-6 w-6 text-white" />
+            <h1 className="text-2xl font-bold text-white">User Management</h1>
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -177,13 +179,13 @@ const UserListing = () => {
                 placeholder="Search users..."
                 value={search}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                className="w-[20vw] pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               />
             </div>
 
             <button
               onClick={handleOpenAddDialog}
-              className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 whitespace-nowrap shadow-sm"
+              className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-600 hover:text-white border border-white transition-colors duration-200 whitespace-nowrap shadow-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               <span className="font-medium">Add User</span>
@@ -212,11 +214,11 @@ const UserListing = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                      <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold text-lg shadow-md">
                         {user.userName.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{user.userName}</h3>
+                        <h3 className="font-semibold text-gray-900 text-lg">{ capitalizeFirstLetter(user.userName)}</h3>
                         <p className="text-sm text-gray-600">{user.email}</p>
                       </div>
                     </div>
@@ -282,8 +284,8 @@ const UserListing = () => {
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage <= 1}
                   className={`flex items-center px-4 py-2 text-sm rounded-lg border ${currentPage <= 1
-                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gray-400 text-white border-gray-200 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
                     }`}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
@@ -291,7 +293,7 @@ const UserListing = () => {
                 </button>
 
                 <div className="flex items-center">
-                  <span className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 font-medium rounded-lg">
+                  <span className="px-3 py-1 text-sm bg-gray-200 text-black font-medium rounded-xl">
                     Page {currentPage} of {totalPages}
                   </span>
                 </div>
@@ -300,8 +302,8 @@ const UserListing = () => {
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
                   className={`flex items-center px-4 py-2 text-sm rounded-lg border ${currentPage >= totalPages
-                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
                     }`}
                 >
                   Next

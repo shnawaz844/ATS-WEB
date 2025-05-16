@@ -27,8 +27,10 @@ const CompanySchema = new mongoose.Schema({
     website: {
         type: String,
         default: false
-    }
-});
+    },
+},
+    { timestamps: true }
+);
 
 const Company = mongoose.model('Company', CompanySchema);
 

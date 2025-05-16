@@ -1,35 +1,55 @@
 import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-const fetchAssignedInterviews = async ({ queryKey }) => {
-    const [, page, limit] = queryKey;
-    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-    console.log("Fetching data with params:", { page, limit });
+const fetchAssignedInterviews = async ( { queryKey } ) => {
+    const [ , page, limit, searchTerm, filterStatus ] = queryKey;
+    const user = JSON.parse( localStorage.getItem( "user" ) );
+    const companyId = user?.company_id;
 
-    const response = await axios.get("http://localhost:8080/applicationscheduledlist/scheduled-interviewer-app", {
-        params: { page, limit },
+    console.log( "Fetching data with params:", { page, limit, searchTerm, filterStatus } );
+
+    // Prepare params object
+    const params = {
+        page,
+        limit
+    };
+
+    // Only add searchTerm if it's not empty
+    if ( searchTerm && searchTerm.trim() !== '' )
+    {
+        params.searchTerm = searchTerm;
+    }
+
+    // Only add filterStatus if it's not 'all'
+    if ( filterStatus && filterStatus !== 'all' )
+    {
+        params.filterStatus = filterStatus;
+    }
+
+    const response = await axios.get( "http://localhost:8080/applicationscheduledlist/scheduled-interviewer-app", {
+        params,
         headers: {
             'company_id': companyId,
         }
-    });
+    } );
 
-    console.log("Response Data:", response.data);
     return response.data;
 };
 
-
-const useScheduledInterview = (page, limit) => {
+const useScheduledInterview = ( page, limit, search, filterStatus ) => {
     const queryClient = useQueryClient();
+
     // Fetch assigned interviews with pagination
-    const { data: assignedInterviews = [], error, isLoading } = useQuery({
-        queryKey: ["assignedInterviews", page, limit], // Include page & limit in the queryKey
+    const { data: assignedInterviews = [], error, isLoading } = useQuery( {
+        queryKey: [ "assignedInterviews", page, limit, search, filterStatus ],
         queryFn: fetchAssignedInterviews,
         keepPreviousData: true, // Helps with smooth pagination
-    });
+    } );
 
-    // Mutation for refetching after updates
+    // Function to refetch data
     const refetchAssignedInterviews = () => {
-        queryClient.invalidateQueries(["assignedInterviews"]);
+        queryClient.invalidateQueries( [ "assignedInterviews" ] );
     };
 
     return { assignedInterviews, error, isLoading, refetchAssignedInterviews };

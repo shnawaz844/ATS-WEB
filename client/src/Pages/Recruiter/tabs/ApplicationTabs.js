@@ -7,7 +7,7 @@ import OtherApplicationsTab from './OtherApplicationsTab';
 const ApplicationTabs = ( { activeTab, setActiveTab, applicationData } ) => {
     const tabs = [
         { id: 'resume', label: 'CV / Resume' },
-        { id: 'details', label: 'Application Details' },
+        { id: 'details', label: 'Applicant Details' },
         { id: 'qa', label: 'Q&A' },
         { id: 'other', label: 'Other Applications' }
     ];

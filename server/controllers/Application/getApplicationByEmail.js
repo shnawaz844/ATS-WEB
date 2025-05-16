@@ -1,11 +1,11 @@
 import Application from '../../models/Application.js';
+// import InterviewSchedule from '../../models/InterviewSchedule.js';
 
 const getApplicationByEmail = async ( req, res ) => {
     try {
         const email = req.params.email;
         let { page = 1, limit = 20, search = '' } = req.query;
         let { company_id } = req.headers;
-
 
         // Convert page & limit to numbers
         page = parseInt( page );
@@ -25,6 +25,7 @@ const getApplicationByEmail = async ( req, res ) => {
                     convertedJobId: { $toObjectId: "$jobID" },
                     convertedCandidateId: { $toObjectId: "$candidateID" },
                     company_id: 1,
+                    createdAt: 1,
                 }
             },
             {
@@ -61,6 +62,23 @@ const getApplicationByEmail = async ( req, res ) => {
                 }
             },
             {
+                $lookup: {
+                    from: 'interviewschedules',
+                    localField: '_id', // Matching _id of the application with the applicationID in the InterviewSchedule
+                    foreignField: 'applicationID', // applicationID in InterviewSchedule
+                    as: 'interviewDetails'
+                }
+            },
+            {
+                $match: {
+                    'interviewDetails': { $size: 0 } // Excluding applications that have a related interview
+                }
+            },
+            // Add sorting stage to sort applications by 'createdAt' in descending order
+            {
+                $sort: { createdAt: -1 } // Sort by createdAt in descending order to get new applications first
+            },
+            {
                 $facet: {
                     metadata: [ { $count: "totalCount" } ],
                     data: [ { $skip: ( page - 1 ) * limit }, { $limit: limit } ]
@@ -80,7 +98,7 @@ const getApplicationByEmail = async ( req, res ) => {
         }
 
         res.status( 200 ).json( {
-            applications, // Now the applications array should include the company_id in candidateDetails
+            applications, // Applications now have the "hasInterviewScheduled" field
             totalCount,
             currentPage: page,
             totalPages: Math.ceil( totalCount / limit ),

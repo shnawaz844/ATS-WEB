@@ -3,7 +3,7 @@ import Job from '../../models/Job.js';
 
 const getAllApplicationsGroupedByJob = async ( req, res ) => {
     try {
-        let { page = 1, limit = 6, title, city, locationType, type, scheduleType, hireType } = req.query;
+        let { page = 1, limit = 6, title, city, locationType, type, scheduleType, hireType, } = req.query;
         let { company_id } = req.headers;
 
         const pageNumber = parseInt( page, 10 ) || 1;
@@ -25,10 +25,10 @@ const getAllApplicationsGroupedByJob = async ( req, res ) => {
         // Step 2: Get all jobs based on filters (or all jobs if no filters)
         let filteredJobs = [];
         if ( Object.keys( jobFilter ).length > 0 ) {
-            filteredJobs = await Job.find( jobFilter );
+            filteredJobs = await Job.find( jobFilter ).sort( { createdAt: -1 } );;
             console.log( `Found ${ filteredJobs.length } jobs matching filters` );
         } else {
-            filteredJobs = await Job.find( {} );
+            filteredJobs = await Job.find( {} ).sort( { createdAt: -1 } );
             console.log( `Found ${ filteredJobs.length } total jobs (no filters applied)` );
         }
 

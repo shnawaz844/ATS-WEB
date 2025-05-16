@@ -1,5 +1,6 @@
 // controllers/Company/getCompanys.js
 
+import { parse } from 'dotenv';
 import Company from '../../models/company.js';
 
 const getCompanies = async (req, res) => {
@@ -10,12 +11,16 @@ const getCompanies = async (req, res) => {
     // Convert page & limit to numbers
     page = parseInt(page);
     limit = parseInt(limit);
+    // search = parseInt(search);
 
     // Build a query for searching CompanyName or email
     const query = {
       $or: [
-        { CompanyName: { $regex: search, $options: 'i' } },
+        { CompanyUserName: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
+        { address: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+
       ],
     };
 
@@ -24,6 +29,7 @@ const getCompanies = async (req, res) => {
 
     // Find Companys with pagination and search
     const Companies = await Company.find(query)
+      .sort( { createdAt: -1 } )
       .skip((page - 1) * limit)
       .limit(limit);
 

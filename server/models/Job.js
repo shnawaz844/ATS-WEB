@@ -96,7 +96,7 @@ const JobSchema = new mongoose.Schema({
     }],
     company_id: { type: String, required: true }
 
-});
+}, { timestamps: true } );
 
 const Job = mongoose.model('Job', JobSchema);
 

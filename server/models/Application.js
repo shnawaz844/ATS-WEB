@@ -23,6 +23,10 @@ const ApplicationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    emailInfo: {
+        type: String,
+        required: true,
+    },
     experience:{
         type: String,
         required: true,

@@ -27,6 +27,7 @@ const getCandidateAppDetail = async (req, res) => {
 
         // Retrieve applications with pagination & population
         const applications = await Application.findOne(filter)
+            .sort( { createdAt: -1 } )
             .populate('candidateID')
             .populate('jobID')
             .skip(skip)

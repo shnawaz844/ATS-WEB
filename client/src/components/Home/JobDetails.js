@@ -14,7 +14,8 @@ import {
   Building,
   Share2,
   Bookmark,
-  ChevronLeft
+  ChevronLeft,
+  IndianRupee
 } from "lucide-react";
 
 export const JobDetails = () => {
@@ -31,6 +32,10 @@ export const JobDetails = () => {
       setLoginData( user );
     }
   }, [] );
+
+  const capitalizeFirstLetter = ( string ) => {
+    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  };
 
   // 2. Fetch the job details
   useEffect( () => {
@@ -55,6 +60,29 @@ export const JobDetails = () => {
     // Here you would add logic to save bookmark to user's profile
   };
 
+  const formatIndianRupee = ( num ) => {
+    if ( !num ) return "0";
+
+    // Convert to string and remove any non-digit characters
+    const numStr = num.toString().replace( /[^\d]/g, "" );
+
+    // Handle the case if it's just 0
+    if ( parseInt( numStr ) === 0 ) return "0";
+
+    let lastThree = numStr.substring( numStr.length - 3 );
+    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
+
+    if ( otherNumbers !== '' ) {
+      // Add commas after every two digits in the other numbers part
+      lastThree = ',' + lastThree;
+    }
+
+    // Format remaining digits with commas after every 2 digits
+    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
+
+    return formattedOtherNumbers + lastThree;
+  };
+
   if ( !job ) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -68,10 +96,12 @@ export const JobDetails = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50">
+    <div className="px-8 py-4 w-full min-h-screen"
+      style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+    >
       <div className="mb-6">
         <button
-          className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
           onClick={ () => window.history.back() }
         >
           <ChevronLeft size={ 18 } />
@@ -82,18 +112,18 @@ export const JobDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* -- Left: Job Details Section -- */ }
         <div className="lg:col-span-8 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="border-b border-gray-100">
+          <div className="border-b border-gray-100 bg-gray-700">
             <div className="p-8">
               <div className="flex justify-between items-start">
                 <div>
-                  <div className="flex items-center space-x-2 text-sm text-blue-600 font-medium mb-2">
+                  <div className="flex items-center space-x-2 text-sm text-white font-medium mb-2">
                     <Briefcase size={ 16 } />
                     <span>{ job.department || "Full-time" }</span>
                   </div>
-                  <h1 className="text-3xl font-bold text-gray-800 mb-3">
-                    { job.title }
+                  <h1 className="text-3xl font-bold text-white mb-3">
+                    { capitalizeFirstLetter(job.title) }
                   </h1>
-                  <div className="flex flex-wrap items-center gap-3 text-gray-600 text-sm mb-4">
+                  <div className="flex flex-wrap items-center gap-3 text-white text-sm mb-4">
                     <div className="flex items-center">
                       <Building size={ 16 } className="mr-1" />
                       <span>{ job.companyName || "Company Name" }</span>
@@ -131,12 +161,12 @@ export const JobDetails = () => {
           </div>
 
           <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-blue-50 p-6 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-gray-200 p-6 rounded-xl">
               <div className="flex items-start">
-                <DollarSign size={ 20 } className="text-blue-500 mr-3 mt-1" />
+                <IndianRupee size={ 20 } className="text-blue-500 mr-3 mt-1" />
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Compensation</p>
-                  <p className="font-semibold text-gray-800">₹{ job.compensation }</p>
+                  <p className="font-semibold text-gray-800">₹{ formatIndianRupee(job.compensation) }</p>
                 </div>
               </div>
               <div className="flex items-start">

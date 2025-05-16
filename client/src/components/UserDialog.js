@@ -55,18 +55,18 @@ const UserDialog = ({
     return (
         <div
             onClick={handleOverlayClick}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300"
         >
             <div
-                className="bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all"
+                className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300"
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >
-                <div className="px-6 py-4 border-b border-gray-200">
-                    <h2 className="text-2xl font-semibold text-gray-800">
+                <div className="flex justify-center items-center p-5 border-b bg-gray-700 border border-white rounded-t-xl">
+                    <h2 className="text-2xl font-semibold text-white">
                         {dialogMode === 'add' ? 'Add New User' : 'Edit User Details'}
                     </h2>
                 </div>
-
+                <div className="max-h-[calc(90vh-150px)] overflow-y-auto">
                 <form onSubmit={onSubmit} className="p-6 space-y-6">
                     <div className="space-y-4">
                         {/* User Name Field */}
@@ -183,7 +183,7 @@ const UserDialog = ({
                         {/* Role Field */}
                         {loggedInUser.role === 'super' ? (
                             <>
-                                <input type="hidden" name="role" value="admin" />
+                                <input type="hidden" name="role" value={ formData.role = "admin" } />
                                 <p className="mb-4 text-gray-700">Role: Admin</p>
                             </>
                         ) : (
@@ -228,19 +228,21 @@ const UserDialog = ({
                         <button
                             type="button"
                             onClick={handleCloseDialog}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-4 py-2 text-sm font-medium text-black bg-gray-400 border border-gray-300 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-400 hover:text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             {dialogMode === 'add' ? 'Add User' : 'Update User'}
                         </button>
                     </div>
                 </form>
+                </div>
             </div>
+            
         </div>
     );
 };

@@ -4,7 +4,7 @@ import Feedback from "../../models/Feedback.js";
 export const updateFeedback = async (req, res) => {
     try {
         const { feedbackId } = req.params;
-        const { feedbackTitle, feedback, applicationID } = req.body;
+        const { feedbackTitle, feedback, applicationID, starRating } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(feedbackId)) {
             return res.status(400).json({ message: "Invalid feedback ID format" });
@@ -14,7 +14,7 @@ export const updateFeedback = async (req, res) => {
 
         const updatedFeedback = await Feedback.findByIdAndUpdate(
             feedbackId,
-            { feedbackTitle, feedback, applicationID },
+            { feedbackTitle, feedback, applicationID, starRating },
             { new: true }
         );
 

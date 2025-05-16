@@ -37,6 +37,10 @@ const FORM_OPTIONS = {
   ]
 };
 
+const capitalizeFirstLetter = ( string ) => {
+  return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+};
+
 const FormField = ( {
   label,
   error,
@@ -96,6 +100,12 @@ const LocationPicker = ( {
   const states = selectedCountry ? State.getStatesOfCountry( selectedCountry ) : [];
   const cities = selectedState ? City.getCitiesOfState( selectedCountry, selectedState ) : [];
 
+  const handleCityChange = ( e ) => {
+    const cityName = e.target.value;
+    setSelectedCity( cityName );  // Set selected city name
+    console.log( "Selected City: ", cityName );
+  };
+
   return (
     <div className="space-y-4">
       <FormField label="Country" error={ errors?.country }>
@@ -139,7 +149,7 @@ const LocationPicker = ( {
       <FormField label="City" error={ errors?.city }>
         <select
           value={ selectedCity }
-          onChange={ ( e ) => setSelectedCity( e.target.value ) }
+          onChange={ handleCityChange }
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           disabled={ !selectedState }
         >
@@ -246,7 +256,8 @@ export const PostJobForm = ( {
 
   // console.log( "recruitersList", recruitersList )
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen py-12"
+      style={ { background: 'linear-gradient(135deg, #ffffff, #808080)' } }>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
@@ -265,7 +276,7 @@ export const PostJobForm = ( {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormInput
-                    label="Title"
+                    label={ capitalizeFirstLetter("Title")}
                     register={ register }
                     name="title"
                     error={ errors?.title }
@@ -372,9 +383,7 @@ export const PostJobForm = ( {
                       </select>
                     </FormField>
                   ) }
-
-
-
+                  
                   <FormInput
                     label="Hiring Manager Email"
                     register={ register }
@@ -430,7 +439,7 @@ export const PostJobForm = ( {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  className="px-8 py-3 bg-gray-700 text-white font-medium hover:bg-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 >
                   { jobToEdit ? 'Update Job Post' : 'Create Job Post' }
                 </button>

@@ -4,7 +4,7 @@ import { getStatusColor, getColorStyles } from './utils';
 const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getStatusCount }) => {
     return (
         <div className="w-64 flex-shrink-0">
-            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+            <div className="bg-gray-300 p-4 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">Application Status</h3>
                 <div className="space-y-2">
                     <button

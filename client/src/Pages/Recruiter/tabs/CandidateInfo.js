@@ -4,6 +4,10 @@ import { User, Mail, Phone, MapPin, Briefcase, UserCircle2, BadgeInfo } from 'lu
 const CandidateInfo = ({ applicationData }) => {
     const { candidateID, contactInfo } = applicationData;
 
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
+
     return (
         <div className="max-w-none mx-auto rounded-xl overflow-hidden transition-shadow border-2">
             <div className="p-6 space-y-4">
@@ -38,10 +42,10 @@ const CandidateInfo = ({ applicationData }) => {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-gray-800">{candidateID?.userName || 'N/A'}</p>
+                        <p className="text-gray-800">{ capitalizeFirstLetter(candidateID?.userName )|| 'N/A'}</p>
                         <p className="text-gray-800">{candidateID?.email || 'N/A'}</p>
                         <p className="text-gray-800">{candidateID?.gender || 'N/A'}</p>
-                        <p className="text-gray-800">{candidateID?.address || 'N/A'}</p>
+                        <p className="text-gray-800">{ capitalizeFirstLetter(candidateID?.address) || 'N/A'}</p>
                         <p className="text-gray-800">{contactInfo || 'N/A'}</p>
                     </div>
                 </div>

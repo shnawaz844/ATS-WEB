@@ -10,6 +10,7 @@ export const PostJob = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const jobToEdit = location.state?.job;
+    const companyUserName = localStorage.getItem( "companyUserName" );
 
     // We store questions in state
     const [questions, setQuestions] = useState(
@@ -114,7 +115,7 @@ export const PostJob = () => {
             updateJob(formattedData, {
                 onSuccess: () => {
                     toast.success('Job updated successfully');
-                    navigate('/all-jobs');
+                    navigate(`/${companyUserName}/all-jobs`);
                 },
                 onError: () => {
                     toast.error('Failed to update job');
@@ -124,7 +125,7 @@ export const PostJob = () => {
             postJob(formattedData, {
                 onSuccess: () => {
                     toast.success('Job posted successfully');
-                    navigate('/all-jobs');
+                    navigate( `/${ companyUserName }/all-jobs` );
                 },
                 onError: () => {
                     toast.error('Failed to post job');

@@ -45,11 +45,14 @@ export const Applications = () => {
         address: ""
     });
     const [scheduledInterviews, setScheduledInterviews] = useState([]);
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+
 
     const handleOpenModal = (candidate) => {
         setSelectedCandidate(candidate);
         setIsModalOpen(true);
     };
+    
 
     const handleScheduleSubmit = () => {
         const interviewData = {
@@ -66,22 +69,31 @@ export const Applications = () => {
         console.log("New Interview Scheduled:", interviewData);
         console.log("All Scheduled Interviews:", [...scheduledInterviews, interviewData]);
     };
-    useEffect(() => {
-        const fetchInterviewers = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/users/interviewers');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+       // Fetch interviewers
+        useEffect( () => {
+            const fetchInterviewers = async () => {
+                try {
+                    const response = await fetch( "http://localhost:8080/users/interviewers", {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'company_id': companyId  // Add company_id to headers
+                        }
+                    } );
+                    if ( !response.ok ) {
+                        throw new Error( `HTTP error! Status: ${ response.status }` );
+                    }
+                    const data = await response.json();
+                    console.log( "Fetched interviewers>>>>:", data );
+                    setInterviewers( data );
+                } catch ( error ) {
+                    console.error( "Error fetching interviewers:", error.message );
                 }
-                const data = await response.json();
-                setInterviewers(data);
-            } catch (error) {
-                console.error('Error fetching interviewers:', error.message);
-            }
-        };
-
-        fetchInterviewers();
-    }, []);
+            };
+    
+            fetchInterviewers();
+        }, [] );
+        
     const handleAssign = (candidateId, interviewerId) => {
         setAssignments((prev) => ({ ...prev, [candidateId]: interviewerId }));
     };
@@ -230,17 +242,20 @@ export const Applications = () => {
 
 function RenderTableRows({ candidate, onSchedule }) {
     const tableDataCss = "border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4";
+    const capitalizeFirstLetter = ( string ) => {
+        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    };
 
     return (
         <tr className="hover:bg-gray-50">
             <th className={`${tableDataCss} text-left text-gray-700 px-3 md:px-6`}>
-                {candidate.userName}
+                { capitalizeFirstLetter(candidate.userName)}
             </th>
             <td className={`${tableDataCss} hidden md:table-cell`}>{candidate.userEmail}</td>
             <td className={`${tableDataCss} hidden md:table-cell`}>{candidate.experience}</td>
             <td className={`${tableDataCss} hidden md:table-cell`}>
                 <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {candidate.status}
+                    { capitalizeFirstLetter(candidate.status)}
                 </span>
             </td>
             <td className={`flex justify-between ${tableDataCss}`}>
