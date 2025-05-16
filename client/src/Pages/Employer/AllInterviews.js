@@ -581,7 +581,7 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */ }
         { isFeedbackModalOpen && detailedInterview && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
               <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
                 <div>
@@ -641,10 +641,14 @@ const AllInterviews = () => {
                   </div>
 
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-                    <div className="flex items-center space-x-1">
-                      { getRatingStars( feedbackForm.starRating ) }
+                  <div className="flex flex-col items-center justify-center py-3">
+                    <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
+                    <div className="flex items-center space-x-3">
+                      {/* Assuming getRatingStars is your existing function */ }
+                      {/* We're just wrapping it with styling */ }
+                      <div className="text-2xl text-amber-400 transform transition-all duration-300">
+                        { getRatingStars( feedbackForm.starRating ) }
+                      </div>
                     </div>
                   </div>
 
@@ -666,7 +670,7 @@ const AllInterviews = () => {
                     ) }
                   </div> */}
 
-                  <div className="flex justify-end pt-4 space-x-3">
+                  {/* <div className="flex justify-end pt-4 space-x-3">
                     <button
                       type="button"
                       onClick={ () => setIsFeedbackModalOpen( false ) }
@@ -681,7 +685,7 @@ const AllInterviews = () => {
                     >
                       Save Status
                     </button>
-                  </div>
+                  </div> */}
                 </form>
               </div>
             </div>
