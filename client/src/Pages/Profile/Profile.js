@@ -41,7 +41,7 @@ const Profile = () => {
       return;
     }
     try {
-      await axios.put( "http://localhost:8080/user/update-profile", user );
+      await axios.put( `${ process.env.BASE_URL }/user/update-profile`, user );
       setMessage( "Profile updated successfully!" );
     } catch ( error ) {
       setMessage( "Error updating profile" );

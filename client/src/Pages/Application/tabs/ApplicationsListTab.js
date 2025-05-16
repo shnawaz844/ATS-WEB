@@ -30,7 +30,7 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
 
     // Fetch statuses from API
     useEffect(() => {
-        fetch("http://localhost:8080/application-types/all-application-types")
+        fetch(`${ process.env.BASE_URL }/application-types/all-application-types`)
             .then(response => response.json())
             .then(data => setStatuses(data.applicationTypes))
             .catch(error => console.error("Error fetching statuses:", error));
@@ -38,7 +38,7 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
 
     const updateApplicationStatus = async (applicationId, newStatus) => {
         try {
-            const response = await fetch(`http://localhost:8080/application/update-candidate-application/${applicationId}`, {
+            const response = await fetch( `${ process.env.BASE_URL }/application/update-candidate-application/${applicationId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

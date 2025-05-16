@@ -24,7 +24,7 @@ const ApplicationList = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/application/get-application-hm/${hiringManagerEmail}`);
+        const response = await fetch( `${ process.env.BASE_URL }/application/get-application-hm/${hiringManagerEmail}`);
         if (!response.ok) throw new Error("API not available");
         const data = await response.json();
         setApplications(Array.isArray(data) ? data : []);

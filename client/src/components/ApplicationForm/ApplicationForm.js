@@ -86,7 +86,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
         formData.append( "company_id", companyId ); 
 
         try {
-            const response = await fetch("http://localhost:8080/application/add-application", {
+            const response = await fetch(`${ process.env.BASE_URL }/application/add-application`, {
                 method: "POST",
                 headers: {
                     "company_id": companyId,  // Add company_id to the headers

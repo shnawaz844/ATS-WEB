@@ -7,7 +7,7 @@ const fetchScheduledInterviews = async ({ queryKey }) => {
     // console.log("Fetching data with params:", { page, limit, interviewerEmail });
     console.log( "company_id", companyId )
 
-    const response = await axios.get("http://localhost:8080/applicationscheduledlist/scheduled-interviewer-app", {
+    const response = await axios.get(`${ process.env.BASE_URL }/applicationscheduledlist/scheduled-interviewer-app`, {
         params: { page, limit, interviewerEmail },
         headers: {
             "company_id": companyId,  // Pass company_id in headers

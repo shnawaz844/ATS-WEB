@@ -41,7 +41,7 @@ const ShortlistedApplications = ({ email }) => {
   useEffect(() => {
     const fetchShortlistedApplications = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/application/get-application-hm/${email}`);
+        const response = await fetch( `${ process.env.BASE_URL }/application/get-application-hm/${email}`);
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
         }

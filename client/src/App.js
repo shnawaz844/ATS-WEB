@@ -39,6 +39,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import axios from 'axios';
 import Banner from './components/Home/Banner/Banner'
 
+const BASE_URL = process.env.REACT_APP_BASE_URL
 // Layout component to ensure Navbar and Footer appear on all pages
 const Layout = () => {
   return (
@@ -108,7 +109,8 @@ function App() {
 
     // Fetch company details from API using companyUserName
     axios
-      .get( `http://localhost:8080/companies/companies/${ slug }` )
+      .get( `${ process.env.BASE_URL }/companies/companies/${ slug }` )
+
       .then( res => {
         // Verify if the company ID from API matches the stored on
         if ( companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
@@ -129,6 +131,7 @@ function App() {
       } );
   }, [ slug, companyUserNameFromStorage, companyIdFromStorage, navigate ] );
 
+  console.log( "process.env.REACT_APP_BASE_URL", process.env.REACT_APP_BASE_URL, BASE_URL )
 
   useAuth();
 

@@ -55,7 +55,7 @@ const AllPostedJobs = () => {
   useEffect( () => {
     const fetchCompanyDetails = async () => {
       try {
-        const response = await axios.get( `http://localhost:8080/companies/companies/${ companyUserName }` );
+        const response = await axios.get( `${ process.env.BASE_URL }/companies/companies/${ companyUserName }` );
         setCompanyDetails( response.data );
       } catch ( error ) {
         console.error( "Error fetching company details", error );
@@ -72,7 +72,7 @@ const AllPostedJobs = () => {
     if ( locationType ) params.locationType = locationType.value;
     if ( scheduleType ) params.scheduleType = scheduleType.value;
 
-    const response = await axios.get( "http://localhost:8080/jobs/all-jobs", {
+    const response = await axios.get( `${ process.env.BASE_URL }/jobs/all-jobs`, {
       params, headers: {
         company_id: companyId
       }

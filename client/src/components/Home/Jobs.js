@@ -38,7 +38,7 @@ const Jobs = () => {
         setCompanyError( false );
 
         axios
-            .get( `http://localhost:8080/companies/companies/${ slug }` )
+            .get( `${ process.env.BASE_URL }/companies/companies/${ slug }` )
             .then( res => {
                 setCompanyDetails( res.data );
                 localStorage.setItem( "companyUserName", slug );
@@ -61,7 +61,7 @@ const Jobs = () => {
         setError( null );
 
         axios
-            .get( "http://localhost:8080/jobs/all-jobs", {
+            .get( `${ process.env.BASE_URL }/jobs/all-jobs`, {
                 headers: { company_id: companyId }
             } )
             .then( res => {

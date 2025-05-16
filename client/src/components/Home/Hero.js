@@ -53,7 +53,7 @@ export const Hero = () => {
 
     // Fetch company data
     axios
-      .get( `http://localhost:8080/companies/companies/${ companyUserName }` )
+      .get( `${ process.env.BASE_URL }/companies/companies/${ companyUserName }` )
       .then( res => {
         const companyFromApi = res.data;
 
