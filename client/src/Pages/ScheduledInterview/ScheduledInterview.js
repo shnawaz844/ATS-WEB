@@ -216,7 +216,7 @@ export const ScheduledInterview = () => {
                 _id: feedbackData?._id || selectedInterview?._id || "",
                 feedbackTitle: feedbackData?.feedbackTitle || selectedInterview?.feedbackTitle || "",
                 feedback: feedbackForm?.feedback || selectedInterview?.feedback || "",
-                starRating: feedbackForm?.starRating || selectedInterview?.starRating || "",
+                starRating: feedbackForm?.starRating || selectedInterview?.starRating,
             } );
 
         } catch ( error ) {
