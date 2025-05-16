@@ -33,7 +33,7 @@ import ShortlistedApplications from './Pages/Application/ShortlistedApplication/
 import { useAuth } from './hooks/useAuth';
 import CompanyListing from './Pages/company/CompanyListing';
 import AllInterviews from './Pages/Employer/AllInterviews';
-import NotFound from './components/notfound';
+import NotFound from './Pages/NotFound';
 import CompanyNotFound from './components/CompanyNotFound';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import axios from 'axios';
@@ -63,11 +63,17 @@ function App() {
   const slug = location.pathname.split( '/' )[ 1 ];
   const companyUserNameFromStorage = localStorage.getItem( 'companyUserName' );
   const companyIdFromStorage = localStorage.getItem( 'companyId' );
-  
+  const user = localStorage.getItem( 'user' );
+
+
 
   // Clear company details from localStorage when slug is not available
   useLayoutEffect( () => {
     if ( !slug ) {
+      if ( user ) {
+        navigate( `/${ companyIdFromStorage }` );
+        return;
+      }
       localStorage.removeItem( "companyUserName" );
       localStorage.removeItem( "companyId" );
       console.log( "Cleared companyUserName from localStorage" );
@@ -89,6 +95,10 @@ function App() {
     // If slug (companyUserName) from route does not match the one stored in localStorage
     if ( companyUserNameFromStorage !== slug ) {
       console.log( 'Company mismatch or invalid company user, redirecting...' );
+      if ( user ) {
+        navigate( '/404' );
+        return;
+      }
       navigate( `/${ slug }` ); // Redirect to login page with the companyUserName
       return;
     }
@@ -101,7 +111,7 @@ function App() {
       .get( `http://localhost:8080/companies/companies/${ slug }` )
       .then( res => {
         // Verify if the company ID from API matches the stored on
-        if (companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
+        if ( companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
           console.error( "Company ID mismatch, invalid access." );
           navigate( '/404' );  // Redirect to "Company Not Found" page
         } else {
@@ -138,7 +148,7 @@ function App() {
           {/* Authentication */ }
           <Route path="/:companyUserName/login" element={ <Login /> } />
           <Route path="/login" element={ <Login /> } />
-          
+
           <Route path="/:companyUserName/signup" element={ <Register /> } />
           {/* <Route path="/:companyUserName?/signup" element={ <Register /> } /> */ }
 
@@ -211,12 +221,12 @@ function App() {
           <Route path="/:companyUserName/candidate-details/:candidateId/:jobId" element={ <CandidateDetailsPage /> } />
           <Route path="/:companyUserName/assign-recruiter/:id" element={ <AssignRecruiter /> } />
 
-        
 
-          {/* <Route path="*" element={ <NotFound /> } /> */}
+
+          <Route path="*" element={ <NotFound /> } />
         </Route>
-          {/* CompanyNotFound route */ }
-          <Route path="/404" element={ <CompanyNotFound /> } />
+        {/* CompanyNotFound route */ }
+        <Route path="/404" element={ <CompanyNotFound /> } />
       </Routes>
     </div>
 

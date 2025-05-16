@@ -648,7 +648,7 @@ const AllInterviews = () => {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
                     { feedbackForm.attachment ? (
                       <div className="flex items-center space-x-2">
@@ -664,7 +664,7 @@ const AllInterviews = () => {
                     ) : (
                       <div className="text-sm text-gray-400 italic">No attachment uploaded</div>
                     ) }
-                  </div>
+                  </div> */}
 
                   <div className="flex justify-end pt-4 space-x-3">
                     <button

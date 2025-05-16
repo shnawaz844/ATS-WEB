@@ -28,7 +28,7 @@ const DetailsTab = ({ applicationData }) => {
     return (
         <div className="border border-gray-200 p-6 rounded-xl bg-gray-400 shadow-md hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">Application Details</h2>
+                <h2 className="text-xl font-semibold text-gray-800">Applicant Details</h2>
                 <div className={`px-3 py-1 rounded-full ${bgColor} ${textColor} font-medium flex items-center space-x-1 border ${borderColor}`}>
                     <span>{icon}</span>
                     <span>{applicationData.applicationStatus || 'N/A'}</span>

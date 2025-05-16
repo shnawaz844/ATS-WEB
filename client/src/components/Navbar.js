@@ -16,6 +16,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import atslogo1URL from "../assets/img/logo1.png";
+import Cookies from "js-cookie";
 
 // Navigation Arrays with icons
 const superNavItems = [

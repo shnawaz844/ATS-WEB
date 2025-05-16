@@ -1,6 +1,6 @@
-import { useEffect, useRef, Suspense, lazy } from "react";
+import { useEffect, useRef, Suspense, lazy, useState } from "react";
 
-import ParticlesComponent from '../../components/Login/Particles'; 
+import ParticlesComponent from '../../components/Login/Particles';
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -19,78 +19,94 @@ export const Hero = () => {
   const ctaRef = useRef( null )
   const { companyUserName } = useParams();
   const navigate = useNavigate();
+  const [ companyData, setCompanyData ] = useState( null );
+  const [ isLoading, setIsLoading ] = useState( false );
 
+  // This effect handles fetching company data whenever companyUserName changes
   useEffect( () => {
-    if ( companyUserName && companyUserName !== "null" ) {
-      console.log( "this runs", companyUserName !== "null", companyUserName)
-      const storedCompanyUserName = localStorage.getItem( "companyUserName" );
-      const storedCompanyId = localStorage.getItem( "companyId" );
+    // Reset state when companyUserName changes
+    setCompanyData( null );
 
-      axios
-        .get( `http://localhost:8080/companies/companies/${ companyUserName }` )
-        .then( res => {
-          const companyFromApi = res.data;
-
-          // If stored company ID exists but doesn't match API result, redirect to 404
-          if ( storedCompanyId && companyFromApi._id !== storedCompanyId ) {
-            console.error( "Company ID mismatch, invalid access." );
-            navigate( "/404" );
-            return;
-          }
-
-          // If stored username is not set or different, only then update localStorage
-          if ( !storedCompanyUserName || storedCompanyUserName !== companyUserName ) {
-            localStorage.setItem( "companyUserName", companyUserName );
-            localStorage.setItem( "companyId", companyFromApi._id );
-          }
-
-          // Optionally: You can also set state if needed
-          // setCompanyDetails(companyFromApi);
-          // setCompanyLoading(false);
-        } )
-        .catch( err => {
-          console.error( "Invalid company slug:", err );
-          navigate( "/404" );
-        } );
-    }
-  }, [ companyUserName, navigate ] );
-
-
-  useEffect( () => {
-    if ( !companyUserName  ) {
+    if ( !companyUserName || companyUserName === "null" ) {
       const stored = localStorage.getItem( "companyUserName" );
       if ( stored && stored !== "" ) {
         navigate( `/${ stored }`, { replace: true } );
       }
+      return;
     }
+
+    // Start loading
+    setIsLoading( true );
+
+    // Get stored values for comparison
+    const storedCompanyUserName = localStorage.getItem( "companyUserName" );
+    const storedCompanyId = localStorage.getItem( "companyId" );
+    const user = localStorage.getItem( "user" );
+
+
+    if ( storedCompanyUserName !== companyUserName ) {
+      console.log( 'Company mismatch or invalid company user, redirecting...' );
+      if ( user ) {
+        return;
+      }
+    }
+
+    // Fetch company data
+    axios
+      .get( `http://localhost:8080/companies/companies/${ companyUserName }` )
+      .then( res => {
+        const companyFromApi = res.data;
+
+        // If stored company ID exists but doesn't match API result, redirect to 404
+        if ( storedCompanyId && companyFromApi._id !== storedCompanyId &&
+          storedCompanyUserName === companyUserName ) {
+          console.error( "Company ID mismatch, invalid access." );
+          navigate( "/404" );
+          return;
+        }
+
+        // Update localStorage with new company info
+        localStorage.setItem( "companyUserName", companyUserName );
+        localStorage.setItem( "companyId", companyFromApi._id );
+
+        // Update state with company data
+        setCompanyData( companyFromApi );
+        setIsLoading( false );
+      } )
+      .catch( err => {
+        console.error( "Invalid company slug:", err );
+        setIsLoading( false );
+        navigate( "/404" );
+      } );
   }, [ companyUserName, navigate ] );
 
+  // Intersection Observer effect for animations
   useEffect( () => {
     const observerOptions = {
       threshold: 0.1,
       rootMargin: "0px 0px -100px 0px",
-    }
+    };
 
     const observer = new IntersectionObserver( ( entries ) => {
       entries.forEach( ( entry ) => {
         if ( entry.isIntersecting ) {
-          entry.target.classList.add( "animate-in" )
+          entry.target.classList.add( "animate-in" );
         }
-      } )
-    }, observerOptions )
+      } );
+    }, observerOptions );
 
     // Observe all sections with animations
-    const sections = [ featuresRef.current, statsRef.current, testimonialsRef.current, ctaRef.current ]
+    const sections = [ featuresRef.current, statsRef.current, testimonialsRef.current, ctaRef.current ];
     sections.forEach( ( section ) => {
-      if ( section ) observer.observe( section )
-    } )
+      if ( section ) observer.observe( section );
+    } );
 
     return () => {
       sections.forEach( ( section ) => {
-        if ( section ) observer.unobserve( section )
-      } )
-    }
-  }, [] )
+        if ( section ) observer.unobserve( section );
+      } );
+    };
+  }, [] );
 
 
   return (
@@ -103,12 +119,20 @@ export const Hero = () => {
 
       {/* All Sections */ }
       <Suspense fallback={ <div className="text-center py-8">Loading...</div> }>
-        <HeroSection />
-        <PowerfulFeatures ref={ featuresRef } />
-        <Stats ref={ statsRef } />
-        <Jobs />
-        <Testimonials ref={ testimonialsRef } />
-        <Cta ref={ ctaRef } />
+        { isLoading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <>
+            <HeroSection companyData={ companyData } />
+            <PowerfulFeatures ref={ featuresRef } companyData={ companyData } />
+            <Stats ref={ statsRef } companyData={ companyData } />
+            <Jobs companyData={ companyData } />
+            <Testimonials ref={ testimonialsRef } companyData={ companyData } />
+            <Cta ref={ ctaRef } companyData={ companyData } />
+          </>
+        ) }
       </Suspense>
     </div >
   )
