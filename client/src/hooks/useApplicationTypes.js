@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 const fetchApplicationTypes = async ( { filters, page, limit } ) => {
     const queryParams = new URLSearchParams( { ...filters, page, limit } ).toString();
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-    const res = await fetch( `${ process.env.BASE_URL }/application/grouped-by-job?${ queryParams }`, {
+    const res = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/grouped-by-job?${ queryParams }`, {
         method: 'GET', // Specify the HTTP method (GET in this case)
         headers: {
             'company_id': companyId, // Add company_id header

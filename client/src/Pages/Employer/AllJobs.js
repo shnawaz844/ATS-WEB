@@ -138,7 +138,7 @@ export const AllJobs = () => {
             setIsDeleting( true );
             setDeleteError( null );
 
-            const response = await fetch( `${ process.env.BASE_URL }/jobs/delete-job/${ jobId }`, {
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/delete-job/${ jobId }`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

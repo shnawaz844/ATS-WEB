@@ -15,7 +15,7 @@ const fetchInterviewDetails = async ({ queryKey }) => {
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
 
   const res = await axios.get(
-    `${ process.env.BASE_URL }/interviews/all-interviews?page=${page}&limit=${limit}&search=${search}`,
+    `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=${page}&limit=${limit}&search=${search}`,
      {
       headers: {
         'company_id': companyId // Sending company_id in headers
@@ -38,7 +38,7 @@ export const useInterviews = ({ page, limit = 5, search = '' }) => {
  * 2. ADD Interview
  */
 const addInterview = async (formData) => {
-  await axios.post(`${ process.env.BASE_URL }/interviews/add-interview`, formData);
+  await axios.post(`${ process.env.REACT_APP_BASE_URL }/interviews/add-interview`, formData);
 };
 
 export const useAddInterview = () => {
@@ -58,7 +58,7 @@ export const useAddInterview = () => {
  */
 const updateInterview = async ({ interviewId, formData }) => {
   await axios.put(
-    `${ process.env.BASE_URL }/interviews/update-interview/${interviewId}`,
+    `${ process.env.REACT_APP_BASE_URL }/interviews/update-interview/${interviewId}`,
     formData
   );
 };

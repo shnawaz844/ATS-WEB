@@ -4,6 +4,7 @@ import ParticlesComponent from '../../components/Login/Particles';
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
+
 // Lazy load components
 const HeroSection = lazy( () => import( "./HeroSection" ) );
 const PowerfulFeatures = lazy( () => import( "./PowerfulFeatures" ) );
@@ -53,7 +54,7 @@ export const Hero = () => {
 
     // Fetch company data
     axios
-      .get( `${ process.env.BASE_URL }/companies/companies/${ companyUserName }` )
+      .get( `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }` )
       .then( res => {
         const companyFromApi = res.data;
 

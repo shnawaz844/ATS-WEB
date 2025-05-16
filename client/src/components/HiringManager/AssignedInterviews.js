@@ -40,7 +40,7 @@ const AssignedInterviews = () => {
 
     // Fetch statuses from API
     useEffect( () => {
-        fetch( `${ process.env.BASE_URL }/application-types/all-application-types` )
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
             .then( ( response ) => response.json() )
             .then( ( data ) => setStatuses( data.applicationTypes ) )
             .catch( ( error ) => console.error( "Error fetching statuses:", error ) );
@@ -98,7 +98,7 @@ const AssignedInterviews = () => {
     useEffect( () => {
         const fetchInterviewers = async () => {
             try {
-                const response = await fetch( `${ process.env.BASE_URL }/users/interviewers`, {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/users/interviewers`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -149,7 +149,7 @@ const AssignedInterviews = () => {
 
         try {
             const response = await fetch(
-                `${ process.env.BASE_URL }/applicationscheduledlist/update-interview/${ detailedInterview._id }`,
+                `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/update-interview/${ detailedInterview._id }`,
                 {
                     method: "PUT",
                     headers: {

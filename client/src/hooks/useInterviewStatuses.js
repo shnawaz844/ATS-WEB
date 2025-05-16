@@ -13,7 +13,7 @@ const useInterviewStatuses = () => {
         const fetchStatusOptions = async () => {
             try {
                 setIsLoading( true );
-                const response = await fetch( `${ process.env.BASE_URL }/api/interview-statuses` );
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/api/interview-statuses` );
 
                 if ( !response.ok ) {
                     throw new Error( `Failed to fetch status options: ${ response.statusText }` );

@@ -8,7 +8,7 @@ const fetchApplicationTypes = async ( { filters, page, limit } ) => {
   const queryParams = new URLSearchParams( filters ).toString();
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   const res = await fetch(
-    `${ process.env.BASE_URL }/application-types/all-application-types?${ queryParams }`,
+    `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types?${ queryParams }`,
     {
       headers: {
         'company_id': companyId // Sending company_id in headers
@@ -35,7 +35,7 @@ export const useApplicationTypes = ( filters, page, limit ) => {
 const addApplication = async ( formData ) => {
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   await axios.post(
-    `${ process.env.BASE_URL }/application-types/add-application-type`,
+    `${ process.env.REACT_APP_BASE_URL }/application-types/add-application-type`,
     formData,{
     headers: {
     'company_id': companyId // Send company_id in headers
@@ -60,7 +60,7 @@ export const useAddApplication = () => {
  */
 const updateApplicationType = async ( { applicationTypeId, formData } ) => {
   await axios.put(
-    `${ process.env.BASE_URL }/application-types/update-application-type/${ applicationTypeId }`,
+    `${ process.env.REACT_APP_BASE_URL }/application-types/update-application-type/${ applicationTypeId }`,
     formData
   );
 };

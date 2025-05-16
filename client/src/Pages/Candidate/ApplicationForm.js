@@ -42,7 +42,7 @@ export const ApplicationForm = () => {
         const newData = { ...data, jobID: id };
 
         // send data to backend API
-        fetch(`${ process.env.BASE_URL }/application/post-application`, {
+        fetch(`${ process.env.REACT_APP_BASE_URL }/application/post-application`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(newData),
@@ -53,7 +53,7 @@ export const ApplicationForm = () => {
                 setRedirect(true);
             });
 
-        fetch(`${ process.env.BASE_URL }/jobs/update-job-by-candidate`, {
+        fetch(`${ process.env.REACT_APP_BASE_URL }/jobs/update-job-by-candidate`, {
             method: "PUT",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
@@ -69,7 +69,7 @@ export const ApplicationForm = () => {
                 setRedirect(true);
             });
 
-        fetch(`${ process.env.BASE_URL }/users/update-user-by-candidate`, {
+        fetch(`${ process.env.REACT_APP_BASE_URL }/users/update-user-by-candidate`, {
             method: "PUT",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
@@ -88,7 +88,7 @@ export const ApplicationForm = () => {
 
     useEffect(() => {
         try {
-            fetch( `${ process.env.BASE_URL }/jobs/current-job/${id}`).then((res) => res.json()).then((data) => setJob(data))
+            fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/current-job/${id}`).then((res) => res.json()).then((data) => setJob(data))
         } catch (error) {
             console.log(error);
         }

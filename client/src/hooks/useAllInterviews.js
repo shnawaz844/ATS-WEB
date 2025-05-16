@@ -4,7 +4,7 @@ const fetchAssignedInterviews = async ({ queryKey }) => {
     const [, page, limit] = queryKey;
     console.log("Fetching data with params:", { page, limit });
 
-    const response = await fetch( `${ process.env.BASE_URL }/interviewerfeedback/get-feedbacks?page=${page}&limit=${limit}`);
+    const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/interviewerfeedback/get-feedbacks?page=${page}&limit=${limit}`);
 
 
     if (!response.ok) {

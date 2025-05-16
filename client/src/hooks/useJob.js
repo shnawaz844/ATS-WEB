@@ -6,7 +6,7 @@ import axios from 'axios';
 const fetchJobs = async ( { filters, page, limit, headers } ) => {
     const queryParams = new URLSearchParams( { ...filters, page, limit } ).toString();
 
-    const response = await fetch( `${ process.env.BASE_URL }/jobs/all-jobs?${ queryParams }`, {
+    const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/all-jobs?${ queryParams }`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ const fetchJobs = async ( { filters, page, limit, headers } ) => {
 
 // Post a new job
 const postJob = async ( jobData ) => {
-    const response = await fetch( `${ process.env.BASE_URL }/jobs/post-job`, {
+    const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/post-job`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify( jobData ),
@@ -34,7 +34,7 @@ const postJob = async ( jobData ) => {
 
 // Update an existing job
 const updateJob = async ( jobData ) => {
-    const response = await fetch( `${ process.env.BASE_URL }/jobs/update-job/${ jobData._id }`, {
+    const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/update-job/${ jobData._id }`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify( jobData ),

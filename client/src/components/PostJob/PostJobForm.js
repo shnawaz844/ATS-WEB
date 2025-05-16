@@ -237,7 +237,7 @@ export const PostJobForm = ( {
   useEffect( () => {
     const fetchRecruiters = async () => {
       try {
-        const response = await fetch( `${ process.env.BASE_URL }/recruiter/all-recruiter`, {
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/recruiter/all-recruiter`, {
           headers: {
             'company_id': companyId  // Pass company_id in headers
           }

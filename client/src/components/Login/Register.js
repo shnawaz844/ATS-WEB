@@ -27,7 +27,7 @@ export const Register = () => {
     if ( !company ) return;
 
     axios
-      .get( `${ process.env.BASE_URL }/companies/companies/${ company }` )
+      .get( `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ company }` )
       .then( ( res ) => {
         setCompanyDetails( res.data );
         localStorage.setItem( "companyUserName", company );
@@ -71,7 +71,7 @@ export const Register = () => {
     };
     
     try {
-      const response = await fetch(`${ process.env.BASE_URL }/auth/register`, {
+      const response = await fetch(`${ process.env.REACT_APP_BASE_URL }/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

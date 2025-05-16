@@ -32,7 +32,7 @@ const OtherApplicationsTab = ({ candidateId }) => {
     };
 
     useEffect(() => {
-        fetch( `${ process.env.BASE_URL }/application/candidate/${candidateId}`)
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application/candidate/${candidateId}`)
             .then((res) => res.json())
             .then((data) => setApplications(data.applications || []));
     }, [candidateId]);

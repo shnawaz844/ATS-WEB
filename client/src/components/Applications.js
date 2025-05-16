@@ -73,7 +73,7 @@ export const Applications = () => {
         useEffect( () => {
             const fetchInterviewers = async () => {
                 try {
-                    const response = await fetch( `${ process.env.BASE_URL }/users/interviewers`, {
+                    const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/users/interviewers`, {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
