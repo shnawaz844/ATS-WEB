@@ -387,122 +387,136 @@ const CompanyListing = () => {
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={ closeDialog }
                         />
-                        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
-                            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300">
-                                <div className="relative flex justify-center items-center p-5 border-b bg-gray-700 border border-white rounded-t-xl">
-                                    <h3 className="text-xl font-bold text-white">
+                        <div className="fixed inset-0 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl transform transition-all duration-300 border border-gray-200">
+                                {/* Header */ }
+                                <div className="relative bg-gray-700 px-6 py-4 flex">
+                                    <h3 className="text-xl font-semibold text-white">
                                         { isEditing ? 'Edit Company' : 'Add New Company' }
                                     </h3>
                                     <button
                                         onClick={ closeDialog }
-                                        className="absolute right-5 p-2 text-white hover:text-gray-600 rounded-full hover:bg-gray-100 transition-all duration-200"
+                                        className="absolute right-4 text-white hover:bg-white/20 rounded-full p-1 transition-all duration-200"
                                     >
                                         <X size={ 20 } />
                                     </button>
                                 </div>
 
-                                <div className="max-h-[calc(90vh-150px)] overflow-y-auto">
-                                    <form onSubmit={ handleSubmit } className="space-y-5 p-10">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Unique Name <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="CompanyUserName"
-                                                value={ formData.CompanyUserName }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter Unique Campany name"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Company Name <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={ formData.name }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter company name"
-                                            />
+                                {/* Form content */ }
+                                <div className="max-h-[calc(90vh-150px)] overflow-y-auto p-6">
+                                    <form onSubmit={ handleSubmit } className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Left column */ }
+                                            <div className="space-y-6">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Unique Name <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            name="CompanyUserName"
+                                                            value={ formData.CompanyUserName }
+                                                            onChange={ handleChange }
+                                                            required
+                                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                            placeholder="Enter unique company name"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Company Name <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="name"
+                                                        value={ formData.name }
+                                                        onChange={ handleChange }
+                                                        required
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                        placeholder="Enter company name"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Email Address <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="email"
+                                                        name="email"
+                                                        value={ formData.email }
+                                                        onChange={ handleChange }
+                                                        required
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                        placeholder="Enter email address"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Right column */ }
+                                            <div className="space-y-6">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Address <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="address"
+                                                        value={ formData.address }
+                                                        onChange={ handleChange }
+                                                        required
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                        placeholder="Enter company address"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Phone Number <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="phone"
+                                                        value={ formData.phone }
+                                                        onChange={ handleChange }
+                                                        required
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                        placeholder="Enter phone number"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Website URL <span className="text-red-500">*</span>
+                                                    </label>
+                                                    <input
+                                                        type="url"
+                                                        name="website"
+                                                        value={ formData.website }
+                                                        onChange={ handleChange }
+                                                        required
+                                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                                        placeholder="Enter website URL"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Email Address <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={ formData.email }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter email address"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Address <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="address"
-                                                value={ formData.address }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter company address"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Phone Number <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="phone"
-                                                value={ formData.phone }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter phone number"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Website URL <span className="text-red-500">*</span>
-                                            </label>
-                                            <input
-                                                type="url"
-                                                name="website"
-                                                value={ formData.website }
-                                                onChange={ handleChange }
-                                                required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                                placeholder="Enter website URL"
-                                            />
-                                        </div>
-
-                                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                                        {/* Footer with buttons */ }
+                                        <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-gray-200">
                                             <button
                                                 type="button"
                                                 onClick={ closeDialog }
-                                                className="px-4 py-2.5 text-black bg-gray-400 hover:bg-gray-300 rounded-xl transition-colors duration-200"
+                                                className="px-5 py-2.5 text-black bg-gray-500 hover:bg-gray-400 rounded-xl font-medium transition-colors duration-200"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 type="submit"
-                                                className="px-6 py-2.5 bg-gray-700 text-white rounded-xl hover:bg-gray-400 hover:text-black transition-colors duration-200"
+                                                className="px-6 py-2.5 bg-gray-700 hover:bg-gray-500 text-white rounded-xl font-medium transition-colors duration-200 flex items-center gap-2"
                                             >
                                                 { isEditing ? 'Save Changes' : 'Add Company' }
                                             </button>

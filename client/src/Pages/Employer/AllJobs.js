@@ -192,7 +192,7 @@ export const AllJobs = () => {
                                     className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                 >
                                     <Plus className="mr-2 h-5 w-5" />
-                                    Post New Job
+                                    Post New Job111
                                 </Link>
                             </div>
                         </div>
@@ -383,7 +383,7 @@ export const AllJobs = () => {
                                 <Link
                                     to={ `/${ companyUserName }/post-job` }
                                     // to="/post-job"
-                                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                                    className="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-500 transition-colors duration-200"
                                 >
                                     <Plus className="mr-2 h-4 w-4" />
                                     Post New Job
