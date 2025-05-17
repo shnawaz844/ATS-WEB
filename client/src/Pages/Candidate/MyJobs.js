@@ -258,7 +258,7 @@ const MyJobs = () => {
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800">No applications yet</h3>
                     <p className="mt-2 text-gray-600 max-w-md mx-auto">You haven't submitted any job applications yet. Start exploring open positions to begin your journey.</p>
-                    <button className="mt-6 bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition-colors shadow-md">
+                    <button className="mt-6 bg-gray-700 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition-colors shadow-md">
                         Find Jobs
                     </button>
                 </div>
