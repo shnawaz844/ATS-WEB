@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Select from "react-select";
 import JobDescriptionModal from "./JobDescriptionModal";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 
 // Dropdown Options
 const jobTypeOptions = [
@@ -166,12 +166,25 @@ const AllPostedJobs = () => {
           </div>
 
 
-          {/* Jobs List */ }
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            { data?.jobs.map( ( job ) => (
-              <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
-            ) ) }
-          </div>
+          {/* Jobs List or No Jobs Found Message */ }
+          { data?.jobs && data.jobs.length > 0 ? (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+              { data.jobs.map( ( job ) => (
+                <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
+              ) ) }
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <div className="bg-gray-100 p-5 rounded-full mb-4">
+                <Briefcase className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
+              <p className="text-gray-500 max-w-md mb-6">
+                  Opportunities are on the way. Stay tuned!
+              </p>
+            </div>
+          ) }
+
 
           {/* Pagination Controls */ }
           <div className="flex items-center justify-between border-t border-gray-200 pt-6 mt-2">
