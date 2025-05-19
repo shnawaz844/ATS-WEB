@@ -355,7 +355,7 @@ export const AllJobs = () => {
                                                         className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200"
                                                     >
                                                         <Edit className="h-4 w-4 mr-1" />
-                                                        Edit
+                                                     View & Edit
                                                     </button>
                                                     <button
                                                         onClick={ () => handleDeleteJob( job._id ) }
