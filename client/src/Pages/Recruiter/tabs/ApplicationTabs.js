@@ -11,7 +11,7 @@ const ApplicationTabs = ( { activeTab, setActiveTab, applicationData } ) => {
         { id: 'qa', label: 'Q&A' },
         { id: 'other', label: 'Other Applications' }
     ];
-
+    console.log( "applicationData>>>>>", applicationData );
     return (
         <>
             <div className="flex space-x-6 border-b-2 pb-2 mb-6 border-gray-300">
