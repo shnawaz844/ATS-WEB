@@ -67,17 +67,26 @@ const candidateNavItems = [
 // ];
 
 export const Navbar = () => {
-  // const [ companyUserName, setCompanyUserName ] = useState( "" );
-  const companyUserName = localStorage.getItem( "companyUserName" );
+  const [ companyUserName, setCompanyUserName ] = useState( localStorage.getItem( "companyUserName" ) );
   const [ loginData, setLoginData ] = useState( null );
   const [ isMenuOpen, setIsMenuOpen ] = useState( false );
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const location = useLocation();
   // const user = JSON.parse(localStorage.getItem("user"))
 
-  // useEffect( () => {
-  //   setCompanyUserName( companyUserName );
-  // }, [ companyUserName ] );
+  useEffect( () => {
+    function fetchCompanyUserName() {
+      if ( companyUserName ) {
+        const storedName = localStorage.getItem( "companyUserName" );
+        setCompanyUserName( storedName );
+      } else {
+        // Retry after 1 second if null
+        setTimeout( fetchCompanyUserName, 1000 );
+      }
+    }
+
+    fetchCompanyUserName();
+  }, [] );
   console.log( "navbaer username", companyUserName );
 
   const normalNavItem = [
