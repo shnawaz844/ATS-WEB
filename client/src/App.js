@@ -69,6 +69,8 @@ function App() {
   const companyIdFromStorage = localStorage.getItem( 'companyId' );
   const user = localStorage.getItem( 'user' );
 
+  console.log( "slug", slug );
+
 
 
   // Clear company details from localStorage when slug is not available
