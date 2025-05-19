@@ -78,6 +78,7 @@ export const Navbar = () => {
   // useEffect( () => {
   //   setCompanyUserName( companyUserName );
   // }, [ companyUserName ] );
+  console.log( "navbaer username", companyUserName );
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
@@ -206,7 +207,7 @@ export const Navbar = () => {
                 // special-case Home to respect companyUserName
                 console.log( "path>>", path )
                 const to =
-                  path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `${ companyUserName }${ path }`;
+                  path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `/${ companyUserName }${ path }`;
 
                 console.log( "to>>>", to )
 
