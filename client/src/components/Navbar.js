@@ -87,7 +87,7 @@ export const Navbar = () => {
 
     fetchCompanyUserName();
   }, [] );
-  console.log( "navbaer username", companyUserName );
+  console.log( "navbaer username", companyUserName , typeof companyUserName);
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
