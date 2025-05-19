@@ -18,9 +18,9 @@ const Modal = ( { getStatusColor, isOpen, onClose, app } ) => {
                         <button
                             onClick={ () => setActiveTab( 'details' ) }
                             className={ `px-4 py-2 rounded-xl font-medium bg-gray-300 transition-all duration-200 ${ activeTab === 'details'
-                                ? 'bg-gray-300 text-black shadow-md'
-                                : 'hover:bg-gray-100 text-black'
-                                }` }
+                                ? 'hover:bg-gray-100 text-black'
+                                : 'bg-gray-700 text-white border border-white shadow-md'
+                                }` } 
                         >
                             Application Details
                         </button>
@@ -28,8 +28,8 @@ const Modal = ( { getStatusColor, isOpen, onClose, app } ) => {
                             <button
                                 onClick={ () => setActiveTab( 'resume' ) }
                                 className={ `px-4 py-2 bg-gray-300 rounded-xl font-medium transition-all duration-200 ${ activeTab === 'resume'
-                                    ? 'bg-gray-300 text-black shadow-md'
-                                    : 'text-black hover:bg-gray-100'
+                                    ? 'text-black hover:bg-gray-100'
+                                    : 'bg-gray-700 text-white border border-white shadow-md'
                                     }` }
                             >
                                 Resume

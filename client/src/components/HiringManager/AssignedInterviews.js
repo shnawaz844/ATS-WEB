@@ -345,8 +345,20 @@ const AssignedInterviews = () => {
                         <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                     </div>
                 ) : filteredInterviews.length === 0 ? (
-                    <div className="bg-white p-8 shadow rounded-md text-center">
-                        <p className="text-gray-500 text-lg">No interviews found matching your criteria.</p>
+                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                        <div className="bg-gray-100 p-5 rounded-full mb-4">
+                            <Briefcase className="h-12 w-12 text-gray-400" />
+                        </div>
+                                <div className="text-center animate-fade-in transition-all duration-500">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                        No Interviews Found
+                                    </h3>
+                                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                        We’re currently in the process of assigning interviewers.
+                                        <br className="hidden sm:block" />
+                                        <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
+                                    </p>
+                                </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -580,25 +592,27 @@ const AssignedInterviews = () => {
             ) }
             {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> */ }
             {/* {totalPages > 1 && ( */ }
-            <div className="flex justify-center mt-8 space-x-4">
-                <button
-                    onClick={ handlePreviousPage }
-                    disabled={ page === 1 }
-                    className={ `px-4 py-2 rounded-xl text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
-                >
-                    Previous
-                </button>
-                <span className="text-gray-700 font-medium">
-                    Page { page } of { totalPages }
-                </span>
-                <button
-                    onClick={ handleNextPage }
-                    // disabled={page >= totalPages}
-                    className={ `px-4 py-2 rounded-xl text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
-                >
-                    Next
-                </button>
-            </div>
+            { filteredInterviews && filteredInterviews.length > 0 && (
+                <div className="flex justify-center mt-8 space-x-4">
+                    <button
+                        onClick={ handlePreviousPage }
+                        disabled={ page === 1 }
+                        className={ `px-4 py-2 rounded-xl text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
+                    >
+                        Previous
+                    </button>
+                    <span className="text-gray-700 font-medium">
+                        Page { page } of { totalPages }
+                    </span>
+                    <button
+                        onClick={ handleNextPage }
+                        disabled={ page >= totalPages }
+                        className={ `px-4 py-2 rounded-xl text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
+                    >
+                        Next
+                    </button>
+                </div>
+            ) } 
 
         </div>
     );

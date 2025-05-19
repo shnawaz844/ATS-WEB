@@ -293,31 +293,36 @@ const ApplicationList = () => {
 
                 {/* Applications Grid */ }
                 {
-                    isLoading ? (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                        </div>
-                    ) :
+                    // isLoading ? (
+                    //     <div className="flex justify-center items-center h-64">
+                    //         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    //     </div>
+                    // ) :
                         isError ? (
-                            <div className="fixed inset-0 flex items-center justify-center bg-red-50 bg-opacity-80 z-50">
-                                <div className="flex flex-col items-center justify-center p-8 bg-red-100 text-red-700 rounded-xl shadow-lg w-full max-w-4xl mx-auto text-center">
-                                    <strong className="font-bold text-2xl mb-4">Error!</strong>
-                                    <span className="block sm:inline text-lg">Failed to load applications. Please try again later.</span>
-                                    <div className="mt-6">
-                                        <button
-                                            onClick={ () => {
-                                                window.location.reload(); // Reloads the entire page
-                                            } }
-                                            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none transition duration-300"
-                                        >
-                                            Try Again
-                                        </button>
-                                    </div>
+                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                                <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                    <Briefcase className="h-12 w-12 text-gray-400" />
                                 </div>
+                            <div className="text-center animate-fade-in transition-all duration-500">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                    No Jobs Found
+                                </h3>
+                                <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                    We couldn't find any job listings matching your filters.
+                                    <br className="hidden sm:block" />
+                                    <span className="text-blue-500 font-medium">Try refining your search</span> or check back later.
+                                </p>
+                            </div>
                             </div>
                         ) : filteredApplications.length === 0 ? (
-                            <div className="bg-white p-8 shadow rounded-md text-center">
-                                <p className="text-gray-500 text-lg">No applications found matching your criteria.</p>
+                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                                <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                    <Briefcase className="h-12 w-12 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
+                                <p className="text-gray-500 max-w-md mb-6">
+                                    Try adjusting your search filters to find candidate applications.
+                                </p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

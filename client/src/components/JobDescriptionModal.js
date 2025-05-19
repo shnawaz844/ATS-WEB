@@ -88,7 +88,7 @@ const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
                 </div>
 
                 {/* Job Description */ }
-                <div className="rounded-xl">
+                <div className="rounded-xl p-2">
                     <div className="prose max-w-none bg-gray-200 p-4 rounded-xl">
                         <ReactQuill
                             value={ job.description }
