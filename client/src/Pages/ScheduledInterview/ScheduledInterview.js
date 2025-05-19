@@ -351,6 +351,17 @@ export const ScheduledInterview = () => {
                     <strong className="font-bold">Error! </strong>
                     <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                 </div>
+            ) : ScheduledInterviews?.interviews?.length === 0 ? (
+                <div className="text-center animate-fade-in transition-all duration-500 py-16">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                        🕒 No Interviews Found
+                    </h3>
+                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                        We’re currently in the process of assigning interviewers.
+                        <br className="hidden sm:block" />
+                        <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
+                    </p>
+                </div>
             ) : (
                 <div className="overflow-x-auto rounded-t-xl shadow">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -800,6 +811,7 @@ export const ScheduledInterview = () => {
                             </button>
                         </div>
                     </div>
+
                 </div>
             ) }
             <ToastContainer position="top-right" autoClose={ 3000 } hideProgressBar={ false } newestOnTop closeOnClick rtl={ false } pauseOnFocusLoss draggable pauseOnHover />

@@ -326,11 +326,21 @@ const AllInterviews = () => {
           { activeTab === 'interviews' && (
             <div className="overflow-x-auto rounded-t-xl">
               { filteredInterviews.length === 0 ? (
-                <div className="text-center py-10">
-                  <div className="text-gray-400 mb-2">
-                    <AlertTriangle size={ 48 } className="mx-auto mb-2" />
-                    <p>No interviews found matching your criteria.</p>
+                <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                  <div className="bg-gray-100 p-5 rounded-full mb-4">
+                    <Briefcase className="h-12 w-12 text-gray-400" />
                   </div>
+                  <div className="text-center animate-fade-in transition-all duration-500">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                      No Interviews Scheduled Yet
+                    </h3>
+                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                      It seems there are no interviews matching your criteria right now.
+                      <br className="hidden sm:block" />
+                      <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
+                    </p>
+                  </div>
+
                 </div>
               ) : (
                 <table className="min-w-full divide-y divide-gray-200">
@@ -694,25 +704,27 @@ const AllInterviews = () => {
 
       </div>
       {/* {totalPages > 1 && ( */ }
-      <div className="flex justify-center mt-5 mb-5 space-x-4">
-        <button
-          onClick={ handlePreviousPage }
-          disabled={ page === 1 }
-          className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
-        >
-          Previous
-        </button>
-        <span className="text-gray-700 font-medium">
-          Page { page } of { totalPages }
-        </span>
-        <button
-          onClick={ handleNextPage }
-          // disabled={page >= totalPages}
-          className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
-        >
-          Next
-        </button>
-      </div>
+      { filteredInterviews && filteredInterviews.length > 0 && (
+        <div className="flex justify-center mt-5 mb-5 space-x-4">
+          <button
+            onClick={ handlePreviousPage }
+            disabled={ page === 1 }
+            className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
+          >
+            Previous
+          </button>
+          <span className="text-gray-700 font-medium">
+            Page { page } of { totalPages }
+          </span>
+          <button
+            onClick={ handleNextPage }
+            // disabled={page >= totalPages}
+            className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
+          >
+            Next
+          </button>
+        </div>
+      ) }
     </div>
   );
 };
