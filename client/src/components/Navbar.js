@@ -208,6 +208,7 @@ export const Navbar = () => {
                 // special-case Home to respect companyUserName
                 const to =
                   path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `${ companyUserName }${ path }`;
+                  console.log("to>>>",to)
 
                 return (
                   <NavLink
