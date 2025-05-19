@@ -67,7 +67,8 @@ const candidateNavItems = [
 // ];
 
 export const Navbar = () => {
-  const [ companyUserName, setCompanyUserName ] = useState( localStorage.getItem( "companyUserName" ) );
+  // const [ companyUserName, setCompanyUserName ] = useState( localStorage.getItem( "companyUserName" ) );
+  const [ companyUserName, setCompanyUserName ] = useState( null );
   const [ loginData, setLoginData ] = useState( null );
   const [ isMenuOpen, setIsMenuOpen ] = useState( false );
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
@@ -76,8 +77,8 @@ export const Navbar = () => {
 
   useEffect( () => {
     function fetchCompanyUserName() {
-      if ( companyUserName ) {
-        const storedName = localStorage.getItem( "companyUserName" );
+      const storedName = localStorage.getItem( "companyUserName" );
+      if ( storedName ) {
         setCompanyUserName( storedName );
       } else {
         // Retry after 1 second if null
@@ -87,7 +88,7 @@ export const Navbar = () => {
 
     fetchCompanyUserName();
   }, [] );
-  console.log( "navbaer username", companyUserName , typeof companyUserName);
+  console.log( "navbaer username", companyUserName, typeof companyUserName );
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
