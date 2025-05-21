@@ -28,7 +28,6 @@ const InterviewListing = () => {
     limit: 12,
     search,
   } );
-  console.log( "interviewsData>>><<<<", interviewsData )
   const { mutate: addInterview } = useAddInterview();
   const { mutate: updateInterview } = useUpdateInterview();
 
@@ -105,17 +104,6 @@ const InterviewListing = () => {
 
   };
 
-  const goToPreviousPage = () => {
-    if ( currentPage > 1 ) setCurrentPage( ( p ) => p - 1 );
-  };
-
-  const goToNextPage = () => {
-    if ( currentPage < totalPages ) setCurrentPage( ( p ) => p + 1 );
-  };
-
-  // if ( isLoading ) return <p>Loading Interview Details...</p>;
-  // if ( isError ) return <p>Error: { error.message }</p>;
-
   return (
     <div className="px-8 py-4 w-full min-h-screen"
       style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
@@ -164,7 +152,6 @@ const InterviewListing = () => {
             key={ interview._id }
             className="bg-white p-5 rounded-xl border border-gray-200 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200"
           >
-            {/* <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md border border-black hover:shadow-lg transition-all duration-200 h-[20vh]"> */ }
             <div className="flex flex-col">
               <div className="flex items-center">
                 <h3 className="font-semibold text-gray-900 mr-2">Round Name:</h3>

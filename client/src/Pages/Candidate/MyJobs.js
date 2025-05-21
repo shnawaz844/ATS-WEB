@@ -6,7 +6,6 @@ import {
     MapPin,
     Clock,
     EyeIcon,
-    Edit2,
     ChevronLeft,
     ChevronRight,
     CalendarDays,
@@ -81,18 +80,6 @@ const MyJobs = () => {
             default:
                 return <AlertCircle className="h-4 w-4" />;
         }
-    };
-
-    const handleEdit = ( app ) => {
-        setSelectedApp( app );
-        setUpdatedApplication( {
-            ...app,
-            experience: app.experience || '',
-            contactInfo: app.contactInfo || '',
-            questions: app.questions ? JSON.parse( app.questions ) : [],
-            answers: app.answers ? JSON.parse( app.answers ) : []
-        } );
-        setIsEditModalOpen( true );
     };
 
     const handleInputChange = ( e ) => {
@@ -239,12 +226,6 @@ const MyJobs = () => {
                                         className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
                                     >
                                         <EyeIcon className="h-4 w-4 mr-1" /> View
-                                    </button>
-                                    <button
-                                        onClick={ () => handleEdit( app ) }
-                                        className="flex items-center bg-gray-300 text-black px-4 py-2 rounded-xl hover:bg-gray-400 transition-colors text-sm shadow-md"
-                                    >
-                                        <Edit2 className="h-4 w-4 mr-1" /> Edit
                                     </button>
                                 </div>
                             </div>

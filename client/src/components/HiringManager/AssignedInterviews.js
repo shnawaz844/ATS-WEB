@@ -56,7 +56,7 @@ const AssignedInterviews = () => {
 
     const capitalizeFirstLetter = ( string ) => {
         if ( string ) {
-            return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+            return string?.charAt( 0 ).toUpperCase() + string.slice( 1 );
         }
         return;
     };
@@ -299,37 +299,136 @@ const AssignedInterviews = () => {
 
                 {/* Today's Interviews Section */ }
                 { filteredInterviews?.some( interview => isToday( interview.date ) ) && (
-                    <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Today's Interviews</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="mb-8 relative">
+                        {/* Background decorative elements */ }
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full opacity-20 blur-xl"></div>
+                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20 blur-xl"></div>
+
+                        {/* Header section with title and controls */ }
+                        <div className="relative z-10 flex flex-col sm:flex-row justify-start items-start sm:items-center mb-6 gap-4">
+                            <div className="shadow-sm px-5 py-3 rounded-2xl">
+                                <h2 className="text-2xl font-bold  bg-clip-text text-black">
+                                    Today's Interviews
+                                </h2>
+                                <p className="text-white text-sm">
+                                    { new Date().toLocaleDateString( 'en-US', { weekday: 'long', month: 'long', day: 'numeric' } ) }
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Cards container */ }
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             { filteredInterviews
                                 .filter( interview => isToday( interview.date ) )
-                                .map( ( interview ) => (
-                                    <div
-                                        key={ interview._id }
-                                        className="bg-white p-5 shadow-md rounded-lg border-l-4 border-blue-500 cursor-pointer hover:shadow-lg transition-shadow duration-200"
-                                        onClick={ () => handleInterviewClick( interview ) }
-                                    >
-                                        <div className="flex justify-between items-start mb-3">
-                                            <h3 className="text-lg font-semibold text-gray-800">{ interview?.applicationID?.jobID?.title || "N/A" }</h3>
-                                            <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( interview.status ) }` }>
-                                                { interview.status || "Scheduled" }
-                                            </span>
+                                .map( ( interview ) => {
+                                    // Determine status colors
+                                    const statusColors = {
+                                        "Completed": "bg-emerald-500 text-emerald-800 bg-emerald-50",
+                                        "Cancelled": "bg-red-500 text-red-800 bg-red-50",
+                                        "In Progress": "bg-amber-500 text-amber-800 bg-amber-50",
+                                        "Scheduled": "bg-blue-500 text-blue-800 bg-blue-50"
+                                    };
+
+                                    const status = interview.status || "Scheduled";
+                                    const [ bgColor, textColor, bgLight ] = statusColors[ status ].split( " " );
+
+                                    // Get candidate initial
+                                    const initial = interview.applicationID?.candidateID?.userName?.[ 0 ] || "?";
+
+                                    return (
+                                        <div
+                                            key={ interview._id }
+                                            onClick={ () => handleInterviewClick( interview ) }
+                                            className="group bg-[#b8e1e1] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100"
+                                        >
+                                            <div className="p-4">
+                                                {/* Header with job title and status */ }
+                                                <div className="flex justify-between items-center mb-3">
+                                                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
+                                                        { capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }
+                                                    </h3>
+                                                    <span className={ `px-2.5 py-1 rounded-full text-xs font-medium ${ textColor } ${ bgLight }` }>
+                                                        { capitalizeFirstLetter( status ) }
+                                                    </span>
+                                                </div>
+
+                                                {/* Main content */ }
+                                                <div className="space-y-3">
+                                                    {/* Candidate info */ }
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className={ `w-8 h-8 rounded-full flex items-center justify-center ${ bgLight }` }>
+                                                            <span className={ `${ textColor } text-sm font-medium` }>
+                                                                { capitalizeFirstLetter( initial ) }
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-800">
+                                                                { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                { interview.interviewerType || "N/A" } Interview
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Time info */ }
+                                                    <div className="flex items-center gap-2 text-sm">
+                                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        <span className="text-gray-700">Today at { interview.scheduledTime }</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Footer */ }
+                                            <div className="flex justify-end items-center px-4 py-3 bg-gray-300 mt-2">
+                                                <button className="text-sm text-black font-medium flex items-center gap-1">
+                                                    Details
+                                                    <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                                    </svg>
+                                                </button>
+                                                {/* 
+                                                <div className="flex gap-1.5">
+                                                    <button className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <button className="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div> */}
+                                            </div>
+
+                                            {/* Status indicator line */ }
+                                            <div className={ "h-1 w-full bg-white" }></div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <p className="text-sm text-gray-600">
-                                                <span className="font-medium">Applicant:</span> { interview.applicationID?.candidateID?.userName || "N/A" }
-                                            </p>
-                                            <p className="text-sm text-gray-600">
-                                                <span className="font-medium">Type:</span> { interview.interviewerType || "N/A" }
-                                            </p>
-                                            <p className="text-sm font-medium text-blue-600">
-                                                Today at { interview.scheduledTime }
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) ) }
+                                    );
+                                } ) }
                         </div>
+
+                        {/* Empty state */ }
+                        { filteredInterviews.filter( interview => isToday( interview.date ) ).length === 0 && (
+                            <div className="bg-white rounded-2xl shadow p-8 text-center">
+                                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">Your schedule is clear today</h3>
+                                <p className="text-gray-500 mb-6 max-w-md mx-auto">No interviews are scheduled for today. Would you like to set up a new interview?</p>
+                                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow hover:shadow-lg transition-all duration-200 font-medium inline-flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Schedule New Interview
+                                </button>
+                            </div>
+                        ) }
                     </div>
                 ) }
 
@@ -349,16 +448,16 @@ const AssignedInterviews = () => {
                         <div className="bg-gray-100 p-5 rounded-full mb-4">
                             <Briefcase className="h-12 w-12 text-gray-400" />
                         </div>
-                                <div className="text-center animate-fade-in transition-all duration-500">
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
-                                        No Interviews Found
-                                    </h3>
-                                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                                        We’re currently in the process of assigning interviewers.
-                                        <br className="hidden sm:block" />
-                                        <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
-                                    </p>
-                                </div>
+                        <div className="text-center animate-fade-in transition-all duration-500">
+                            <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                No Interviews Found
+                            </h3>
+                            <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                We’re currently in the process of assigning interviewers.
+                                <br className="hidden sm:block" />
+                                <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
+                            </p>
+                        </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -593,26 +692,43 @@ const AssignedInterviews = () => {
             {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> */ }
             {/* {totalPages > 1 && ( */ }
             { filteredInterviews && filteredInterviews.length > 0 && (
-                <div className="flex justify-center mt-8 space-x-4">
-                    <button
-                        onClick={ handlePreviousPage }
-                        disabled={ page === 1 }
-                        className={ `px-4 py-2 rounded-xl text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
-                    >
-                        Previous
-                    </button>
-                    <span className="text-gray-700 font-medium">
-                        Page { page } of { totalPages }
-                    </span>
-                    <button
-                        onClick={ handleNextPage }
-                        disabled={ page >= totalPages }
-                        className={ `px-4 py-2 rounded-xl text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
-                    >
-                        Next
-                    </button>
+                <div className="px-6 py-4 border-t border-gray-100 mt-4">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={ handlePreviousPage }
+                            disabled={ page === 1 }
+                            className={ `px-4 py-2 rounded-xl text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
+                        >
+                            Previous
+                        </button>
+                        <div className="hidden sm:flex items-center space-x-1">
+                            { [ ...Array( totalPages ) ].map( ( _, i ) => (
+                                <button
+                                    key={ i }
+                                    onClick={ () => setPage( i + 1 ) }
+                                    className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
+                                        ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                                        : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                        }` }
+                                >
+                                    { i + 1 }
+                                </button>
+                            ) ) }
+                        </div>
+
+                        <span className="sm:hidden text-sm text-gray-600">
+                            Page { page } of { totalPages }
+                        </span>
+                        <button
+                            onClick={ handleNextPage }
+                            disabled={ page >= totalPages }
+                            className={ `px-4 py-2 rounded-xl text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black" }` }
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
-            ) } 
+            ) }
 
         </div>
     );

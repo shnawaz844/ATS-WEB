@@ -5,7 +5,9 @@ import Select from "react-select";
 import { toast } from 'react-toastify';
 import {
     Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight,
-    Briefcase, MapPin, Clock, RefreshCw, Filter
+    Briefcase, MapPin, Clock, RefreshCw, Filter,
+    Calendar1,
+    IndianRupee
 } from 'lucide-react';
 
 export const AllJobs = () => {
@@ -192,7 +194,7 @@ export const AllJobs = () => {
                                     className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                 >
                                     <Plus className="mr-2 h-5 w-5" />
-                                    Post New Job111
+                                    Post New Job
                                 </Link>
                             </div>
                         </div>
@@ -304,73 +306,81 @@ export const AllJobs = () => {
                         </span>
                     </div>
 
-                    {/* Table Section */ }
+                    {/* Jobs Card Section */ }
                     <div className="overflow-x-auto rounded-t-xl">
-                        { isLoading &&
+                        { isLoading && (
                             <div className="flex justify-center items-center min-h-screen bg-gray-50">
                                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
                             </div>
-                        }
+                        ) }
+
                         { allJobs?.jobs?.length > 0 ? (
-                            <table className="w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr className="bg-gray-700 text-left">
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Job Title</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Salary</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Location</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    { allJobs?.jobs?.map( ( job ) => (
-                                        <tr key={ job._id } className="group hover:bg-gray-700 transition-colors duration-150">
-                                            <td className="px-6 py-5 whitespace-nowrap">
-                                                <div className="text-sm font-medium group-hover:text-white">{ capitalizeFirstLetter( job.title ) }</div>
-                                                <div className="text-xs text-gray-500 mt-1 group-hover:text-white">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
-                                                        { job.type || "Full-Time" }
-                                                    </span>
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        { job.locationType || "On-Site" }
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
-                                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">₹{ formatIndianRupee(job.compensation) }</div>
-                                                <div className="text-xs text-gray-500 mt-1 group-hover:text-white">{ job.scheduleType || "Full day" }</div>
-                                            </td>
-                                            <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
-                                                <div className="flex items-start group-hover:text-white">
-                                                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 mr-1 flex-shrink-0" />
-                                                    <div>
-                                                        <div className="text-sm text-gray-900 group-hover:text-white">{ ( job.city ) }, { job.state }</div>
-                                                        <div className="text-xs text-gray-500 mt-1 group-hover:text-white">{ job.country }</div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                                { allJobs?.jobs?.map( ( job ) => (
+                                    <div
+                                        key={ job._id }
+                                        className="bg-gray-200 hover:bg-gray-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 hover:border-gray-300 group"
+                                    >
+                                        <div className="p-6">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-black group-hover:text-white mb-4 font-DM Sansong">
+                                                        { capitalizeFirstLetter( job.title ) }
+                                                    </h3>
+                                                    <div className="flex flex-wrap gap-2 mb-3">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            { job.type || "Full-Time" }
+                                                        </span>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            { job.locationType || "On-Site" }
+                                                        </span>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                            { job.scheduleType || "Full day" }
+                                                        </span>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-5 whitespace-nowrap text-sm group-hover:text-white">
-                                                <div className="flex gap-3">
-                                                    <button
-                                                        onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
-                                                        className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200"
-                                                    >
-                                                        <Edit className="h-4 w-4 mr-1" />
-                                                     View & Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={ () => handleDeleteJob( job._id ) }
-                                                        disabled={ isDeleting }
-                                                        className="flex items-center text-red-600 group-hover:text-white font-medium transition-colors duration-200"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-1" />
-                                                        { isDeleting ? 'Deleting...' : 'Delete' }
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) ) }
-                                </tbody>
-                            </table>
+                                            </div>
+
+                                            <div className="mt-4 flex items-center text-black group-hover:text-white">
+                                                <IndianRupee className="h-4 w-4 mr-2" />
+                                                <span className="text-sm">Compensation :  { formatIndianRupee( job.compensation ) }</span>
+                                            </div>
+
+                                            <div className="mt-2 flex items-center text-black group-hover:text-white">
+                                                <MapPin className="h-4 w-4 mr-2" />
+                                                <span className="text-sm">Address:     
+                                                    { job.city }, { job.state }, { job.country }
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-4 flex items-center text-black group-hover:text-white">
+                                                <Calendar1 className="h-4 w-4 mr-2" />
+                                                <span className="text-sm">
+                                                    { new Date( job.createdAt ).toISOString().split( "T" )[ 0 ] }
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between">
+                                                <button
+                                                    onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
+                                                    className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200 text-sm"
+                                                >
+                                                    <Edit className="h-4 w-4 mr-1" />
+                                                    View & Edit
+                                                </button>
+                                                <button
+                                                    onClick={ () => handleDeleteJob( job._id ) }
+                                                    disabled={ isDeleting }
+                                                    className="flex items-center text-red-600 group-hover:text-white font-medium transition-colors duration-200 text-sm"
+                                                >
+                                                    <Trash2 className="h-4 w-4 mr-1" />
+                                                    { isDeleting ? 'Deleting...' : 'Delete' }
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) ) }
+                            </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                                 <div className="bg-gray-100 p-5 rounded-full mb-4">
@@ -382,7 +392,6 @@ export const AllJobs = () => {
                                 </p>
                                 <Link
                                     to={ `/${ companyUserName }/post-job` }
-                                    // to="/post-job"
                                     className="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-500 transition-colors duration-200"
                                 >
                                     <Plus className="mr-2 h-4 w-4" />

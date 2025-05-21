@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, User, Briefcase, Clock, Filter, FileText, X, Check, AlertTriangle, ChevronDown, Download } from 'lucide-react';
+import { Search, Calendar, User, Briefcase, Clock, Filter, FileText, X, Check, AlertTriangle, ChevronDown, Download, ChevronRight, ChevronLeft } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 
@@ -14,7 +14,6 @@ const AllInterviews = () => {
   const [ isPdfModalOpen, setIsPdfModalOpen ] = useState( false );
   const [ pdfPreviewUrl, setPdfPreviewUrl ] = useState( '' );
   const [ isFeedbackExpanded, setIsFeedbackExpanded ] = useState( false );
-  const [ isStatus, setIsStatus ] = useState( false );
   const [ debouncedSearch, setDebouncedSearch ] = useState( '' );
   const [ debouncedStatus, setDebouncedStatus ] = useState( '' );
 
@@ -75,10 +74,6 @@ const AllInterviews = () => {
       alert( "Please select a status before saving." );
       return;
     }
-
-    // Example: You can use fetch or axios to send to backend
-    // console.log( "Saving candidate status:", feedbackForm.status );
-
     // Optional: Close modal or show confirmation
     setIsFeedbackModalOpen( false );
   };
@@ -481,7 +476,7 @@ const AllInterviews = () => {
               {/* Candidate */ }
 
               <div className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Candidate</h3>
                     <p className="text-lg font-semibold text-gray-800">{ capitalizeFirstLetter( detailedInterview.applicationID?.candidateID?.userName ) }</p>
@@ -524,6 +519,11 @@ const AllInterviews = () => {
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration</h3>
                     <p className="text-lg font-semibold text-gray-800">{ detailedInterview.duration }</p>
+                  </div>
+                  {/* { Round Name } */}
+                  <div className="bg-gray-200 rounded-xl p-4">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Round Name</h3>
+                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.roundID.roundName }</p>
                   </div>
                 </div>
 
@@ -703,26 +703,55 @@ const AllInterviews = () => {
         ) }
 
       </div>
+      
+     
       {/* {totalPages > 1 && ( */ }
       { filteredInterviews && filteredInterviews.length > 0 && (
-        <div className="flex justify-center mt-5 mb-5 space-x-4">
-          <button
-            onClick={ handlePreviousPage }
-            disabled={ page === 1 }
-            className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
-          >
-            Previous
-          </button>
-          <span className="text-gray-700 font-medium">
-            Page { page } of { totalPages }
-          </span>
-          <button
-            onClick={ handleNextPage }
-            // disabled={page >= totalPages}
-            className={ `px-4 py-2 rounded-xl bg-gray-400 text-white ${ page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400" }` }
-          >
-            Next
-          </button>
+        <div className="px-6 py-4 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={ handlePreviousPage }
+              disabled={ page === 1 }
+              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
+                  ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                  : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                }` }
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Previous
+            </button>
+
+            <div className="hidden sm:flex items-center space-x-1">
+              { [ ...Array( totalPages ) ].map( ( _, i ) => (
+                <button
+                  key={ i }
+                  onClick={ () => setPage( i + 1 ) }
+                  className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
+                      ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                      : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                    }` }
+                >
+                  { i + 1 }
+                </button>
+              ) ) }
+            </div>
+
+            <span className="sm:hidden text-sm text-gray-600">
+              Page { page } of { totalPages }
+            </span>
+
+            <button
+              onClick={ handleNextPage }
+              disabled={ page === totalPages }
+              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === totalPages
+                  ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                  : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                }` }
+            >
+              Next
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </button>
+          </div>
         </div>
       ) }
     </div>
