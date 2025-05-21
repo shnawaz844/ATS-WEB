@@ -3,10 +3,10 @@ import FeedbackModel from "../../models/Feedback.js";
 export const createFeedback = async (req, res) => {
     try {
         // const { interviewId } = req.params;
-        const { feedbackTitle, feedback, interviewId, applicationID } = req.body;
+        const { feedbackTitle, feedback, interviewId, applicationID, starRating } = req.body;
         console.log("feedback", feedbackTitle, feedback, interviewId, req.body)
 
-        const newFeedback = new FeedbackModel({ interviewId, feedbackTitle, feedback, applicationID });
+        const newFeedback = new FeedbackModel( { interviewId, feedbackTitle, feedback, applicationID, starRating });
         await newFeedback.save();
 
         res.status(201).json(newFeedback);

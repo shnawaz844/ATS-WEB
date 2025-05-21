@@ -66,6 +66,10 @@ export const getInterviews = async ( req, res ) => {
                 path: 'interviewerID',
                 select: 'email name interviewer userName',
             } )
+            .populate( {
+                path: "roundID",       // ← NEW: populate the round document
+                select: "roundName"
+            } )
             .sort( { createdAt: -1 } );
 
         // Get total count before applying search term
