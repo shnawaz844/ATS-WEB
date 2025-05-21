@@ -5,6 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useManagerApplications from '../../hooks/useManagerApplications';
 import { Briefcase, Search, User } from 'lucide-react';
+import axios from 'axios';
 
 const ApplicationList = () => {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ const ApplicationList = () => {
     const [ search, setSearch ] = useState( "" );
     const [ detailedApplication, setDetailedApplication ] = useState( null );
     const [ interviewers, setInterviewers ] = useState( [] );
+    const [ interviewRounds, setInterviewRounds ] = useState( [] );
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
     const [ editForm, setEditForm ] = useState( {
         applicationID: "",
@@ -21,6 +23,7 @@ const ApplicationList = () => {
         meetingLink: "",
         interviewerId: "",
         company_id: "",
+        roundName: "",
     } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
@@ -89,6 +92,31 @@ const ApplicationList = () => {
         fetchInterviewers();
     }, [] );
 
+    // Fetch Interview Rounds
+    useEffect( () => {
+        const fetchInterviewRounds = async () => {
+            try {
+                const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+                const res = await axios.get(
+                    `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=1&limit=100&search=`,
+                    {
+                        headers: { company_id: companyId },
+                    }
+                );
+                // Assuming API returns { interviews: [ { roundName: "Round 1" }, ... ] }
+                // Extract distinct roundNames
+                const rounds = res.data.interviews;
+                console.log( "rounds", rounds )
+                // Remove duplicates
+                setInterviewRounds( rounds );
+            } catch ( error ) {
+                console.error( "Failed to fetch interview rounds", error );
+            }
+        };
+
+        fetchInterviewRounds();
+    }, [] );
+
     // Create a unique list of job fields from applications
     const jobFields = [ "All", ...new Set( applications
         .map( app => app.jobDetails?.title || "Unknown" )
@@ -141,6 +169,7 @@ const ApplicationList = () => {
             meetingLink: application.interview?.meetingLink || "",
             interviewerId: application.interview?.interviewerId || "",
             company_id: application.company_id || "",
+            roundName: application.interview?.roundName || "",
         } );
         setEditingId( application._id );
         setIsEditModalOpen( true );
@@ -179,6 +208,7 @@ const ApplicationList = () => {
             scheduledTime: editForm.time,
             interviewerType: editForm.interviewType,
             meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
+            roundID: editForm.roundName,
             status: "Scheduled",
             company_id: companyId,
 
@@ -388,25 +418,57 @@ const ApplicationList = () => {
                         ) }
 
                 {/* Pagination Controls */ }
-                { !isLoading && !isError && totalPages > 1 && (
-                    <div className="mt-8 flex justify-center space-x-4">
-                        <button
-                            disabled={ page === 1 }
-                            onClick={ () => setPage( prev => Math.max( prev - 1, 1 ) ) }
-                            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 transition"
-                        >
-                            Previous
-                        </button>
-                        <span className="flex items-center text-lg font-semibold">
-                            Page { page } of { totalPages }
-                        </span>
-                        <button
-                            disabled={ page === totalPages }
-                            onClick={ () => setPage( prev => Math.min( prev + 1, totalPages ) ) }
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition"
-                        >
-                            Next
-                        </button>
+                {/* Pagination Controls - Updated to match CandidateApplication style */ }
+                { applications.length > 0 && (
+                    <div className="px-6 py-4 border-t border-gray-100 mt-4">
+                        <div className="flex items-center justify-between">
+                            <button
+                                onClick={ handlePreviousPage }
+                                disabled={ page === 1 }
+                                className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
+                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                                        : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                    }` }
+                            >
+                                <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Previous
+                            </button>
+
+                            <div className="hidden sm:flex items-center space-x-1">
+                                { [ ...Array( totalPages ) ].map( ( _, i ) => (
+                                    <button
+                                        key={ i }
+                                        onClick={ () => setPage( i + 1 ) }
+                                        className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
+                                                ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                                                : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                            }` }
+                                    >
+                                        { i + 1 }
+                                    </button>
+                                ) ) }
+                            </div>
+
+                            <span className="sm:hidden text-sm text-gray-600">
+                                Page { page } of { totalPages }
+                            </span>
+
+                            <button
+                                onClick={ handleNextPage }
+                                disabled={ page === totalPages }
+                                className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === totalPages
+                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                                        : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                                    }` }
+                            >
+                                Next
+                                <svg className="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 ) }
             </div>
@@ -531,6 +593,23 @@ const ApplicationList = () => {
                                         ) ) }
                                     </select>
                                 </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Round</label>
+                                    <select
+                                        value={ editForm.roundName }
+                                        onChange={ ( e ) => setEditForm( { ...editForm, roundName: e.target.value } ) }
+                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        required
+                                    >
+                                        <option value="">Select Interview Round</option>
+                                        { interviewRounds.map( ( round ) => (
+                                            <option key={ round._id } value={ round._id }>
+                                                { round.roundName }
+                                            </option>
+                                        ) ) }
+                                    </select>
+                                </div>
+
                             </div>
 
                             <div className="mt-6 flex justify-end space-x-3">

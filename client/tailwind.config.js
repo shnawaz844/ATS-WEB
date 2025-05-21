@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
     extend: {
+      fontFamily: {
+        fangsong: [ 'fangsong', 'serif', 'DM Sans' ], // fallback to serif
+      },
       colors: {
         lightGray: "#e0e0e0",
         vibrantPink: "#FF3366",

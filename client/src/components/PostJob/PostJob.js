@@ -33,9 +33,26 @@ export const PostJob = () => {
     const user = JSON.parse( localStorage.getItem( 'user' ) ); // Parse user object from localStorage
     const recruiterRole = user?.head || '';
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+    const [ hiringManagersList, setHiringManagersList ] = useState( [] );
     // const recruiterName = user?.userName || '';
 
-    
+    // Fetch hiring managers
+    useEffect( () => {
+        const fetchHiringManagers = async () => {
+            try {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager/all-hiring-manager`, {
+                    headers: {
+                        'company_id': companyId
+                    }
+                } );
+                const data = await response.json();
+                setHiringManagersList( data );
+            } catch ( error ) {
+                console.error( 'Error fetching hiring managers:', error );
+            }
+        };
+        fetchHiringManagers();
+    }, [ companyId ] );
 
     const {
         register,
@@ -58,8 +75,8 @@ export const PostJob = () => {
             requiredResources: '',
             status: '',
             recruiterName: recruiterRole ? '' : user._id,
-            hiringManagerEmail: '',
-            hiringManagerName: '',
+            hiringManagerEmail: jobToEdit?.hiringManagerEmail || '',
+            hiringManagerName: jobToEdit?.hiringManagerName || '',
             description: '',
             applicationForm: {
                 question: questions.map((q) => q.question),
@@ -93,7 +110,16 @@ export const PostJob = () => {
     }, [jobToEdit, setValue]);
 
     // The form submit handler
-    const onSubmit = (data) => {
+    const onSubmit = ( data ) => {
+        // Find the selected hiring manager
+        const selectedHiringManager = hiringManagersList.find(
+            manager => manager.email === data.hiringManagerEmail
+        );
+
+        if ( !selectedHiringManager ) {
+            toast.error( 'Please select a valid hiring manager' );
+            return;
+        }
         // Format the data to include shiftStart, shiftEnd, and separate location fields
         const formattedData = {
             ...data,
@@ -105,6 +131,8 @@ export const PostJob = () => {
             compensation: String(data.compensation),
             experienceRequired: String(data.experienceRequired),
             company_id : companyId,
+            hiringManagerEmail: selectedHiringManager.email,
+            hiringManagerName: selectedHiringManager.userName,
             applicationForm: {
                 question: questions.map((q) => q.question),
                 answer: questions.map((q) => q.answer),
@@ -122,6 +150,7 @@ export const PostJob = () => {
                 },
             });
         } else {
+            console.log( "formattedData", formattedData )
             postJob(formattedData, {
                 onSuccess: () => {
                     toast.success('Job posted successfully');

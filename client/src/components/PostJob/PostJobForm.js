@@ -216,10 +216,11 @@ export const PostJobForm = ( {
   selectedCity,
   setSelectedCity,
   recruiterRole,
-  recruiterName
+  // recruiterName
 } ) => {
   const [ isHead, setIsHead ] = React.useState( false );
   const [ recruitersList, setRecruitersList ] = useState( [] );
+  const [ hiringManagersList, setHiringManagersList ] = useState( [] );
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id; 
   // console.log( "recruiterRole>>>>", recruiterRole )
 
@@ -251,6 +252,25 @@ export const PostJobForm = ( {
     };
 
     fetchRecruiters();
+  }, [] );
+
+  useEffect( () => {
+    const fetchHiringManagers = async () => {
+      try {
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager//all-hiring-manager`, {
+          headers: {
+            'company_id': companyId
+          }
+        } );
+        const data = await response.json();
+        console.log( 'Fetched Hiring Managers:', data );
+        setHiringManagersList( data );
+      } catch ( error ) {
+        console.error( 'Error fetching hiring managers:', error );
+      }
+    };
+
+    fetchHiringManagers();
   }, [] );
 
 
@@ -383,23 +403,44 @@ export const PostJobForm = ( {
                       </select>
                     </FormField>
                   ) }
-                  
-                  <FormInput
-                    label="Hiring Manager Email"
-                    register={ register }
-                    name="hiringManagerEmail"
-                    type="email"
-                    error={ errors?.hiringManagerEmail }
-                    placeholder="manager@example.com"
-                  />
 
-                  <FormInput
-                    label="Hiring Manager Name"
-                    register={ register }
-                    name="hiringManagerName"
-                    error={ errors?.hiringManagerName }
-                    placeholder="Hiring Manager Name"
-                  />
+                  <FormField label="Hiring Manager Email" error={ errors?.hiringManagerEmail }>
+                    <select
+                      { ...register( "hiringManagerEmail", {
+                        required: "Hiring Manager is required"
+                      } ) }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Select Hiring Manager</option>
+                      { hiringManagersList && hiringManagersList.length > 0 ? (
+                        hiringManagersList.map( ( manager ) => (
+                          <option key={ manager._id } value={ manager.email }>
+                          { manager.email }
+                          </option>
+                        ) )
+                      ) : (
+                        <option disabled>No hiring managers found</option>
+                      ) }
+                    </select>
+                  </FormField>
+
+                  {/* Hiring Manager Dropdown */ }
+                  <FormField label="Hiring Manager Name">
+                    <select
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Select Hiring Manager</option>
+                      { hiringManagersList && hiringManagersList.length > 0 ? (
+                        hiringManagersList.map( ( manager ) => (
+                          <option key={ manager._id } value={ manager._id }>
+                            { manager.userName }
+                          </option>
+                        ) )
+                      ) : (
+                        <option disabled>No hiring managers found</option>
+                      ) }
+                    </select>
+                  </FormField>
 
                   <div className="col-span-2">
                     <LocationPicker

@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { toast, ToastContainer } from "react-toastify";
+
+import { Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
+import axios from 'axios';
 import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+
 import useScheduledInterview from '../../hooks/useScheduledInterview';
-import { Briefcase } from 'lucide-react';
 
 export const ScheduledInterview = () => {
     const [ page, setPage ] = useState( 1 );
-    const limit = 10; // Number of interviews per page
+    const limit = 10;
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const storedUser = localStorage.getItem( "user" );
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerEmail = interviewer?.email || "";
     const [ statuses, setStatuses ] = useState( [] );
-    const [ file, setFile ] = useState( null );
-    const [ preview, setPreview ] = useState( null );
 
     // ✅ Correctly using the custom hook inside the component
     const {
@@ -23,10 +24,8 @@ export const ScheduledInterview = () => {
         refetchScheduledInterviews
     } = useScheduledInterview( page, limit, interviewerEmail, companyId );
     console.log( "ScheduledInterviews", ScheduledInterviews )
-    const [ editingId, setEditingId ] = useState( null );
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
-    // const[selectedInterview,setSelectedInterview] =useState({});
 
     const [ editForm, setEditForm ] = useState( {
         date: "",
@@ -42,6 +41,7 @@ export const ScheduledInterview = () => {
 
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
     const [ isFeedbackModalOpen, setIsFeedbackModalOpen ] = useState( false );
+    const [ interviewRounds, setInterviewRounds ] = useState( [] );
     const [ feedbackForm, setFeedbackForm ] = useState( {
         feedbackTitle: "",
         feedback: "",
@@ -49,7 +49,6 @@ export const ScheduledInterview = () => {
     } );
 
     const modalRef = useRef();
-    const statusOptions = [ "scheduled", "completed", "cancelled", "rescheduled" ];
     const interviewTypes = [ "online", "walkin" ];
     const feedbackTitles = [
         "Poor",
@@ -120,6 +119,30 @@ export const ScheduledInterview = () => {
         } );
         setIsEditModalOpen( true );
     };
+
+    useEffect( () => {
+        const fetchInterviewRounds = async () => {
+            try {
+                const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+                const res = await axios.get(
+                    `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=1&limit=100&search=`,
+                    {
+                        headers: { company_id: companyId },
+                    }
+                );
+                // Assuming API returns { interviews: [ { roundName: "Round 1" }, ... ] }
+                // Extract distinct roundNames
+                const rounds = res.data.interviews;
+                console.log( "rounds", rounds )
+                // Remove duplicates
+                setInterviewRounds( rounds );
+            } catch ( error ) {
+                console.error( "Failed to fetch interview rounds", error );
+            }
+        };
+
+        fetchInterviewRounds();
+    }, [] );
 
     // Validate form before update
     const validateForm = () => {
@@ -374,6 +397,7 @@ export const ScheduledInterview = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Feedback</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Action</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Round</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -404,6 +428,9 @@ export const ScheduledInterview = () => {
                                             Edit
                                         </button>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">
+                                        { interview.roundID?.roundName || "N/A" }
+                                    </td>
                                 </tr>
                             ) ) }
                         </tbody>
@@ -413,22 +440,31 @@ export const ScheduledInterview = () => {
 
             {/* Pagination */ }
             { ScheduledInterviews?.totalPages > 1 && (
-                <div className="flex justify-center mt-8 space-x-4">
+                <div className="flex items-center justify-between border-t border-gray-200 pt-6 mt-2">
                     <button
                         onClick={ handlePreviousPage }
                         disabled={ page === 1 }
-                        className={ `px-4 py-2 rounded-md text-white ${ page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+                        className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
+                            ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                            : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                            }` }
                     >
+                         <ChevronLeft className="mr-1 h-4 w-4" />
                         Previous
                     </button>
-                    <span className="text-gray-700 font-medium">
-                        Page { page } of { ScheduledInterviews?.totalPages }
-                    </span>
+                    <div className="flex items-center gap-1">
+                        <span className="px-3 py-1 bg-gray-300 text-black rounded-full font-medium">{ page }</span>
+                        <span className="text-sm text-gray-500">of { ScheduledInterviews?.totalPages }</span>
+                    </div>
                     <button
                         onClick={ handleNextPage }
                         disabled={ page >= ScheduledInterviews?.totalPages }
-                        className={ `px-4 py-2 rounded-md text-white ${ page >= ScheduledInterviews?.totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700" }` }
+                        className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === ScheduledInterviews?.totalPages
+                            ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                            : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                            }` }
                     >
+                         <ChevronRight className="ml-1 h-4 w-4" />
                         Next
                     </button>
                 </div>
@@ -475,8 +511,10 @@ export const ScheduledInterview = () => {
                                         <p className="font-medium text-gray-800 mt-1">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                     </div>
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                                        <p className="text-gray-500 text-xs uppercase font-medium">Email</p>
-                                        <p className="font-medium text-gray-800 mt-1">{ detailedInterview?.applicationID?.candidateID?.email || "N/A" }</p>
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Candidate Id</p>
+                                        <p className="font-medium text-gray-800 mt-1">
+                                            { detailedInterview?.applicationID?.candidateID?._id || "N/A" }
+                                        </p>
                                     </div>
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Current Status</p>
@@ -678,6 +716,13 @@ export const ScheduledInterview = () => {
                                         <p className="text-gray-500 text-xs uppercase font-medium">Interview Date</p>
                                         <p className="font-medium text-gray-800 mt-1">{ formatDate( detailedInterview?.date ) }</p>
                                     </div>
+                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                        <p className="text-gray-500 text-xs uppercase font-medium">Round</p>
+                                        <p className="font-medium text-gray-800 mt-1">
+                                            { detailedInterview?.roundID?.roundName || "N/A" }
+                                        </p>
+                                    </div>
+
 
                                 </div>
                             </div>
