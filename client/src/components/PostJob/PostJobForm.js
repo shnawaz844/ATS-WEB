@@ -120,7 +120,7 @@ const LocationPicker = ( {
         >
           <option value="">Select Country</option>
           { countries.map( country => (
-            <option key={ country.isoCode } value={ country.isoCode }>
+            <option key={ country.isoCode } value={ country.name }>
               { country.name }
             </option>
           ) ) }
@@ -139,7 +139,7 @@ const LocationPicker = ( {
         >
           <option value="">Select State</option>
           { states.map( state => (
-            <option key={ state.isoCode } value={ state.isoCode }>
+            <option key={ state.isoCode } value={ state.name }>
               { state.name }
             </option>
           ) ) }
@@ -257,7 +257,7 @@ export const PostJobForm = ( {
   useEffect( () => {
     const fetchHiringManagers = async () => {
       try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager//all-hiring-manager`, {
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager/all-hiring-manager`, {
           headers: {
             'company_id': companyId
           }

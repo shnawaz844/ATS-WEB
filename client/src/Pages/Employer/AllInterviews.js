@@ -26,6 +26,8 @@ const AllInterviews = () => {
   } );
 
   const [ statuses, setStatuses ] = useState( [] );
+  const [ filteredInterviews, setFilteredInterviews ] = useState( [] );
+
   const [ page, setPage ] = useState( 1 );
   const limit = 10; // Adjust limit as needed
 
@@ -59,7 +61,12 @@ const AllInterviews = () => {
   const { assignedInterviews, error: interviewError, isLoading: interviewLoading, refetchAssignedInterviews } = useScheduledInterview( page, limit, debouncedSearch, debouncedStatus );
 
   const totalPages = assignedInterviews?.totalPages || 1;
-  const interviewList = assignedInterviews?.interviews || [];
+
+  useEffect( () => {
+    if ( assignedInterviews?.interviews?.length )
+      setFilteredInterviews( assignedInterviews?.interviews )
+  }, [ assignedInterviews?.interviews ] )
+
 
   // console.log( "assignedInterviews", assignedInterviews );
 
@@ -164,9 +171,6 @@ const AllInterviews = () => {
       hour12: true,
     } );
   };
-
-
-  const filteredInterviews = interviewList
 
   const handleStatusChange = async ( feedbackId, newStatus ) => {
     try {
@@ -320,139 +324,93 @@ const AllInterviews = () => {
         <div className=" rounded-t-xl shadow-sm p-6">
           { activeTab === 'interviews' && (
             <div className="overflow-x-auto rounded-t-xl">
-              { filteredInterviews.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                  <div className="bg-gray-100 p-5 rounded-full mb-4">
-                    <Briefcase className="h-12 w-12 text-gray-400" />
-                  </div>
-                  <div className="text-center animate-fade-in transition-all duration-500">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
-                      No Interviews Scheduled Yet
-                    </h3>
-                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                      It seems there are no interviews matching your criteria right now.
-                      <br className="hidden sm:block" />
-                      <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
-                    </p>
-                  </div>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr className='bg-gray-700'>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date & Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
 
-                </div>
-              ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr className='bg-gray-700'>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date & Time</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-
-                  { feedbackLoading || interviewLoading ? (
-                    <tbody>
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">Loading data...</td>
-                      </tr>
-                    </tbody>
-                  ) : feedbackError ? (
-                    <tbody>
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-red-500">Error loading feedbacks: { feedbackError.message }</td>
-                      </tr>
-                    </tbody>
-                  ) : interviewError ? (
-                    <tbody>
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-red-500">Error loading interviews: { interviewError.message }</td>
-                      </tr>
-                    </tbody>
-                  ) : assignedInterviews?.interviews?.length > 0 ? (
-                    assignedInterviews.interviews.map( ( feedback ) => (
-                      <tbody key={ feedback._id }>
-                        <tr className="group hover:bg-gray-700">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-start">
-                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <User size={ 20 } className="text-indigo-600" />
+                { assignedInterviews?.interviews?.length > 0 && (
+                  assignedInterviews.interviews.map( ( feedback ) => (
+                    <tbody key={ feedback._id }>
+                      <tr className="group hover:bg-gray-700">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <User size={ 20 } className="text-indigo-600" />
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900 group-hover:text-white">
+                                { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
                               </div>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">
-                                  { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
-                                </div>
-                                <div className="text-sm text-gray-700 group-hover:text-white">
-                                  { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
-                                </div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  { feedback.skills?.map( ( skill, index ) => (
-                                    <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                                      { skill }
-                                    </span>
-                                  ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
-                                </div>
+                              <div className="text-sm text-gray-700 group-hover:text-white">
+                                { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                { feedback.skills?.map( ( skill, index ) => (
+                                  <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                                    { skill }
+                                  </span>
+                                ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
                               </div>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 group-hover:text-white">
-                              { feedback.date ? formatDate( feedback.date ) : "No date" }
-                            </div>
-                            <div className="text-xs text-gray-500 group-hover:text-white">
-                              { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <select
-                              value={ feedback.status || "" }
-                              onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
-                              className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
-                            >
-                              <option value="">Select status</option>
-                              { statuses.map( ( status ) => (
-                                <option key={ status } value={ status.applicationStatus }>
-                                  { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
-                                </option>
-                              ) ) }
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={ () => {
-                                setDetailedInterview( feedback );
-                                setIsDetailModalOpen( true );
-                              } }
-                              className="text-indigo-600 hover:text-indigo-900 group-hover:text-white mr-3"
-                            >
-                              View
-                            </button>
-                            <button
-                              onClick={ () => {
-                                setDetailedInterview( feedback );
-                                handleFeedbackClick( feedback );
-                              } }
-                              className="text-indigo-600 group-hover:text-white hover:text-indigo-900"
-                            >
-                              Feedback
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    ) )
-                  ) : (
-                    <tbody>
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                          No interviews found.
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 group-hover:text-white">
+                            { feedback.date ? formatDate( feedback.date ) : "No date" }
+                          </div>
+                          <div className="text-xs text-gray-500 group-hover:text-white">
+                            { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            value={ feedback.status || "" }
+                            onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
+                            className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
+                          >
+                            <option value="">Select status</option>
+                            { statuses.map( ( status ) => (
+                              <option key={ status } value={ status.applicationStatus }>
+                                { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                              </option>
+                            ) ) }
+                          </select>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={ () => {
+                              setDetailedInterview( feedback );
+                              setIsDetailModalOpen( true );
+                            } }
+                            className="text-indigo-600 hover:text-indigo-900 group-hover:text-white mr-3"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={ () => {
+                              setDetailedInterview( feedback );
+                              handleFeedbackClick( feedback );
+                            } }
+                            className="text-indigo-600 group-hover:text-white hover:text-indigo-900"
+                          >
+                            Feedback
+                          </button>
                         </td>
                       </tr>
                     </tbody>
-                  ) }
-                </table>
-
-              ) }
+                  ) )
+                ) }
+              </table>
             </div>
           ) }
         </div>
@@ -520,7 +478,7 @@ const AllInterviews = () => {
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration</h3>
                     <p className="text-lg font-semibold text-gray-800">{ detailedInterview.duration }</p>
                   </div>
-                  {/* { Round Name } */}
+                  {/* { Round Name } */ }
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Round Name</h3>
                     <p className="text-lg font-semibold text-gray-800">{ detailedInterview.roundID.roundName }</p>
@@ -703,8 +661,8 @@ const AllInterviews = () => {
         ) }
 
       </div>
-      
-     
+
+
       {/* {totalPages > 1 && ( */ }
       { filteredInterviews && filteredInterviews.length > 0 && (
         <div className="px-6 py-4 border-t border-gray-100">
@@ -713,8 +671,8 @@ const AllInterviews = () => {
               onClick={ handlePreviousPage }
               disabled={ page === 1 }
               className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
-                  ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                  : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
                 }` }
             >
               <ChevronLeft className="mr-1 h-4 w-4" />
@@ -727,8 +685,8 @@ const AllInterviews = () => {
                   key={ i }
                   onClick={ () => setPage( i + 1 ) }
                   className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
-                      ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
-                      : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                    ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                    : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
                     }` }
                 >
                   { i + 1 }
@@ -744,14 +702,33 @@ const AllInterviews = () => {
               onClick={ handleNextPage }
               disabled={ page === totalPages }
               className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === totalPages
-                  ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                  : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
                 }` }
             >
               Next
               <ChevronRight className="ml-1 h-4 w-4" />
             </button>
           </div>
+        </div>
+      ) }
+
+      { !filteredInterviews.length && (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="bg-gray-100 p-5 rounded-full mb-4">
+            <Briefcase className="h-12 w-12 text-gray-400" />
+          </div>
+          <div className="text-center animate-fade-in transition-all duration-500">
+            <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+              No Interviews Scheduled Yet
+            </h3>
+            <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+              It seems there are no interviews matching your criteria right now.
+              <br className="hidden sm:block" />
+              <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
+            </p>
+          </div>
+
         </div>
       ) }
     </div>
