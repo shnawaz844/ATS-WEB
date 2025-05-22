@@ -260,7 +260,7 @@ const AssignedInterviews = () => {
                         </div>
                         {/* Search and Filter */ }
                         <div className='flex items-center gap-4'>
-                            <div className="w-[30vw]">
+                            <div className="w-[35vw]">
                                 <label className="block text-white text-xs font-bold mb-2">
                                     Search:
                                 </label>
@@ -268,7 +268,7 @@ const AssignedInterviews = () => {
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <input
                                         type="text"
-                                        placeholder="Search by job, candidate or interview type"
+                                        placeholder="Search by job, candidate or interview type..."
                                         value={ search }
                                         onChange={ ( e ) => setSearch( e.target.value ) }
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none duration-200 h-[6.3vh]"
@@ -282,7 +282,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={ filterStatus }
                                     onChange={ ( e ) => setFilterStatus( e.target.value ) }
-                                    className="appearance-none bg-gray-200 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
+                                    className="appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
                                 >
                                     <option value="all">All Statuses</option>
                                     { statuses.map( status => (

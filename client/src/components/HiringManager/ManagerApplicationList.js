@@ -118,7 +118,7 @@ const ApplicationList = () => {
     }, [] );
 
     // Create a unique list of job fields from applications
-    const jobFields = [ "All", ...new Set( applications
+    const jobFields = [ "All Jobs", ...new Set( applications
         .map( app => app.jobDetails?.title || "Unknown" )
         .filter( title => title !== "Unknown" ) ) ];
 
@@ -280,7 +280,7 @@ const ApplicationList = () => {
                         <div>
                             <h2 className="text-3xl font-bold text-white flex items-center">
                                 <Briefcase className="mr-2 h-6 w-6 text-white" />
-                                Manage Applications
+                                Manage Applications1
                             </h2>
                         </div>
                         {/* Search and Filter Controls */ }
@@ -305,7 +305,7 @@ const ApplicationList = () => {
                                     Filter by Job:
                                 </label>
                                 <select
-                                    className="appearance-none bg-gray-200 rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none "
+                                    className="appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none "
                                     value={ selectedJobField }
                                     onChange={ ( e ) => setSelectedJobField( e.target.value ) }
                                 >
@@ -323,11 +323,6 @@ const ApplicationList = () => {
 
                 {/* Applications Grid */ }
                 {
-                    // isLoading ? (
-                    //     <div className="flex justify-center items-center h-64">
-                    //         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                    //     </div>
-                    // ) :
                         isError ? (
                             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                                 <div className="bg-gray-100 p-5 rounded-full mb-4">
@@ -551,7 +546,7 @@ const ApplicationList = () => {
                                     <select
                                         value={ editForm.interviewType }
                                         onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500 "
                                         required
                                     >
                                         <option value="">Select Interview Type</option>

@@ -216,13 +216,11 @@ export const PostJobForm = ( {
   selectedCity,
   setSelectedCity,
   recruiterRole,
-  // recruiterName
+  hiringManagersList,
 } ) => {
   const [ isHead, setIsHead ] = React.useState( false );
   const [ recruitersList, setRecruitersList ] = useState( [] );
-  const [ hiringManagersList, setHiringManagersList ] = useState( [] );
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id; 
-  // console.log( "recruiterRole>>>>", recruiterRole )
 
 
   useEffect( () => {
@@ -245,7 +243,7 @@ export const PostJobForm = ( {
         } );
         const data = await response.json();
         console.log( 'Fetched Recruiters:', data );
-        setRecruitersList( data ); // Assuming response contains a list of recruiters
+        setRecruitersList( data );
       } catch ( error ) {
         console.error( 'Error fetching recruiters:', error );
       }
@@ -254,27 +252,6 @@ export const PostJobForm = ( {
     fetchRecruiters();
   }, [] );
 
-  useEffect( () => {
-    const fetchHiringManagers = async () => {
-      try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager/all-hiring-manager`, {
-          headers: {
-            'company_id': companyId
-          }
-        } );
-        const data = await response.json();
-        console.log( 'Fetched Hiring Managers:', data );
-        setHiringManagersList( data );
-      } catch ( error ) {
-        console.error( 'Error fetching hiring managers:', error );
-      }
-    };
-
-    fetchHiringManagers();
-  }, [] );
-
-
-  // console.log( "recruitersList", recruitersList )
   return (
     <div className="min-h-screen py-12"
       style={ { background: 'linear-gradient(135deg, #ffffff, #808080)' } }>

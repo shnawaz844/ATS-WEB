@@ -246,8 +246,8 @@ const AllInterviews = () => {
             </div>
             {/* Search and Filter */ }
             <div className='flex items-center gap-4'>
-              <div className="flex flex-col md:flex-row md:justify-between gap-4 w-[40vw]">
-                <div className="lg:col-span-2 w-[30vw]">
+              <div className="flex flex-col md:flex-row md:justify-between gap-3 w-[50vw]">
+                <div className="lg:col-span-2 w-[67%]">
                   <label className="block text-white text-xs font-bold mb-2">
                     Search:
                   </label>
@@ -282,7 +282,7 @@ const AllInterviews = () => {
                       Filter by Status:
                     </label>
                     <select
-                      className="appearance-none bg-gray-200 rounded-xl py-1.5 pl-4 pr-10 focus:outline-none focus:ring-none"
+                      className="appearance-none bg-gray-200 rounded-xl py-1.5 pl-4 pr-10 focus:outline-none focus:ring-none hover:bg-white"
                       value={ filterStatus }
                       onChange={ ( e ) => setFilterStatus( e.target.value ) }
                     >
