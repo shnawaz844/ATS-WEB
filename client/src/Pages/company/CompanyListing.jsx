@@ -14,6 +14,8 @@ import {
     Globe,
     ChartNoAxesCombined,
 } from 'lucide-react'
+import 'react-toastify/dist/ReactToastify.css'
+import { toast, ToastContainer } from 'react-toastify'
 
 const CompanyListing = () => {
     // State for company data, pagination, and search
@@ -74,6 +76,12 @@ const CompanyListing = () => {
                 const data = await response.json()
                 setCompanies( data.Companies )
                 setTotalCompanies( data.totalCount )
+                // Show success toast only on initial load or search
+                if ( searchTerm && data.Companies.length > 0 ) {
+                    toast.success( `Found ${ data.totalCount } companies matching "${ searchTerm }"` )
+                } else if ( searchTerm && data.Companies.length === 0 ) {
+                    toast.info( `No companies found matching "${ searchTerm }"` )
+                }
             } else {
                 // Fallback to dummy data if API responds with error status
                 setCompanies( dummyCompanies )
@@ -83,6 +91,7 @@ const CompanyListing = () => {
             console.error( 'Error fetching companies:', error )
             setCompanies( dummyCompanies )
             setTotalCompanies( dummyCompanies.length )
+            
         }
     }
 
@@ -122,6 +131,7 @@ const CompanyListing = () => {
         setSearchTerm( '' )
         setIsSearching( false )
         setCurrentPage( 1 )
+        toast.info( 'Search cleared' )
     }
 
     // Open dialog to add a new company (reset form)
@@ -136,6 +146,7 @@ const CompanyListing = () => {
             website: '',
         } )
         setIsDialogOpen( true )
+        toast.info( 'Ready to add a new company' )
     }
 
     // Open dialog to edit an existing company (populate form)

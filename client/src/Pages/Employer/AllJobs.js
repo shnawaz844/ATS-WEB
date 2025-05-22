@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+
+import { Link, useNavigate } from 'react-router-dom';
 import { useJobs } from '../../hooks/useJob';
 import Select from "react-select";
 import { toast } from 'react-toastify';
@@ -11,8 +12,6 @@ import {
 } from 'lucide-react';
 
 export const AllJobs = () => {
-    // State for search and filters
-    // const companyUserName = useParams();
     const [ search, setSearch ] = useState( "" );
     const [ debouncedSearch, setDebouncedSearch ] = useState( "" );
     const [ jobType, setJobType ] = useState( "" );
@@ -22,7 +21,6 @@ export const AllJobs = () => {
     const [ jobsPerPage ] = useState( 9 );
     const [ isFilterOpen, setIsFilterOpen ] = useState( false );
     const [ isDeleting, setIsDeleting ] = useState( false );
-    const [ deleteError, setDeleteError ] = useState( null );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
@@ -138,7 +136,6 @@ export const AllJobs = () => {
 
         try {
             setIsDeleting( true );
-            setDeleteError( null );
 
             const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/delete-job/${ jobId }`, {
                 method: 'DELETE',
@@ -161,7 +158,6 @@ export const AllJobs = () => {
         } catch ( error ) {
             console.error( 'Error deleting job:', error );
             console.log( "jobId", jobId )
-            setDeleteError( error.message );
         } finally {
             setIsDeleting( false );
         }
@@ -174,21 +170,35 @@ export const AllJobs = () => {
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */ }
-                    <div className='mb-6 h-25vh flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
                         <div className="flex justify-between items-center w-full">
                             <div>
-                                <h2 className="text-3xl font-bold text-white flex items-center">
+                                <h2 className="text-3xl font-bold text-white flex items-center font-DM Sansong">
                                     <Briefcase className="mr-2 h-6 w-6 text-gray-200" />
                                     Job Board
                                 </h2>
                             </div>
                             <div className='flex gap-4'>
+                                {/* Search Bar */ }
+                                <div className="relative rounded-full w-[25vw]">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Search className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search job titles, skills, or keywords..."
+                                        value={ search }
+                                        onChange={ ( e ) => setSearch( e.target.value ) }
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm transition-all duration-200 h-[6.3vh] focus:outline-none focus:ring-none rounded-xl"
+                                    />
+                                </div>
                                 <button
                                     className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                     onClick={ () => setIsFilterOpen( !isFilterOpen ) } // Toggle filter visibility
                                 >
                                     { isFilterOpen ? "Hide Filters" : "Show Filters" }
                                 </button>
+
                                 <Link
                                     to={ `/${ companyUserName }/post-job` }
                                     className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
@@ -212,84 +222,129 @@ export const AllJobs = () => {
                     </div>
 
                     {/* Filters Section */ }
-                    <div className={ `flex items-center justify-evenly transition-all duration-300 ${ isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100 backdrop-blur-full' }` }>
+                    <div className={ `transition-all duration-300 ${ isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100' }` }>
                         <div className={ isFilterOpen ? 'block' : 'hidden' }>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 items-end">
-                                {/* Search Bar */ }
-                                <div className="lg:col-span-4 ">
-                                    <div className="relative rounded-full">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Search className="h-5 w-5 text-gray-400" />
+                            <div className="max-w-7xl mx-auto bg-gradient-to-br from-gray-300 to-gray-100 p-6 rounded-2xl shadow-lg border-0">
+                                <div className="flex justify-center">
+                                    <div className="flex flex-wrap justify-center gap-4 items-end max-w-5xl w-full">
+
+                                        {/* Job Type Dropdown */ }
+                                        <div className="flex-1 min-w-48">
+                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                                <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
+                                                <span>Job Type</span>
+                                            </div>
+                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                                <Select
+                                                    options={ jobTypeOptions }
+                                                    value={ jobType }
+                                                    onChange={ setJobType }
+                                                    placeholder="Any type"
+                                                    isClearable
+                                                    styles={ {
+                                                        ...customSelectStyles,
+                                                        control: ( provided, state ) => ( {
+                                                            ...provided,
+                                                            border: 'none',
+                                                            borderRadius: '16px',
+                                                            background: 'transparent',
+                                                            boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                            '&:hover': {
+                                                                border: 'none'
+                                                            }
+                                                        } ),
+                                                        placeholder: ( provided ) => ( {
+                                                            ...provided,
+                                                            color: '#94a3b8'
+                                                        } )
+                                                    } }
+                                                    className="text-sm"
+                                                />
+                                            </div>
                                         </div>
-                                        <input
-                                            type="text"
-                                            placeholder="Search job titles, skills, or keywords..."
-                                            value={ search }
-                                            onChange={ ( e ) => setSearch( e.target.value ) }
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm transition-all duration-200 h-[6.3vh] focus:outline-none focus:ring-none rounded-xl"
-                                        />
-                                    </div>
-                                </div>
 
-                                {/* Job Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <Briefcase className="mr-1.5 h-4 w-4" />
-                                        <span>Job Type</span>
-                                    </div>
-                                    <Select
-                                        options={ jobTypeOptions }
-                                        value={ jobType }
-                                        onChange={ setJobType }
-                                        placeholder="Any type"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
+                                        {/* Location Type Dropdown */ }
+                                        <div className="flex-1 min-w-48">
+                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                                <MapPin className="mr-2 h-4 w-4 text-teal-500" />
+                                                <span>Location</span>
+                                            </div>
+                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                                <Select
+                                                    options={ locationTypeOptions }
+                                                    value={ locationType }
+                                                    onChange={ setLocationType }
+                                                    placeholder="Any location"
+                                                    isClearable
+                                                    styles={ {
+                                                        ...customSelectStyles,
+                                                        control: ( provided, state ) => ( {
+                                                            ...provided,
+                                                            border: 'none',
+                                                            borderRadius: '16px',
+                                                            background: 'transparent',
+                                                            boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                            '&:hover': {
+                                                                border: 'none'
+                                                            }
+                                                        } ),
+                                                        placeholder: ( provided ) => ( {
+                                                            ...provided,
+                                                            color: '#94a3b8'
+                                                        } )
+                                                    } }
+                                                    className="text-sm"
+                                                />
+                                            </div>
+                                        </div>
 
-                                {/* Location Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <MapPin className="mr-1.5 h-4 w-4" />
-                                        <span>Location</span>
-                                    </div>
-                                    <Select
-                                        options={ locationTypeOptions }
-                                        value={ locationType }
-                                        onChange={ setLocationType }
-                                        placeholder="Any location"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
+                                        {/* Schedule Type Dropdown */ }
+                                        <div className="flex-1 min-w-48">
+                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                                <Clock className="mr-2 h-4 w-4 text-purple-500" />
+                                                <span>Schedule</span>
+                                            </div>
+                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                                <Select
+                                                    options={ scheduleTypeOptions }
+                                                    value={ scheduleType }
+                                                    onChange={ setScheduleType }
+                                                    placeholder="Any schedule"
+                                                    isClearable
+                                                    styles={ {
+                                                        ...customSelectStyles,
+                                                        control: ( provided, state ) => ( {
+                                                            ...provided,
+                                                            border: 'none',
+                                                            borderRadius: '16px',
+                                                            background: 'transparent',
+                                                            boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                            '&:hover': {
+                                                                border: 'none'
+                                                            }
+                                                        } ),
+                                                        placeholder: ( provided ) => ( {
+                                                            ...provided,
+                                                            color: '#94a3b8'
+                                                        } )
+                                                    } }
+                                                    className="text-sm"
+                                                />
+                                            </div>
+                                        </div>
 
-                                {/* Schedule Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <Clock className="mr-1.5 h-4 w-4" />
-                                        <span>Schedule</span>
+                                        {/* Reset Button */ }
+                                        <div className="flex-shrink-0 min-w-32">
+                                            <button
+                                                type="button"
+                                                onClick={ handleResetFilters }
+                                                className="group flex items-center justify-center w-full px-1 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-2xl hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                Reset
+                                                <RefreshCw className="h-4 ml-2 w-4 group-hover:rotate-180 transition-transform duration-300" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <Select
-                                        options={ scheduleTypeOptions }
-                                        value={ scheduleType }
-                                        onChange={ setScheduleType }
-                                        placeholder="Any schedule"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
-
-                                <div className="lg:col-span-1 ">
-                                    <button
-                                        type="button"
-                                        onClick={ handleResetFilters }
-                                        className="flex items-center px-4 py-3 bg-gray-700 text-gray-100 rounded-xl hover:bg-gray-400 transition-colors duration-200"
-                                    >
-                                        <RefreshCw className="h-4 w-4" />
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -348,7 +403,7 @@ export const AllJobs = () => {
 
                                             <div className="mt-2 flex items-center text-black group-hover:text-white">
                                                 <MapPin className="h-4 w-4 mr-2" />
-                                                <span className="text-sm">Address:     
+                                                <span className="text-sm">Address:
                                                     { job.city }, { job.state }, { job.country }
                                                 </span>
                                             </div>

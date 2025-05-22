@@ -1,10 +1,14 @@
 import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom';
+
 import './App.css';
+import { useAuth } from './hooks/useAuth';
+import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
+
 import { Home } from './Pages/Employer/Home';
 import { Navbar } from './components/Navbar';
 import { PostJob } from './components/PostJob/PostJob';
-import AllJobs, { Jobs } from './Pages/Employer/AllJobs';
+import AllJobs from './Pages/Employer/AllJobs';
 import { Login } from './components/Login/Login';
 import { Register } from './components/Login/Register';
 import RecruiterDashboard from './Pages/Recruiter/RecruiterDashboard';
@@ -30,13 +34,11 @@ import CandidateApplication from './Pages/Application/CandidateApplication';
 import ApplicationJobDetail from './Pages/Application/ApplicationJobDetail';
 import CandidateDetailsPage from './Pages/Recruiter/CandidateDetailsPage';
 import ShortlistedApplications from './Pages/Application/ShortlistedApplication/ShortlistedApplications';
-import { useAuth } from './hooks/useAuth';
 import CompanyListing from './Pages/company/CompanyListing';
 import AllInterviews from './Pages/Employer/AllInterviews';
 import NotFound from './Pages/NotFound';
 import CompanyNotFound from './components/CompanyNotFound';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import axios from 'axios';
 import Banner from './components/Home/Banner/Banner'
 
 
@@ -57,10 +59,7 @@ const Layout = () => {
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [ companyDetails, setCompanyDetails ] = useState( null );
-  const [ companyLoading, setCompanyLoading ] = useState( true );
   const [ companyError, setCompanyError ] = useState( false );
-  const [ isClearing, setIsClearing ] = useState( true );
   const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 
@@ -83,9 +82,6 @@ function App() {
       localStorage.removeItem( "companyUserName" );
       localStorage.removeItem( "companyId" );
       console.log( "Cleared companyUserName from localStorage" );
-      setIsClearing( false );
-    } else {
-      setIsClearing( false );
     }
   }, [ slug ] );
 
@@ -109,7 +105,6 @@ function App() {
       return;
     }
 
-    setCompanyLoading( true );
     setCompanyError( false );
 
     // Fetch company details from API using companyUserName
@@ -120,10 +115,8 @@ function App() {
         // Verify if the company ID from API matches the stored on
         if ( companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
           console.error( "Company ID mismatch, invalid access." );
-          navigate( '/404' );  // Redirect to "Company Not Found" page
+          navigate( '/404' );
         } else {
-          setCompanyDetails( res.data );
-          setCompanyLoading( false );
           // Optionally update localStorage with the correct company data
           localStorage.setItem( "companyId", res.data._id );
           localStorage.setItem( "companyUserName", slug );
@@ -131,7 +124,6 @@ function App() {
       } )
       .catch( err => {
         console.error( "Invalid company slug:", err );
-        setCompanyLoading( false );
         setCompanyError( true );
       } );
   }, [ slug, companyUserNameFromStorage, companyIdFromStorage, navigate ] );
@@ -170,7 +162,6 @@ function App() {
           <Route path="/:companyUserName/all-jobs" element={ <AllJobs /> } />
           <Route path="/:companyUserName/all-interviews" element={ <AllInterviews /> } />
           <Route path="/:companyUserName/current-job/:id" element={ <JobDetails /> } />
-          <Route path="/:companyUserName/job-detail/:id" element={ <ApplicationJobDetail /> } />
 
           {/* Dynamic route for companyName */ }
           <Route path="/:companyUserName?/all-posted-jobs" element={ <AllPostedJobs /> } />
@@ -192,11 +183,6 @@ function App() {
           <Route path="/all-users" element={ <UserListing /> } />
           <Route path="/all-companies" element={ <CompanyListing /> } />
 
-          {/* Role-specific Dashboards */ }
-          <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />
-          <Route path="/:companyUserName/coordinator/review" element={ <CoordinatorDashboard /> } />
-          <Route path="/:companyUserName/hiring_manager" element={ <HiringManagerDashboard /> } />
-
           {/* Interviews */ }
           <Route path="/:companyUserName/interview-rounds" element={ <InterviewListing /> } />
           <Route path="/:companyUserName/scheduled-interview" element={ <ScheduledInterview /> } />
@@ -210,20 +196,10 @@ function App() {
           <Route path="/my-jobs" element={ <MyJobs /> } />
           <Route path="/application-types" element={ <ApplicationListing /> } />
 
-          {/* User Management */ }
-          {/* <Route path="/all-users" element={ <UserListing /> } />
-          <Route path="/all-companies" element={ <CompanyListing /> } /> */}
-
           {/* Role-specific Dashboards */ }
           <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />
           <Route path="/:companyUserName/coordinator/review" element={ <CoordinatorDashboard /> } />
           <Route path="/:companyUserName/hiring_manager" element={ <HiringManagerDashboard /> } />
-
-          {/* Interviews */ }
-          <Route path="/:companyUserName/interview-rounds" element={ <InterviewListing /> } />
-          <Route path="/:companyUserName/scheduled-interview" element={ <ScheduledInterview /> } />
-          <Route path="/:companyUserName/assigned-interviews" element={ <AssignedInterviews /> } />
-          <Route path="/:companyUserName/application-list" element={ <ManagerApplicationList /> } />
 
           {/* Candidate */ }
           <Route path="/:companyUserName/candidate-details/:candidateId/:jobId" element={ <CandidateDetailsPage /> } />

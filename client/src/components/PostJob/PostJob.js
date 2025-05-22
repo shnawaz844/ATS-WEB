@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { usePostJob, useUpdateJob } from '../../hooks/useJob';
 import { useLocation, useNavigate } from 'react-router-dom';
+import PostJobForm from './PostJobForm';
 
-import PostJobForm from './PostJobForm'; // <-- The new UI component we just created
 
 export const PostJob = () => {
     const location = useLocation();
@@ -199,7 +200,7 @@ export const PostJob = () => {
             setSelectedCity={setSelectedCity}
             recruiterRole={ recruiterRole }
             companyId={ companyId }
-            // recruiterName={ recruiterName }
+            hiringManagersList={ hiringManagersList }
         />
     );
 };

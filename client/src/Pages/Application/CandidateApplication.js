@@ -132,13 +132,27 @@ const CandidateApplication = () => {
                     <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
                         <div className="flex justify-between items-center w-full">
                             <div>
-                                <h2 className="text-3xl font-bold text-white flex items-center">
+                                <h2 className="text-3xl font-bold text-white flex items-center font-DM Sansong">
                                     <Briefcase className="mr-2 h-6 w-6 text-white" />
                                     Candidate Applications
                                 </h2>
                             </div>
 
-                            <div>
+                            <div className='flex gap-4'>
+                                {/* Search Bar */ }
+                                <div className="relative rounded-full">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Search className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        value={ formInputs.title }
+                                        onChange={ handleFilterChange }
+                                        placeholder="Search job titles..."
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
+                                    />
+                                </div>
                                 <button
                                     className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
                                     onClick={ () => setIsFilterOpen( !isFilterOpen ) } // Toggle filter visibility
@@ -164,116 +178,173 @@ const CandidateApplication = () => {
                     {/* Filters Section */ }
                     <div className={ `transition-all duration-300 ${ isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100' }` }>
                         <div className={ isFilterOpen ? 'block' : 'hidden' }>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
-                                {/* Search Bar */ }
-                                <div className="lg:col-span-2">
-                                    <div className="relative rounded-full">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <Search className="h-5 w-5 text-gray-400" />
+                            <div className="max-w-7xl mx-auto bg-gradient-to-br from-gray-300 to-gray-100 p-6 rounded-2xl shadow-lg border-0">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
+                                    {/* Location Search */ }
+                                    <div className="lg:col-span-3">
+                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <MapPin className="mr-2 h-4 w-4 text-blue-500" />
+                                            <span>Location</span>
                                         </div>
                                         <input
                                             type="text"
-                                            name="title"
-                                            value={ formInputs.title }
+                                            name="city"
+                                            value={ formInputs.city }
                                             onChange={ handleFilterChange }
-                                            placeholder="Search job titles..."
-                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
+                                            placeholder="Any location"
+                                            className="w-full px-4 py-3.5 border-0 bg-white/80 backdrop-blur-sm shadow-md rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-300/50 focus:bg-white transition-all duration-300 h-[6.3vh] placeholder-slate-400 text-slate-700"
                                         />
                                     </div>
-                                </div>
 
-                                {/* Location Search */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <MapPin className="mr-1.5 h-4 w-4" />
-                                        <span>Location</span>
+                                    {/* Employment Type Dropdown */ }
+                                    <div className="lg:col-span-2">
+                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
+                                            <span>Job Type</span>
+                                        </div>
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <Select
+                                                options={ employmentTypes }
+                                                value={ employmentTypes.find( opt => opt.value === formInputs.type ) }
+                                                onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, type: selectedOption?.value || '' } ) }
+                                                placeholder="Any type"
+                                                isClearable
+                                                styles={ {
+                                                    ...customSelectStyles,
+                                                    control: ( provided, state ) => ( {
+                                                        ...provided,
+                                                        border: 'none',
+                                                        borderRadius: '16px',
+                                                        background: 'transparent',
+                                                        boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                        '&:hover': {
+                                                            border: 'none'
+                                                        }
+                                                    } ),
+                                                    placeholder: ( provided ) => ( {
+                                                        ...provided,
+                                                        color: '#94a3b8'
+                                                    } )
+                                                } }
+                                                className="text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        value={ formInputs.city }
-                                        onChange={ handleFilterChange }
-                                        placeholder="Any location"
-                                        className="w-full px-4 py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[6.3vh]"
-                                    />
-                                </div>
 
-                                {/* Employment Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <Briefcase className="mr-1.5 h-4 w-4" />
-                                        <span>Job Type</span>
+                                    {/* Schedule Type Dropdown */ }
+                                    <div className="lg:col-span-2">
+                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <Clock className="mr-2 h-4 w-4 text-purple-500" />
+                                            <span>Schedule</span>
+                                        </div>
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <Select
+                                                options={ scheduleTypes }
+                                                value={ scheduleTypes.find( opt => opt.value === formInputs.scheduleType ) }
+                                                onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, scheduleType: selectedOption?.value || '' } ) }
+                                                placeholder="Any schedule"
+                                                isClearable
+                                                styles={ {
+                                                    ...customSelectStyles,
+                                                    control: ( provided, state ) => ( {
+                                                        ...provided,
+                                                        border: 'none',
+                                                        borderRadius: '16px',
+                                                        background: 'transparent',
+                                                        boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                        '&:hover': {
+                                                            border: 'none'
+                                                        }
+                                                    } ),
+                                                    placeholder: ( provided ) => ( {
+                                                        ...provided,
+                                                        color: '#94a3b8'
+                                                    } )
+                                                } }
+                                                className="text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <Select
-                                        options={ employmentTypes }
-                                        value={ employmentTypes.find( opt => opt.value === formInputs.type ) }
-                                        onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, type: selectedOption?.value || '' } ) }
-                                        placeholder="Any type"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
 
-                                {/* Schedule Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <Clock className="mr-1.5 h-4 w-4" />
-                                        <span>Schedule</span>
+                                    {/* Hire Type Dropdown */ }
+                                    <div className="lg:col-span-2">
+                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <Briefcase className="mr-2 h-4 w-4 text-orange-500" />
+                                            <span>Hire Type</span>
+                                        </div>
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <Select
+                                                options={ hireTypes }
+                                                value={ hireTypes.find( opt => opt.value === formInputs.hireType ) }
+                                                onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, hireType: selectedOption?.value || '' } ) }
+                                                placeholder="Any hire type"
+                                                isClearable
+                                                styles={ {
+                                                    ...customSelectStyles,
+                                                    control: ( provided, state ) => ( {
+                                                        ...provided,
+                                                        border: 'none',
+                                                        borderRadius: '16px',
+                                                        background: 'transparent',
+                                                        boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                        '&:hover': {
+                                                            border: 'none'
+                                                        }
+                                                    } ),
+                                                    placeholder: ( provided ) => ( {
+                                                        ...provided,
+                                                        color: '#94a3b8'
+                                                    } )
+                                                } }
+                                                className="text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <Select
-                                        options={ scheduleTypes }
-                                        value={ scheduleTypes.find( opt => opt.value === formInputs.scheduleType ) }
-                                        onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, scheduleType: selectedOption?.value || '' } ) }
-                                        placeholder="Any schedule"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
 
-                                {/* Hire Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <Briefcase className="mr-1.5 h-4 w-4" />
-                                        <span>Hire Type</span>
+                                    {/* Location Type Dropdown */ }
+                                    <div className="lg:col-span-2">
+                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <MapPin className="mr-2 h-4 w-4 text-teal-500" />
+                                            <span>Location Type</span>
+                                        </div>
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <Select
+                                                options={ locationTypes }
+                                                value={ locationTypes.find( opt => opt.value === formInputs.locationType ) }
+                                                onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, locationType: selectedOption?.value || '' } ) }
+                                                placeholder="Any location type"
+                                                isClearable
+                                                styles={ {
+                                                    ...customSelectStyles,
+                                                    control: ( provided, state ) => ( {
+                                                        ...provided,
+                                                        border: 'none',
+                                                        borderRadius: '16px',
+                                                        background: 'transparent',
+                                                        boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                        '&:hover': {
+                                                            border: 'none'
+                                                        }
+                                                    } ),
+                                                    placeholder: ( provided ) => ( {
+                                                        ...provided,
+                                                        color: '#94a3b8'
+                                                    } )
+                                                } }
+                                                className="text-sm"
+                                            />
+                                        </div>
                                     </div>
-                                    <Select
-                                        options={ hireTypes }
-                                        value={ hireTypes.find( opt => opt.value === formInputs.hireType ) }
-                                        onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, hireType: selectedOption?.value || '' } ) }
-                                        placeholder="Any hire type"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
 
-                                {/* Location Type Dropdown */ }
-                                <div className="lg:col-span-2">
-                                    <div className="flex items-center mb-1.5 text-gray-500 text-sm">
-                                        <MapPin className="mr-1.5 h-4 w-4" />
-                                        <span>Location Type</span>
+                                    <div className="lg:col-span-1">
+                                        <button
+                                            type="button"
+                                            onClick={ handleResetFilters }
+                                            className="group flex items-center justify-center w-full px-1 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-2xl hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                        >
+                                            <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
+                                        </button>
                                     </div>
-                                    <Select
-                                        options={ locationTypes }
-                                        value={ locationTypes.find( opt => opt.value === formInputs.locationType ) }
-                                        onChange={ ( selectedOption ) => setFormInputs( { ...formInputs, locationType: selectedOption?.value || '' } ) }
-                                        placeholder="Any location type"
-                                        isClearable
-                                        styles={ customSelectStyles }
-                                        className="text-sm"
-                                    />
-                                </div>
-
-                                <div className="lg:col-span-1">
-                                    <button
-                                        type="button"
-                                        onClick={ handleResetFilters }
-                                        className="flex items-center px-4 py-3 bg-gray-700 text-gray-100 rounded-xl hover:bg-gray-400 transition-colors duration-200"
-                                    >
-                                        <RefreshCw className="h-4 w-4" />
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -380,16 +451,16 @@ const CandidateApplication = () => {
                                 <div className="bg-gray-100 p-5 rounded-full mb-4">
                                     <Briefcase className="h-12 w-12 text-gray-400" />
                                 </div>
-                                    <div className="text-center animate-fade-in transition-all duration-500">
-                                        <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
-                                            No Applications Found
-                                        </h3>
-                                        <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                                            It looks like there are no matching applications at the moment.
-                                            <br className="hidden sm:block" />
-                                            <span className="text-blue-500 font-medium">Try adjusting your filters</span> or come back later.
-                                        </p>
-                                    </div>
+                                <div className="text-center animate-fade-in transition-all duration-500">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                        No Applications Found
+                                    </h3>
+                                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                        It looks like there are no matching applications at the moment.
+                                        <br className="hidden sm:block" />
+                                        <span className="text-blue-500 font-medium">Try adjusting your filters</span> or come back later.
+                                    </p>
+                                </div>
                             </div>
                         ) }
                     </div>
