@@ -12,6 +12,7 @@ import {
     User,
     Lock
 } from "lucide-react";
+import emailjs from "@emailjs/browser";
 
 export const ApplicationForm = ( { job, loginData, applicationTypesData, company_id }) => {
     const companyUserName = localStorage.getItem("companyUserName");
@@ -22,6 +23,7 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
 
       // Fetch company_id from localStorage (or use the passed prop)
     const companyId = company_id || JSON.parse( localStorage.getItem( "user" ) )?.company_id;
+    const [ emailStatus, setEmailStatus ] = useState( "" ); 
     const {
         register,
         handleSubmit,
@@ -43,6 +45,14 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
         },
     });
 
+    // Initialize EmailJS (similar to your first document)
+    useEffect( () => {
+        // Initialize EmailJS with your public key
+        if ( process.env.REACT_APP_EMAILJS_PUBLIC_KEY ) {
+            emailjs.init( process.env.REACT_APP_EMAILJS_PUBLIC_KEY );
+        }
+    }, [] );
+
     // Handle file
     const handleFileUpload = (e) => {
         const selectedFile = e.target.files[0];
@@ -61,52 +71,122 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
         }
     }, [applicationTypesData, setValue]);
 
-    // Form submission
-    const onSubmit = async (data) => {
+    // Improved EmailJS function (based on your first document)
+    const sendConfirmationEmail = async ( formData ) => {
+        console.log( "formData", formData )
+        try {
+            setEmailStatus( "Sending confirmation email..." );
+
+            const templateParams = {
+                // Recipient information
+                to_email: formData.emailInfo,
+                applicant_name: loginData.name || "Applicant",
+                applicant_email: formData.emailInfo,
+
+                // Job and company information
+                job_title: job.title || "Position",
+                company_name: companyUserName || "Company",
+
+                // Application details
+                contact_info: formData.contactInfo,
+                experience: formData.experience,
+                application_date: new Date().toLocaleDateString(),
+
+                // Additional information
+                job_description: job.description || "",
+                application_status: formData.applicationStatus || "Submitted",
+            };
+
+            console.log( "Sending email with template params:", templateParams );
+
+            const response = await emailjs.send(
+                process.env.REACT_APP_EMAILJS_SERVICE_ID,
+                process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+                templateParams,
+                process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+            );
+
+            console.log( "✅ Email sent successfully!", response.status, response.text );
+            setEmailStatus( "Confirmation email sent successfully!" );
+            return true;
+
+        } catch ( error ) {
+            console.error( "❌ EmailJS Error:", error );
+            setEmailStatus( "Failed to send confirmation email, but application was submitted." );
+
+            // Log detailed error information
+            if ( error.status ) {
+                console.error( "Error Status:", error.status );
+                console.error( "Error Text:", error.text );
+            }
+
+            return false;
+        }
+    };
+
+    const onSubmit = async ( data ) => {
+        console.log( "data", data )
         // Check candidate login again as a safeguard
-        if (!loginData || loginData?.role !== "candidate") {
-            navigate("/login", { state: { returnUrl: window.location.pathname, message: "Please log in to apply for this job" } });
+        if ( !loginData || loginData?.role !== "candidate" ) {
+            navigate( "/login", { state: { returnUrl: window.location.pathname, message: "Please log in to apply for this job" } } );
             return;
         }
 
-        setIsSubmitting(true);
+        setIsSubmitting( true );
+        setEmailStatus( "" );
 
         // Prepare FormData
         const formData = new FormData();
-        formData.append("candidateID", loginData._id);
-        formData.append("jobID", job._id);
-        formData.append("applicationStatus", data.applicationStatus);
-        formData.append("resume", file);
-        formData.append("contactInfo", data.contactInfo);
+        formData.append( "candidateID", loginData._id );
+        formData.append( "jobID", job._id );
+        formData.append( "applicationStatus", data.applicationStatus );
+        formData.append( "resume", file );
+        formData.append( "contactInfo", data.contactInfo );
         formData.append( "emailInfo", data.emailInfo );
-        formData.append("experience", data.experience);
-        formData.append("additionalDocuments", data.additionalDocuments);
-        formData.append("questions", JSON.stringify(job.applicationForm.question));
-        formData.append("answers", JSON.stringify(data.answers));
-        formData.append( "company_id", companyId ); 
+        formData.append( "experience", data.experience );
+        formData.append( "additionalDocuments", data.additionalDocuments );
+        formData.append( "questions", JSON.stringify( job.applicationForm.question ) );
+        formData.append( "answers", JSON.stringify( data.answers ) );
+        formData.append( "company_id", companyId );
 
         try {
-            const response = await fetch(`${ process.env.REACT_APP_BASE_URL }/application/add-application`, {
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/add-application`, {
                 method: "POST",
                 headers: {
-                    "company_id": companyId,  // Add company_id to the headers
+                    "company_id": companyId,
                 },
                 body: formData,
-            });
+            } );
             const result = await response.json();
 
-            if (response.ok) {
-                setSuccessMessage("Application submitted successfully!");
-                setTimeout(() => {
-                    navigate(`/${companyUserName}/my-jobs`);
-                }, 1500);
+            if ( response.ok ) {
+                console.log( "✅ Application submitted successfully!" );
+
+                // Send confirmation email after successful application submission
+                const emailSent = await sendConfirmationEmail( data );
+
+                // Set success message based on email status
+                if ( emailSent ) {
+                    setSuccessMessage( "Application submitted successfully! Check your email for confirmation." );
+                } else {
+                    setSuccessMessage( "Application submitted successfully! (Email confirmation may have failed)" );
+                }
+
+                // Redirect after a delay
+                setTimeout( () => {
+                    navigate( `/${ companyUserName }/my-jobs` );
+                }, 2500 );
+
             } else {
-                alert("Failed to submit application.");
+                console.error( "Application submission failed:", result );
+                alert( `Failed to submit application: ${ result.message || "Unknown error" }` );
             }
-        } catch (error) {
-            console.error("Error submitting application:", error);
+
+        } catch ( error ) {
+            console.error( "Error submitting application:", error );
+            alert( "An error occurred while submitting your application. Please try again." );
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting( false );
         }
     };
 
@@ -127,12 +207,16 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
         );
     }
 
-    if (successMessage) {
+    if ( successMessage ) {
         return (
             <div className="flex flex-col items-center justify-center p-6 bg-green-50 rounded-lg text-center">
-                <CheckCircle size={32} className="text-green-500 mb-3" />
+                <CheckCircle size={ 32 } className="text-green-500 mb-3" />
                 <h3 className="text-lg font-medium text-gray-800 mb-2">Application Submitted!</h3>
-                <p className="text-gray-600">Redirecting to application details...</p>
+                <p className="text-gray-600 mb-2">{ successMessage }</p>
+                { emailStatus && (
+                    <p className="text-sm text-blue-600">{ emailStatus }</p>
+                ) }
+                <p className="text-gray-500 text-sm mt-2">Redirecting to your applications...</p>
             </div>
         );
     }
@@ -257,6 +341,13 @@ export const ApplicationForm = ( { job, loginData, applicationTypesData, company
                     ))}
                 </div>
             )}
+
+            {/* Email Status */ }
+            { emailStatus && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-blue-700 text-sm">{ emailStatus }</p>
+                </div>
+            ) }
 
             {/* Submit Button */}
             <button

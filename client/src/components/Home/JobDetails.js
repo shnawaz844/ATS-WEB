@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+
 import ReactQuill from "react-quill";
+import { useParams } from "react-router-dom";
 import { ApplicationForm } from "../ApplicationForm/ApplicationForm";
 import "react-quill/dist/quill.snow.css";
 import { useApplicationTypes } from "../../hooks/useApplication";
@@ -8,7 +9,6 @@ import {
   Briefcase,
   MapPin,
   Clock,
-  DollarSign,
   Calendar,
   Award,
   Building,
@@ -44,13 +44,11 @@ export const JobDetails = () => {
       .then( ( data ) => setJob( data ) )
       .catch( ( err ) => console.error( "Error fetching job data:", err ) );
   }, [ id ] );
+  
 
   // 3. We also fetch the application types (and can pass them to the form)
   const {
     data: applicationTypesData,
-    isLoading,
-    isError,
-    error,
   } = useApplicationTypes( {} );
 
   console.log( "this is types", applicationTypesData );
@@ -110,6 +108,7 @@ export const JobDetails = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
         {/* -- Left: Job Details Section -- */ }
         <div className="lg:col-span-8 bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="border-b border-gray-100 bg-gray-700">
@@ -121,7 +120,7 @@ export const JobDetails = () => {
                     <span>{ job.department || "Full-time" }</span>
                   </div>
                   <h1 className="text-3xl font-bold text-white mb-3">
-                    { capitalizeFirstLetter(job.title) }
+                    { capitalizeFirstLetter( job.title ) }
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 text-white text-sm mb-4">
                     <div className="flex items-center">
@@ -166,7 +165,7 @@ export const JobDetails = () => {
                 <IndianRupee size={ 20 } className="text-blue-500 mr-3 mt-1" />
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Compensation</p>
-                  <p className="font-semibold text-gray-800">₹{ formatIndianRupee(job.compensation) }</p>
+                  <p className="font-semibold text-gray-800">₹{ formatIndianRupee( job.compensation ) }</p>
                 </div>
               </div>
               <div className="flex items-start">
