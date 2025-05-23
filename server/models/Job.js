@@ -63,7 +63,7 @@ const JobSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Approve', 'Cancel', 'Filled', 'Pending'],
+        enum: [ 'Screening', 'Hold', 'Round 1', 'Round 2', 'Selected','Rejected'],
         required: true
     },
     recruiterName: {
