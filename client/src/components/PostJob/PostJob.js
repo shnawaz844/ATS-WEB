@@ -126,6 +126,7 @@ export const PostJob = () => {
             ...data,
             shiftStart,
             shiftEnd,
+            status: "Screening",
             country: selectedCountry,
             state: selectedState,
             city: selectedCity,

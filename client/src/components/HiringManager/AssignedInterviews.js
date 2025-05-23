@@ -330,7 +330,8 @@ const AssignedInterviews = () => {
                                     };
 
                                     const status = interview.status || "Scheduled";
-                                    const [ bgColor, textColor, bgLight ] = statusColors[ status ].split( " " );
+                                    const colorString = statusColors[ status ] || statusColors[ "Scheduled" ];
+                                    const [ bgColor, textColor, bgLight ] = colorString.split( " " );
 
                                     // Get candidate initial
                                     const initial = interview.applicationID?.candidateID?.userName?.[ 0 ] || "?";

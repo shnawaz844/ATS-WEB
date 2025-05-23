@@ -120,7 +120,7 @@ const LocationPicker = ( {
         >
           <option value="">Select Country</option>
           { countries.map( country => (
-            <option key={ country.isoCode } value={ country.name }>
+            <option key={ country.isoCode } value={ country.isoCode }>
               { country.name }
             </option>
           ) ) }
@@ -139,7 +139,7 @@ const LocationPicker = ( {
         >
           <option value="">Select State</option>
           { states.map( state => (
-            <option key={ state.isoCode } value={ state.name }>
+            <option key={ state.isoCode } value={ state.isoCode }>
               { state.name }
             </option>
           ) ) }
@@ -351,14 +351,14 @@ export const PostJobForm = ( {
                     placeholder="Ex: 5"
                   />
 
-                  <FormInput
+                  {/* <FormInput
                     label="Status"
                     register={ register }
                     name="status"
                     type="select"
                     options={ FORM_OPTIONS.status }
                     error={ errors?.status }
-                  />
+                  /> */}
 
                   {/* Conditional Recruiter Name Field */ }
                   { isHead && (

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+
 import axios from "axios";
+import { Link } from "react-router-dom";
 import Select from "react-select";
+import { useQuery } from "@tanstack/react-query";
 import JobDescriptionModal from "./JobDescriptionModal";
 import { Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -180,7 +181,7 @@ const AllPostedJobs = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
               <p className="text-gray-500 max-w-md mb-6">
-                  Opportunities are on the way. Stay tuned!
+                Opportunities are on the way. Stay tuned!
               </p>
             </div>
           ) }
