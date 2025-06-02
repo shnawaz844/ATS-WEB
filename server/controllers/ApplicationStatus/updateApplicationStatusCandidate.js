@@ -1,6 +1,6 @@
 import ApplicationStatus from "../../models/ApplicationStatus.js";
 
-const updateApplicationStatusByCandidate = async ( req, res ) => {
+const updateApplicationStatusCandidate = async ( req, res ) => {
   try {
     const { jobID, candidateID, status } = req.body;
 
@@ -35,4 +35,4 @@ const updateApplicationStatusByCandidate = async ( req, res ) => {
   }
 };
 
-export { updateApplicationStatusByCandidate };
+export { updateApplicationStatusCandidate };

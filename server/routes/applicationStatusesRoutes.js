@@ -8,7 +8,7 @@ import { addApplicationStatus } from "../controllers/ApplicationStatus/addApplic
 import { getApplicationStatus } from "../controllers/ApplicationStatus/getApplicationStatus.js";
 import { deleteApplicationStatus } from "../controllers/ApplicationStatus/deleteApplicationStatus.js";
 import { updateApplicationStatus } from "../controllers/ApplicationStatus/updateApplicationStatus.js";
-import { updateApplicationStatusByCandidate } from "../controllers/ApplicationStatus/updateApplicationStatusByCandidate.js";
+import { updateApplicationStatusCandidate } from "../controllers/ApplicationStatus/updateApplicationStatusCandidate.js";
 
 router.get( "/all-application-statuses", getApplicationStatuses );
 router.post( "/add-application-status", addApplicationStatus );
@@ -18,7 +18,7 @@ router.delete( "/delete-application-status/:id", deleteApplicationStatus );
 router.put( "/update-application-status/:id", updateApplicationStatus );
 router.put(
   "/update-application-status-by-candidate/",
-  updateApplicationStatusByCandidate
+  updateApplicationStatusCandidate
 );
 
 export default router;
