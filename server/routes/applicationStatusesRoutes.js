@@ -13,6 +13,7 @@ import { updateApplicationStatusByCandidate } from "../controllers/ApplicationSt
 router.get("/all-application-statuses", getApplicationStatuses);
 router.post("/add-application-status", addApplicationStatus);
 router.get("/application-status/:id", getApplicationStatus);
+
 router.delete("/delete-application-status/:id", deleteApplicationStatus);
 router.put("/update-application-status/:id", updateApplicationStatus);
 router.put(
