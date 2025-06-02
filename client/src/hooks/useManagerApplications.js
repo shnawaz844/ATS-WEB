@@ -8,7 +8,7 @@ const useManagerApplications = ( hiringManagerId, page = 1, limit = 10, search =
                 const queryParams = new URLSearchParams( { page, limit, search } ).toString();
                 const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
                 const response = await fetch(
-                    `http://localhost:8080/application/get-application-hm/${ hiringManagerId }?${ queryParams }`,
+                    `${ process.env.REACT_APP_BASE_URL }/application/get-application-hm/${ hiringManagerId }?${ queryParams }`,
                     {
                         headers: {
                             'company_id': companyId, // Ensure company_id is sent here
