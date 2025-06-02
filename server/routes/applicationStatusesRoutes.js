@@ -10,12 +10,12 @@ import { deleteApplicationStatus } from "../controllers/ApplicationStatus/delete
 import { updateApplicationStatus } from "../controllers/ApplicationStatus/updateApplicationStatus.js";
 import { updateApplicationStatusByCandidate } from "../controllers/ApplicationStatus/updateApplicationStatusByCandidate.js";
 
-router.get("/all-application-statuses", getApplicationStatuses);
-router.post("/add-application-status", addApplicationStatus);
-router.get("/application-status/:id", getApplicationStatus);
+router.get( "/all-application-statuses", getApplicationStatuses );
+router.post( "/add-application-status", addApplicationStatus );
+router.get( "/application-status/:id", getApplicationStatus );
 
-router.delete("/delete-application-status/:id", deleteApplicationStatus);
-router.put("/update-application-status/:id", updateApplicationStatus);
+router.delete( "/delete-application-status/:id", deleteApplicationStatus );
+router.put( "/update-application-status/:id", updateApplicationStatus );
 router.put(
   "/update-application-status-by-candidate/",
   updateApplicationStatusByCandidate
