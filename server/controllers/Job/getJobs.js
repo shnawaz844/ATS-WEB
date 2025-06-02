@@ -2,7 +2,7 @@ import Job from '../../models/Job.js';
 
 const getJobs = async ( req, res ) => {
     try {
-        let { page = 1, limit = 12, search, title, locationType, type, scheduleType, hireType, city } = req.query;
+        let { page = 1, limit = 12, search, title, locationType, type, scheduleType, hireType, city, status } = req.query;
         let { company_id } = req.headers;
         // Convert page & limit to numbers safely
         const pageNumber = parseInt( page, 10 ) || 1;
@@ -22,6 +22,7 @@ const getJobs = async ( req, res ) => {
         };
         if (title) filter.title = { $regex: title, $options: 'i' };
         if ( company_id ) filter.company_id = company_id;
+        
 
         const totalCount = await Job.countDocuments( filter );
 

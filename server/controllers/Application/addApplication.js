@@ -1,11 +1,14 @@
 import Application from "../../models/Application.js";
 import upload, { uploadToS3 } from "../../middleware/upload.js";
+import Job from "../../models/Job.js";
 
 const addApplication = async (req, res) => {
-  const { jobID, candidateID, applicationStatus, contactInfo,emailInfo, experience, questions, answers,company_id } = req.body;
+  const { jobID, candidateID, applicationStatusId, contactInfo, emailInfo, experience, questions, answers, company_id, jobStatusId } = req.body;
+  console.log( "req.body>>>>><<<<<", req.body );
   try {
-    if ( !jobID || !candidateID || !applicationStatus || !contactInfo || !emailInfo || !experience || !company_id ) {
-      return res.status(400).json({ message: "All required fields must be provided." });
+    if ( !jobID || !candidateID || !applicationStatusId || !contactInfo || !emailInfo || !experience || !company_id || !jobStatusId ) {
+      console.log( "first", jobID, candidateID, applicationStatusId, contactInfo, emailInfo, experience, company_id, jobStatusId );
+      return res.status(400).json({ message: "All required fields must be provided.console" });
     }
 
     // Check if resume file exists
@@ -21,7 +24,8 @@ const addApplication = async (req, res) => {
     const newApplication = new Application({
       jobID,
       candidateID,
-      applicationStatus,
+      applicationStatusId,
+      jobStatusId,
       resume: resumeUrl, // Store S3 file URL
       contactInfo,
       emailInfo,
@@ -32,6 +36,13 @@ const addApplication = async (req, res) => {
     });
 
     await newApplication.save();
+
+
+    // ✅ Update job status to 'Filled' only if it's the first application
+    const existingApplications = await Application.find( { jobID } );
+    if ( existingApplications.length === 1 ) {  // Just saved one application above
+      await Job.findByIdAndUpdate( jobID, { status: jobStatusId } );
+    }
 
     res.status(201).json({ message: "Application submitted successfully!", application: newApplication });
   } catch (error) {

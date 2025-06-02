@@ -13,7 +13,8 @@ import recruiterRoutes from "./routes/recruiterRoutes.js"
 import hiringmanagerRoutes from "./routes/hiringmanagerRoutes.js"
 import fileUploadRoute from './routes/fileUploadRoute.js'
 import Auth from './routes/Auth.js'
-import applicationTypesRoutes from "./routes/applicationTypeRoutes.js";
+import applicationStatusesRoutes from "./routes/applicationStatusesRoutes.js";
+import jobStatusesRoutes from "./routes/jobStatusesRoutes.js";
 import interviewerappRoutes from "./routes/interviewerappRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js"
 import applicationlistRoutes from './routes/applicationlistRoutes.js'
@@ -40,7 +41,8 @@ app.use("/application", applicationRoutes);
 app.use("/recruiter", recruiterRoutes);
 app.use( "/hiringmanager", hiringmanagerRoutes );
 app.use("/auth", Auth);
-app.use("/application-types", applicationTypesRoutes);
+app.use("/application-statuses", applicationStatusesRoutes);
+app.use("/job-statuses", jobStatusesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
 app.use("/companies", companyRoutes),

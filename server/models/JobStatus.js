@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 
-const ApplicationTypeSchema = new mongoose.Schema( {
-  applicationStep: {
+const JobStatusSchema = new mongoose.Schema( {
+  jobStep: {
     type: String,
     required: true,
   },
-  applicationStatus: {
+  jobStatus: {
     type: String,
     required: true,
   },
@@ -18,9 +18,9 @@ const ApplicationTypeSchema = new mongoose.Schema( {
   { timestamps: true }
 );
 
-const ApplicationType = mongoose.model(
-  "ApplicationType",
-  ApplicationTypeSchema
+const JobStatus = mongoose.model(
+  "Job-Status",
+  JobStatusSchema
 );
 
-export default ApplicationType;
+export default JobStatus;

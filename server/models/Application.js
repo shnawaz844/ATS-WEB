@@ -11,7 +11,11 @@ const ApplicationSchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
-    applicationStatus: {
+    applicationStatusId: {
+        type: String,
+        required: true,
+    },
+    jobStatusId: {
         type: String,
         required: true,
     },
@@ -38,10 +42,6 @@ const ApplicationSchema = new mongoose.Schema({
     answers:{
         type: Array,
         required: false,
-    },
-     contactInfo:{
-        type: String,
-        required: true,
     },
     company_id: {
         type: String,

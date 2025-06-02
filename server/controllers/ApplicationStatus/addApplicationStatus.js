@@ -1,34 +1,34 @@
 // import User from "../../models/User.js";
-import ApplicationType from "../../models/ApplicationType.js";
+import ApplicationStatus from "../../models/ApplicationStatus.js";
 
-const addApplicationType = async (req, res) => {
+const addApplicationStatus = async (req, res) => {
   try {
     const { applicationStep, applicationStatus, company_id } = req.body;
 
     // Check if email already exists
-    const existingApplicationType = await ApplicationType.findOne({
+    const existingApplicationStatus = await ApplicationStatus.findOne({
       applicationStep,
     });
-    if (existingApplicationType) {
+    if (existingApplicationStatus) {
       return res
         .status(409)
         .json({ message: "Application already registered." });
     }
 
-    // Create new applicationType
-    const newApplicationType = new ApplicationType({
+    // Create new applicationSatus
+    const newApplicationStatus = new ApplicationStatus({
       applicationStep,
       applicationStatus,
       company_id,
       company_id,
     });
 
-    await newApplicationType.save();
+    await newApplicationStatus.save();
 
-    res.status(201).json(newApplicationType);
+    res.status(201).json(newApplicationStatus);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export { addApplicationType };
+export { addApplicationStatus };
