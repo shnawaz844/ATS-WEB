@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getStatusColor, getColorStyles } from './utils';
 
@@ -20,6 +20,26 @@ const ApplicationsTable = ( {
     // State for the search input value (before debouncing)
     const [ searchInput, setSearchInput ] = useState( search );
 
+    // build a map from status _id to its applicationStatusId (i.e. its “name”)
+    const statusNameMap = useMemo( () => {
+        return ( statuses || [] ).reduce( ( map, status ) => {
+            map[ status._id ] = status.applicationStatus;
+            console.log( "map", map )
+            return map;
+        }, {} );
+    }, [ statuses ] );
+
+    // local copy
+    const [ apps, setApps ] = useState( filteredApps );
+    useEffect( () => setApps( filteredApps ), [ filteredApps ] );
+
+    const handleSelect = ( id, newStatus ) => {
+        setApps( curr =>
+            curr.map( a => a._id === id ? { ...a, applicationStatusId: newStatus } : a )
+        );
+        onStatusChange( id, newStatus );
+    };
+
     // Debounce function
     const debounce = ( func, delay ) => {
         let timeoutId;
@@ -39,6 +59,7 @@ const ApplicationsTable = ( {
     };
 
     const companyUserName = localStorage.getItem( "companyUserName" );
+    //   const [statuses, setStatuses] = useState([]);
 
     // Create a debounced version of setSearch
     const debouncedSetSearch = useCallback(
@@ -73,6 +94,8 @@ const ApplicationsTable = ( {
         setLimit( Number( e.target.value ) );
         setPage( 1 ); // Reset to first page when changing limit
     };
+
+    console.log( "statuses>>>", statuses );
 
     return (
         <div className="space-y-4">
@@ -131,12 +154,12 @@ const ApplicationsTable = ( {
                         </tr>
                     </thead>
                     <tbody className="bg-gray-300 divide-y divide-gray-200">
-                        { filteredApps.length > 0 ? (
+                        { filteredApps?.length > 0 ? (
                             filteredApps.map( ( app ) => {
                                 // Prepare candidateID & jobID for the link
                                 const candidateId = app.candidateID?._id;
                                 const jobId = app.jobID?._id || app.jobID;
-                                const statusColor = getStatusColor( app.applicationStatus );
+                                const statusColor = getStatusColor( app.applicationStatusId );
 
                                 return (
                                     <tr key={ app._id } className="group hover:bg-gray-700 ">
@@ -167,7 +190,10 @@ const ApplicationsTable = ( {
                                                     color: getColorStyles( statusColor, 800 )
                                                 } }
                                             >
-                                                { capitalizeFirstLetter( app.applicationStatus ) }
+                                                { capitalizeFirstLetter(
+                                                    statusNameMap[ app.applicationStatusId ]
+                                                )
+                                                }
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
@@ -184,15 +210,15 @@ const ApplicationsTable = ( {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <select
                                                 className="block w-full rounded-xl bg-gray-700 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                                value={ app.applicationStatus }
-                                                onChange={ ( e ) => onStatusChange( app._id, e.target.value ) }
+                                                value={ app.applicationStatusId }
+                                                // onChange={ ( e ) => onStatusChange( app._id, e.target.value ) }
+                                                onChange={ e => handleSelect( app._id, e.target.value ) }
                                             >
-                                                { statuses.map( status => (
-                                                    <option key={ status._id } value={ status.applicationStatus }
+                                                { statuses?.map( status => (
+                                                    <option key={ status._id } value={ status._id }
                                                         className="bg-gray-800 text-white hover:bg-gray-600"
                                                     >
                                                         { status.applicationStatus }
-
                                                     </option>
                                                 ) ) }
                                             </select>
@@ -214,7 +240,7 @@ const ApplicationsTable = ( {
             {/* Pagination Controls */ }
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
                 <div className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{ filteredApps.length > 0 ? ( currentPage - 1 ) * limit + 1 : 0 }</span> to <span className="font-medium">{ Math.min( currentPage * limit, totalApplications ) }</span> of <span className="font-medium">{ totalApplications }</span> applications
+                    Showing <span className="font-medium">{ filteredApps?.length > 0 ? ( currentPage - 1 ) * limit + 1 : 0 }</span> to <span className="font-medium">{ Math.min( currentPage * limit, totalApplications ) }</span> of <span className="font-medium">{ totalApplications }</span> applications
                 </div>
                 <div className="flex items-center space-x-2">
                     <button
@@ -233,7 +259,7 @@ const ApplicationsTable = ( {
                     </button>
 
                     {/* Page numbers */ }
-                    { [ ...Array( totalPages ).keys() ].map( ( _, index ) => {
+                    { [ ...Array( totalPages ).keys() ]?.map( ( _, index ) => {
                         const pageNumber = index + 1;
                         // Show current page, and 1 page before and after if available
                         if (
@@ -246,8 +272,8 @@ const ApplicationsTable = ( {
                                     key={ pageNumber }
                                     onClick={ () => handlePageChange( pageNumber ) }
                                     className={ `px-3 py-1 border rounded text-sm ${ pageNumber === currentPage
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white text-gray-700 hover:bg-gray-100'
                                         }` }
                                 >
                                     { pageNumber }

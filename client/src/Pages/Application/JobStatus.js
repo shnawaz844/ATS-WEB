@@ -1,42 +1,38 @@
 import React, { useState } from "react";
-import {
-  useApplicationStatuses,
-  useAddApplication,
-  useUpdateApplicationStatus,
-} from "../../hooks/useApplication";
 
-import ApplicationDialog from "../../components/ApplicationDialog";
 import { Search, Plus, Edit, ChevronLeft, ChevronRight, Layers, FileText, AlertCircle } from "lucide-react";
+import JobStatusDialog from "../../components/JobStatusDialog";
+import { useAddJob, useJobStatuses, useUpdateJobStatus } from "../../hooks/useJobStatuses";
 
-const ApplicationListing = () => {
+const JobStatus = () => {
   const [ currentPage, setCurrentPage ] = useState( 1 );
   const [ search, setSearch ] = useState( "" );
   const [ isDialogOpen, setIsDialogOpen ] = useState( false );
   const [ dialogMode, setDialogMode ] = useState( "add" );
-  const [ selectedApplication, setSelectedApplication ] = useState( null );
+  const [ selectedJob, setSelectedJob ] = useState( null );
   const [ formData, setFormData ] = useState( {
-    applicationStep: 0,
-    applicationStatus: "",
+    jobStep: 0,
+    jobStatus: "",
     company_id: "",
   } );
 
   const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
   const {
-    data: applicationStatusesData,
+    data: jobStatusesData,
     isLoading,
     isError,
     error,
-  } = useApplicationStatuses( {
+  } = useJobStatuses( {
     page: currentPage,
     limit: 12,
     search,
   } );
 
-  const { mutate: addApplicationStatus } = useAddApplication();
-  const { mutate: updateApplicationStatus } = useUpdateApplicationStatus();
+  const { mutate: addJobStatus } = useAddJob();
+  const { mutate: updateJobStatus } = useUpdateJobStatus();
 
-  const applicationStatuses = applicationStatusesData?.applicationStatuses || [];
-  const totalPages = applicationStatusesData?.totalPages || 1;
+  const jobStatuses = jobStatusesData?.jobStatuses || [];
+  const totalPages = jobStatusesData?.totalPages || 1;
 
   const handleSearchChange = ( e ) => {
     setSearch( e.target.value );
@@ -46,27 +42,27 @@ const ApplicationListing = () => {
   const handleOpenAddDialog = () => {
     setDialogMode( "add" );
     setFormData( {
-      applicationStep: "",
-      applicationStatus: "",
+      jobStep: "",
+      jobStatus: "",
       company_id: companyId,
     } );
     setIsDialogOpen( true );
   };
 
-  const handleOpenEditDialog = ( application ) => {
+  const handleOpenEditDialog = ( job ) => {
     setDialogMode( "edit" );
-    setSelectedApplication( application );
+    setSelectedJob( job );
     setFormData( {
-      applicationStep: application.applicationStep || "",
-      applicationStatus: application.applicationStatus || "",
-      company_id: application.company_id || "",
+      jobStep: job.jobStep || "",
+      jobStatus: job.jobStatus || "",
+      company_id: job.company_id || "",
     } );
     setIsDialogOpen( true );
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen( false );
-    setSelectedApplication( null );
+    setSelectedJob( null );
   };
 
   const handleFormChange = ( e ) => {
@@ -80,32 +76,32 @@ const ApplicationListing = () => {
     e.preventDefault();
     if ( dialogMode === "add" ) {
       formData.company_id = companyId;
-      addApplicationStatus( formData, {
+      addJobStatus( formData, {
         onSuccess: handleCloseDialog,
-        onError: ( error ) => console.error( "Failed to add application:", error ),
+        onError: ( error ) => console.error( "Failed to add job status:", error ),
       } );
     } else {
-      if ( !selectedApplication ) return;
-      updateApplicationStatus(
+      if ( !selectedJob ) return;
+      updateJobStatus(
         {
-          applicationStatusId: selectedApplication._id,
+          jobStatusId: selectedJob._id,
           formData,
         },
         {
           onSuccess: () => {
-            alert( "Application updated successfully" );
+            alert( "Job status updated successfully" );
             handleCloseDialog();
           },
           onError: ( error ) => {
             console.error( "Update failed:", error );
-            alert( "Failed to update application" );
+            alert( "Failed to update job status" );
           },
         }
       );
     }
   };
 
-  // Define status badge styling based on application status
+  // Define status badge styling based on job status
   const getStatusBadgeClass = ( status ) => {
     const lowerStatus = status.toLowerCase();
     if ( lowerStatus.includes( "complete" ) || lowerStatus.includes( "approved" ) )
@@ -125,7 +121,7 @@ const ApplicationListing = () => {
         <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
           <div className="flex items-center w-full gap-4">
             <Layers className="text-white h-6 w-6" />
-            <h1 className="text-2xl font-bold text-white">Application Statuses</h1>
+            <h1 className="text-2xl font-bold text-white">Job Statuses</h1>
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -167,27 +163,27 @@ const ApplicationListing = () => {
 
         { !isLoading && !isError && (
           <>
-            { applicationStatuses.length === 0 ? (
+            { jobStatuses.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center text-gray-500">
                 <FileText className="h-12 w-12 mb-4 text-gray-400" />
-                <p>No application statuses found. Try adding a new one.</p>
+                <p>No job statuses found. Try adding a new one.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                { applicationStatuses.map( ( application ) => (
+                { jobStatuses.map( ( job ) => (
                   <div
-                    key={ application._id }
+                    key={ job._id }
                     className="bg-white p-5 rounded-xl border border-gray-100 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200"
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                          <span className="font-bold">{ application.applicationStep }</span>
+                          <span className="font-bold">{ job.jobStep }</span>
                         </div>
-                        <h3 className="font-semibold text-gray-800">Step { application.applicationStep }</h3>
+                        <h3 className="font-semibold text-gray-800">Step { job.jobStep }</h3>
                       </div>
                       <button
-                        onClick={ () => handleOpenEditDialog( application ) }
+                        onClick={ () => handleOpenEditDialog( job ) }
                         className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                         aria-label="Edit"
                       >
@@ -197,15 +193,15 @@ const ApplicationListing = () => {
 
                     <div className="mt-2">
                       <span className="text-sm text-gray-500">Status: </span>
-                      <div className={ `mt-1 px-3 py-1 rounded-full inline-flex items-center ${ getStatusBadgeClass( application.applicationStatus ) }` }>
-                        <span className="text-sm font-medium">{ application.applicationStatus }</span>
+                      <div className={ `mt-1 px-3 py-1 rounded-full inline-flex items-center ${ getStatusBadgeClass( job.jobStatus ) }` }>
+                        <span className="text-sm font-medium">{ job.jobStatus }</span>
                       </div>
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex justify-between text-xs text-gray-500">
-                        <span>ID: { application._id.substring( 0, 8 ) }...</span>
-                        <span>Last updated:{ application.updatedAt }</span>
+                        <span>ID: { job._id.substring( 0, 8 ) }...</span>
+                        <span>Last updated:{ job.updatedAt }</span>
                       </div>
                     </div>
                   </div>
@@ -248,7 +244,7 @@ const ApplicationListing = () => {
       </div>
 
       { isDialogOpen && (
-        <ApplicationDialog
+        <JobStatusDialog
           isOpen={ isDialogOpen }
           dialogMode={ dialogMode }
           formData={ formData }
@@ -261,4 +257,4 @@ const ApplicationListing = () => {
   );
 };
 
-export default ApplicationListing;
+export default JobStatus;

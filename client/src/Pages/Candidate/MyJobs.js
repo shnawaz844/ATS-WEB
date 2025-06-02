@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Modal from './Modal';
 import { toast } from 'react-toastify';
 import {
@@ -22,6 +22,24 @@ import {
     BookText
 } from 'lucide-react';
 
+const fetchApplicationStatuses = async ( { filters = {}, page = 1, limit = 100 } ) => {
+    const queryParams = new URLSearchParams( filters ).toString();
+    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+    const res = await fetch(
+        `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses?${ queryParams }`,
+        {
+            headers: {
+                'company_id': companyId
+            }
+        }
+    );
+    if ( !res.ok ) {
+        throw new Error( "Error fetching application statuses" );
+    }
+    return res.json();
+};
+
+
 const MyJobs = () => {
     const [ loginData, setLoginData ] = useState( null );
     const [ applications, setApplications ] = useState( [] );
@@ -34,7 +52,19 @@ const MyJobs = () => {
     const [ updatedApplication, setUpdatedApplication ] = useState( null );
     const [ isLoading, setIsLoading ] = useState( true );
     const limit = 9;
+    const [ applicationStatuses, setApplicationStatuses ] = useState( [] );
+    const [ loadingStatuses, setLoadingStatuses ] = useState( true );
 
+    // 1️⃣ Build lookup map: _id -> applicationStatus
+    const statusMap = useMemo( () => {
+        return applicationStatuses.reduce( ( map, s ) => {
+            map[ s._id ] = s.applicationStatus;
+            return map;
+        }, {} );
+    }, [ applicationStatuses ] );
+
+    const getStatusName = id => statusMap[ id ] ?? 'Unknown';
+    
     const fetchApplications = async () => {
         try {
             setIsLoading( true );
@@ -148,6 +178,24 @@ const MyJobs = () => {
         fetchApplications();
     }, [ loginData, currentPage ] );
 
+    // Fetch all application statuses
+    useEffect( () => {
+        const loadStatuses = async () => {
+            if ( !loginData ) return;
+            setLoadingStatuses( true );
+            try {
+                const data = await fetchApplicationStatuses( { page: 1, limit: 100 } );
+                setApplicationStatuses( data.applicationStatuses );
+            } catch ( err ) {
+                console.error( 'Error fetching statuses:', err );
+            } finally {
+                setLoadingStatuses( false );
+            }
+        };
+        loadStatuses();
+    }, [ loginData ] );
+
+
     const capitalizeFirstLetter = ( string ) => {
         return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
@@ -172,66 +220,79 @@ const MyJobs = () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
                 </div>
             ) : applications.length > 0 ? (
-                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    { applications.map( ( app ) => (
-                        <div key={ app._id } className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 overflow-hidden">
-                            <div className="p-6">
-                                <div className="flex justify-between items-start mb-3">
-                                    <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">{ capitalizeFirstLetter( app?.jobID?.title ) }</h2>
-                                    <span className={ `flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${ ( getStatusColor( app.applicationStatus ) ) }` }>
-                                        { getStatusIcon( app.applicationStatus ) }
-                                        { capitalizeFirstLetter( app.applicationStatus ) }
-                                    </span>
-                                </div>
-
-                                <div className="space-y-2 mb-4">
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <CircleUser className="h-4 w-4 mr-2 text-gray-500" />
-                                        { capitalizeFirstLetter( app?.candidateID.userName ) }
-                                    </p>
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <Mail className="h-4 w-4 mr-2 text-gray-500" />
-                                        { ( app?.candidateID.email ) }
-                                    </p>
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <FolderDown className="h-4 w-4 mr-2 text-gray-500" />
-                                        { ( app?.jobID?.locationType ) }
-                                    </p>
-                                    <p className="text-sm text-gray-700 flex items-center">
-                                        <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                                        { app?.jobID?.city }, { app?.jobID?.state }
-                                    </p>
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                                        { app?.jobID?.shiftStart } - { app?.jobID?.shiftEnd }
-                                    </p>
-                                    <p className="text-sm text-gray-600 flex items-center">
-                                        <div className="h-14 overflow-y-auto pr-1 transition-all duration-300 flex">
-                                            <BookText className="h-4 w-4 mr-2 text-gray-500" />
-                                            { capitalizeFirstLetter( app?.experience || 'No experience specified' ) }
+                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        { applications.map( app => {
+                            const name = getStatusName( app.applicationStatusId );
+                            return (
+                                <div
+                                    key={ app._id }
+                                    className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                                >
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">
+                                                { capitalizeFirstLetter( app.jobID.title ) }
+                                            </h2>
+                                            <span
+                                                className={ `flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${ getStatusColor( name )
+                                                    }` }
+                                            >
+                                                { getStatusIcon( name ) }
+                                                { capitalizeFirstLetter( name ) }
+                                            </span>
                                         </div>
-                                    </p>
 
-                                    { app.submittedAt && (
-                                        <p className="text-sm text-gray-600 flex items-center">
-                                            <CalendarDays className="h-4 w-4 mr-2 text-gray-500" />
-                                            Applied: { new Date( app.submittedAt ).toLocaleDateString() }
-                                        </p>
-                                    ) }
-                                </div>
+                                        <div className="space-y-2 mb-4">
+                                            <p className="text-sm text-gray-600 flex items-center">
+                                                <CircleUser className="h-4 w-4 mr-2" />
+                                                { capitalizeFirstLetter( app.candidateID.userName ) }
+                                            </p>
+                                            <p className="text-sm text-gray-600 flex items-center">
+                                                <Mail className="h-4 w-4 mr-2" />
+                                                { app.candidateID.email }
+                                            </p>
+                                            <p className="text-sm text-gray-600 flex items-center">
+                                                <FolderDown className="h-4 w-4 mr-2" />
+                                                { app.jobID.locationType }
+                                            </p>
+                                            <p className="text-sm text-gray-700 flex items-center">
+                                                <MapPin className="h-4 w-4 mr-2" />
+                                                { app.jobID.city }, { app.jobID.state }
+                                            </p>
+                                            <p className="text-sm text-gray-600 flex items-center">
+                                                <Clock className="h-4 w-4 mr-2" />
+                                                { app.jobID.shiftStart } - { app.jobID.shiftEnd }
+                                            </p>
+                                            <p className="text-sm text-gray-600 flex items-center">
+                                                <div className="h-14 overflow-y-auto pr-1 flex">
+                                                    <BookText className="h-4 w-4 mr-2" />
+                                                    { capitalizeFirstLetter( app.experience || 'No experience specified' ) }
+                                                </div>
+                                            </p>
+                                            { app.submittedAt && (
+                                                <p className="text-sm text-gray-600 flex items-center">
+                                                    <CalendarDays className="h-4 w-4 mr-2" />
+                                                    Applied: { new Date( app.submittedAt ).toLocaleDateString() }
+                                                </p>
+                                            ) }
+                                        </div>
 
-                                <div className="flex justify-between mt-5 pt-3 border-t border-gray-100">
-                                    <button
-                                        onClick={ () => { setSelectedApp( app ); setIsModalOpen( true ); } }
-                                        className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
-                                    >
-                                        <EyeIcon className="h-4 w-4 mr-1" /> View
-                                    </button>
+                                        <div className="flex justify-between mt-5 pt-3 border-t border-gray-100">
+                                            <button
+                                                onClick={ () => {
+                                                    setSelectedApp( app );
+                                                    setIsModalOpen( true );
+                                                } }
+                                                className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
+                                            >
+                                                <EyeIcon className="h-4 w-4 mr-1" /> View
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    ) ) }
-                </div>
+                            );
+                        } ) }
+                    </div>
             ) : (
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
                     <div className="flex justify-center mb-4">

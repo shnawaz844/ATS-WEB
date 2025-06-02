@@ -91,7 +91,7 @@ const ApplicationList = () => {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Application List1</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Application List</h1>
           <div className="flex gap-4">
             <input
               type="text"

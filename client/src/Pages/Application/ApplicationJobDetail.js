@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import OverviewTab from './tabs/OverviewTab';
 import ApplicationsListTab from './tabs/ApplicationsListTab';
@@ -15,6 +15,16 @@ const ApplicationJobDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('applications');
+    // NEW: state for job-statuses
+    const [ jobStatuses, setJobStatuses ] = useState( [] );
+     const [ statusMap, setStatusMap ] = useState( {} );
+     const [ loadingStatuses, setLoadingStatuses ] = useState( false );
+    const [ toggleCount, setToggleCount ] = useState( 0 );
+
+    const onStatusChange = useCallback( () => {
+        setToggleCount( count => count + 1 );
+    }, [] );
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -39,7 +49,39 @@ const ApplicationJobDetail = () => {
         };
 
         fetchData();
-    }, [id, page, limit, search]);
+    }, [id, page, limit, search,toggleCount]);
+
+    // NEW: fetch job-statuses on mount
+    useEffect( () => {
+       const fetchJobStatuses = async () => {
+         setLoadingStatuses( true );
+         try {
+           const storedUser = JSON.parse( localStorage.getItem( 'user' ) );
+           const companyId = storedUser?.company_id;
+           if ( !companyId ) return;
+   
+           const response = await fetch(
+             `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`,
+             { headers: { company_id: companyId } }
+           );
+           const data = await response.json();
+           if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+             setJobStatuses( data.jobStatuses );
+             const mapping = {};
+             data.jobStatuses.forEach( entry => {
+               mapping[ entry._id ] = entry.jobStatus;
+             } );
+             setStatusMap( mapping );
+           }
+         } catch ( error ) {
+           console.error( 'Error fetching job statuses:', error );
+         } finally {
+           setLoadingStatuses( false );
+         }
+       };
+   
+       fetchJobStatuses();
+     }, [] );
 
     const capitalizeFirstLetter = ( str ) => {
         if ( !str ) return '';
@@ -55,7 +97,8 @@ const ApplicationJobDetail = () => {
         );
     }
 
-    const { title, status } = job;
+    const { title, status: statusId } = job;
+    const displayStatus = statusMap[ statusId ] || statusId;
     const candidateCount = applications.applications.length;
 
     const getStatusColor = (status) => {
@@ -87,11 +130,11 @@ const ApplicationJobDetail = () => {
                                 { capitalizeFirstLetter(title) || 'Untitled Job'}
                             </h1>
                             <div className="flex flex-wrap gap-3">
-                                <span className={`bg-gray-400 inline-flex items-center px-3 py-1 rounded-full text-sm text-white font-medium ${getStatusColor(status)}`}>
+                                <span className={ `bg-gray-400 inline-flex items-center px-3 py-1 rounded-full text-sm text-white font-medium ${ getStatusColor( displayStatus )}`}>
                                     <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    {status || 'N/A'}
+                                    { capitalizeFirstLetter( displayStatus ) || 'N/A' }
                                 </span>
                                 <span className="inline-flex bg-gray-400 items-center px-3 py-1 rounded-full text-white text-sm font-medium">
                                     <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,9 +194,10 @@ const ApplicationJobDetail = () => {
 
                     {/* Tab Content */}
                     <div className="p-6">
-                        {activeTab === 'overview' && <OverviewTab job={job} applications={applications.applications} />}
+                        { activeTab === 'overview' && <OverviewTab job={job} applications={applications.applications} />}
                         {activeTab === 'applications' &&
                             <ApplicationsListTab
+                            onStatusChange={ onStatusChange }
                                 applications={applications.applications}
                                 page={page}
                                 limit={limit}

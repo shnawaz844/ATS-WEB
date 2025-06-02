@@ -40,7 +40,7 @@ import NotFound from './Pages/NotFound';
 import CompanyNotFound from './components/CompanyNotFound';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import Banner from './components/Home/Banner/Banner'
-
+import Jobstatus from './Pages/Application/JobStatus';
 
 
 // Layout component to ensure Navbar and Footer appear on all pages
@@ -176,8 +176,8 @@ function App() {
           <Route path="/:companyUserName/all-applications" element={ <CandidateApplication /> } />
           <Route path="/:companyUserName/shortlisted-applications" element={ <ShortlistedApplications /> } />
           <Route path="/:companyUserName/my-jobs" element={ <MyJobs /> } />
-          <Route path="/:companyUserName/application-types" element={ <ApplicationListing /> } />
-
+          <Route path="/:companyUserName/application-statuses" element={ <ApplicationListing /> } />
+          <Route path="/:companyUserName/Job-statuses" element={ <Jobstatus /> } />
           {/* User Management */ }
           <Route path="/:companyUserName/all-users" element={ <UserListing /> } />
           <Route path="/all-users" element={ <UserListing /> } />
@@ -194,7 +194,7 @@ function App() {
           <Route path="/all-applications" element={ <CandidateApplication /> } />
           <Route path="/shortlisted-applications" element={ <ShortlistedApplications /> } />
           <Route path="/my-jobs" element={ <MyJobs /> } />
-          <Route path="/application-types" element={ <ApplicationListing /> } />
+          <Route path="/application-Statuses" element={ <ApplicationListing /> } />
 
           {/* Role-specific Dashboards */ }
           <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />

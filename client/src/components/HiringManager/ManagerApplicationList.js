@@ -24,13 +24,14 @@ const ApplicationList = () => {
         interviewerId: "",
         company_id: "",
         roundName: "",
+        applicationStatus: "",
     } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
 
     const capitalizeFirstLetter = ( string ) => {
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
     const [ editingId, setEditingId ] = useState( null );
@@ -40,9 +41,25 @@ const ApplicationList = () => {
     const interviewTypes = [ "online", "walkin" ];
     const storedUser = localStorage.getItem( "user" );
     const debouncedSearch = useDebounce( search, 1000 );
-
     const hiringManager = JSON.parse( storedUser ); // Parse the stored email
-    const hiringManagerEmail = hiringManager.email;
+    const hiringManagerId = hiringManager._id;
+    const [ statusMap, setStatusMap ] = useState( {} );
+
+    // 2) Fetch all application statuses once
+    useEffect( () => {
+        axios.get(
+            `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses`,
+            { headers: { company_id: companyId } }
+        )
+            .then( res => {
+                const map = {};
+                res.data.applicationStatuses.forEach( s => {
+                    map[ s._id ] = s.applicationStatus;
+                } );
+                setStatusMap( map );
+            } )
+            .catch( err => console.error( "Failed to load statuses", err ) );
+    }, [ companyId ] );
 
     // Fetch applications with pagination and search
     const {
@@ -50,10 +67,11 @@ const ApplicationList = () => {
         isLoading,
         isError,
         refetch
-    } = useManagerApplications( hiringManagerEmail, page, limit, debouncedSearch, companyId );
+    } = useManagerApplications( hiringManagerId, page, limit, debouncedSearch, companyId );
 
     const applications = applicationsData?.applications || [];
     const totalPages = applicationsData?.totalPages || 1;
+    console.log( "applications><><><><123", applications );
 
     // Handle click outside modal to close it
     useEffect( () => {
@@ -92,6 +110,11 @@ const ApplicationList = () => {
         fetchInterviewers();
     }, [] );
 
+    useEffect( () => {
+        console.log( "applications", applications )
+    }, [ applications ] )
+
+
     // Fetch Interview Rounds
     useEffect( () => {
         const fetchInterviewRounds = async () => {
@@ -117,6 +140,7 @@ const ApplicationList = () => {
         fetchInterviewRounds();
     }, [] );
 
+
     // Create a unique list of job fields from applications
     const jobFields = [ "All Jobs", ...new Set( applications
         .map( app => app.jobDetails?.title || "Unknown" )
@@ -124,15 +148,20 @@ const ApplicationList = () => {
 
     // Filter applications based on job field and search term
     const filteredApplications = applications.filter( app => {
-        const jobTitleMatch = selectedJobField === "All" || app.jobDetails?.title === selectedJobField;
-        const searchMatch = app.applicationStatus.toLowerCase().includes( debouncedSearch.toLowerCase() ) ||
-            app.jobDetails?.title.toLowerCase().includes( debouncedSearch.toLowerCase() ) ||
-            app.candidateDetails?.userName.toLowerCase().includes( debouncedSearch.toLowerCase() );
+        const titleMatch = selectedJobField === "All" || app.jobDetails?.title === selectedJobField;
+        const statusName = ( statusMap[ app.applicationStatusId ] || "" ).toLowerCase();
+        const term = debouncedSearch.toLowerCase();
 
-        return jobTitleMatch && searchMatch;
+        return (
+            titleMatch &&
+            ( statusName.includes( term )
+                || app.jobDetails?.title.toLowerCase().includes( term )
+                || app.candidateDetails?.userName.toLowerCase().includes( term )
+            )
+        );
     } );
 
-
+    console.log( "filteredApplications", filteredApplications )
     // Validate form before submission
     const validateForm = () => {
         if ( !editForm.date ) {
@@ -170,6 +199,7 @@ const ApplicationList = () => {
             interviewerId: application.interview?.interviewerId || "",
             company_id: application.company_id || "",
             roundName: application.interview?.roundName || "",
+            applicationStatus: application.applicationStatusId || ""
         } );
         setEditingId( application._id );
         setIsEditModalOpen( true );
@@ -209,9 +239,8 @@ const ApplicationList = () => {
             interviewerType: editForm.interviewType,
             meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
             roundID: editForm.roundName,
-            status: "Scheduled",
+            applicationStatusId: editForm.applicationStatus,
             company_id: companyId,
-
         };
 
         try {
@@ -280,7 +309,7 @@ const ApplicationList = () => {
                         <div>
                             <h2 className="text-3xl font-bold text-white flex items-center">
                                 <Briefcase className="mr-2 h-6 w-6 text-white" />
-                                Manage Applications1
+                                Manage Applications
                             </h2>
                         </div>
                         {/* Search and Filter Controls */ }
@@ -323,11 +352,11 @@ const ApplicationList = () => {
 
                 {/* Applications Grid */ }
                 {
-                        isError ? (
-                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                                <div className="bg-gray-100 p-5 rounded-full mb-4">
-                                    <Briefcase className="h-12 w-12 text-gray-400" />
-                                </div>
+                    isError ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                            <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                <Briefcase className="h-12 w-12 text-gray-400" />
+                            </div>
                             <div className="text-center animate-fade-in transition-all duration-500">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
                                     No Jobs Found
@@ -338,81 +367,80 @@ const ApplicationList = () => {
                                     <span className="text-blue-500 font-medium">Try refining your search</span> or check back later.
                                 </p>
                             </div>
+                        </div>
+                    ) : filteredApplications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                            <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                <Briefcase className="h-12 w-12 text-gray-400" />
                             </div>
-                        ) : filteredApplications.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                                <div className="bg-gray-100 p-5 rounded-full mb-4">
-                                    <Briefcase className="h-12 w-12 text-gray-400" />
-                                </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
-                                <p className="text-gray-500 max-w-md mb-6">
-                                    Try adjusting your search filters to find candidate applications.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                { filteredApplications.map( app => (
-                                    <div
-                                        key={ app._id }
-                                        className="bg-white p-6 rounded-xl border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-indigo-50 group"
-                                        onClick={ () => handleApplicationClick( app ) }
-                                    >
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
-                                                    { capitalizeFirstLetter( app.jobDetails?.title ) || "Untitled Position" }
-                                                </h3>
-                                                <p className="text-sm text-gray-500 mt-3 flex items-center">
-                                                    <User className="mr-2 text-gray-500 w-5 h-5" />
-                                                    { capitalizeFirstLetter( app.candidateDetails?.userName || "N/A" ) }
-                                                </p>
-                                            </div>
-                                            <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( app.applicationStatus ) }` }>
-                                                { capitalizeFirstLetter( app.applicationStatus ) || "Unknown" }
-                                            </span>
+                            <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
+                            <p className="text-gray-500 max-w-md mb-6">
+                                Try adjusting your search filters to find candidate applications.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            { filteredApplications.map( app => (
+                                <div
+                                    key={ app._id }
+                                    className="bg-white p-6 rounded-xl border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-indigo-50 group"
+                                    onClick={ () => handleApplicationClick( app ) }
+                                >
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 transition-colors">
+                                                { capitalizeFirstLetter( app.jobDetails?.title ) || "Untitled Position" }
+                                            </h3>
+                                            <p className="text-sm text-gray-500 mt-3 flex items-center">
+                                                <User className="mr-2 text-gray-500 w-5 h-5" />
+                                                { capitalizeFirstLetter( app.candidateDetails?.userName || "N/A" ) }
+                                            </p>
+                                        </div>
+                                        <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( app.applicationStatusId ) }` }>
+                                            { capitalizeFirstLetter( statusMap[ app.applicationStatusId ] ) || "Unknown" }
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-3 mt-4">
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <svg className="w-5 h-5 mr-2 text-gray-500 flex items-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            { app.candidateDetails?.email || "N/A" }
                                         </div>
 
-                                        <div className="space-y-3 mt-4">
-                                            <div className="flex items-center text-sm text-gray-600">
-                                                <svg className="w-5 h-5 mr-2 text-gray-500 flex items-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                                { app.candidateDetails?.email || "N/A" }
-                                            </div>
-
-                                            { app.interview && (
-                                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                                    <div className="flex items-start">
-                                                        <div className="bg-indigo-50 p-2 rounded-lg mr-3">
-                                                            <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-medium text-gray-900">Interview Scheduled</p>
-                                                            <p className="text-sm text-gray-600">
-                                                                { formatDate( app.interview.date ) } • { app.interview.time }
-                                                            </p>
-                                                        </div>
+                                        { app.interview && (
+                                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                                <div className="flex items-start">
+                                                    <div className="bg-indigo-50 p-2 rounded-lg mr-3">
+                                                        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-gray-900">Interview Scheduled</p>
+                                                        <p className="text-sm text-gray-600">
+                                                            { formatDate( app.interview.date ) } • { app.interview.time }
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            ) }
-                                        </div>
-
-                                        <div className="mt-6 flex justify-end">
-                                            <button className="text-gray-700 group-hover:text-red-600 text-sm font-medium flex items-center">
-                                                View Details
-                                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </button>
-                                        </div>
+                                            </div>
+                                        ) }
                                     </div>
-                                ) ) }
-                            </div>
-                        ) }
 
-                {/* Pagination Controls */ }
+                                    <div className="mt-6 flex justify-end">
+                                        <button className="text-gray-700 group-hover:text-red-600 text-sm font-medium flex items-center">
+                                            View Details
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ) ) }
+                        </div>
+                    ) }
+
                 {/* Pagination Controls - Updated to match CandidateApplication style */ }
                 { applications.length > 0 && (
                     <div className="px-6 py-4 border-t border-gray-100 mt-4">
@@ -421,8 +449,8 @@ const ApplicationList = () => {
                                 onClick={ handlePreviousPage }
                                 disabled={ page === 1 }
                                 className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
-                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                                        : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                    ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                                    : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
                                     }` }
                             >
                                 <svg className="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,8 +465,8 @@ const ApplicationList = () => {
                                         key={ i }
                                         onClick={ () => setPage( i + 1 ) }
                                         className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
-                                                ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
-                                                : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                            ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                                            : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
                                             }` }
                                     >
                                         { i + 1 }
@@ -454,8 +482,8 @@ const ApplicationList = () => {
                                 onClick={ handleNextPage }
                                 disabled={ page === totalPages }
                                 className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === totalPages
-                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                                        : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+                                    ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
+                                    : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
                                     }` }
                             >
                                 Next
@@ -506,7 +534,7 @@ const ApplicationList = () => {
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Status:</p>
-                                        <p className="font-medium">{ capitalizeFirstLetter( detailedApplication?.applicationStatus ) || "N/A" }</p>
+                                        <p className="font-medium">{ capitalizeFirstLetter( statusMap[ detailedApplication?.applicationStatusId ] ) || "N/A" }</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Company ID:</p>
@@ -517,6 +545,45 @@ const ApplicationList = () => {
 
                             {/* Interview Scheduling Form */ }
                             <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Status
+                                        </label>
+                                        <select
+                                            value={ editForm.status }
+                                            onChange={ e => setEditForm( { ...editForm, status: e.target.value } ) }
+                                            className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        >
+                                            <option value="">Select Status</option>
+                                            { Object.entries( statusMap ).map( ( [ id, name ] ) => (
+                                                <option key={ id } value={ id }>
+                                                    { capitalizeFirstLetter( name ) }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Interview Round
+                                        </label>
+                                        <select
+                                            value={ editForm.roundName }
+                                            onChange={ e => setEditForm( { ...editForm, roundName: e.target.value } ) }
+                                            className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        >
+                                            <option value="">Select Interview Round</option>
+                                            { interviewRounds.map( round => (
+                                                <option key={ round._id } value={ round._id }>
+                                                    { round.roundName }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                    </div>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Interview Date</label>
@@ -541,21 +608,40 @@ const ApplicationList = () => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
-                                    <select
-                                        value={ editForm.interviewType }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500 "
-                                        required
-                                    >
-                                        <option value="">Select Interview Type</option>
-                                        { interviewTypes.map( type => (
-                                            <option key={ type } value={ type }>
-                                                { type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
-                                            </option>
-                                        ) ) }
-                                    </select>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
+                                        <select
+                                            value={ editForm.interviewType }
+                                            onChange={ ( e ) => setEditForm( { ...editForm, interviewType: e.target.value } ) }
+                                            className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500"
+                                            required
+                                        >
+                                            <option value="">Select Interview Type</option>
+                                            { interviewTypes.map( type => (
+                                                <option key={ type } value={ type }>
+                                                    { type?.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Assign Interviewer</label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                                            value={ editForm.interviewerId }
+                                            onChange={ ( e ) => setEditForm( { ...editForm, interviewerId: e.target.value } ) }
+                                            required
+                                        >
+                                            <option value="">Select Interviewer</option>
+                                            { interviewers.map( ( interviewer ) => (
+                                                <option key={ interviewer._id } value={ interviewer._id }>
+                                                    { interviewer.userName }
+                                                </option>
+                                            ) ) }
+                                        </select>
+                                    </div>
                                 </div>
 
                                 { editForm.interviewType === 'online' && (
@@ -571,40 +657,6 @@ const ApplicationList = () => {
                                         />
                                     </div>
                                 ) }
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Assign Interviewer</label>
-                                    <select
-                                        className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={ editForm.interviewerId }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, interviewerId: e.target.value } ) }
-                                        required
-                                    >
-                                        <option value="">Select Interviewer</option>
-                                        { interviewers.map( ( interviewer ) => (
-                                            <option key={ interviewer._id } value={ interviewer._id }>
-                                                { interviewer.userName }
-                                            </option>
-                                        ) ) }
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Interview Round</label>
-                                    <select
-                                        value={ editForm.roundName }
-                                        onChange={ ( e ) => setEditForm( { ...editForm, roundName: e.target.value } ) }
-                                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
-                                        required
-                                    >
-                                        <option value="">Select Interview Round</option>
-                                        { interviewRounds.map( ( round ) => (
-                                            <option key={ round._id } value={ round._id }>
-                                                { round.roundName }
-                                            </option>
-                                        ) ) }
-                                    </select>
-                                </div>
-
                             </div>
 
                             <div className="mt-6 flex justify-end space-x-3">

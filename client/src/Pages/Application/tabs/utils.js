@@ -23,11 +23,11 @@ export const getStatusColor = (status) => {
 
     // Generate a hash from the status string.
     let hash = 0;
-    for (let i = 0; i < status.length; i++) {
+    for (let i = 0; i < status?.length; i++) {
         hash = status.charCodeAt(i) + ((hash << 5) - hash);
     }
     // Ensure a positive index within fallbackColors array bounds.
-    const index = Math.abs(hash) % fallbackColors.length;
+    const index = Math.abs(hash) % fallbackColors?.length;
     return fallbackColors[index];
 };
 

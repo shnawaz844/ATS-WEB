@@ -209,7 +209,7 @@ const AllInterviews = () => {
   };
 
   const getRatingStars = ( rating ) => {
-    return Array( 5 ).fill( 0 ).map( ( _, i ) => (
+    return Array( 5 ).fill( 0 )?.map( ( _, i ) => (
       <span key={ i } className={ i < rating ? "text-yellow-500" : "text-gray-300" }>★</span>
     ) );
   };
@@ -287,7 +287,7 @@ const AllInterviews = () => {
                       onChange={ ( e ) => setFilterStatus( e.target.value ) }
                     >
                       <option value="all">All Status</option>
-                      { statuses.map( ( status ) => (
+                      { statuses?.map( ( status ) => (
                         <option key={ status } value={ status.applicationStatus }>
                           { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                         </option>
@@ -336,7 +336,7 @@ const AllInterviews = () => {
                 </thead>
 
                 { assignedInterviews?.interviews?.length > 0 && (
-                  assignedInterviews.interviews.map( ( feedback ) => (
+                  assignedInterviews.interviews?.map( ( feedback ) => (
                     <tbody key={ feedback._id }>
                       <tr className="group hover:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap">

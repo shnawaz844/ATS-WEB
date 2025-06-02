@@ -12,7 +12,7 @@ export const PostJob = () => {
     const navigate = useNavigate();
     const jobToEdit = location.state?.job;
     const companyUserName = localStorage.getItem( "companyUserName" );
-
+    console.log( "jobToEdit", jobToEdit )
     // We store questions in state
     const [questions, setQuestions] = useState(
         jobToEdit?.applicationForm?.question.map((q, i) => ({
@@ -35,7 +35,6 @@ export const PostJob = () => {
     const recruiterRole = user?.head || '';
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const [ hiringManagersList, setHiringManagersList ] = useState( [] );
-    // const recruiterName = user?.userName || '';
 
     // Fetch hiring managers
     useEffect( () => {
@@ -74,10 +73,9 @@ export const PostJob = () => {
             compensation: '',
             experienceRequired: '',
             requiredResources: '',
-            status: '',
-            recruiterName: recruiterRole ? '' : user._id,
-            hiringManagerEmail: jobToEdit?.hiringManagerEmail || '',
-            hiringManagerName: jobToEdit?.hiringManagerName || '',
+            status: jobToEdit?.status || '',
+            recruiterId: recruiterRole ? '' : user._id,
+            hiringManagerId: jobToEdit?.hiringManagerId || '',
             description: '',
             applicationForm: {
                 question: questions.map((q) => q.question),
@@ -114,7 +112,7 @@ export const PostJob = () => {
     const onSubmit = ( data ) => {
         // Find the selected hiring manager
         const selectedHiringManager = hiringManagersList.find(
-            manager => manager.email === data.hiringManagerEmail
+            manager => manager._id === data.hiringManagerId
         );
 
         if ( !selectedHiringManager ) {
@@ -126,15 +124,14 @@ export const PostJob = () => {
             ...data,
             shiftStart,
             shiftEnd,
-            status: "Screening",
+            // status: "Screening",
             country: selectedCountry,
             state: selectedState,
             city: selectedCity,
             compensation: String(data.compensation),
             experienceRequired: String(data.experienceRequired),
             company_id : companyId,
-            hiringManagerEmail: selectedHiringManager.email,
-            hiringManagerName: selectedHiringManager.userName,
+            hiringManagerId: selectedHiringManager._id,
             applicationForm: {
                 question: questions.map((q) => q.question),
                 answer: questions.map((q) => q.answer),
@@ -175,7 +172,7 @@ export const PostJob = () => {
         const newQuestions = questions.filter((_, qIndex) => qIndex !== index);
         setQuestions(newQuestions);
     };
-
+    console.log( "hiringManagersList", hiringManagersList )
     // Render the new PostJobForm, passing everything it needs
     return (
         <PostJobForm

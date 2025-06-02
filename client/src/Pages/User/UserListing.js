@@ -117,6 +117,11 @@ const UserListing = () => {
   }, [])
 
   const handleFormSubmit = (e) => {
+    // Clean up form data - remove empty address if not provided
+    const cleanedFormData = { ...formData };
+    if ( !cleanedFormData.address?.trim() ) {
+      delete cleanedFormData.address; // Remove empty address field
+    }
     e.preventDefault();
     if (dialogMode === 'add') {
       addUser(formData, {

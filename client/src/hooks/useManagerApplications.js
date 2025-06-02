@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
-const useManagerApplications = ( hiringManagerEmail, page = 1, limit = 10, search = "" ) => {
+const useManagerApplications = ( hiringManagerId, page = 1, limit = 10, search = "" ) => {
     return useQuery( {
-        queryKey: [ "applications", hiringManagerEmail, page, limit, search ],
+        queryKey: [ "applications", hiringManagerId, page, limit, search ],
         queryFn: async () => {
             try {
                 const queryParams = new URLSearchParams( { page, limit, search } ).toString();
                 const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
                 const response = await fetch(
-                    `${ process.env.REACT_APP_BASE_URL }/application/get-application-hm/${ hiringManagerEmail }?${ queryParams }`,
+                    `http://localhost:8080/application/get-application-hm/${ hiringManagerId }?${ queryParams }`,
                     {
                         headers: {
                             'company_id': companyId, // Ensure company_id is sent here
