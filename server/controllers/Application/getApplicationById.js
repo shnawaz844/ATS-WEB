@@ -1,9 +1,9 @@
 import Application from '../../models/Application.js';
 // import InterviewSchedule from '../../models/InterviewSchedule.js';
 
-const getApplicationByEmail = async ( req, res ) => {
+const getApplicationById = async ( req, res ) => {
     try {
-        const email = req.params.email;
+        const id = req.params.id;
         let { page = 1, limit = 20, search = '' } = req.query;
         let { company_id } = req.headers;
 
@@ -16,7 +16,7 @@ const getApplicationByEmail = async ( req, res ) => {
                 $project: {
                     jobID: 1,
                     candidateID: 1,
-                    applicationStatus: 1,
+                    applicationStatusId: 1,
                     resume: 1,
                     contactInfo: 1,
                     experience: 1,
@@ -24,6 +24,7 @@ const getApplicationByEmail = async ( req, res ) => {
                     answers: 1,
                     convertedJobId: { $toObjectId: "$jobID" },
                     convertedCandidateId: { $toObjectId: "$candidateID" },
+                    convertedAppStatusId: { $toObjectId: "$applicationStatusId" },
                     company_id: 1,
                     createdAt: 1,
                 }
@@ -36,6 +37,7 @@ const getApplicationByEmail = async ( req, res ) => {
                     as: 'jobDetails'
                 }
             },
+            { $unwind: "$jobDetails" },
             {
                 $lookup: {
                     from: 'users',
@@ -44,11 +46,29 @@ const getApplicationByEmail = async ( req, res ) => {
                     as: 'candidateDetails'
                 }
             },
-            { $unwind: "$jobDetails" },
             { $unwind: "$candidateDetails" },
             {
+                $lookup: {
+                    from: 'application-statuses',
+                    localField: 'convertedAppStatusId',
+                    foreignField: '_id',
+                    as: 'statusDetails'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$statusDetails',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    applicationStatus: '$statusDetails.statusName'
+                }
+            },
+            {
                 $match: {
-                    'jobDetails.hiringManagerEmail': email,
+                    'jobDetails.hiringManagerId': id,
                     $or: [
                         { 'jobDetails.title': { $regex: search, $options: 'i' } },
                         { 'candidateDetails.userName': { $regex: search, $options: 'i' } }
@@ -93,7 +113,7 @@ const getApplicationByEmail = async ( req, res ) => {
         if ( applications.length === 0 ) {
             return res.status( 404 ).json( {
                 message: 'No applications found for this hiring manager',
-                searchedEmail: email
+                searchedId: id
             } );
         }
 
@@ -109,9 +129,9 @@ const getApplicationByEmail = async ( req, res ) => {
         res.status( 500 ).json( {
             message: 'Server error',
             error: error.message,
-            searchedEmail: email
+            searchedId: id
         } );
     }
 };
 
-export { getApplicationByEmail };
+export { getApplicationById };

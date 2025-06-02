@@ -63,18 +63,13 @@ const JobSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: [ 'Screening', 'Hold', 'Round 1', 'Round 2', 'Selected','Rejected'],
         required: true
     },
-    recruiterName: {
+    recruiterId: {
         type: String,
         required: true
     },
-    hiringManagerEmail: {
-        type: String,
-        required: true
-    },
-    hiringManagerName: {
+    hiringManagerId: {
         type: String,
         required: true
     },
@@ -90,7 +85,6 @@ const JobSchema = new mongoose.Schema({
         },
         status: {
             type: String,
-            enum: ['active', 'inactive', 'shortlist', 'rejected'],
             default: 'active'
         }
     }],

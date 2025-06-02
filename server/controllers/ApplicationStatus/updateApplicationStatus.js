@@ -1,15 +1,15 @@
 // controllers/ApplicationType/updateApplicationType.js
 
-import ApplicationType from "../../models/ApplicationType.js";
+import ApplicationStatus from "../../models/ApplicationStatus.js";
 // import bcrypt from "bcryptjs";
 
-const updateApplicationType = async ( req, res ) => {
+const updateApplicationStatus = async ( req, res ) => {
   try {
     const { id } = req.params; // Get the ID from the route parameter
     const { applicationStep, applicationStatus,company_id } = req.body; // Get the fields from the request body
 
     // Find the application type by ID
-    const applicationType = await ApplicationType.findById( id );
+    const applicationType = await ApplicationStatus.findById( id );
     if ( !applicationType ) {
       return res.status( 404 ).json( {
         success: false,
@@ -33,4 +33,4 @@ const updateApplicationType = async ( req, res ) => {
   }
 };
 
-export { updateApplicationType };
+export { updateApplicationStatus };

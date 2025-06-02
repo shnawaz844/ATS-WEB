@@ -1,6 +1,7 @@
-import ApplicationType from "../../models/ApplicationType.js";
+import ApplicationStatus from "../../models/ApplicationStatus.js";
 
-const getApplicationTypes = async (req, res) => {
+
+const getApplicationStatuses = async (req, res) => {
   try {
     // Default values for page & limit
     let { page = 1, limit = 10, search = "" } = req.query;
@@ -9,7 +10,7 @@ const getApplicationTypes = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    // Build a query for searching application types
+    // Build a query for searching application statuses
     let query = {};
 
     if(company_id){
@@ -37,25 +38,25 @@ const getApplicationTypes = async (req, res) => {
     }
 
     // Count total documents that match the query
-    const totalCount = await ApplicationType.countDocuments(query);
+    const totalCount = await ApplicationStatus.countDocuments(query);
 
-    // Find application types with pagination and search
-    const applicationTypes = await ApplicationType.find(query)
+    // Find application statuses with pagination and search
+    const applicationStatuses = await ApplicationStatus.find(query)
       .sort({ applicationStep: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
-
-    // Send back application types array and totalCount
+    console.log( "applicationStatuses>>><<<<<>>>>>", applicationStatuses )
+    // Send back application statuses array and totalCount
     res.status(200).json({
-      applicationTypes,
+      applicationStatuses,
       totalCount,
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit),
     });
   } catch (error) {
-    console.error("Error getting application types:", error);
-    res.status(500).json({ message: "Failed to get application types" });
+    console.error("Error getting application Status:", error);
+    res.status(500).json({ message: "Failed to get application status" });
   }
 };
 
-export { getApplicationTypes };
+export { getApplicationStatuses };
