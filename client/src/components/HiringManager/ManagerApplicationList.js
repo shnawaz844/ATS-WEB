@@ -24,7 +24,7 @@ const ApplicationList = () => {
         interviewerId: "",
         company_id: "",
         roundName: "",
-        applicationStatus: "",
+        applicationStatusId: "",
     } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
@@ -199,7 +199,7 @@ const ApplicationList = () => {
             interviewerId: application.interview?.interviewerId || "",
             company_id: application.company_id || "",
             roundName: application.interview?.roundName || "",
-            applicationStatus: application.applicationStatusId || ""
+            applicationStatusId: application.applicationStatusId || ""
         } );
         setEditingId( application._id );
         setIsEditModalOpen( true );
@@ -239,7 +239,7 @@ const ApplicationList = () => {
             interviewerType: editForm.interviewType,
             meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
             roundID: editForm.roundName,
-            applicationStatusId: editForm.applicationStatus,
+            applicationStatus: editForm.applicationStatus,
             company_id: companyId,
         };
 

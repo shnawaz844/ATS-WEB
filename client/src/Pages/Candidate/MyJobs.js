@@ -231,7 +231,7 @@ const MyJobs = () => {
                                     <div className="p-6">
                                         <div className="flex justify-between items-start mb-3">
                                             <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">
-                                                { capitalizeFirstLetter( app.jobID.title ) }
+                                                { capitalizeFirstLetter( app.jobID?.title ) }
                                             </h2>
                                             <span
                                                 className={ `flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${ getStatusColor( name )
@@ -253,15 +253,15 @@ const MyJobs = () => {
                                             </p>
                                             <p className="text-sm text-gray-600 flex items-center">
                                                 <FolderDown className="h-4 w-4 mr-2" />
-                                                { app.jobID.locationType }
+                                                { app.jobID?.locationType }
                                             </p>
                                             <p className="text-sm text-gray-700 flex items-center">
                                                 <MapPin className="h-4 w-4 mr-2" />
-                                                { app.jobID.city }, { app.jobID.state }
+                                                { app.jobID?.city }, { app.jobID?.state }
                                             </p>
                                             <p className="text-sm text-gray-600 flex items-center">
                                                 <Clock className="h-4 w-4 mr-2" />
-                                                { app.jobID.shiftStart } - { app.jobID.shiftEnd }
+                                                { app.jobID?.shiftStart } - { app.jobID?.shiftEnd }
                                             </p>
                                             <p className="text-sm text-gray-600 flex items-center">
                                                 <div className="h-14 overflow-y-auto pr-1 flex">
