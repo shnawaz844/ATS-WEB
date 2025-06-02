@@ -7,6 +7,7 @@ import CandidateForm from './CandidateForm';
 import 'react-quill/dist/quill.snow.css';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
+import axios from 'axios';
 
 const FORM_OPTIONS = {
   location: [
@@ -29,12 +30,6 @@ const FORM_OPTIONS = {
     { value: 'New', label: 'New' },
     { value: 'Replacement', label: 'Replacement' }
   ],
-  status: [
-    { value: 'Approve', label: 'Approve' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Filled', label: 'Filled' },
-    { value: 'On Hold', label: 'On Hold' }
-  ]
 };
 
 const capitalizeFirstLetter = ( string ) => {
@@ -220,7 +215,10 @@ export const PostJobForm = ( {
 } ) => {
   const [ isHead, setIsHead ] = React.useState( false );
   const [ recruitersList, setRecruitersList ] = useState( [] );
-  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id; 
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+  const [ jobStatuses, setJobStatuses ] = useState( [] );
+  const [ loadingStatuses, setLoadingStatuses ] = useState( false );
+  const [ statusError, setStatusError ] = useState( null );
 
 
   useEffect( () => {
@@ -252,6 +250,52 @@ export const PostJobForm = ( {
     fetchRecruiters();
   }, [] );
 
+  useEffect( () => {
+    const fetchJobStatuses = async () => {
+      setLoadingStatuses( true );
+      setStatusError( null );
+      try {
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
+          headers: {
+            'company_id': companyId
+          }
+        } );
+
+        if ( !response.ok ) {
+          throw new Error( 'Failed to fetch job statuses' );
+        }
+
+        const data = await response.json();
+        console.log( 'Job Statuses API Response:', data );
+
+        // Access the jobStatuses array from the response
+        if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+          setJobStatuses( data.jobStatuses );
+        } else {
+          throw new Error( 'Invalid data format received' );
+        }
+      } catch ( error ) {
+        console.error( 'Error fetching job statuses:', error );
+        setStatusError( error.message );
+        setJobStatuses( [] );
+      } finally {
+        setLoadingStatuses( false );
+      }
+    };
+
+    fetchJobStatuses();
+  }, [ companyId ] );
+
+  const statusOptions = Array.isArray( jobStatuses )
+    ? jobStatuses
+      .sort( ( a, b ) => parseInt( a.jobStep ) - parseInt( b.jobStep ) ) // Convert jobStep to numbers
+      .map( status => ( {
+        value: status._id,
+        label: status.jobStatus
+      } ) )
+    : [];
+
+  console.log( "jobToEdit", jobToEdit )
   return (
     <div className="min-h-screen py-12"
       style={ { background: 'linear-gradient(135deg, #ffffff, #808080)' } }>
@@ -273,7 +317,7 @@ export const PostJobForm = ( {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormInput
-                    label={ capitalizeFirstLetter("Title")}
+                    label={ capitalizeFirstLetter( "Title" ) }
                     register={ register }
                     name="title"
                     error={ errors?.title }
@@ -351,20 +395,37 @@ export const PostJobForm = ( {
                     placeholder="Ex: 5"
                   />
 
-                  {/* <FormInput
-                    label="Status"
-                    register={ register }
-                    name="status"
-                    type="select"
-                    options={ FORM_OPTIONS.status }
-                    error={ errors?.status }
-                  /> */}
+                  {/* Fixed Status Field */ }
+                  <FormField label="Status" error={ errors?.status || statusError }>
+                    <select
+                      value={ jobToEdit?.status }
+                      { ...register( "status", {
+                        required: "Status is required"
+                      } ) }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      disabled={ loadingStatuses }
+                    >
+                      <option value="">Select Status</option>
+                      { loadingStatuses ? (
+                        <option>Loading statuses...</option>
+                      ) : statusOptions && statusOptions.length > 0 ? (
+                        statusOptions.map( ( status ) => (
+                          <option key={ status.value } value={ status.value }>
+                            { status.label }
+                          </option>
+                        ) )
+                      ) : (
+                        <option disabled>No statuses available</option>
+                      ) }
+                    </select>
+                  </FormField>
 
                   {/* Conditional Recruiter Name Field */ }
                   { isHead && (
-                    <FormField label="Recruiter Name" error={ errors?.recruiterName }>
+                    <FormField label="Recruiter" error={ errors?.recruiterId }>
                       <select
-                        { ...register( "recruiterName" ) }
+                        value={ jobToEdit?.recruiterId}
+                        { ...register( "recruiterId" ) }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       >
                         <option value="">Select Recruiter</option>
@@ -381,29 +442,12 @@ export const PostJobForm = ( {
                     </FormField>
                   ) }
 
-                  <FormField label="Hiring Manager Email" error={ errors?.hiringManagerEmail }>
+                  <FormField label="Hiring Manager" error={ errors?.hiringManagerId }>
                     <select
-                      { ...register( "hiringManagerEmail", {
+                      value={ jobToEdit?.hiringManagerId }
+                      { ...register( "hiringManagerId", {
                         required: "Hiring Manager is required"
                       } ) }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    >
-                      <option value="">Select Hiring Manager</option>
-                      { hiringManagersList && hiringManagersList.length > 0 ? (
-                        hiringManagersList.map( ( manager ) => (
-                          <option key={ manager._id } value={ manager.email }>
-                          { manager.email }
-                          </option>
-                        ) )
-                      ) : (
-                        <option disabled>No hiring managers found</option>
-                      ) }
-                    </select>
-                  </FormField>
-
-                  {/* Hiring Manager Dropdown */ }
-                  <FormField label="Hiring Manager Name">
-                    <select
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     >
                       <option value="">Select Hiring Manager</option>

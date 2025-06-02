@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
+
 import StatusSidebar from './StatusSidebar';
-import EmptyState from './EmptyState';
 import ApplicationsTable from './ApplicationsTable';
 import ConfirmationDialog from './ConfirmationDialog';
 import ResumeModal from './ResumeModal';
-// import { updateApplicationStatus, getResumeData } from '../services/applicationService';
 
-const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLimit, setSearch, currentPage, totalApplications, totalPages }) => {
-    // Load applications from localStorage or use provided applications prop
+const ApplicationsListTab = ( { onStatusChange, applications, page, limit, search, setPage, setLimit, setSearch, currentPage, totalApplications, totalPages }) => {
     const [allApps, setAllApps] = useState(applications);
     const [statusFilter, setStatusFilter] = useState('');
     const [statuses, setStatuses] = useState([]);
@@ -28,13 +26,38 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
         resumeData: null
     });
 
-    // Fetch statuses from API
-    useEffect(() => {
-        fetch(`${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types`)
-            .then(response => response.json())
-            .then(data => setStatuses(data.applicationTypes))
-            .catch(error => console.error("Error fetching statuses:", error));
-    }, []);
+  // Fetch statuses from API
+  useEffect(() => {
+    const fetchApplicationStatuses = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (!storedUser?.company_id) return;
+
+        const res = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`,
+          {
+            headers: {
+              'company_id': storedUser.company_id,
+            },
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch application statuses');
+
+        const { applicationStatuses } = await res.json();
+
+        // optional: sort by applicationStep so buttons render in step order
+        applicationStatuses.sort((a, b) =>
+          Number(a.applicationStep) - Number(b.applicationStep)
+        );
+
+        setStatuses(applicationStatuses);
+      } catch (err) {
+        console.error('Error fetching statuses:', err);
+      }
+    };
+
+      fetchApplicationStatuses();
+  }, []);
 
     const updateApplicationStatus = async (applicationId, newStatus) => {
         try {
@@ -43,13 +66,14 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ applicationStatus: newStatus }),
+                body: JSON.stringify( { applicationStatusId: newStatus }),
             });
 
             if (!response.ok) {
                 throw new Error('Failed to update application status');
             }
-
+            console.log( 'componentB update done, calling parent' );
+            onStatusChange()
             return await response.json();
         } catch (error) {
             console.error('Error updating application status:', error);
@@ -58,7 +82,7 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
     };
 
     const getStatusCount = (status) => {
-        return allApps.filter(app => app.applicationStatus === status).length;
+        return allApps.filter( app => app.applicationStatusId === status).length;
     };
 
     const handleStatusChangeRequest = (appId, newStatus) => {
@@ -66,7 +90,7 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
         const app = allApps.find(a => a._id === appId);
 
         // If no change in status, do nothing
-        if (app && app.applicationStatus === newStatus) return;
+        if ( app && app.applicationStatusId === newStatus) return;
 
         // Open confirmation dialog
         setConfirmDialog({
@@ -79,24 +103,32 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
         });
     };
 
-    const confirmStatusChange = async (appId, newStatus) => {
+    const confirmStatusChange = async ( appId, newStatus ) => {
         try {
-            // Call API to update status
-            await updateApplicationStatus(appId, newStatus);
+            const { application } = await updateApplicationStatus( appId, newStatus );
 
-            // Update local state
-            const updated = allApps.map(app =>
-                app._id === appId ? { ...app, applicationStatus: newStatus } : app
+            setAllApps( curr =>
+                curr.map( a =>
+                    // Option A: patch only the status
+                    a._id === appId
+                        ? { ...a, applicationStatusId: newStatus }
+                        : a
+
+                    // — or Option B: merge full object
+                    // a._id === application._id
+                    //   ? { ...a, ...application }
+                    //   : a
+                )
             );
-            setAllApps(updated);
 
-            // Close dialog
-            setConfirmDialog({ ...confirmDialog, isOpen: false });
-        } catch (error) {
-            console.error("Error updating status:", error);
-            alert("Failed to update status. Please try again.");
+            setConfirmDialog( dialog => ( { ...dialog, isOpen: false } ) );
+        } catch ( err ) {
+            console.error( err );
+            alert( "Failed to update status" );
         }
     };
+
+
 
     const handleViewResume = async (application) => {
         try {
@@ -112,7 +144,7 @@ const ApplicationsListTab = ({ applications, page, limit, search, setPage, setLi
     };
 
     const filteredApps = allApps
-        .filter(app => statusFilter ? app.applicationStatus === statusFilter : true)
+        .filter( app => statusFilter ? app.applicationStatusId === statusFilter : true)
         .filter(app =>
             search
                 ? app.candidateID?.userName?.toLowerCase().includes(search.toLowerCase()) ||

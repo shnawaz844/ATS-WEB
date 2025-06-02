@@ -193,7 +193,7 @@ const AssignedInterviews = () => {
             time: interview.scheduledTime || "",
             interviewType: interview.interviewerType || "",
             meetingLink: interview.meetingLink || "",
-            status: interview.status || "scheduled",
+            status: interview.status,
             interviewerID: interview.interviewerID || "",
         } );
         setIsEditModalOpen( true );
@@ -285,7 +285,7 @@ const AssignedInterviews = () => {
                                     className="appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-none"
                                 >
                                     <option value="all">All Statuses</option>
-                                    { statuses.map( status => (
+                                    { statuses?.map( status => (
                                         <option key={ status } value={ status.applicationStatus }>
                                             { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                                         </option>
@@ -329,8 +329,8 @@ const AssignedInterviews = () => {
                                         "Scheduled": "bg-blue-500 text-blue-800 bg-blue-50"
                                     };
 
-                                    const status = interview.status || "Scheduled";
-                                    const colorString = statusColors[ status ] || statusColors[ "Scheduled" ];
+                                    const status = interview.status;
+                                    const colorString = statusColors[ status ];
                                     const [ bgColor, textColor, bgLight ] = colorString.split( " " );
 
                                     // Get candidate initial
@@ -480,7 +480,7 @@ const AssignedInterviews = () => {
                                             </p>
                                         </div>
                                         <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( interview.status ) }` }>
-                                            { interview.status || "Scheduled" }
+                                            { interview.status }
                                         </span>
                                     </div>
 
@@ -571,7 +571,7 @@ const AssignedInterviews = () => {
                                 <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">STATUS</p>
                                     <span className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-flex items-center px-2.5 py-0.5 rounded-full text-xs` }>
-                                        { capitalizeFirstLetter( detailedInterview?.status ) || "Scheduled" }
+                                        { capitalizeFirstLetter( detailedInterview?.status ) }
                                     </span>
                                 </div>
                             </div>
@@ -611,7 +611,7 @@ const AssignedInterviews = () => {
                                     className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Select Interview Type</option>
-                                    { interviewTypes.map( ( type ) => (
+                                    { interviewTypes?.map( ( type ) => (
                                         <option key={ type } value={ type }>{ type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }</option>
                                     ) ) }
                                 </select>
@@ -637,7 +637,7 @@ const AssignedInterviews = () => {
                                     onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
                                     className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
-                                    { statuses.map( ( status ) => (
+                                    { statuses?.map( ( status ) => (
                                         <option key={ status.applicationStatus } value={ status.applicationStatus }>{ status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }</option>
                                     ) ) }
                                 </select>
@@ -656,7 +656,7 @@ const AssignedInterviews = () => {
                                     required
                                 >
                                     <option value="">Select Interviewer</option>
-                                    { interviewers.map( ( interviewer ) => (
+                                    { interviewers?.map( ( interviewer ) => (
                                         <option key={ interviewer._id } value={ interviewer._id }>{ interviewer.userName }</option>
                                     ) ) }
                                 </select>

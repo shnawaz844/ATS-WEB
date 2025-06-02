@@ -18,14 +18,14 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                             </span>
                         </div>
                     </button>
-                    {statuses.map(status => {
+                    {statuses?.map(status => {
                         const colorName = status.color || getStatusColor(status.applicationStatus);
-                        const isSelected = statusFilter === status.applicationStatus;
+                        const isSelected = statusFilter === status._id;
                         
                         return (
                             <button
-                                key={status.applicationStatus}
-                                onClick={() => setStatusFilter(status.applicationStatus)}
+                                key={status._id}
+                                onClick={ () => setStatusFilter( status._id )}
                                 className="w-full text-left px-3 py-2 rounded-md text-sm hover:bg-gray-50"
                                 style={isSelected ? {
                                     backgroundColor: getColorStyles(colorName, 50),
@@ -47,7 +47,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                                             color: getColorStyles(colorName, 700)
                                         }}
                                     >
-                                        {getStatusCount(status.applicationStatus)}
+                                        {getStatusCount(status._id)}
                                     </span>
                                 </div>
                             </button>

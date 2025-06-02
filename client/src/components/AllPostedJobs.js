@@ -42,8 +42,16 @@ const AllPostedJobs = () => {
   const [ scheduleType, setScheduleType ] = useState( "" );
   const companyId = companyDetails?._id;
   const [ isFilterOpen, setIsFilterOpen ] = useState( false );
+  const [ statusMap, setStatusMap ] = useState( {} );
+  const [ jobStatuses, setJobStatuses ] = useState( [] );
+  const [ loadingStatuses, setLoadingStatuses ] = useState( false );
+
+  const [ applicationStatuses, setApplicationStatuses ] = useState( [] );
+  const [ applicationStatusMap, setApplicationStatusMap ] = useState( {} );
+  const [ loadingAppStatuses, setLoadingAppStatuses ] = useState( false );
 
   console.log( "companyId", companyId )
+
   // Debounce search input
   useEffect( () => {
     const handler = setTimeout( () => {
@@ -65,6 +73,83 @@ const AllPostedJobs = () => {
     fetchCompanyDetails();
   }, [ companyUserName ] );
 
+  useEffect( () => {
+    const fetchJobStatuses = async () => {
+      setLoadingStatuses( true );
+      try {
+        const companyId = companyDetails?._id;
+        if ( !companyId ) return;
+
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
+          headers: {
+            company_id: companyId
+          }
+        } );
+
+        const data = await response.json();
+        if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+          setJobStatuses( data.jobStatuses );
+          const statusMapping = {};
+          data.jobStatuses.forEach( ( status ) => {
+            statusMapping[ status._id ] = status.jobStatus;
+          } );
+          setStatusMap( statusMapping );
+        }
+      } catch ( error ) {
+        console.error( "Error fetching job statuses:", error );
+      } finally {
+        setLoadingStatuses( false );
+      }
+    };
+
+    if ( companyDetails?._id ) {
+      fetchJobStatuses();
+    }
+  }, [ companyDetails ] );
+
+
+  useEffect( () => {
+    const fetchApplicationStatuses = async () => {
+      setLoadingAppStatuses( true );
+      try {
+        const companyId = companyDetails?._id;
+        if ( !companyId ) return;
+
+        // if you need pagination or filters, build query string:
+        const params = new URLSearchParams( { page: 1, limit: 100 } ).toString();
+
+        const response = await fetch(
+          `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses?${ params }`,
+          {
+            headers: {
+              company_id: companyId,
+            },
+          }
+        );
+        const data = await response.json();
+        if ( data.applicationStatuses && Array.isArray( data.applicationStatuses ) ) {
+          setApplicationStatuses( data.applicationStatuses );
+
+          // build lookup: ID → label
+          const map = {};
+          data.applicationStatuses.forEach( ( st ) => {
+            map[ st._id ] = st.applicationStatus;
+            // adjust `applicationStatus` field name if your API uses something else
+          } );
+          setApplicationStatusMap( map );
+        }
+      } catch ( error ) {
+        console.error( "Error fetching application statuses:", error );
+      } finally {
+        setLoadingAppStatuses( false );
+      }
+    };
+
+    if ( companyDetails?._id ) {
+      fetchApplicationStatuses();
+    }
+  }, [ companyDetails ] );
+
   const fetchJobs = async ( { queryKey } ) => {
     const [ _, page, limit, debouncedSearch, jobType, locationType, scheduleType ] = queryKey;
     const params = { page, limit, search: debouncedSearch };
@@ -72,6 +157,9 @@ const AllPostedJobs = () => {
     if ( jobType ) params.type = jobType.value;
     if ( locationType ) params.locationType = locationType.value;
     if ( scheduleType ) params.scheduleType = scheduleType.value;
+
+    // Add status filter to only show Open and Filled jobs
+    params.status = "Open,Filled";
 
     const response = await axios.get( `${ process.env.REACT_APP_BASE_URL }/jobs/all-jobs`, {
       params, headers: {
@@ -170,9 +258,17 @@ const AllPostedJobs = () => {
           {/* Jobs List or No Jobs Found Message */ }
           { data?.jobs && data.jobs.length > 0 ? (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-              { data.jobs.map( ( job ) => (
-                <Card key={ job._id } job={ job } onViewDetails={ () => setSelectedJob( job ) } companyUserName={ companyUserName } />
-              ) ) }
+              { data.jobs
+                .filter( ( job ) => statusMap[ job.status ] === "Open" || statusMap[ job.status ] === "Filled" )
+                .map( ( job ) => (
+                  <Card
+                    key={ job._id }
+                    job={ job }
+                    jobStatusLabel={ statusMap[ job.status ] } // pass status text
+                    onViewDetails={ () => setSelectedJob( job ) }
+                    companyUserName={ companyUserName }
+                  />
+                ) ) }
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
@@ -230,7 +326,7 @@ const AllPostedJobs = () => {
   );
 };
 
-const Card = ( { job, onViewDetails, companyUserName } ) => {
+const Card = ( { job, onViewDetails, companyUserName, jobStatusLabel } ) => {
 
   const capitalizeFirstLetter = ( string ) => {
     return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
@@ -261,22 +357,56 @@ const Card = ( { job, onViewDetails, companyUserName } ) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
-      <div className="p-5">
-        <h2 className="text-lg font-bold text-gray-800 capitalize">{ job.title || "Software Engineer" }</h2>
-        <p className="text-[1rem] text-gray-600 pt-2">{ job.type } | { job.scheduleType }</p>
-        <p className="text-sm text-gray-700 pt-2">{ job.city }, { job.state } | { job.locationType }</p>
-        <p className="text-sm text-gray-600 pt-2">₹{ formatIndianRupee( job.compensation ) }/Annum</p>
+    <div className="bg-white relative rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
+      {/* { jobStatusLabel && (
+        <div className="absolute top-3 right-3 z-10">
+          <span
+            className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ jobStatusLabel === "Open"
+              ? "bg-green-50 text-green-700 border-green-200"
+              : "bg-purple-50 text-purple-700 border-purple-200"
+              }` }
+          >
+            <div
+              className={ `w-2 h-2 rounded-full mr-2 ${ jobStatusLabel === "Open" ? "bg-green-500" : "bg-purple-500"
+                }` }
+            ></div>
+            { jobStatusLabel }
+          </span>
+        </div>
+      ) } */}
 
+      {/* ✅ Main Content */ }
+      <div className="p-5 pt-5">
+        <h2 className="text-lg font-bold text-gray-800 capitalize">
+          { job.title || "Software Engineer" }
+        </h2>
+        <p className="text-[1rem] text-gray-600 pt-2">
+          { job.type } | { job.scheduleType }
+        </p>
+        <p className="text-sm text-gray-700 pt-2">
+          { job.city }, { job.state } | { job.locationType }
+        </p>
+        <p className="text-sm text-gray-600 pt-2">
+          ₹{ formatIndianRupee( job.compensation ) }/Annum
+        </p>
 
         <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">
-          <div dangerouslySetInnerHTML={ { __html: capitalizeFirstLetter( job.description ) } } />
+          <div
+            dangerouslySetInnerHTML={ {
+              __html: capitalizeFirstLetter( job.description ),
+            } }
+          />
         </div>
 
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">{ job.experienceRequired } Years Experience.</div>
+          <div className="text-sm text-gray-500">
+            { job.experienceRequired } Years Experience.
+          </div>
           <div className="flex space-x-2">
-            <button onClick={ onViewDetails } className="bg-gray-300 text-black px-3 py-2 rounded-xl hover:bg-gray-400 hover:text-black transition-colors text-sm">
+            <button
+              onClick={ onViewDetails }
+              className="bg-gray-300 text-black px-3 py-2 rounded-xl hover:bg-gray-400 hover:text-black transition-colors text-sm"
+            >
               View Details
             </button>
             <Link to={ `/${ companyUserName }/current-job/${ job._id }` }>

@@ -22,12 +22,57 @@ export const AllJobs = () => {
     const [ isFilterOpen, setIsFilterOpen ] = useState( false );
     const [ isDeleting, setIsDeleting ] = useState( false );
 
+    //
+    const [ jobStatuses, setJobStatuses ] = useState( [] );
+    const [ loadingStatuses, setLoadingStatuses ] = useState( false );
+    const [ statusError, setStatusError ] = useState( null );
+
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
 
     const capitalizeFirstLetter = ( string ) => {
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
+
+    useEffect( () => {
+        const fetchJobStatuses = async () => {
+            setLoadingStatuses( true );
+            setStatusError( null );
+            try {
+                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
+                    headers: {
+                        'company_id': companyId
+                    }
+                } );
+
+                if ( !response.ok ) {
+                    throw new Error( 'Failed to fetch job statuses' );
+                }
+
+                const data = await response.json();
+                console.log( 'Job Statuses API Response:', data );
+
+                if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+                    setJobStatuses( data.jobStatuses );
+                } else {
+                    throw new Error( 'Invalid data format received' );
+                }
+            } catch ( error ) {
+                console.error( 'Error fetching job statuses:', error );
+                setStatusError( error.message );
+                setJobStatuses( [] );
+            } finally {
+                setLoadingStatuses( false );
+            }
+        };
+
+        fetchJobStatuses();
+    }, [ companyId ] );
+
+    const statusMap = jobStatuses.reduce( ( map, status ) => {
+        map[ status._id ] = status.jobStatus;  // Use _id as key, jobStatus as value
+        return map;
+    }, {} );
 
     // Debounce search input
     useEffect( () => {
@@ -206,6 +251,7 @@ export const AllJobs = () => {
                                     <Plus className="mr-2 h-5 w-5" />
                                     Post New Job
                                 </Link>
+                               
                             </div>
                         </div>
                     </div>
@@ -374,51 +420,74 @@ export const AllJobs = () => {
                                 { allJobs?.jobs?.map( ( job ) => (
                                     <div
                                         key={ job._id }
-                                        className="bg-gray-200 hover:bg-gray-700 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 hover:border-gray-300 group"
+                                        className="bg-white hover:bg-gray-700 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-gray-400 group relative"
                                     >
-                                        <div className="p-6">
+                                        {/* Enhanced Status badge positioned at top right */ }
+                                        <div className="absolute top-3 right-3 z-10">
+                                            <span className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ job.status === 'Active'
+                                                ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
+                                                job.status === 'Closed'
+                                                    ? 'bg-red-50 text-red-700 border-red-200 group-hover:bg-red-100 group-hover:text-red-800' :
+                                                    'bg-purple-50 text-purple-700 border-purple-200 group-hover:bg-purple-100 group-hover:text-purple-800'
+                                                }` }>
+                                                <div className={ `w-2 h-2 rounded-full mr-2 ${ job.status === 'Active' ? 'bg-green-500' :
+                                                    job.status === 'Closed' ? 'bg-red-500' : 'bg-purple-500'
+                                                    }` }></div>
+                                                { statusMap[ job.status ] }
+                                            </span>
+                                        </div>
+
+                                        <div className="p-6 pt-12"> {/* Added extra top padding to accommodate badge */ }
                                             <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-black group-hover:text-white mb-4 font-DM Sansong">
+                                                <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */ }
+                                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-white mb-4 font-DM leading-tight">
                                                         { capitalizeFirstLetter( job.title ) }
                                                     </h3>
-                                                    <div className="flex flex-wrap gap-2 mb-3">
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
                                                             { job.type || "Full-Time" }
                                                         </span>
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
                                                             { job.locationType || "On-Site" }
                                                         </span>
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
                                                             { job.scheduleType || "Full day" }
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 flex items-center text-black group-hover:text-white">
-                                                <IndianRupee className="h-4 w-4 mr-2" />
-                                                <span className="text-sm">Compensation :  { formatIndianRupee( job.compensation ) }</span>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                    <span className="text-sm font-medium">
+                                                        Compensation: { formatIndianRupee( job.compensation ) }
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                    <span className="text-sm">
+                                                        { job.city }, { job.state }, { job.country }
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                    <span className="text-sm">
+                                                        Posted: { new Date( job.createdAt ).toLocaleDateString( 'en-US', {
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric'
+                                                        } ) }
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div className="mt-2 flex items-center text-black group-hover:text-white">
-                                                <MapPin className="h-4 w-4 mr-2" />
-                                                <span className="text-sm">Address:
-                                                    { job.city }, { job.state }, { job.country }
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-4 flex items-center text-black group-hover:text-white">
-                                                <Calendar1 className="h-4 w-4 mr-2" />
-                                                <span className="text-sm">
-                                                    { new Date( job.createdAt ).toISOString().split( "T" )[ 0 ] }
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between">
+                                            <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
                                                 <button
                                                     onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
-                                                    className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200 text-sm"
+                                                    className="flex items-center text-blue-600 group-hover:text-blue-300 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
                                                 >
                                                     <Edit className="h-4 w-4 mr-1" />
                                                     View & Edit
@@ -426,7 +495,7 @@ export const AllJobs = () => {
                                                 <button
                                                     onClick={ () => handleDeleteJob( job._id ) }
                                                     disabled={ isDeleting }
-                                                    className="flex items-center text-red-600 group-hover:text-white font-medium transition-colors duration-200 text-sm"
+                                                    className="flex items-center text-red-600 group-hover:text-red-300 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
                                                 >
                                                     <Trash2 className="h-4 w-4 mr-1" />
                                                     { isDeleting ? 'Deleting...' : 'Delete' }
@@ -438,18 +507,18 @@ export const AllJobs = () => {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                                <div className="bg-gray-100 p-5 rounded-full mb-4">
-                                    <Briefcase className="h-12 w-12 text-gray-400" />
+                                <div className="bg-gray-100 p-6 rounded-full mb-6">
+                                    <Briefcase className="h-16 w-16 text-gray-400" />
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
-                                <p className="text-gray-500 max-w-md mb-6">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
+                                <p className="text-gray-500 max-w-md mb-8 text-base">
                                     Try adjusting your search filters or post a new job to get started.
                                 </p>
                                 <Link
                                     to={ `/${ companyUserName }/post-job` }
-                                    className="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-500 transition-colors duration-200"
+                                    className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-700 transition-colors duration-200 shadow-md hover:shadow-lg"
                                 >
-                                    <Plus className="mr-2 h-4 w-4" />
+                                    <Plus className="mr-2 h-5 w-5" />
                                     Post New Job
                                 </Link>
                             </div>

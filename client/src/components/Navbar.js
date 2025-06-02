@@ -27,8 +27,9 @@ const superNavItems = [
 const adminNavItems = [
   { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
-  { label: "Application Types", path: "/application-types", icon: <FileText className="w-5 h-5" /> },
+  { label: "Application Statuses", path: "/application-statuses", icon: <FileText className="w-5 h-5" /> },
   { label: "Interview Rounds", path: "/interview-rounds", icon: <Calendar className="w-5 h-5" /> },
+  { label: "Job Status", path: "/job-statuses", icon: <Calendar className="w-5 h-5" />}
 ];
 
 const hiringManagerNavItems = [

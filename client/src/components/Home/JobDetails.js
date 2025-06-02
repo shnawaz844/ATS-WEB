@@ -4,7 +4,7 @@ import ReactQuill from "react-quill";
 import { useParams } from "react-router-dom";
 import { ApplicationForm } from "../ApplicationForm/ApplicationForm";
 import "react-quill/dist/quill.snow.css";
-import { useApplicationTypes } from "../../hooks/useApplication";
+import { useApplicationStatuses } from "../../hooks/useApplication";
 import {
   Briefcase,
   MapPin,
@@ -23,7 +23,9 @@ export const JobDetails = () => {
   const [ job, setJob ] = useState( null );
   const [ loginData, setLoginData ] = useState( null );
   const [ isBookmarked, setIsBookmarked ] = useState( false );
-
+  const [ jobStatuses, setJobStatuses ] = useState( [] );
+  
+  console.log( "jobStatuses", jobStatuses )
   // 1. Fetch the logged-in user (if any)
   useEffect( () => {
     const token = localStorage.getItem( "user" );
@@ -44,14 +46,14 @@ export const JobDetails = () => {
       .then( ( data ) => setJob( data ) )
       .catch( ( err ) => console.error( "Error fetching job data:", err ) );
   }, [ id ] );
-  
 
-  // 3. We also fetch the application types (and can pass them to the form)
+
+  // 3. We also fetch the application statuses (and can pass them to the form)
   const {
-    data: applicationTypesData,
-  } = useApplicationTypes( {} );
+    data: applicationStatusesData,
+  } = useApplicationStatuses( {} );
 
-  console.log( "this is types", applicationTypesData );
+  console.log( "this is statuses", applicationStatusesData );
 
   const toggleBookmark = () => {
     setIsBookmarked( !isBookmarked );
@@ -80,6 +82,36 @@ export const JobDetails = () => {
 
     return formattedOtherNumbers + lastThree;
   };
+
+  useEffect( () => {
+    const fetchJobStatuses = async () => {
+      try {
+        const companyId = job?.company_id;
+        if ( !companyId ) return;
+
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
+          headers: {
+            company_id: companyId
+          }
+        } );
+
+        const data = await response.json();
+        if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+          setJobStatuses( data.jobStatuses );
+          const statusMapping = {};
+          data.jobStatuses.forEach( ( status ) => {
+            statusMapping[ status._id ] = status.jobStatus;
+          } );
+        }
+      } catch ( error ) {
+        console.error( "Error fetching job statuses:", error );
+      }
+    };
+
+    if ( job?.company_id ) {
+      fetchJobStatuses();
+    }
+  }, [ job?.company_id ] );
 
   if ( !job ) {
     return (
@@ -135,7 +167,7 @@ export const JobDetails = () => {
                     </div>
                     <div className="flex items-center">
                       <Clock size={ 16 } className="mr-1" />
-                      <span>{ job.locationType }</span>
+                      <span>{ job.locationStatus }</span>
                     </div>
                   </div>
                 </div>
@@ -240,7 +272,8 @@ export const JobDetails = () => {
               <ApplicationForm
                 job={ job }
                 loginData={ loginData }
-                applicationTypesData={ applicationTypesData }
+                applicationStatusesData={ applicationStatusesData }
+                jobStatuses={ jobStatuses }
               />
             </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApplicationTypes } from '../../hooks/useApplicationTypes';
+import { useApplicationStatuses } from '../../hooks/useApplicationStatuses';
 import Select from "react-select";
 import {
     Search, Briefcase, MapPin, Clock, RefreshCw, ChevronLeft,
@@ -52,7 +52,7 @@ const CandidateApplication = () => {
     const navigate = useNavigate();
 
     // Fetch jobs with active filters
-    const { data: jobData, isLoading, isError } = useApplicationTypes(
+    const { data: jobData, isLoading, isError } = useApplicationStatuses(
         debouncedFilters, currentPage, jobsPerPage, companyId
     );
 
@@ -354,7 +354,7 @@ const CandidateApplication = () => {
                     <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
                         <span className="text-sm text-gray-600">
                             { allJobs?.length > 0 ? (
-                                <>Showing <span className="font-medium">{ allJobs.length }</span> of <span className="font-medium">{ jobData.totalJobs || 0 }</span> jobs</>
+                                <>Showing <span className="font-medium">{ allJobs?.length }</span> of <span className="font-medium">{ jobData.totalJobs || 0 }</span> jobs</>
                             ) : (
                                 'No jobs found'
                             ) }

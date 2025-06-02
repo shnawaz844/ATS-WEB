@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const JobDetailsTab = ({ job }) => {
-
+const JobDetailsTab = ( { job } ) => {
+  
+  const [ hiringManagers, setHiringManagers ] = useState( [] );
+  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+  const [ recruitersList, setRecruitersList ] = useState( [] );
   const capitalizeFirstLetter = ( string ) => {
     return string ? string.charAt( 0 ).toUpperCase() + string.slice( 1 ) : '';
   };
+  const [ jobStatuses, setJobStatuses ] = useState( [] );
+  const [ statusMap, setStatusMap ] = useState( {} );
+  const [ loadingStatuses, setLoadingStatuses ] = useState( false );
 
   // Function to format number in Indian Rupee format (e.g., 1,00,000)
   const formatIndianRupee = ( num ) => {
@@ -30,7 +36,73 @@ const JobDetailsTab = ({ job }) => {
     return formattedOtherNumbers + lastThree;
   };
 
-  if (!job) {
+  useEffect( () => {
+    const fetchRecruiters = async () => {
+      try {
+        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/recruiter/all-recruiter`, {
+          headers: {
+            'company_id': companyId  // Pass company_id in headers
+          }
+        } );
+        const data = await response.json();
+        console.log( 'Fetched Recruiters:', data );
+        setRecruitersList( data );
+      } catch ( error ) {
+        console.error( 'Error fetching recruiters:', error );
+      }
+    };
+
+    fetchRecruiters();
+  }, [] );
+
+  useEffect( () => {
+    const fetchHiringManagers = async () => {
+      try {
+        const res = await fetch(
+          `${ process.env.REACT_APP_BASE_URL }/hiringmanager/all-hiring-manager`,
+          { headers: { company_id: companyId } }
+        );
+        const data = await res.json();
+        setHiringManagers( data );
+      } catch ( err ) {
+        console.error( 'Error fetching hiring managers', err );
+      }
+    };
+    fetchHiringManagers();
+  }, [ companyId ] );
+
+  useEffect( () => {
+    const fetchJobStatuses = async () => {
+      setLoadingStatuses( true );
+      try {
+        const storedUser = JSON.parse( localStorage.getItem( 'user' ) );
+        const companyId = storedUser?.company_id;
+        if ( !companyId ) return;
+
+        const response = await fetch(
+          `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`,
+          { headers: { company_id: companyId } }
+        );
+        const data = await response.json();
+        if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+          setJobStatuses( data.jobStatuses );
+          const mapping = {};
+          data.jobStatuses.forEach( entry => {
+            mapping[ entry._id ] = entry.jobStatus;
+          } );
+          setStatusMap( mapping );
+        }
+      } catch ( error ) {
+        console.error( 'Error fetching job statuses:', error );
+      } finally {
+        setLoadingStatuses( false );
+      }
+    };
+
+    fetchJobStatuses();
+  }, [] );
+
+  if ( !job ) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
         <div className="text-center">
@@ -60,41 +132,44 @@ const JobDetailsTab = ({ job }) => {
     experienceRequired,
     requiredResources,
     status,
-    recruiterName,
-    hiringManagerEmail,
-    hiringManagerName,
+    recruiterId,
+    hiringManagerId,
   } = job;
 
+  const displayStatus = statusMap[ status ] || status || 'N/A';
+  const recruiter = recruitersList.find( u => u._id === recruiterId )
+  const hiringManager = hiringManagers.find( u => u._id === hiringManagerId )
+
   // Status badge styles based on status
-  const getStatusStyle = (status) => {
+  const getStatusStyle = ( status ) => {
     const styles = {
       Active: 'bg-green-100 text-green-800',
       Paused: 'bg-yellow-100 text-yellow-800',
       Closed: 'bg-red-100 text-red-800',
       Draft: 'bg-gray-100 text-gray-800',
     };
-    return styles[status] || 'bg-gray-100 text-gray-800';
+    return styles[ status ] || 'bg-gray-100 text-gray-800';
   };
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header Section */}
+      {/* Header Section */ }
       <div className="mb-8 border-b pb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{ capitalizeFirstLetter(title )|| 'N/A'}</h1>
-            <p className="mt-1 text-sm text-black">Job ID: {jobID || 'N/A'}</p>
+            <h1 className="text-2xl font-bold text-gray-900">{ capitalizeFirstLetter( title ) || 'N/A' }</h1>
+            <p className="mt-1 text-sm text-black">Job ID: { jobID || 'N/A' }</p>
           </div>
-          <span className={`px-3 py-1 bg-slate-700 rounded-full text-sm text-white font-medium ${getStatusStyle(status)}`}>
-            {status || 'N/A'}
+          <span className={ `px-3 py-1 bg-slate-700 rounded-full text-sm text-white font-medium ${ getStatusStyle( displayStatus ) }` }>
+            { displayStatus || 'N/A' }
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Main Details Section */}
+        {/* Main Details Section */ }
         <div className="md:col-span-2 space-y-6">
-          {/* Job Overview */}
+          {/* Job Overview */ }
           <section className="bg-slate-50 rounded-xl border p-6 space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,24 +181,24 @@ const JobDetailsTab = ({ job }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Job Type</p>
-                <p className="font-medium">{type || 'N/A'}</p>
+                <p className="font-medium">{ type || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Schedule</p>
-                <p className="font-medium">{scheduleType || 'N/A'}</p>
+                <p className="font-medium">{ scheduleType || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Shift Hours</p>
-                <p className="font-medium">{shiftStart ? `${shiftStart} - ${shiftEnd}` : 'N/A'}</p>
+                <p className="font-medium">{ shiftStart ? `${ shiftStart } - ${ shiftEnd }` : 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Hire Type</p>
-                <p className="font-medium">{hireType || 'N/A'}</p>
+                <p className="font-medium">{ hireType || 'N/A' }</p>
               </div>
             </div>
           </section>
 
-          {/* Location Details */}
+          {/* Location Details */ }
           <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,24 +211,24 @@ const JobDetailsTab = ({ job }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Location Type</p>
-                <p className="font-medium">{locationType || 'N/A'}</p>
+                <p className="font-medium">{ locationType || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Country</p>
-                <p className="font-medium">{country || 'N/A'}</p>
+                <p className="font-medium">{ country || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">State</p>
-                <p className="font-medium">{state || 'N/A'}</p>
+                <p className="font-medium">{ state || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">City</p>
-                <p className="font-medium">{city || 'N/A'}</p>
+                <p className="font-medium">{ city || 'N/A' }</p>
               </div>
             </div>
           </section>
 
-          {/* Job Description */}
+          {/* Job Description */ }
           <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,13 +236,13 @@ const JobDetailsTab = ({ job }) => {
               </svg>
               Job Description
             </h2>
-            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: description || 'No description available.' }} />
+            <div className="prose max-w-none" dangerouslySetInnerHTML={ { __html: description || 'No description available.' } } />
           </section>
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar */ }
         <div className="space-y-6">
-          {/* Requirements Card */}
+          {/* Requirements Card */ }
           <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,20 +253,20 @@ const JobDetailsTab = ({ job }) => {
             <div className="space-y-4">
               <div>
                 <p className="text-sm text-gray-500">Experience Required</p>
-                <p className="font-medium">{experienceRequired || 'N/A'}</p>
+                <p className="font-medium">{ experienceRequired || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Resources Required</p>
-                <p className="font-medium">{requiredResources || 'N/A'}</p>
+                <p className="font-medium">{ requiredResources || 'N/A' }</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Compensation</p>
-                <p className="font-medium">{ formatIndianRupee(compensation) || 'N/A'}</p>
+                <p className="font-medium">{ formatIndianRupee( compensation ) || 'N/A' }</p>
               </div>
             </div>
           </section>
 
-          {/* Contact Card */}
+          {/* Contact Card */ }
           <section className="bg-slate-50 rounded-xl border p-6">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center mb-4">
               <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -201,16 +276,12 @@ const JobDetailsTab = ({ job }) => {
             </h2>
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500">Recruiter</p>
-                <p className="font-medium">{recruiterName || 'N/A'}</p>
+                <p className="text-sm text-gray-500">Recruiter Name</p>
+                <p className="font-medium"> { recruiter?.userName || 'N/A' }</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Hiring Manager</p>
-                <p className="font-medium">{hiringManagerName || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Manager Email</p>
-                <p className="font-medium break-words">{hiringManagerEmail || 'N/A'}</p>
+                <p className="text-sm text-gray-500">Hiring Manager Name</p>
+                <p className="font-medium"> { hiringManager?.userName || 'N/A' }</p>
               </div>
             </div>
           </section>
