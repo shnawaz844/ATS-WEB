@@ -89,7 +89,7 @@ export const Register = () => {
       } else if (response.status === 409) {
         setError("Email already registered. Please use a different email.");
       } else {
-        setError("Unable to signup. Please try again.");
+        setError("Email already registered. Please use a different email");
       }
     } catch (err) {
       setError("Connection error. Please try again.");

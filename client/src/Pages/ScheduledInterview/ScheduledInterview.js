@@ -23,7 +23,6 @@ export const ScheduledInterview = () => {
         isLoading,
         refetchScheduledInterviews
     } = useScheduledInterview( page, limit, interviewerEmail, companyId );
-    console.log( "ScheduledInterviews", ScheduledInterviews )
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
 
@@ -63,9 +62,9 @@ export const ScheduledInterview = () => {
 
     // Fetch statuses from the API
     useEffect( () => {
-        fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses` )
             .then( response => response.json() )
-            .then( data => setStatuses( data.applicationTypes ) )
+            .then( data => setStatuses( data.applicationStatuses ) )
             .catch( error => console.error( "Error fetching statuses:", error ) );
     }, [] );
 
@@ -113,7 +112,7 @@ export const ScheduledInterview = () => {
             time: interview.scheduledTime || "",
             interviewType: interview.interviewerType || "",
             meetingLink: interview.meetingLink || "",
-            status: interview.status || "scheduled",
+            status: interview.status || "",
             interviewerID: interview.interviewerID || "",
             reasonRescheduled: interview.reasonRescheduled || "",
         } );
@@ -255,8 +254,6 @@ export const ScheduledInterview = () => {
 
         setIsFeedbackModalOpen( true );
     };
-
-
 
     const getStatusColor = ( status ) => {
         const colors = {
@@ -408,8 +405,9 @@ export const ScheduledInterview = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ formatDate( interview.date ) }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={ `px-2 py-1 rounded-full text-xs font-medium ${ getStatusColor( interview.status ) }` }>
-                                            { interview.status?.charAt( 0 ).toUpperCase() + interview.status?.slice( 1 ) || "Scheduled" }
+                                        <span className={ `px-2 py-1 rounded-full text-xs font-medium group-hover:text-white` }>
+                                            {/* { interview.status?.charAt( 0 ).toUpperCase() + interview.status?.slice( 1 ) || "Scheduled" } */ }
+                                            { statuses?.length && statuses.filter( status => status._id === interview.status )[ 0 ]?.applicationStatus }
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -449,7 +447,7 @@ export const ScheduledInterview = () => {
                             : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
                             }` }
                     >
-                         <ChevronLeft className="mr-1 h-4 w-4" />
+                        <ChevronLeft className="mr-1 h-4 w-4" />
                         Previous
                     </button>
                     <div className="flex items-center gap-1">
@@ -464,7 +462,7 @@ export const ScheduledInterview = () => {
                             : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
                             }` }
                     >
-                         <ChevronRight className="ml-1 h-4 w-4" />
+                        <ChevronRight className="ml-1 h-4 w-4" />
                         Next
                     </button>
                 </div>
@@ -519,7 +517,8 @@ export const ScheduledInterview = () => {
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Current Status</p>
                                         <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs mt-1` }>
-                                            { capitalizeFirstLetter( detailedInterview?.status ) || "Scheduled" }
+                                            { statuses?.length && statuses.filter( status => status._id === detailedInterview.status )[ 0 ]?.applicationStatus }
+
                                         </p>
                                     </div>
                                 </div>
@@ -572,7 +571,7 @@ export const ScheduledInterview = () => {
                                             className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                                         >
                                             <option value="">Select Interview Type</option>
-                                            { interviewTypes.map( type => (
+                                            { interviewTypes?.map( type => (
                                                 <option key={ type } value={ type }>
                                                     { type.charAt( 0 ).toUpperCase() + type.slice( 1 ) }
                                                 </option>
@@ -610,12 +609,12 @@ export const ScheduledInterview = () => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                     <div className="relative">
                                         <select
-                                            value={ editForm.status }
+                                            value={ editForm.status || detailedInterview?.status }
                                             onChange={ ( e ) => setEditForm( { ...editForm, status: e.target.value } ) }
                                             className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                                         >
-                                            { statuses.map( status => (
-                                                <option key={ status.applicationStatus } value={ status.applicationStatus }>
+                                            { statuses?.map( status => (
+                                                <option key={ status.applicationStatus } value={ status._id }>
                                                     { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                                                 </option>
                                             ) ) }
@@ -739,7 +738,7 @@ export const ScheduledInterview = () => {
                                                 className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                                             >
                                                 <option value="">Select a rating</option>
-                                                { feedbackTitles.map( title => (
+                                                { feedbackTitles?.map( title => (
                                                     <option key={ title } value={ title }>
                                                         { title }
                                                     </option>
@@ -761,7 +760,7 @@ export const ScheduledInterview = () => {
                                             className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         >
                                             <option value="">Select rating (1 to 5)</option>
-                                            { [ 1, 2, 3, 4, 5 ].map( ( star ) => (
+                                            { [ 1, 2, 3, 4, 5 ]?.map( ( star ) => (
                                                 <option key={ star } value={ star }>
                                                     { `${ star } Star${ star > 1 ? "s" : "" }` }
                                                 </option>

@@ -17,6 +17,7 @@ const ApplicationsTable = ( {
     totalApplications,
     totalPages
 } ) => {
+    console.log( "filteredApps00000", filteredApps );
     // State for the search input value (before debouncing)
     const [ searchInput, setSearchInput ] = useState( search );
 
@@ -211,7 +212,6 @@ const ApplicationsTable = ( {
                                             <select
                                                 className="block w-full rounded-xl bg-gray-700 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                                 value={ app.applicationStatusId }
-                                                // onChange={ ( e ) => onStatusChange( app._id, e.target.value ) }
                                                 onChange={ e => handleSelect( app._id, e.target.value ) }
                                             >
                                                 { statuses?.map( status => (

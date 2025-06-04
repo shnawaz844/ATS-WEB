@@ -25,6 +25,7 @@ const ApplicationList = () => {
         company_id: "",
         roundName: "",
         applicationStatusId: "",
+        status: ""
     } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
@@ -56,6 +57,7 @@ const ApplicationList = () => {
                 res.data.applicationStatuses.forEach( s => {
                     map[ s._id ] = s.applicationStatus;
                 } );
+
                 setStatusMap( map );
             } )
             .catch( err => console.error( "Failed to load statuses", err ) );
@@ -218,6 +220,46 @@ const ApplicationList = () => {
         }
     };
 
+    const updateApplicationStatus = async ( applicationID, applicationStatusId, companyId ) => {
+        try {
+            // Validate input parameters
+            if ( !applicationID ) {
+                throw new Error( "Application ID is required" );
+            }
+            if ( !applicationStatusId ) {
+                throw new Error( "Application Status ID is required" );
+            }
+
+            // Make API call to update the application
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/update-candidate-application/${ applicationID }`, {
+                method: 'PUT', // or 'PATCH' depending on your API setup
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...( companyId && { 'company_id': companyId } ), // Add company_id header if provided
+                },
+                body: JSON.stringify( {
+                    applicationStatusId: applicationStatusId
+                } )
+            } );
+
+            // Check if the request was successful
+            if ( !response.ok ) {
+                const errorData = await response.json();
+                throw new Error( errorData.message || `HTTP error! status: ${ response.status }` );
+            }
+
+            // Parse and return the response
+            const data = await response.json();
+            console.log( 'Application status updated successfully:', data );
+            return data;
+
+        } catch ( error ) {
+            console.error( 'Error updating application status:', error );
+            throw error; // Re-throw to allow caller to handle
+        }
+    };
+
+
     // Handle assigning interviewer and scheduling interview
     const assignInterviewer = async () => {
         if ( !editingId ) {
@@ -239,7 +281,8 @@ const ApplicationList = () => {
             interviewerType: editForm.interviewType,
             meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
             roundID: editForm.roundName,
-            applicationStatus: editForm.applicationStatus,
+            // applicationStatusId: editForm.applicationStatusId,
+            status: editForm.status,
             company_id: companyId,
         };
 
@@ -257,7 +300,8 @@ const ApplicationList = () => {
                 const errorData = await response.json();
                 throw new Error( errorData.message || "Failed to assign interviewer" );
             }
-
+            console.log( "response123", response );
+            await updateApplicationStatus( editingId, editForm.status)
             toast.dismiss( loadingToast );
             toast.success( 'Interview scheduled successfully! 🎉 Redirecting to Assigned interviews to ' );
             setTimeout( () => {
@@ -551,7 +595,7 @@ const ApplicationList = () => {
                                             Status
                                         </label>
                                         <select
-                                            value={ editForm.status }
+                                            value={ editForm.status || detailedApplication?.applicationStatusId }
                                             onChange={ e => setEditForm( { ...editForm, status: e.target.value } ) }
                                             className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
                                             required
