@@ -10,6 +10,48 @@ const ApplicationsListTab = ( { onStatusChange, applications, page, limit, searc
     const [statusFilter, setStatusFilter] = useState('');
     const [statuses, setStatuses] = useState([]);
 
+    // Update local state when parent applications change
+    useEffect( () => {
+        setAllApps( applications );
+    }, [ applications ] );
+
+    // Add this function to handle status updates from both table and modal
+    const handleStatusUpdate = async ( applicationId, newStatus ) => {
+        try {
+            // Find the current app
+            const app = allApps.find( a => a._id === applicationId );
+
+            // If no change in status, do nothing
+            if ( app && app.applicationStatusId === newStatus ) return;
+
+            // Open confirmation dialog
+            setConfirmDialog( {
+                isOpen: true,
+                title: 'Update Application Status',
+                message: `Are you sure you want to change the status from "${ app?.applicationStatus }" to "${ newStatus }"?`,
+                applicationId: applicationId,
+                newStatus: newStatus,
+                onConfirm: () => confirmStatusChange( applicationId, newStatus )
+            } );
+        } catch ( err ) {
+            console.error( err );
+            alert( "Failed to update status" );
+        }
+    };
+
+    // Update the confirmStatusChange to call the parent's onStatusChange
+    const confirmStatusChange = async ( appId, newStatus ) => {
+        try {
+            await updateApplicationStatus( appId, newStatus );
+            // Notify parent component to refresh data
+            onStatusChange();
+            setConfirmDialog( dialog => ( { ...dialog, isOpen: false } ) );
+        } catch ( err ) {
+            console.error( err );
+            alert( "Failed to update status" );
+        }
+    };
+
     // State for confirmation dialog
     const [confirmDialog, setConfirmDialog] = useState({
         isOpen: false,
@@ -68,11 +110,11 @@ const ApplicationsListTab = ( { onStatusChange, applications, page, limit, searc
                 },
                 body: JSON.stringify( { applicationStatusId: newStatus }),
             });
-
+            console.log( 'Raw response001:', response );
             if (!response.ok) {
                 throw new Error('Failed to update application status');
             }
-            console.log( 'componentB update done, calling parent' );
+            console.log( 'component update done, calling parent' );
             onStatusChange()
             return await response.json();
         } catch (error) {
@@ -103,33 +145,6 @@ const ApplicationsListTab = ( { onStatusChange, applications, page, limit, searc
         });
     };
 
-    const confirmStatusChange = async ( appId, newStatus ) => {
-        try {
-            const { application } = await updateApplicationStatus( appId, newStatus );
-
-            setAllApps( curr =>
-                curr.map( a =>
-                    // Option A: patch only the status
-                    a._id === appId
-                        ? { ...a, applicationStatusId: newStatus }
-                        : a
-
-                    // — or Option B: merge full object
-                    // a._id === application._id
-                    //   ? { ...a, ...application }
-                    //   : a
-                )
-            );
-
-            setConfirmDialog( dialog => ( { ...dialog, isOpen: false } ) );
-        } catch ( err ) {
-            console.error( err );
-            alert( "Failed to update status" );
-        }
-    };
-
-
-
     const handleViewResume = async (application) => {
         try {
             // Open resume modal
@@ -142,6 +157,8 @@ const ApplicationsListTab = ( { onStatusChange, applications, page, limit, searc
             alert("Failed to load resume. Please try again.");
         }
     };
+
+    console.log( "allApps123", allApps )
 
     const filteredApps = allApps
         .filter( app => statusFilter ? app.applicationStatusId === statusFilter : true)

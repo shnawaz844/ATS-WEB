@@ -33,9 +33,9 @@ const AllInterviews = () => {
 
   // Fetch statuses from API
   useEffect( () => {
-    fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
+    fetch( `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses` )
       .then( response => response.json() )
-      .then( data => setStatuses( data.applicationTypes ) )
+      .then( data => setStatuses( data.applicationStatuses ) )
       .catch( error => console.error( "Error fetching statuses:", error ) );
   }, [] );
 
@@ -379,8 +379,8 @@ const AllInterviews = () => {
                             className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
                           >
                             <option value="">Select status</option>
-                            { statuses.map( ( status ) => (
-                              <option key={ status } value={ status.applicationStatus }>
+                            { statuses?.map( ( status ) => (
+                              <option key={ status } value={ status._id }>
                                 { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                               </option>
                             ) ) }

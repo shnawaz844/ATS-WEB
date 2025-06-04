@@ -20,6 +20,11 @@ const AssignedInterviews = () => {
         refetchAssignedInterviews
     } = useAssignedInterview( page, limit, search );
 
+    useEffect(() => {
+      console.log("assigned interview", assignedInterviews)
+    }, [assignedInterviews])
+    
+
     const [ filterStatus, setFilterStatus ] = useState( "all" );
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
@@ -33,16 +38,16 @@ const AssignedInterviews = () => {
         interviewerID: "",
         company_id: "",
     } );
-    console.log( "detailedInterview>>>>>>>", detailedInterview );
+    console.log( "editForm>>>>>>>", editForm );
 
     // New state to store the fetched statuses
     const [ statuses, setStatuses ] = useState( [] );
 
     // Fetch statuses from API
     useEffect( () => {
-        fetch( `${ process.env.REACT_APP_BASE_URL }/application-types/all-application-types` )
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses` )
             .then( ( response ) => response.json() )
-            .then( ( data ) => setStatuses( data.applicationTypes ) )
+            .then( ( data ) => setStatuses( data.applicationStatuses ) )
             .catch( ( error ) => console.error( "Error fetching statuses:", error ) );
     }, [] );
 
@@ -52,7 +57,6 @@ const AssignedInterviews = () => {
 
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
-    // const interviewStatuses = [ "scheduled", "completed", "cancelled", "rescheduled" ];
 
     const capitalizeFirstLetter = ( string ) => {
         if ( string ) {
@@ -60,6 +64,7 @@ const AssignedInterviews = () => {
         }
         return;
     };
+    console.log( "statuses", statuses )
 
     // Handle click outside modal to close it
     useEffect( () => {
@@ -330,7 +335,7 @@ const AssignedInterviews = () => {
                                     };
 
                                     const status = interview.status;
-                                    const colorString = statusColors[ status ];
+                                    const colorString = statusColors[ status ] || "bg-gray-500 text-gray-800 bg-gray-50"; // Add fallback here
                                     const [ bgColor, textColor, bgLight ] = colorString.split( " " );
 
                                     // Get candidate initial
@@ -349,7 +354,9 @@ const AssignedInterviews = () => {
                                                         { capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }
                                                     </h3>
                                                     <span className={ `px-2.5 py-1 rounded-full text-xs font-medium ${ textColor } ${ bgLight }` }>
-                                                        { capitalizeFirstLetter( status ) }
+                                                        { statuses?.length && statuses.find( statusItem => statusItem._id === interview.status )?.applicationStatus
+                                                            ? statuses.find( statusItem => statusItem._id === interview.status ).applicationStatus.charAt( 0 ).toUpperCase() + statuses.find( statusItem => statusItem._id === interview.status ).applicationStatus.slice( 1 )
+                                                            : capitalizeFirstLetter( status ) }
                                                     </span>
                                                 </div>
 
@@ -444,7 +451,7 @@ const AssignedInterviews = () => {
                         <strong className="font-bold">Error! </strong>
                         <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                     </div>
-                ) : filteredInterviews.length === 0 ? (
+                ) : filteredInterviews?.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                         <div className="bg-gray-100 p-5 rounded-full mb-4">
                             <Briefcase className="h-12 w-12 text-gray-400" />
@@ -480,7 +487,7 @@ const AssignedInterviews = () => {
                                             </p>
                                         </div>
                                         <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( interview.status ) }` }>
-                                            { interview.status }
+                                            { statuses?.length && statuses.filter( status => status._id === interview.status )[ 0 ]?.applicationStatus }
                                         </span>
                                     </div>
 
@@ -588,7 +595,7 @@ const AssignedInterviews = () => {
                                         value={ editForm.date }
                                         onChange={ ( e ) => setEditForm( { ...editForm, date: e.target.value } ) }
                                         className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        min={ new Date().toISOString().split( 'T' )[ 0 ] }
+                                        min={ new Date().toISOString()?.split( 'T' )[ 0 ] }
                                     />
                                 </div>
                                 <div>
@@ -692,7 +699,7 @@ const AssignedInterviews = () => {
             ) }
             {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> */ }
             {/* {totalPages > 1 && ( */ }
-            { filteredInterviews && filteredInterviews.length > 0 && (
+            { filteredInterviews && filteredInterviews?.length > 0 && (
                 <div className="px-6 py-4 border-t border-gray-100 mt-4">
                     <div className="flex items-center justify-between">
                         <button
