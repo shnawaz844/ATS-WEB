@@ -4,6 +4,7 @@ import { getStatusColor, getColorStyles } from './utils';
 import ScheduleInterviewModal from '../../../components/ScheduleInterviewModal'; // Import the modal
 
 const ApplicationsTable = ( {
+    job,
     filteredApps,
     statuses,
     onStatusChange,
@@ -51,12 +52,14 @@ const ApplicationsTable = ( {
 
     // Handle schedule interview button click
     const handleScheduleInterview = ( app ) => {
+        console.log("jobIdddd", app.jobID._id)
         // Transform the application data to match what ScheduleInterviewModal expects
         const transformedApp = {
             _id: app._id,
             applicationStatusId: app.applicationStatusId,
             company_id: app.company_id || user.company_id,
             jobDetails: {
+                id: app.jobID._id ,
                 title: app.jobID?.title || app.jobTitle || 'N/A'
             },
             candidateDetails: {
@@ -67,7 +70,7 @@ const ApplicationsTable = ( {
             },
             interview: app.interview || {}
         };
-        console.log( "appppppppp>>>>>>>", app )
+        console.log( "appppppppp>>>>>>>", transformedApp )
 
         setSelectedApplication( transformedApp );
         setIsScheduleModalOpen( true );

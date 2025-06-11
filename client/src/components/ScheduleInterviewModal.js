@@ -30,13 +30,14 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
     const [ search ] = useState( '' );
     const [ filterStatus ] = useState( 'all' );
     const [ candidateID ] = useState( application?.candidateDetails?.candidateID );
+    const [ jobID ] = useState( application?.jobDetails?.id );
     const [ showAssignedInterviews, setShowAssignedInterviews ] = useState( false );
 
     // Use the custom hook to fetch assigned interviews
     const {
         assignedInterviews,
         error: assignedInterviewsError,
-    } = useScheduledInterview( page, limit, search, candidateID, filterStatus, );
+    } = useScheduledInterview( page, limit, search, candidateID, jobID, filterStatus );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
@@ -105,6 +106,7 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
                 status: application.applicationStatusId || ""
             } );
         }
+        console.log("application>>>>", application)
     }, [ isOpen, application, companyId ] );
 
     // Fetch all application statuses once

@@ -197,6 +197,7 @@ const ApplicationJobDetail = () => {
                         { activeTab === 'overview' && <OverviewTab job={job} applications={applications.applications} />}
                         {activeTab === 'applications' &&
                             <ApplicationsListTab
+                            job={ job }
                             onStatusChange={ onStatusChange }
                                 applications={applications.applications}
                                 page={page}

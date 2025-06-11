@@ -18,10 +18,10 @@ const fetchApplicationStatuses = async ( { filters, page, limit } ) => {
 };
 
 
-export const useApplicationStatuses = ( filters, page = 1, limit = 6 ) => {
+export const useApplicationStatuses = ( filters, page = 1, limit ) => {
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     return useQuery( {
-        queryKey: [ 'applicationTypes', filters, page ],
+        queryKey: [ 'applicationTypes', filters, page, limit ],
         queryFn: () => fetchApplicationStatuses( {
             filters,
             page,
