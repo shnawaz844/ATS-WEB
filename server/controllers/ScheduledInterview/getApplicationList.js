@@ -1,19 +1,18 @@
 import InterviewSchedule from "../../models/Applicationlist.js";
 import User from "../../models/User.js"; // Import the User model
+import mongoose from "mongoose";
 
 // Function to fetch interviews
 export const getInterviews = async ( req, res ) => {
     try {
         // Extract parameters from query
         const page = parseInt( req.query.page ) || 1; // Default to page 1
-        const limit = parseInt( req.query.limit ) || 9; // Default limit to 10
-        const interviewerEmail = req.query.interviewerEmail
-            ? decodeURIComponent( req.query.interviewerEmail )
-            : null; // Decode email safely
+        const limit = parseInt( req.query.limit ) || 9;
+        const candidateID = req.query.candidateID // Default limit to 10
+        const interviewerEmail = decodeURIComponent( req.query.interviewerEmail || "" );
         const searchTerm = req.query.searchTerm || '';
         const filterStatus = req.query.filterStatus || '';
-        console.log( "page>>>>>", page, limit, searchTerm, filterStatus );
-
+        console.log( "interviewerEmail??????", interviewerEmail )
         // Extract company_id from headers
         const { company_id } = req.headers;
 
@@ -44,8 +43,8 @@ export const getInterviews = async ( req, res ) => {
             filter.status = filterStatus;
         }
 
-        // Get interviews that match the base filter (without search term)
-        // We'll do the search term filtering after populating the fields
+        // Get interviews that match the base filter (without search term and candidateID)
+        // We'll do the search term and candidateID filtering after populating the fields
         const interviewsQuery = InterviewSchedule
             .find( filter )
             .populate( {
@@ -66,17 +65,18 @@ export const getInterviews = async ( req, res ) => {
                 path: 'interviewerID',
                 select: 'email name interviewer userName',
             } )
-            .populate( {
-                path: "roundID",       // ← NEW: populate the round document
-                select: "roundName"
-            } )
             .sort( { createdAt: -1 } );
-
-        // Get total count before applying search term
-        const totalInterviewsBeforeSearch = await InterviewSchedule.countDocuments( filter );
 
         // Get all interviews that match the base filter
         let allInterviews = await interviewsQuery.exec();
+        console.log( "allInterviews", allInterviews );
+
+        // Filter by candidateID if provided (after population)
+        if ( candidateID ) {
+            allInterviews = allInterviews.filter( interview => {
+                return interview.applicationID?.candidateID?._id?.toString() === candidateID;
+            } );
+        }
 
         // Filter by search term if provided (after population)
         if ( searchTerm && searchTerm.trim() !== '' ) {
@@ -97,7 +97,7 @@ export const getInterviews = async ( req, res ) => {
             } );
         }
 
-        // Calculate total after search filter
+        // Calculate total after all filters
         const totalInterviews = allInterviews.length;
 
         // Apply pagination to filtered results

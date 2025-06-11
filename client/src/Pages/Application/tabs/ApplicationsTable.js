@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getStatusColor, getColorStyles } from './utils';
+import ScheduleInterviewModal from '../../../components/ScheduleInterviewModal'; // Import the modal
 
 const ApplicationsTable = ( {
     filteredApps,
@@ -15,13 +16,20 @@ const ApplicationsTable = ( {
     setSearch,
     currentPage,
     totalApplications,
-    totalPages
+    totalPages,
 } ) => {
     console.log( "filteredApps00000", filteredApps );
-    // State for the search input value (before debouncing)
     const [ searchInput, setSearchInput ] = useState( search );
 
-    // build a map from status _id to its applicationStatusId (i.e. its “name”)
+    // Modal state
+    const [ isScheduleModalOpen, setIsScheduleModalOpen ] = useState( false );
+    const [ selectedApplication, setSelectedApplication ] = useState( null );
+
+    const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+    const userRole = user.role; // Assuming role field exists in user object
+    const isHiringManager = userRole === 'hiring_manager';
+    const isRecruiterManager = userRole === 'recruiter_manager';
+
     const statusNameMap = useMemo( () => {
         return ( statuses || [] ).reduce( ( map, status ) => {
             map[ status._id ] = status.applicationStatus;
@@ -30,8 +38,8 @@ const ApplicationsTable = ( {
         }, {} );
     }, [ statuses ] );
 
-    // local copy
     const [ apps, setApps ] = useState( filteredApps );
+
     useEffect( () => setApps( filteredApps ), [ filteredApps ] );
 
     const handleSelect = ( id, newStatus ) => {
@@ -41,7 +49,30 @@ const ApplicationsTable = ( {
         onStatusChange( id, newStatus );
     };
 
-    // Debounce function
+    // Handle schedule interview button click
+    const handleScheduleInterview = ( app ) => {
+        // Transform the application data to match what ScheduleInterviewModal expects
+        const transformedApp = {
+            _id: app._id,
+            applicationStatusId: app.applicationStatusId,
+            company_id: app.company_id || user.company_id,
+            jobDetails: {
+                title: app.jobID?.title || app.jobTitle || 'N/A'
+            },
+            candidateDetails: {
+                userName: app.candidateID?.userName || 'N/A',
+                email: app.candidateID?.email || 'N/A',
+                candidateID: app.candidateID?._id || 'N/A'
+
+            },
+            interview: app.interview || {}
+        };
+        console.log( "appppppppp>>>>>>>", app )
+
+        setSelectedApplication( transformedApp );
+        setIsScheduleModalOpen( true );
+    };
+
     const debounce = ( func, delay ) => {
         let timeoutId;
         return ( ...args ) => {
@@ -60,9 +91,7 @@ const ApplicationsTable = ( {
     };
 
     const companyUserName = localStorage.getItem( "companyUserName" );
-    //   const [statuses, setStatuses] = useState([]);
 
-    // Create a debounced version of setSearch
     const debouncedSetSearch = useCallback(
         debounce( ( value ) => {
             setSearch( value );
@@ -71,32 +100,28 @@ const ApplicationsTable = ( {
         [ setSearch, setPage ]
     );
 
-    // Set initial search input value
     useEffect( () => {
         setSearchInput( search );
     }, [ search ] );
 
-    // Handle search input change
     const handleSearchChange = ( e ) => {
         const value = e.target.value;
-        setSearchInput( value ); // Update the input field immediately
-        debouncedSetSearch( value ); // Debounce the actual search operation
+        setSearchInput( value );
+        debouncedSetSearch( value );
     };
 
-    // Handle page change
     const handlePageChange = ( newPage ) => {
         if ( newPage >= 1 && newPage <= totalPages ) {
             setPage( newPage );
         }
     };
 
-    // Handle items per page change
     const handleLimitChange = ( e ) => {
         setLimit( Number( e.target.value ) );
-        setPage( 1 ); // Reset to first page when changing limit
+        setPage( 1 );
     };
 
-    console.log( "statuses>>>", statuses );
+    console.log( "selectedApplication>>>", selectedApplication );
 
     return (
         <div className="space-y-4">
@@ -149,9 +174,9 @@ const ApplicationsTable = ( {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Resume
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            { isHiringManager && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Actions
-                            </th>
+                            </th> ) }
                         </tr>
                     </thead>
                     <tbody className="bg-gray-300 divide-y divide-gray-200">
@@ -183,34 +208,9 @@ const ApplicationsTable = ( {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                                style={ {
-                                                    backgroundColor: getColorStyles( statusColor, 100 ),
-                                                    color: getColorStyles( statusColor, 800 )
-                                                } }
-                                            >
-                                                { capitalizeFirstLetter(
-                                                    statusNameMap[ app.applicationStatusId ]
-                                                )
-                                                }
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
-                                            { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button
-                                                onClick={ () => onViewResume( app ) }
-                                                className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
-                                            >
-                                                View Resume
-                                            </button>
-                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <select
-                                                className="block w-full rounded-xl bg-gray-700 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                                 value={ app.applicationStatusId }
                                                 onChange={ e => handleSelect( app._id, e.target.value ) }
                                             >
@@ -223,6 +223,27 @@ const ApplicationsTable = ( {
                                                 ) ) }
                                             </select>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
+                                            { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button
+                                                onClick={ () => onViewResume( app ) }
+                                                className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
+                                            >
+                                                View Resume
+                                            </button>
+                                        </td>
+                                        { isHiringManager && (
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button
+                                                    onClick={ () => handleScheduleInterview( app ) }
+                                                    className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                >
+                                                    Schedule Interview
+                                                </button>
+                                            </td>
+                                        ) }
                                     </tr>
                                 );
                             } )
@@ -261,7 +282,6 @@ const ApplicationsTable = ( {
                     {/* Page numbers */ }
                     { [ ...Array( totalPages ).keys() ]?.map( ( _, index ) => {
                         const pageNumber = index + 1;
-                        // Show current page, and 1 page before and after if available
                         if (
                             pageNumber === 1 ||
                             pageNumber === totalPages ||
@@ -301,6 +321,19 @@ const ApplicationsTable = ( {
                     </button>
                 </div>
             </div>
+
+            {/* Schedule Interview Modal */ }
+            { isScheduleModalOpen && selectedApplication && (
+                <ScheduleInterviewModal
+                    isOpen={ isScheduleModalOpen }
+                    onClose={ () => {
+                        setIsScheduleModalOpen( false );
+                        setSelectedApplication( null );
+                    } }
+                    application={ selectedApplication }
+                />
+            ) }
+
         </div>
     );
 };

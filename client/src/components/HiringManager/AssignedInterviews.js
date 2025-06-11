@@ -11,6 +11,8 @@ const AssignedInterviews = () => {
     const itemsPerPage = 1; // Number of interviews per page
     const limit = 9; // Set the number of items per page
     const [ search, setSearch ] = useState( "" );
+    const [ filterStatus, setFilterStatus ] = useState( "all" );
+
     // Fetch company_id from localStorage
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const {
@@ -18,14 +20,13 @@ const AssignedInterviews = () => {
         error,
         isLoading,
         refetchAssignedInterviews
-    } = useAssignedInterview( page, limit, search );
+    } = useAssignedInterview( page, limit, search, filterStatus );
 
-    useEffect(() => {
-      console.log("assigned interview", assignedInterviews)
-    }, [assignedInterviews])
-    
+    useEffect( () => {
+        console.log( "assigned interview", assignedInterviews )
+    }, [ assignedInterviews ] )
 
-    const [ filterStatus, setFilterStatus ] = useState( "all" );
+
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
@@ -291,7 +292,7 @@ const AssignedInterviews = () => {
                                 >
                                     <option value="all">All Statuses</option>
                                     { statuses?.map( status => (
-                                        <option key={ status } value={ status.applicationStatus }>
+                                        <option key={ status._id } value={ status._id }>
                                             { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                                         </option>
                                     ) ) }
@@ -371,10 +372,13 @@ const AssignedInterviews = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-800">
-                                                                { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
+                                                               Applicant Name :   { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
                                                             </p>
                                                             <p className="text-xs text-gray-500">
-                                                                { interview.interviewerType || "N/A" } Interview
+                                                                Interview Type :    { capitalizeFirstLetter(interview.interviewerType) || "N/A" } Interview
+                                                            </p>
+                                                            <p className="text-xs text-gray-500">
+                                                                Interviewer :   { capitalizeFirstLetter(interview.interviewerID.userName) || "N/A" }
                                                             </p>
                                                         </div>
                                                     </div>
@@ -397,19 +401,6 @@ const AssignedInterviews = () => {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                                                     </svg>
                                                 </button>
-                                                {/* 
-                                                <div className="flex gap-1.5">
-                                                    <button className="p-1.5 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                                        </svg>
-                                                    </button>
-                                                    <button className="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                                                        </svg>
-                                                    </button>
-                                                </div> */}
                                             </div>
 
                                             {/* Status indicator line */ }
@@ -420,7 +411,7 @@ const AssignedInterviews = () => {
                         </div>
 
                         {/* Empty state */ }
-                        { filteredInterviews.filter( interview => isToday( interview.date ) ).length === 0 && (
+                        { filteredInterviews?.filter( interview => isToday( interview.date ) ).length === 0 && (
                             <div className="bg-white rounded-2xl shadow p-8 text-center">
                                 <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,11 +474,11 @@ const AssignedInterviews = () => {
                                                 { capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }
                                             </h3>
                                             <p className="text-sm text-gray-500 mt-1">
-                                                { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
+                                                Applicant Name :  { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
                                             </p>
                                         </div>
                                         <span className={ `px-3 py-1 rounded-full text-xs font-semibold ${ getStatusColor( interview.status ) }` }>
-                                            { statuses?.length && statuses.filter( status => status._id === interview.status )[ 0 ]?.applicationStatus }
+                                            { statuses?.length && statuses?.filter( status => status._id === interview.status )[ 0 ]?.applicationStatus }
                                         </span>
                                     </div>
 
@@ -496,21 +487,27 @@ const AssignedInterviews = () => {
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
-                                            { capitalizeFirstLetter( interview.interviewerType ) || "N/A" }
+                                            Interview Type :   { capitalizeFirstLetter( interview.interviewerType ) || "N/A" }
                                         </div>
 
                                         <div className="flex items-center text-sm text-gray-600">
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            { formatDate( interview.date ) }
+                                            Scheduled Date :   { formatDate( interview.date ) }
                                         </div>
 
                                         <div className="flex items-center text-sm text-gray-600">
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            { interview.scheduledTime }
+                                            Scheduled Time :   { interview.scheduledTime }
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Interviewer :   { interview.interviewerID.userName }
                                         </div>
                                     </div>
 
@@ -531,10 +528,7 @@ const AssignedInterviews = () => {
             {/* Interview Details Modal */ }
             { isEditModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
-                    {/* <div
-                        ref={ modalRef }
-                        className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] overflow-y-auto"
-                    > */}
+
                     <div
                         ref={ modalRef }
                         className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
@@ -553,7 +547,6 @@ const AssignedInterviews = () => {
                             </button>
                         </div>
 
-                        {/* Interview Details - Visual Enhancement Only */ }
                         <div className="bg-gray-300 p-5 rounded-xl m-6 mt-4 mb-6 border border-gray-200">
                             <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
                                 <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -562,7 +555,6 @@ const AssignedInterviews = () => {
                                 Application Details
                             </h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                {/* Keep all existing logic, just enhance visuals */ }
                                 <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">JOB TITLE</p>
                                     <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.jobID?.title ) || "N/A" }</p>
@@ -571,22 +563,22 @@ const AssignedInterviews = () => {
                                     <p className="text-xs font-medium text-gray-500">APPLICANT</p>
                                     <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                 </div>
-                                <div className="space-y-1">
+                                {/* <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">Candidtae Id</p>
                                     <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?._id || "N/A" }</p>
-                                </div>
+                                </div> */}
                                 <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">STATUS</p>
                                     <span className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-flex items-center px-2.5 py-0.5 rounded-full text-xs` }>
-                                        { capitalizeFirstLetter( detailedInterview?.status ) }
+                                        { statuses?.length && statuses.find( statusItem => statusItem._id === detailedInterview?.status )?.applicationStatus
+                                            ? capitalizeFirstLetter( statuses.find( statusItem => statusItem._id === detailedInterview?.status ).applicationStatus )
+                                            : capitalizeFirstLetter( detailedInterview?.status ) || "N/A" }
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Update Form - Visual Enhancement Only */ }
                         <div className="px-6 pb-6 space-y-5">
-                            {/* Date/Time Picker - No Logic Changes */ }
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Date</label>
@@ -609,7 +601,6 @@ const AssignedInterviews = () => {
                                 </div>
                             </div>
 
-                            {/* All other form fields - No Logic Changes */ }
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Type</label>
                                 <select
@@ -697,8 +688,7 @@ const AssignedInterviews = () => {
                     </div>
                 </div>
             ) }
-            {/* <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover /> */ }
-            {/* {totalPages > 1 && ( */ }
+        
             { filteredInterviews && filteredInterviews?.length > 0 && (
                 <div className="px-6 py-4 border-t border-gray-100 mt-4">
                     <div className="flex items-center justify-between">
