@@ -479,14 +479,14 @@ const AllInterviews = () => {
 
                   {/* Duration */ }
 
-                  <div className="bg-gray-200 rounded-xl p-4">
+                  {/* <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration</h3>
                     <p className="text-lg font-semibold text-gray-800">{ detailedInterview.duration }</p>
-                  </div>
+                  </div> */}
                   {/* { Round Name } */ }
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Round Name</h3>
-                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.roundID.roundName }</p>
+                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.roundID.roundID }</p>
                   </div>
                 </div>
 

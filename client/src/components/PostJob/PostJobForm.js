@@ -7,7 +7,6 @@ import CandidateForm from './CandidateForm';
 import 'react-quill/dist/quill.snow.css';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
-import axios from 'axios';
 
 const FORM_OPTIONS = {
   location: [
@@ -212,6 +211,8 @@ export const PostJobForm = ( {
   setSelectedCity,
   recruiterRole,
   hiringManagersList,
+  jobStatus,
+  setJobStatus
 } ) => {
   const [ isHead, setIsHead ] = React.useState( false );
   const [ recruitersList, setRecruitersList ] = useState( [] );
@@ -398,10 +399,11 @@ export const PostJobForm = ( {
                   {/* Fixed Status Field */ }
                   <FormField label="Status" error={ errors?.status || statusError }>
                     <select
-                      value={ jobToEdit?.status }
+                      value={ jobStatus }
                       { ...register( "status", {
                         required: "Status is required"
                       } ) }
+                      onChange={ ( e ) => setJobStatus( e.target.value ) }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       disabled={ loadingStatuses }
                     >
@@ -424,7 +426,7 @@ export const PostJobForm = ( {
                   { isHead && (
                     <FormField label="Recruiter" error={ errors?.recruiterId }>
                       <select
-                        value={ jobToEdit?.recruiterId}
+                        value={ jobToEdit?.recruiterId }
                         { ...register( "recruiterId" ) }
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       >
