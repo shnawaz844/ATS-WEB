@@ -45,7 +45,6 @@ const getApplicationStatuses = async (req, res) => {
       .sort({ applicationStep: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    console.log( "applicationStatuses>>><<<<<>>>>>", applicationStatuses )
     // Send back application statuses array and totalCount
     res.status(200).json({
       applicationStatuses,

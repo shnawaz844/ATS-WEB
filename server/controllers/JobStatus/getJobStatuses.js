@@ -45,7 +45,6 @@ const getJobStatuses = async (req, res) => {
       .sort({ jobStep: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
-    console.log( "jobStatuses>>><<<<<>>>>>", jobStatuses )
     // Send back job statuses array and totalCount
     res.status(200).json({
       jobStatuses,

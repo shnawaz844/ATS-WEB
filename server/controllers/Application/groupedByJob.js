@@ -3,7 +3,7 @@ import Job from '../../models/Job.js';
 
 const getAllApplicationsGroupedByJob = async ( req, res ) => {
     try {
-        let { page = 1, limit = 6, title, city, locationType, type, scheduleType, hireType, } = req.query;
+        let { page = 1, limit = 10, title, city, locationType, type, scheduleType, hireType, } = req.query;
         let { company_id } = req.headers;
 
         const pageNumber = parseInt( page, 10 ) || 1;
