@@ -5,15 +5,13 @@ import mongoose from "mongoose";
 // Function to fetch interviews
 export const getInterviews = async ( req, res ) => {
     try {
-        // Extract parameters from query
-        const page = parseInt( req.query.page ) || 1; // Default to page 1
+        const page = parseInt( req.query.page ) || 1;
         const limit = parseInt( req.query.limit ) || 9;
-        const candidateID = req.query.candidateID // Default limit to 10
+        const candidateID = req.query.candidateID
+        const jobId = req.query.jobID
         const interviewerEmail = decodeURIComponent( req.query.interviewerEmail || "" );
         const searchTerm = req.query.searchTerm || '';
         const filterStatus = req.query.filterStatus || '';
-        console.log( "interviewerEmail??????", interviewerEmail )
-        // Extract company_id from headers
         const { company_id } = req.headers;
 
         // Pagination calculation
@@ -39,7 +37,7 @@ export const getInterviews = async ( req, res ) => {
         }
 
         // Add status filter if provided directly to the initial database query
-        if ( filterStatus && filterStatus.trim() !== '' ) {
+        if ( filterStatus && filterStatus.trim() !== '' && filterStatus.trim() !== 'all' ) {
             filter.status = filterStatus;
         }
 
@@ -69,14 +67,21 @@ export const getInterviews = async ( req, res ) => {
 
         // Get all interviews that match the base filter
         let allInterviews = await interviewsQuery.exec();
-        console.log( "allInterviews", allInterviews );
+        console.log( "allInterviews before", allInterviews );
+
 
         // Filter by candidateID if provided (after population)
         if ( candidateID ) {
+            allInterviews = allInterviews.filter( interview => interview.applicationID?.candidateID?._id?.toString() === candidateID );
+        }
+
+        if ( jobId ) {
+            console.log( 'filter by jobId', jobId );
             allInterviews = allInterviews.filter( interview => {
-                return interview.applicationID?.candidateID?._id?.toString() === candidateID;
+                return interview.applicationID?.jobID?._id?.toString() === jobId;
             } );
         }
+        console.log( "allInterviews after filter", allInterviews );
 
         // Filter by search term if provided (after population)
         if ( searchTerm && searchTerm.trim() !== '' ) {
