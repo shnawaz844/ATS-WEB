@@ -171,6 +171,16 @@ export const AllJobs = () => {
             backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#eff6ff' : null,
             color: state.isSelected ? 'white' : '#1e293b',
         } ),
+        // Add these properties to fix the z-index issue
+        menu: ( provided ) => ( {
+            ...provided,
+            zIndex: 9999, // High z-index to appear above other content
+            position: 'absolute',
+        } ),
+        menuPortal: ( provided ) => ( {
+            ...provided,
+            zIndex: 9999,
+        } )
     };
 
     // Handle job deletion
@@ -287,6 +297,7 @@ export const AllJobs = () => {
                                                     onChange={ setJobType }
                                                     placeholder="Any type"
                                                     isClearable
+                                                    menuPortalTarget={ document.body } // Add this line
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -302,6 +313,15 @@ export const AllJobs = () => {
                                                         placeholder: ( provided ) => ( {
                                                             ...provided,
                                                             color: '#94a3b8'
+                                                        } ),
+                                                        // Add menu styles here too
+                                                        menu: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
+                                                        } ),
+                                                        menuPortal: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
                                                         } )
                                                     } }
                                                     className="text-sm"
@@ -322,6 +342,7 @@ export const AllJobs = () => {
                                                     onChange={ setLocationType }
                                                     placeholder="Any location"
                                                     isClearable
+                                                    menuPortalTarget={ document.body } // Add this line
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -337,10 +358,20 @@ export const AllJobs = () => {
                                                         placeholder: ( provided ) => ( {
                                                             ...provided,
                                                             color: '#94a3b8'
+                                                        } ),
+                                                        // Add menu styles here too
+                                                        menu: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
+                                                        } ),
+                                                        menuPortal: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
                                                         } )
                                                     } }
                                                     className="text-sm"
                                                 />
+
                                             </div>
                                         </div>
 
@@ -357,6 +388,7 @@ export const AllJobs = () => {
                                                     onChange={ setScheduleType }
                                                     placeholder="Any schedule"
                                                     isClearable
+                                                    menuPortalTarget={ document.body } // Add this line
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -372,6 +404,15 @@ export const AllJobs = () => {
                                                         placeholder: ( provided ) => ( {
                                                             ...provided,
                                                             color: '#94a3b8'
+                                                        } ),
+                                                        // Add menu styles here too
+                                                        menu: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
+                                                        } ),
+                                                        menuPortal: ( provided ) => ( {
+                                                            ...provided,
+                                                            zIndex: 9999,
                                                         } )
                                                     } }
                                                     className="text-sm"

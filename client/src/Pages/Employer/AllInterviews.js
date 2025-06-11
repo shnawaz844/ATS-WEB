@@ -172,6 +172,11 @@ const AllInterviews = () => {
     } );
   };
 
+  const getStatusName = ( statusId ) => {
+    const status = statuses.find( s => s._id === statusId );
+    return status ? status.applicationStatus : statusId || 'Unknown';
+  };
+
   const handleStatusChange = async ( feedbackId, newStatus ) => {
     try {
       const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/update-interview/${ feedbackId }`, {
@@ -288,7 +293,7 @@ const AllInterviews = () => {
                     >
                       <option value="all">All Status</option>
                       { statuses?.map( ( status ) => (
-                        <option key={ status } value={ status.applicationStatus }>
+                        <option key={ status } value={ status._id }>
                           { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
                         </option>
                       ) ) }
@@ -459,8 +464,8 @@ const AllInterviews = () => {
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Status</h3>
                     <div className="mt-1">
-                      <span className={ `px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${ getStatusColor( detailedInterview.status ) }` }>
-                        { detailedInterview.status }
+                      <span className={ `px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${ getStatusColor( getStatusName( detailedInterview.status ) ) }` }>
+                        { capitalizeFirstLetter( getStatusName( detailedInterview.status ) ) }
                       </span>
                     </div>
                   </div>

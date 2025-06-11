@@ -18,14 +18,13 @@ export const ScheduledInterview = () => {
 
     // ✅ Correctly using the custom hook inside the component
     const {
-        ScheduledInterviews,
+        assignedInterviews,
         error,
         isLoading,
         refetchScheduledInterviews
     } = useScheduledInterview( page, limit, interviewerEmail, companyId );
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
-
     const [ editForm, setEditForm ] = useState( {
         date: "",
         time: "",
@@ -131,7 +130,7 @@ export const ScheduledInterview = () => {
                 );
                 // Assuming API returns { interviews: [ { roundName: "Round 1" }, ... ] }
                 // Extract distinct roundNames
-                const rounds = res.data.interviews;
+                const rounds = res.data?.interviews;
                 console.log( "rounds", rounds )
                 // Remove duplicates
                 setInterviewRounds( rounds );
@@ -331,7 +330,7 @@ export const ScheduledInterview = () => {
 
     // Handle Pagination
     const handleNextPage = () => {
-        if ( page < ( ScheduledInterviews?.totalPages || 1 ) ) {
+        if ( page < ( assignedInterviews?.totalPages || 1 ) ) {
             setPage( prevPage => prevPage + 1 );
         }
     };
@@ -346,6 +345,7 @@ export const ScheduledInterview = () => {
         if ( !string ) return "N/A";
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
+
 
     return (
         <div className="px-8 py-10 w-full min-h-screen"
@@ -371,7 +371,7 @@ export const ScheduledInterview = () => {
                     <strong className="font-bold">Error! </strong>
                     <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                 </div>
-            ) : ScheduledInterviews?.interviews?.length === 0 ? (
+                ) : assignedInterviews?.interviews?.length === 0 ? (
                 <div className="text-center animate-fade-in transition-all duration-500 py-16">
                     <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
                         🕒 No Interviews Found
@@ -398,16 +398,15 @@ export const ScheduledInterview = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            { ScheduledInterviews?.interviews?.map( ( interview ) => (
-                                <tr key={ interview._id } className="group hover:bg-gray-700 ">
+                                        { assignedInterviews?.interviews?.map( ( interview ) => (
+                                <tr key={ interview?._id } className="group hover:bg-gray-700 ">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ formatDate( interview.date ) }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={ `px-2 py-1 rounded-full text-xs font-medium group-hover:text-white` }>
-                                            {/* { interview.status?.charAt( 0 ).toUpperCase() + interview.status?.slice( 1 ) || "Scheduled" } */ }
-                                            { statuses?.length && statuses.filter( status => status._id === interview.status )[ 0 ]?.applicationStatus }
+                                            { statuses?.length && statuses.filter( status => status._id === interview?.status )[ 0 ]?.applicationStatus }
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -415,7 +414,7 @@ export const ScheduledInterview = () => {
                                             onClick={ () => handleFeedbackClick( interview ) }
                                             className="text-blue-600 hover:text-blue-900 group-hover:text-white"
                                         >
-                                            { interview.feedbackTitle || "Add Feedback" }
+                                            { interview?.feedbackTitle || "Add Feedback" }
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -427,7 +426,7 @@ export const ScheduledInterview = () => {
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">
-                                        { interview.roundID?.roundName || "N/A" }
+                                        { interviewRounds?.length && interviewRounds.filter( round => round._id === interview?.roundID )[ 0 ]?.roundName || "N/A" }
                                     </td>
                                 </tr>
                             ) ) }
@@ -437,7 +436,7 @@ export const ScheduledInterview = () => {
             ) }
 
             {/* Pagination */ }
-            { ScheduledInterviews?.totalPages > 1 && (
+            { assignedInterviews?.totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-gray-200 pt-6 mt-2">
                     <button
                         onClick={ handlePreviousPage }
@@ -452,12 +451,12 @@ export const ScheduledInterview = () => {
                     </button>
                     <div className="flex items-center gap-1">
                         <span className="px-3 py-1 bg-gray-300 text-black rounded-full font-medium">{ page }</span>
-                        <span className="text-sm text-gray-500">of { ScheduledInterviews?.totalPages }</span>
+                        <span className="text-sm text-gray-500">of { assignedInterviews?.totalPages }</span>
                     </div>
                     <button
                         onClick={ handleNextPage }
-                        disabled={ page >= ScheduledInterviews?.totalPages }
-                        className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === ScheduledInterviews?.totalPages
+                        disabled={ page >= assignedInterviews?.totalPages }
+                        className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === assignedInterviews?.totalPages
                             ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
                             : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
                             }` }
@@ -718,7 +717,7 @@ export const ScheduledInterview = () => {
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Round</p>
                                         <p className="font-medium text-gray-800 mt-1">
-                                            { detailedInterview?.roundID?.roundName || "N/A" }
+                                            { interviewRounds?.length && interviewRounds.filter( round => round._id === detailedInterview?.roundID )[ 0 ]?.roundName || "N/A" }
                                         </p>
                                     </div>
 

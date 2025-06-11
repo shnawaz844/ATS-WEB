@@ -1,42 +1,56 @@
 import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const fetchScheduledInterviews = async ({ queryKey }) => {
-    const [, page, limit, interviewerEmail] = queryKey;
+const fetchScheduledInterviews = async ( { queryKey } ) => {
+    const [page, limit, search, candidateID, filterStatus ] = queryKey;
+
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-    // console.log("Fetching data with params:", { page, limit, interviewerEmail });
-    console.log( "company_id", companyId )
+    console.log( "Fetching scheduled interviews for candidateID:", candidateID );
+    console.log( "company_id:", companyId );
 
-    const response = await axios.get(`${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app`, {
-        params: { page, limit, interviewerEmail },
-        headers: {
-            "company_id": companyId,  // Pass company_id in headers
-        },
-    });
+    const response = await axios.get(
+    `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app?page=${ page }?limit=${ limit }?search=${ search }?candidateID=${ candidateID}?filterStatus=${filterStatus}`,
+        {
+            headers: {
+                "company_id": companyId,
+            },
+        }
+    );
 
-    console.log( "Response Data:", response.data, );
+    console.log( "Scheduled Interviews Response:", response.data );
     return response.data;
 };
 
-const useScheduledInterview = ( page, limit, interviewerEmail ) => {
+const useScheduledInterview = ( page, limit, search, candidateID, filterStatus ) => {
     const queryClient = useQueryClient();
 
-    // Fetch Scheduled Interviews with pagination
-    const { data, error, isLoading } = useQuery({
-        queryKey: ["ScheduledInterviews", page, limit, interviewerEmail],
+    // Fetch Scheduled Interviews with pagination and candidate filtering
+    const { data, error, isLoading } = useQuery( {
+        queryKey: [ "ScheduledInterviews", page, limit, search, candidateID, filterStatus ],
         queryFn: fetchScheduledInterviews,
-        keepPreviousData: true, // Prevents flickering when paginating
-    });
+        keepPreviousData: true,
+        enabled: !!candidateID, // Only fetch when candidateID is available
+    } );
 
-    // Ensure data is properly extracted
-    const ScheduledInterviews = data?.data || data || [];
+    // Extract the interviews data from response
+    const assignedInterviews = data?.data || data || {};
+    const interviews = assignedInterviews?.interviews || [];
+
     // Mutation for refetching after updates
     const refetchScheduledInterviews = () => {
-        console.log("Refetching Scheduled Interviews...");
-        queryClient.invalidateQueries( { queryKey: [ "ScheduledInterviews", page, limit, interviewerEmail ] });
+        console.log( "Refetching Scheduled Interviews..." );
+        queryClient.invalidateQueries( {
+            queryKey: [ "ScheduledInterviews", page, limit, search, candidateID, filterStatus ]
+        } );
     };
 
-    return { ScheduledInterviews, error, isLoading, refetchScheduledInterviews};
+    return {
+        assignedInterviews,
+        interviews,
+        error,
+        isLoading,
+        refetchScheduledInterviews
+    };
 };
 
 export default useScheduledInterview;
