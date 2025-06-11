@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
 import { useJobs } from '../../hooks/useJob';
@@ -10,6 +10,7 @@ import {
     Calendar1,
     IndianRupee
 } from 'lucide-react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 export const AllJobs = () => {
     const [ search, setSearch ] = useState( "" );
@@ -18,7 +19,7 @@ export const AllJobs = () => {
     const [ locationType, setLocationType ] = useState( "" );
     const [ scheduleType, setScheduleType ] = useState( "" );
     const [ currentPage, setCurrentPage ] = useState( 1 );
-    const [ jobsPerPage ] = useState( 9 );
+    const [ jobsPerPage ] = useState( 6 );
     const [ isFilterOpen, setIsFilterOpen ] = useState( false );
     const [ isDeleting, setIsDeleting ] = useState( false );
 
@@ -26,6 +27,11 @@ export const AllJobs = () => {
     const [ jobStatuses, setJobStatuses ] = useState( [] );
     const [ loadingStatuses, setLoadingStatuses ] = useState( false );
     const [ statusError, setStatusError ] = useState( null );
+
+    // New state for infinite scroll
+    const [ allJobsList, setAllJobsList ] = useState( [] );
+    const [ hasMore, setHasMore ] = useState( true );
+    const [ isLoadingMore, setIsLoadingMore ] = useState( false );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
@@ -113,10 +119,55 @@ export const AllJobs = () => {
     if ( locationType ) filterParams.locationType = locationType.value;
     if ( scheduleType ) filterParams.scheduleType = scheduleType.value;
 
-
     // Fetch jobs with filters
     const { data: allJobs = [], isLoading, refetch } = useJobs( filterParams, currentPage, jobsPerPage, companyId );
     const navigate = useNavigate();
+
+    // Reset to first page and clear jobs list when filters change
+    useEffect( () => {
+        setCurrentPage( 1 );
+        setAllJobsList( [] );
+        setHasMore( true );
+        setIsLoadingMore( false );
+    }, [ debouncedSearch, jobType, locationType, scheduleType ] );
+
+    // Update jobs list when new data arrives
+    useEffect( () => {
+        if ( allJobs?.jobs && Array.isArray( allJobs.jobs ) ) {
+            if ( currentPage === 1 ) {
+                // First page or filter change - replace the list
+                setAllJobsList( allJobs.jobs );
+                setHasMore( allJobs.jobs.length < ( allJobs.totalCount || 0 ) );
+            } else {
+                // Subsequent pages - append to existing list
+                setAllJobsList( prevJobs => {
+                    // Simple concatenation - let React handle duplicates with keys
+                    const newJobs = allJobs.jobs || [];
+                    return [ ...prevJobs, ...newJobs ];
+                } );
+
+                // Calculate if there are more jobs
+                const totalLoadedAfterUpdate = allJobsList.length + allJobs.jobs.length;
+                setHasMore( totalLoadedAfterUpdate < ( allJobs.totalCount || 0 ) );
+            }
+        } else if ( currentPage === 1 ) {
+            // No jobs found on first page
+            setAllJobsList( [] );
+            setHasMore( false );
+        }
+
+        // Reset loading state
+        setIsLoadingMore( false );
+    }, [ allJobs, currentPage ] );
+
+    // Load more jobs for infinite scroll
+    const fetchMoreJobs = useCallback( () => {
+        if ( !isLoading && hasMore && !isLoadingMore ) {
+            console.log( 'Fetching more jobs, current page:', currentPage );
+            setIsLoadingMore( true );
+            setCurrentPage( prevPage => prevPage + 1 );
+        }
+    }, [ isLoading, hasMore, isLoadingMore, currentPage ] );
 
     // Calculate pagination
     const totalPages = allJobs?.totalPages || 1;
@@ -129,6 +180,8 @@ export const AllJobs = () => {
         setLocationType( "" );
         setScheduleType( "" );
         setCurrentPage( 1 );
+        setAllJobsList( [] );
+        setHasMore( true );
     };
 
     // Function to format number in Indian Rupee format (e.g., 1,00,000)
@@ -204,10 +257,10 @@ export const AllJobs = () => {
                 return false;
             }
 
-            // Refetch jobs to update the table
-            refetch();
+            // Remove the deleted job from the current list
+            setAllJobsList( prevJobs => prevJobs.filter( job => job._id !== jobId ) );
 
-            // Show success message (could use a toast notification library here)
+            // Show success message
             toast.success( 'Job deleted successfully' );
 
         } catch ( error ) {
@@ -217,6 +270,23 @@ export const AllJobs = () => {
             setIsDeleting( false );
         }
     };
+
+    // Loader component for infinite scroll
+    const InfiniteScrollLoader = () => (
+        <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading more jobs...</span>
+        </div>
+    );
+
+    // End message component
+    const EndMessage = () => (
+        <div className="text-center py-8">
+            <p className="text-gray-500 text-lg font-medium">
+                🎉 You've reached the end! No more jobs to load.
+            </p>
+        </div>
+    );
 
     return (
         <div className="px-8 py-4 w-full min-h-screen"
@@ -261,7 +331,7 @@ export const AllJobs = () => {
                                     <Plus className="mr-2 h-5 w-5" />
                                     Post New Job
                                 </Link>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -440,8 +510,8 @@ export const AllJobs = () => {
                     {/* Results Count */ }
                     <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
                         <span className="text-sm text-gray-600">
-                            { allJobs?.jobs?.length > 0 ? (
-                                <>Showing <span className="font-medium">{ allJobs.jobs.length }</span> of <span className="font-medium">{ allJobs.totalCount || 0 }</span> jobs</>
+                            { allJobsList.length > 0 ? (
+                                <>Showing <span className="font-medium">{ allJobsList.length }</span> of <span className="font-medium">{ allJobs.totalCount || 0 }</span> jobs</>
                             ) : (
                                 'No jobs found'
                             ) }
@@ -450,102 +520,112 @@ export const AllJobs = () => {
 
                     {/* Jobs Card Section */ }
                     <div className="overflow-x-auto rounded-t-xl">
-                        { isLoading && (
+                        { isLoading && currentPage === 1 && (
                             <div className="flex justify-center items-center min-h-screen bg-gray-50">
                                 <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
                             </div>
                         ) }
 
-                        { allJobs?.jobs?.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-                                { allJobs?.jobs?.map( ( job ) => (
-                                    <div
-                                        key={ job._id }
-                                        className="bg-white hover:bg-gray-700 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-gray-400 group relative"
-                                    >
-                                        {/* Enhanced Status badge positioned at top right */ }
-                                        <div className="absolute top-3 right-3 z-10">
-                                            <span className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ job.status === 'Active'
-                                                ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
-                                                job.status === 'Closed'
-                                                    ? 'bg-red-50 text-red-700 border-red-200 group-hover:bg-red-100 group-hover:text-red-800' :
-                                                    'bg-purple-50 text-purple-700 border-purple-200 group-hover:bg-purple-100 group-hover:text-purple-800'
-                                                }` }>
-                                                <div className={ `w-2 h-2 rounded-full mr-2 ${ job.status === 'Active' ? 'bg-green-500' :
-                                                    job.status === 'Closed' ? 'bg-red-500' : 'bg-purple-500'
-                                                    }` }></div>
-                                                { statusMap[ job.status ] }
-                                            </span>
-                                        </div>
+                        { allJobsList.length > 0 ? (
+                            <InfiniteScroll
+                                dataLength={ allJobsList.length }
+                                next={ fetchMoreJobs }
+                                hasMore={ hasMore }
+                                loader={ <InfiniteScrollLoader /> }
+                                endMessage={ <EndMessage /> }
+                                scrollThreshold={ 0.8 }
+                                style={ { overflow: 'visible' } }
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                                    { allJobsList.map( ( job ) => (
+                                        <div
+                                            key={ job._id }
+                                            className="bg-white hover:bg-gray-700 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-gray-400 group relative"
+                                        >
+                                            {/* Enhanced Status badge positioned at top right */ }
+                                            <div className="absolute top-3 right-3 z-10">
+                                                <span className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ job.status === 'Active'
+                                                    ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
+                                                    job.status === 'Closed'
+                                                        ? 'bg-red-50 text-red-700 border-red-200 group-hover:bg-red-100 group-hover:text-red-800' :
+                                                        'bg-purple-50 text-purple-700 border-purple-200 group-hover:bg-purple-100 group-hover:text-purple-800'
+                                                    }` }>
+                                                    <div className={ `w-2 h-2 rounded-full mr-2 ${ job.status === 'Active' ? 'bg-green-500' :
+                                                        job.status === 'Closed' ? 'bg-red-500' : 'bg-purple-500'
+                                                        }` }></div>
+                                                    { statusMap[ job.status ] }
+                                                </span>
+                                            </div>
 
-                                        <div className="p-6 pt-12"> {/* Added extra top padding to accommodate badge */ }
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */ }
-                                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-white mb-4 font-DM leading-tight">
-                                                        { capitalizeFirstLetter( job.title ) }
-                                                    </h3>
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                                            { job.type || "Full-Time" }
+                                            <div className="p-6 pt-12"> {/* Added extra top padding to accommodate badge */ }
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */ }
+                                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-white mb-4 font-DM leading-tight">
+                                                            { capitalizeFirstLetter( job.title ) }
+                                                        </h3>
+                                                        <div className="flex flex-wrap gap-2 mb-4">
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                                                { job.type || "Full-Time" }
+                                                            </span>
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                                { job.locationType || "On-Site" }
+                                                            </span>
+                                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                                                { job.scheduleType || "Full day" }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                        <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                        <span className="text-sm font-medium">
+                                                            Compensation: { formatIndianRupee( job.compensation ) }
                                                         </span>
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                            { job.locationType || "On-Site" }
+                                                    </div>
+
+                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                        <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                        <span className="text-sm">
+                                                            { job.city }, { job.state }, { job.country }
                                                         </span>
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
-                                                            { job.scheduleType || "Full day" }
+                                                    </div>
+
+                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                        <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                        <span className="text-sm">
+                                                            Posted: { new Date( job.createdAt ).toLocaleDateString( 'en-US', {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric'
+                                                            } ) }
                                                         </span>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="space-y-3">
-                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
-                                                    <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm font-medium">
-                                                        Compensation: { formatIndianRupee( job.compensation ) }
-                                                    </span>
+                                                <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
+                                                    <button
+                                                        onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
+                                                        className="flex items-center text-blue-600 group-hover:text-blue-300 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
+                                                    >
+                                                        <Edit className="h-4 w-4 mr-1" />
+                                                        View & Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={ () => handleDeleteJob( job._id ) }
+                                                        disabled={ isDeleting }
+                                                        className="flex items-center text-red-600 group-hover:text-red-300 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
+                                                    >
+                                                        <Trash2 className="h-4 w-4 mr-1" />
+                                                        { isDeleting ? 'Deleting...' : 'Delete' }
+                                                    </button>
                                                 </div>
-
-                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
-                                                    <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm">
-                                                        { job.city }, { job.state }, { job.country }
-                                                    </span>
-                                                </div>
-
-                                                <div className="flex items-center text-gray-700 group-hover:text-gray-200">
-                                                    <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm">
-                                                        Posted: { new Date( job.createdAt ).toLocaleDateString( 'en-US', {
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric'
-                                                        } ) }
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
-                                                <button
-                                                    onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
-                                                    className="flex items-center text-blue-600 group-hover:text-blue-300 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
-                                                >
-                                                    <Edit className="h-4 w-4 mr-1" />
-                                                    View & Edit
-                                                </button>
-                                                <button
-                                                    onClick={ () => handleDeleteJob( job._id ) }
-                                                    disabled={ isDeleting }
-                                                    className="flex items-center text-red-600 group-hover:text-red-300 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
-                                                >
-                                                    <Trash2 className="h-4 w-4 mr-1" />
-                                                    { isDeleting ? 'Deleting...' : 'Delete' }
-                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                ) ) }
-                            </div>
+                                    ) ) }
+                                </div>
+                            </InfiniteScroll>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                                 <div className="bg-gray-100 p-6 rounded-full mb-6">
@@ -566,55 +646,6 @@ export const AllJobs = () => {
                         ) }
                     </div>
 
-                    {/* Pagination */ }
-                    { totalPages > 0 && allJobs?.jobs?.length > 0 && (
-                        <div className="px-6 py-4 border-t border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <button
-                                    onClick={ () => setCurrentPage( ( p ) => Math.max( 1, p - 1 ) ) }
-                                    disabled={ currentPage === 1 }
-                                    className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ currentPage === 1
-                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                                        : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
-                                        }` }
-                                >
-                                    <ChevronLeft className="mr-1 h-4 w-4" />
-                                    Previous
-                                </button>
-
-                                <div className="hidden sm:flex items-center space-x-1">
-                                    { [ ...Array( totalPages ) ].map( ( _, i ) => (
-                                        <button
-                                            key={ i }
-                                            onClick={ () => setCurrentPage( i + 1 ) }
-                                            className={ `px-3.5 py-2 text-sm rounded-md ${ currentPage === i + 1
-                                                ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
-                                                : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
-                                                }` }
-                                        >
-                                            { i + 1 }
-                                        </button>
-                                    ) ) }
-                                </div>
-
-                                <span className="sm:hidden text-sm text-gray-600">
-                                    Page { currentPage } of { totalPages }
-                                </span>
-
-                                <button
-                                    onClick={ () => setCurrentPage( ( p ) => Math.min( totalPages, p + 1 ) ) }
-                                    disabled={ currentPage === totalPages }
-                                    className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ currentPage === totalPages
-                                        ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                                        : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
-                                        }` }
-                                >
-                                    Next
-                                    <ChevronRight className="ml-1 h-4 w-4" />
-                                </button>
-                            </div>
-                        </div>
-                    ) }
                 </div>
             </div>
         </div>

@@ -1,15 +1,17 @@
 import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const fetchScheduledInterviews = async ( { queryKey } ) => {
-    const [page, limit, search, candidateID, filterStatus ] = queryKey;
+    console.log( "queryKeyyy", queryKey )
+    const [ key, page, limit, search, candidateID, filterStatus, jobID ] = queryKey;
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     console.log( "Fetching scheduled interviews for candidateID:", candidateID );
     console.log( "company_id:", companyId );
+    console.log( "job_id:", jobID );
 
     const response = await axios.get(
-    `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app?page=${ page }?limit=${ limit }?search=${ search }?candidateID=${ candidateID}?filterStatus=${filterStatus}`,
+        `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app?page=${ page }&limit=${ limit }&search=${ search }&candidateID=${ candidateID }&filterStatus=${ filterStatus }&jobID=${ jobID }`,
         {
             headers: {
                 "company_id": companyId,
@@ -21,12 +23,12 @@ const fetchScheduledInterviews = async ( { queryKey } ) => {
     return response.data;
 };
 
-const useScheduledInterview = ( page, limit, search, candidateID, filterStatus ) => {
+const useScheduledInterview = ( page, limit, search, candidateID, jobID, filterStatus ) => {
     const queryClient = useQueryClient();
 
     // Fetch Scheduled Interviews with pagination and candidate filtering
     const { data, error, isLoading } = useQuery( {
-        queryKey: [ "ScheduledInterviews", page, limit, search, candidateID, filterStatus ],
+        queryKey: [ "ScheduledInterviews", page, limit, search, candidateID, filterStatus, jobID ],
         queryFn: fetchScheduledInterviews,
         keepPreviousData: true,
         enabled: !!candidateID, // Only fetch when candidateID is available

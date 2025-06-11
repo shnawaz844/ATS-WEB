@@ -5,7 +5,7 @@ import ApplicationsTable from './ApplicationsTable';
 import ConfirmationDialog from './ConfirmationDialog';
 import ResumeModal from './ResumeModal';
 
-const ApplicationsListTab = ( { onStatusChange, applications, page, limit, search, setPage, setLimit, setSearch, currentPage, totalApplications, totalPages } ) => {
+const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, search, setPage, setLimit, setSearch, currentPage, totalApplications, totalPages } ) => {
     const [ allApps, setAllApps ] = useState( applications );
     const [ statusFilter, setStatusFilter ] = useState( '' );
     const [ statuses, setStatuses ] = useState( [] );
@@ -191,6 +191,7 @@ const ApplicationsListTab = ( { onStatusChange, applications, page, limit, searc
 
                 {/* Applications Table */ }
                 <ApplicationsTable
+                    job={ job }
                     filteredApps={ filteredApps }
                     statuses={ statuses }
                     onStatusChange={ handleStatusChangeRequest }
