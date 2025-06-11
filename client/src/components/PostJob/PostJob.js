@@ -14,21 +14,23 @@ export const PostJob = () => {
     const companyUserName = localStorage.getItem( "companyUserName" );
     console.log( "jobToEdit", jobToEdit )
     // We store questions in state
-    const [questions, setQuestions] = useState(
-        jobToEdit?.applicationForm?.question.map((q, i) => ({
+    const [ questions, setQuestions ] = useState(
+        jobToEdit?.applicationForm?.question.map( ( q, i ) => ( {
             question: q,
-            answer: jobToEdit.applicationForm.answer[i],
-        })) || [{ question: '', answer: '' }]
+            answer: jobToEdit.applicationForm.answer[ i ],
+        } ) ) || [ { question: '', answer: '' } ]
     );
 
+    const [ jobStatus, setJobStatus ] = useState( jobToEdit?.status || '' );
+
     // Country, State, City
-    const [selectedCountry, setSelectedCountry] = useState(jobToEdit?.country || '');
-    const [selectedState, setSelectedState] = useState(jobToEdit?.state || '');
-    const [selectedCity, setSelectedCity] = useState(jobToEdit?.city || '');
+    const [ selectedCountry, setSelectedCountry ] = useState( jobToEdit?.country || '' );
+    const [ selectedState, setSelectedState ] = useState( jobToEdit?.state || '' );
+    const [ selectedCity, setSelectedCity ] = useState( jobToEdit?.city || '' );
 
     // Shift time states
-    const [shiftStart, setShiftStart] = useState(jobToEdit?.shiftStart || '09:00');
-    const [shiftEnd, setShiftEnd] = useState(jobToEdit?.shiftEnd || '17:00');
+    const [ shiftStart, setShiftStart ] = useState( jobToEdit?.shiftStart || '09:00' );
+    const [ shiftEnd, setShiftEnd ] = useState( jobToEdit?.shiftEnd || '17:00' );
 
     // Fetch the recruiter role from localStorage
     const user = JSON.parse( localStorage.getItem( 'user' ) ); // Parse user object from localStorage
@@ -60,7 +62,7 @@ export const PostJob = () => {
         control,
         setValue,
         formState: { errors },
-    } = useForm({
+    } = useForm( {
         defaultValues: {
             title: '',
             locationType: '',
@@ -78,35 +80,35 @@ export const PostJob = () => {
             hiringManagerId: jobToEdit?.hiringManagerId || '',
             description: '',
             applicationForm: {
-                question: questions.map((q) => q.question),
-                answer: questions.map((q) => q.answer),
+                question: questions.map( ( q ) => q.question ),
+                answer: questions.map( ( q ) => q.answer ),
             },
-            company_id: companyId    
+            company_id: companyId
         },
-    });
+    } );
 
     const { mutate: postJob } = usePostJob();
     const { mutate: updateJob } = useUpdateJob();
 
     // Populate form if editing an existing job
-    useEffect(() => {
-        if (jobToEdit) {
-            Object.keys(jobToEdit).forEach((key) => {
-                if (key !== 'applicationForm') {
-                    setValue(key, jobToEdit[key]);
+    useEffect( () => {
+        if ( jobToEdit ) {
+            Object.keys( jobToEdit ).forEach( ( key ) => {
+                if ( key !== 'applicationForm' ) {
+                    setValue( key, jobToEdit[ key ] );
                 }
-            });
+            } );
 
-            if (jobToEdit.shiftStart) setShiftStart(jobToEdit.shiftStart);
-            if (jobToEdit.shiftEnd) setShiftEnd(jobToEdit.shiftEnd);
+            if ( jobToEdit.shiftStart ) setShiftStart( jobToEdit.shiftStart );
+            if ( jobToEdit.shiftEnd ) setShiftEnd( jobToEdit.shiftEnd );
 
-            if (jobToEdit.description) setValue('description', jobToEdit.description);
+            if ( jobToEdit.description ) setValue( 'description', jobToEdit.description );
 
-            if (jobToEdit.country) setSelectedCountry(jobToEdit.country);
-            if (jobToEdit.state) setSelectedState(jobToEdit.state);
-            if (jobToEdit.city) setSelectedCity(jobToEdit.city);
+            if ( jobToEdit.country ) setSelectedCountry( jobToEdit.country );
+            if ( jobToEdit.state ) setSelectedState( jobToEdit.state );
+            if ( jobToEdit.city ) setSelectedCity( jobToEdit.city );
         }
-    }, [jobToEdit, setValue]);
+    }, [ jobToEdit, setValue ] );
 
     // The form submit handler
     const onSubmit = ( data ) => {
@@ -128,77 +130,79 @@ export const PostJob = () => {
             country: selectedCountry,
             state: selectedState,
             city: selectedCity,
-            compensation: String(data.compensation),
-            experienceRequired: String(data.experienceRequired),
-            company_id : companyId,
+            compensation: String( data.compensation ),
+            experienceRequired: String( data.experienceRequired ),
+            company_id: companyId,
             hiringManagerId: selectedHiringManager._id,
             applicationForm: {
-                question: questions.map((q) => q.question),
-                answer: questions.map((q) => q.answer),
+                question: questions.map( ( q ) => q.question ),
+                answer: questions.map( ( q ) => q.answer ),
             },
         };
 
-        if (jobToEdit) {
-            updateJob(formattedData, {
+        if ( jobToEdit ) {
+            updateJob( formattedData, {
                 onSuccess: () => {
-                    toast.success('Job updated successfully');
-                    navigate(`/${companyUserName}/all-jobs`);
-                },
-                onError: () => {
-                    toast.error('Failed to update job');
-                },
-            });
-        } else {
-            console.log( "formattedData", formattedData )
-            postJob(formattedData, {
-                onSuccess: () => {
-                    toast.success('Job posted successfully');
+                    toast.success( 'Job updated successfully' );
                     navigate( `/${ companyUserName }/all-jobs` );
                 },
                 onError: () => {
-                    toast.error('Failed to post job');
+                    toast.error( 'Failed to update job' );
                 },
-            });
+            } );
+        } else {
+            console.log( "formattedData", formattedData )
+            postJob( formattedData, {
+                onSuccess: () => {
+                    toast.success( 'Job posted successfully' );
+                    navigate( `/${ companyUserName }/all-jobs` );
+                },
+                onError: () => {
+                    toast.error( 'Failed to post job' );
+                },
+            } );
         }
     };
 
     // Add a new question
     const addQuestion = () => {
-        setQuestions([...questions, { question: '', answer: '' }]);
+        setQuestions( [ ...questions, { question: '', answer: '' } ] );
     };
 
     // Delete a question by index
-    const handleDeleteQuestion = (index) => {
-        const newQuestions = questions.filter((_, qIndex) => qIndex !== index);
-        setQuestions(newQuestions);
+    const handleDeleteQuestion = ( index ) => {
+        const newQuestions = questions.filter( ( _, qIndex ) => qIndex !== index );
+        setQuestions( newQuestions );
     };
     console.log( "hiringManagersList", hiringManagersList )
     // Render the new PostJobForm, passing everything it needs
     return (
         <PostJobForm
-            jobToEdit={jobToEdit}
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
-            errors={errors}
-            register={register}
-            control={control}
-            shiftStart={shiftStart}
-            setShiftStart={setShiftStart}
-            shiftEnd={shiftEnd}
-            setShiftEnd={setShiftEnd}
-            questions={questions}
-            setQuestions={setQuestions}
-            addQuestion={addQuestion}
-            handleDeleteQuestion={handleDeleteQuestion}
-            selectedCountry={selectedCountry}
-            setSelectedCountry={setSelectedCountry}
-            selectedState={selectedState}
-            setSelectedState={setSelectedState}
-            selectedCity={selectedCity}
-            setSelectedCity={setSelectedCity}
+            jobToEdit={ jobToEdit }
+            handleSubmit={ handleSubmit }
+            onSubmit={ onSubmit }
+            errors={ errors }
+            register={ register }
+            control={ control }
+            shiftStart={ shiftStart }
+            setShiftStart={ setShiftStart }
+            shiftEnd={ shiftEnd }
+            setShiftEnd={ setShiftEnd }
+            questions={ questions }
+            setQuestions={ setQuestions }
+            addQuestion={ addQuestion }
+            handleDeleteQuestion={ handleDeleteQuestion }
+            selectedCountry={ selectedCountry }
+            setSelectedCountry={ setSelectedCountry }
+            selectedState={ selectedState }
+            setSelectedState={ setSelectedState }
+            selectedCity={ selectedCity }
+            setSelectedCity={ setSelectedCity }
             recruiterRole={ recruiterRole }
             companyId={ companyId }
             hiringManagersList={ hiringManagersList }
+            jobStatus={ jobStatus }
+            setJobStatus={ setJobStatus }
         />
     );
 };
