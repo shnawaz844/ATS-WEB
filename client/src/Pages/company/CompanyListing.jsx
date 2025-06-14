@@ -362,11 +362,11 @@ const CompanyListing = () => {
 
                                 {/* Improved Company Image Section */ }
                                 { company.image && (
-                                    <div className="mt-4 mb-4 flex justify-center items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden h-40 relative group">
+                                    <div className="mt-4 mb-4 flex justify-center items-center bg-gray-50 rounded-lg border border-gray-200 overflow-hidden h-40 relative">
                                         <img
                                             src={ company.image }
                                             alt={ `${ company.CompanyUserName } logo` }
-                                            className="w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                                            className="w-full h-full object-contain p-4 transition-transform duration-300"
                                             onError={ ( e ) => {
                                                 e.target.style.display = 'none';
                                                 e.target.parentElement.classList.add( 'hidden' );
