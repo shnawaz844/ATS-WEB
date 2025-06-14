@@ -4,17 +4,14 @@ import Job from "../../models/Job.js";
 
 const addApplication = async (req, res) => {
   const { jobID, candidateID, applicationStatusId, contactInfo, emailInfo, experience, questions, answers, company_id, jobStatusId } = req.body;
-  console.log( "req.body>>>>><<<<<", req.body );
   try {
     if ( !jobID || !candidateID || !applicationStatusId || !contactInfo || !emailInfo || !experience || !company_id || !jobStatusId ) {
-      console.log( "first", jobID, candidateID, applicationStatusId, contactInfo, emailInfo, experience, company_id, jobStatusId );
       return res.status(400).json({ message: "All required fields must be provided.console" });
     }
 
     // Check if resume file exists
     let resumeUrl = null;
     if (req.file) {
-      console.log("Received file:", req.file.originalname);
       resumeUrl = await uploadToS3(req.file);
     } else {
       return res.status(400).json({ message: "Resume file is required." });
