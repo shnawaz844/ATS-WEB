@@ -373,7 +373,6 @@ export const PostJobForm = ( {
                     label="Compensation"
                     register={ register }
                     name="compensation"
-                    type="number"
                     error={ errors?.compensation }
                     placeholder="Ex: 50000"
                   />
@@ -382,7 +381,6 @@ export const PostJobForm = ( {
                     label="Experience Required (years)"
                     register={ register }
                     name="experienceRequired"
-                    type="number"
                     error={ errors?.experienceRequired }
                     placeholder="Ex: 3"
                   />

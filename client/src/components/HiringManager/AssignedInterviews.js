@@ -372,13 +372,13 @@ const AssignedInterviews = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-800">
-                                                               Applicant Name :   { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
+                                                                Applicant Name :   { capitalizeFirstLetter( interview.applicationID?.candidateID?.userName ) || "N/A" }
                                                             </p>
                                                             <p className="text-xs text-gray-500">
-                                                                Interview Type :    { capitalizeFirstLetter(interview.interviewerType) || "N/A" } Interview
+                                                                Interview Type :    { capitalizeFirstLetter( interview.interviewerType ) || "N/A" } Interview
                                                             </p>
                                                             <p className="text-xs text-gray-500">
-                                                                Interviewer :   { capitalizeFirstLetter(interview.interviewerID.userName) || "N/A" }
+                                                                Interviewer :   { capitalizeFirstLetter( interview.interviewerID.userName ) || "N/A" }
                                                             </p>
                                                         </div>
                                                     </div>
@@ -563,10 +563,6 @@ const AssignedInterviews = () => {
                                     <p className="text-xs font-medium text-gray-500">APPLICANT</p>
                                     <p className="font-medium">{ capitalizeFirstLetter( detailedInterview?.applicationID?.candidateID?.userName ) || "N/A" }</p>
                                 </div>
-                                {/* <div className="space-y-1">
-                                    <p className="text-xs font-medium text-gray-500">Candidtae Id</p>
-                                    <p className="font-medium">{ detailedInterview?.applicationID?.candidateID?._id || "N/A" }</p>
-                                </div> */}
                                 <div className="space-y-1">
                                     <p className="text-xs font-medium text-gray-500">STATUS</p>
                                     <span className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-flex items-center px-2.5 py-0.5 rounded-full text-xs` }>
@@ -636,7 +632,9 @@ const AssignedInterviews = () => {
                                     className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     { statuses?.map( ( status ) => (
-                                        <option key={ status.applicationStatus } value={ status.applicationStatus }>{ status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }</option>
+                                        <option key={ status._id } value={ status._id }>
+                                            { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                                        </option>
                                     ) ) }
                                 </select>
                             </div>
@@ -688,7 +686,7 @@ const AssignedInterviews = () => {
                     </div>
                 </div>
             ) }
-        
+
             { filteredInterviews && filteredInterviews?.length > 0 && (
                 <div className="px-6 py-4 border-t border-gray-100 mt-4">
                     <div className="flex items-center justify-between">

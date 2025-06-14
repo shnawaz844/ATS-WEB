@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import {
   UserPen,
   LogOut,
@@ -16,9 +16,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import atslogo1URL from "../assets/img/logo1.png";
-import Cookies from "js-cookie";
 
-// Navigation Arrays with icons
 const superNavItems = [
   { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
   { label: "Companies", path: "/all-companies", icon: <Building className="w-5 h-5" /> }
@@ -42,7 +40,6 @@ const hiringManagerNavItems = [
 const interviewerNavItems = [
   { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
   { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="w-5 h-5" /> },
-  // { label: "Applications", path: "/shortlist", icon: <FileText className="w-5 h-5" /> },
 ];
 
 const recruiterNavItems = [
@@ -57,32 +54,21 @@ const candidateNavItems = [
   { label: "Applied Jobs", path: `/my-jobs`, icon: <UserCheck className="w-5 h-5" /> },
 ];
 
-// const normalNavItem = [
-//   { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
-//   {
-//     label: "All Jobs",
-//     // path: `/all-posted-jobs`,
-//     path: `/${}/all-posted-jobs`,
-//     icon: <Briefcase className="w-5 h-5" />
-//   }
-// ];
-
 export const Navbar = () => {
-  // const [ companyUserName, setCompanyUserName ] = useState( localStorage.getItem( "companyUserName" ) );
   const [ companyUserName, setCompanyUserName ] = useState( null );
   const [ loginData, setLoginData ] = useState( null );
   const [ isMenuOpen, setIsMenuOpen ] = useState( false );
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const location = useLocation();
-  // const user = JSON.parse(localStorage.getItem("user"))
-
+  const [ company, setCompany ] = useState( [] );
+  console.log( "companyUserName>>>>>>>??????", companyUserName )
+  
   useEffect( () => {
     function fetchCompanyUserName() {
       const storedName = localStorage.getItem( "companyUserName" );
       if ( storedName ) {
         setCompanyUserName( storedName );
       } else {
-        // Retry after 1 second if null
         setTimeout( fetchCompanyUserName, 1000 );
       }
     }
@@ -90,6 +76,32 @@ export const Navbar = () => {
     fetchCompanyUserName();
   }, [] );
   console.log( "navbaer username", companyUserName, typeof companyUserName );
+
+   
+ 
+   useEffect( () => {
+
+     const fetchCompanies = async () => {
+       try {
+        console.log("running")
+         const response = await fetch(
+           `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }`
+         )
+         console.log("response112233", response)
+         if ( response.ok ) {
+           const data = await response.json()
+           console.log( "datacompany", data )
+           setCompany( data )
+         } else {
+           setCompany( [] )
+         }
+       } catch ( error ) {
+         console.error( 'Error fetching companies:', error )
+       }
+     }
+
+     fetchCompanies();
+   }, [ companyUserName ] )
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
@@ -132,7 +144,7 @@ export const Navbar = () => {
 
   useEffect( () => {
     if ( location.pathname === "/" ) {
-      setNavItems( loginData?.role === "super" ? superNavItems : [] );  // Hides all nav items on the banner route
+      setNavItems( loginData?.role === "super" ? superNavItems : [] ); 
     } else {
       // Reapply the default or user role-based navigation items
       if ( loginData ) {
@@ -169,7 +181,6 @@ export const Navbar = () => {
       const result = await res.json()
       console.log( "result,result" )
       if ( result.success ) {
-        // 1. clear everything you care about:
         localStorage.removeItem( "usertoken" )
         localStorage.removeItem( "user" )
         localStorage.removeItem( "email" )
@@ -192,7 +203,7 @@ export const Navbar = () => {
   return (
     <div className="w-full sticky top-0 z-50">
       <nav className="bg-gray-700 relative z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             {/* BRAND */ }
             <div className="flex items-center">
@@ -201,12 +212,14 @@ export const Navbar = () => {
                 className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
                 <img
-                  src={ atslogo1URL }
+                  src={ companyUserName && company?.image ? company.image : "/ATSLOGO.png" }
                   className="rounded-full h-12 md:h-14 border-2 border-gray-300"
                   alt="ATS Logo"
                 />
-                <span className="text-white font-extrabold text-xl md:text-2xl ml-2 hidden sm:block">
-                  ATS Portal
+                <span className="text-white ml-2 hidden sm:block">
+                  <span className="font-extrabold text-xl md:text-2xl">
+                    { companyUserName ? company.CompanyUserName : "ATS" }
+                  </span>
                 </span>
               </NavLink>
             </div>

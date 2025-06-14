@@ -79,8 +79,12 @@ export const Login = () => {
       <div className="w-full max-w-md bg-gray-700 backdrop-blur-lg border border-gray-800/50 rounded-2xl p-8 shadow-2xl relative z-10">
         <div className="text-center mb-10">
           {/* Logo placeholder */ }
-          <div className="w-14 h-14 mx-auto mb-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <span className="text-2xl font-bold text-white">ATS</span>
+          <div className="mx-auto mb-2 flex items-center justify-center rounded-full p-1">
+            <img
+              src="/ATSLOGO.png"
+              alt="ATS Logo"
+              className="h-20 w-20 object-cover rounded-full" // Makes the image itself rounded
+            />
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-2 tracking-wider">Access Portal</h1>

@@ -3,13 +3,13 @@ import User from "../../models/User.js"; // Import the User model
 import mongoose from "mongoose";
 
 // Function to fetch interviews
-export const getInterviews = async ( req, res ) => {
+export const getInterviews = async ( req, res ) => {console.log("api called")
     try {
         const page = parseInt( req.query.page ) || 1;
         const limit = parseInt( req.query.limit ) || 9;
         const candidateID = req.query.candidateID
         const jobId = req.query.jobID
-        const interviewerEmail = decodeURIComponent( req.query.interviewerEmail || "" );
+        const interviewerID = decodeURIComponent( req.query.interviewerID || "" );
         const searchTerm = req.query.searchTerm || '';
         const filterStatus = req.query.filterStatus || '';
         const { company_id } = req.headers;
@@ -26,14 +26,8 @@ export const getInterviews = async ( req, res ) => {
         }
 
         // Add filter for interviewerEmail if provided
-        if ( interviewerEmail ) {
-            // Find the interviewer by email to get their ObjectId
-            const interviewer = await User.findOne( { email: interviewerEmail } );
-            if ( interviewer ) {
-                filter.interviewerID = interviewer._id; // Filter by interviewer ObjectId
-            } else {
-                return res.status( 404 ).json( { message: "Interviewer not found" } );
-            }
+        if ( interviewerID ) {
+            filter.interviewerID = interviewerID; // Filter by interviewer ObjectId
         }
 
         // Add status filter if provided directly to the initial database query
@@ -43,6 +37,7 @@ export const getInterviews = async ( req, res ) => {
 
         // Get interviews that match the base filter (without search term and candidateID)
         // We'll do the search term and candidateID filtering after populating the fields
+        console.log( 'test filter', filter );
         const interviewsQuery = InterviewSchedule
             .find( filter )
             .populate( {
