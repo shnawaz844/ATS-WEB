@@ -78,3 +78,30 @@ export const useUpdateUser = () => {
     },
   });
 };
+
+// { * 4. DELETE USER}
+const deleteUser = async ( userId ) => {
+  await axios.delete(
+    `${ process.env.REACT_APP_BASE_URL }/users/delete-user/${ userId }`,
+    {
+      headers: {
+        'company_id': JSON.parse( localStorage.getItem( "user" ) ).company_id
+      }
+    }
+  );
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation( {
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      // Invalidate the users query to refresh the list
+      queryClient.invalidateQueries( [ 'users' ] );
+    },
+    onError: ( error ) => {
+      console.error( 'Error deleting user:', error );
+    }
+  } );
+};

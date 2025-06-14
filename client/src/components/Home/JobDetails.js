@@ -63,24 +63,23 @@ export const JobDetails = () => {
   const formatIndianRupee = ( num ) => {
     if ( !num ) return "0";
 
-    // Convert to string and remove any non-digit characters
-    const numStr = num.toString().replace( /[^\d]/g, "" );
+    const formatSingle = ( n ) => {
+      const clean = n.replace( /[^\d]/g, "" );
+      if ( !clean || clean === "0" ) return "0";
+      return clean.replace( /\B(?=(\d{2})+(?=\d{3}))/g, "," ).replace( /(\d{3})$/, ",$1" );
+    };
 
-    // Handle the case if it's just 0
-    if ( parseInt( numStr ) === 0 ) return "0";
+    const str = num.toString();
 
-    let lastThree = numStr.substring( numStr.length - 3 );
-    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
-
-    if ( otherNumbers !== '' ) {
-      // Add commas after every two digits in the other numbers part
-      lastThree = ',' + lastThree;
+    // Check for range pattern
+    if ( str.includes( "-" ) || str.toLowerCase().includes( "to" ) ) {
+      const numbers = str.split( /[-–—]|\s+to\s+/i );
+      if ( numbers.length === 2 ) {
+        return `${ formatSingle( numbers[ 0 ].trim() ) } - ${ formatSingle( numbers[ 1 ].trim() ) }`;
+      }
     }
 
-    // Format remaining digits with commas after every 2 digits
-    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
-
-    return formattedOtherNumbers + lastThree;
+    return formatSingle( str );
   };
 
   useEffect( () => {
@@ -171,7 +170,7 @@ export const JobDetails = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex space-x-2">
+                {/* <div className="flex space-x-2">
                   <button
                     onClick={ toggleBookmark }
                     className={ `p-2 rounded-full ${ isBookmarked ? "bg-blue-50 text-blue-600" : "bg-gray-50 text-gray-500 hover:bg-gray-100"
@@ -186,7 +185,7 @@ export const JobDetails = () => {
                   >
                     <Share2 size={ 20 } />
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

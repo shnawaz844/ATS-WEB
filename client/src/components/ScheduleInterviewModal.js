@@ -37,7 +37,7 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
     const {
         assignedInterviews,
         error: assignedInterviewsError,
-    } = useScheduledInterview( page, limit, search, candidateID, jobID, filterStatus );
+    } = useScheduledInterview( { page, limit, search, candidateID, jobID, filterStatus } );
 
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const companyUserName = localStorage.getItem( "companyUserName" );
@@ -106,7 +106,7 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
                 status: application.applicationStatusId || ""
             } );
         }
-        console.log("application>>>>", application)
+        console.log( "application>>>>", application )
     }, [ isOpen, application, companyId ] );
 
     // Fetch all application statuses once
@@ -196,7 +196,7 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
             fetchInterviewRounds();
         }
     }, [ isOpen ] );
-    
+
 
     // Validate form before submission
     const validateForm = () => {
@@ -446,7 +446,7 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <span className="text-sm text-gray-600 group-hover:text-white">
-                                                            { capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A" }
+                                                            { capitalizeFirstLetter( interview?.interviewerID?.userName ) || "N/A" }
 
                                                         </span>
                                                     </td>

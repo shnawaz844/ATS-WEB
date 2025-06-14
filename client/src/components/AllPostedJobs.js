@@ -336,44 +336,26 @@ const Card = ( { job, onViewDetails, companyUserName, jobStatusLabel } ) => {
   const formatIndianRupee = ( num ) => {
     if ( !num ) return "0";
 
-    // Convert to string and remove any non-digit characters
-    const numStr = num.toString().replace( /[^\d]/g, "" );
+    const formatSingle = ( n ) => {
+      const clean = n.replace( /[^\d]/g, "" );
+      if ( !clean || clean === "0" ) return "0";
+      return clean.replace( /\B(?=(\d{2})+(?=\d{3}))/g, "," ).replace( /(\d{3})$/, ",$1" );
+    };
 
-    // Handle the case if it's just 0
-    if ( parseInt( numStr ) === 0 ) return "0";
+    const str = num.toString();
 
-    let lastThree = numStr.substring( numStr.length - 3 );
-    let otherNumbers = numStr.substring( 0, numStr.length - 3 );
-
-    if ( otherNumbers !== '' ) {
-      // Add commas after every two digits in the other numbers part
-      lastThree = ',' + lastThree;
+    // Check for range pattern
+    if ( str.includes( "-" ) || str.toLowerCase().includes( "to" ) ) {
+      const numbers = str.split( /[-–—]|\s+to\s+/i );
+      if ( numbers.length === 2 ) {
+        return `${ formatSingle( numbers[ 0 ].trim() ) } - ${ formatSingle( numbers[ 1 ].trim() ) }`;
+      }
     }
 
-    // Format remaining digits with commas after every 2 digits
-    const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
-
-    return formattedOtherNumbers + lastThree;
+    return formatSingle( str );
   };
-
   return (
     <div className="bg-white relative rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
-      {/* { jobStatusLabel && (
-        <div className="absolute top-3 right-3 z-10">
-          <span
-            className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ jobStatusLabel === "Open"
-              ? "bg-green-50 text-green-700 border-green-200"
-              : "bg-purple-50 text-purple-700 border-purple-200"
-              }` }
-          >
-            <div
-              className={ `w-2 h-2 rounded-full mr-2 ${ jobStatusLabel === "Open" ? "bg-green-500" : "bg-purple-500"
-                }` }
-            ></div>
-            { jobStatusLabel }
-          </span>
-        </div>
-      ) } */}
 
       {/* ✅ Main Content */ }
       <div className="p-5 pt-5">

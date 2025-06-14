@@ -13,7 +13,7 @@ export const ScheduledInterview = () => {
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const storedUser = localStorage.getItem( "user" );
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
-    const interviewerEmail = interviewer?.email || "";
+    const interviewerID = interviewer?._id || "";
     const [ statuses, setStatuses ] = useState( [] );
 
     // ✅ Correctly using the custom hook inside the component
@@ -22,7 +22,7 @@ export const ScheduledInterview = () => {
         error,
         isLoading,
         refetchScheduledInterviews
-    } = useScheduledInterview( page, limit, interviewerEmail, companyId );
+    } = useScheduledInterview( { page, limit, interviewerID } );
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
     const [ editForm, setEditForm ] = useState( {
@@ -36,7 +36,7 @@ export const ScheduledInterview = () => {
         company_id: "",
         starRating: "",
     } );
-
+    console.log( "assignedInterviewseeeeeee", assignedInterviews )
     const [ isEditModalOpen, setIsEditModalOpen ] = useState( false );
     const [ isFeedbackModalOpen, setIsFeedbackModalOpen ] = useState( false );
     const [ interviewRounds, setInterviewRounds ] = useState( [] );
@@ -371,7 +371,7 @@ export const ScheduledInterview = () => {
                     <strong className="font-bold">Error! </strong>
                     <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                 </div>
-                ) : assignedInterviews?.interviews?.length === 0 ? (
+            ) : assignedInterviews?.interviews?.length === 0 ? (
                 <div className="text-center animate-fade-in transition-all duration-500 py-16">
                     <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
                         🕒 No Interviews Found
@@ -398,7 +398,7 @@ export const ScheduledInterview = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                                        { assignedInterviews?.interviews?.map( ( interview ) => (
+                            { assignedInterviews?.interviews?.map( ( interview ) => (
                                 <tr key={ interview?._id } className="group hover:bg-gray-700 ">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>

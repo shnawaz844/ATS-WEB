@@ -185,27 +185,27 @@ export const AllJobs = () => {
     };
 
     // Function to format number in Indian Rupee format (e.g., 1,00,000)
+
     const formatIndianRupee = ( num ) => {
         if ( !num ) return "0";
 
-        // Convert to string and remove any non-digit characters
-        const numStr = num.toString().replace( /[^\d]/g, "" );
+        const formatSingle = ( n ) => {
+            const clean = n.replace( /[^\d]/g, "" );
+            if ( !clean || clean === "0" ) return "0";
+            return clean.replace( /\B(?=(\d{2})+(?=\d{3}))/g, "," ).replace( /(\d{3})$/, ",$1" );
+        };
 
-        // Handle the case if it's just 0
-        if ( parseInt( numStr ) === 0 ) return "0";
+        const str = num.toString();
 
-        let lastThree = numStr.substring( numStr.length - 3 );
-        let otherNumbers = numStr.substring( 0, numStr.length - 3 );
-
-        if ( otherNumbers !== '' ) {
-            // Add commas after every two digits in the other numbers part
-            lastThree = ',' + lastThree;
+        // Check for range pattern
+        if ( str.includes( "-" ) || str.toLowerCase().includes( "to" ) ) {
+            const numbers = str.split( /[-–—]|\s+to\s+/i );
+            if ( numbers.length === 2 ) {
+                return `${ formatSingle( numbers[ 0 ].trim() ) } - ${ formatSingle( numbers[ 1 ].trim() ) }`;
+            }
         }
 
-        // Format remaining digits with commas after every 2 digits
-        const formattedOtherNumbers = otherNumbers.replace( /\B(?=(\d{2})+(?!\d))/g, "," );
-
-        return formattedOtherNumbers + lastThree;
+        return formatSingle( str );
     };
 
     // Custom styles for react-select
@@ -541,6 +541,7 @@ export const AllJobs = () => {
                                         <div
                                             key={ job._id }
                                             className="bg-white hover:bg-gray-700 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-gray-400 group relative"
+                                            onClick={ () => navigate( `/${ companyUserName }/job-detail/${ job._id }` ) }
                                         >
                                             {/* Enhanced Status badge positioned at top right */ }
                                             <div className="absolute top-3 right-3 z-10">
@@ -606,14 +607,20 @@ export const AllJobs = () => {
 
                                                 <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
                                                     <button
-                                                        onClick={ () => navigate( `/${ companyUserName }/post-job`, { state: { job } } ) }
+                                                        onClick={ ( e ) => {
+                                                            e.stopPropagation();
+                                                            navigate( `/${ companyUserName }/post-job`, { state: { job } } );
+                                                        } }
                                                         className="flex items-center text-blue-600 group-hover:text-blue-300 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
                                                     >
                                                         <Edit className="h-4 w-4 mr-1" />
                                                         View & Edit
                                                     </button>
                                                     <button
-                                                        onClick={ () => handleDeleteJob( job._id ) }
+                                                        onClick={ ( e ) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteJob( job._id );
+                                                        } }
                                                         disabled={ isDeleting }
                                                         className="flex items-center text-red-600 group-hover:text-red-300 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
                                                     >
