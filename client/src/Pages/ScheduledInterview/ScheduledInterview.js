@@ -371,11 +371,7 @@ export const ScheduledInterview = () => {
                             <Briefcase className="mr-2 h-6 w-6 text-gray-100" />
                             { isAdmin ? "All Scheduled Interviews" : "My Scheduled Interviews" }
                         </h1>
-                        { isAdmin && (
-                            <p className="text-gray-300 text-sm mt-1">
-                                Filter by interviewer to view specific interviews
-                            </p>
-                        ) }
+                      
                     </div>
                     {/* Admin Filter Section */ }
                     { isAdmin && (

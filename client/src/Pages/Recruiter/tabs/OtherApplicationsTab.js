@@ -1,7 +1,9 @@
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
 const OtherApplicationsTab = ({ candidateId,statuses }) => {
     const [applications, setApplications] = useState([]);
+    const [ statusMap, setStatusMap ] = useState( {} );
 
     const capitalizeFirstLetter = (string) =>
         string ? string.charAt(0).toUpperCase() + string.slice(1) : '';
@@ -24,6 +26,24 @@ const OtherApplicationsTab = ({ candidateId,statuses }) => {
             .then((res) => res.json())
             .then((data) => setApplications(data.applications || []));
     }, [candidateId]);
+    
+    useEffect( () => {
+        // Fetch applications
+        fetch( `${ process.env.REACT_APP_BASE_URL }/application/candidate/${ candidateId }` )
+            .then( ( res ) => res.json() )
+            .then( ( data ) => setApplications( data.applications || [] ) );
+
+        // Fetch statuses
+        axios.get( `${ process.env.REACT_APP_BASE_URL }/application-statuses/all-application-statuses` )
+            .then( res => {
+                const map = {};
+                res.data.applicationStatuses.forEach( s => {
+                    map[ s._id ] = s.applicationStatus;
+                } );
+                setStatusMap( map );
+            } )
+            .catch( err => console.error( "Failed to load statuses", err ) );
+    }, [ candidateId ] );
 
     return (
         <div className="mb-8 relative">
@@ -52,8 +72,7 @@ const OtherApplicationsTab = ({ candidateId,statuses }) => {
                                             {capitalizeFirstLetter(app.jobID?.title) || 'N/A'}
                                         </h3>
                                         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-800">
-                                            { capitalizeFirstLetter( app.applicationStatusId ) || 'N/A'}
-                                            
+                                            { capitalizeFirstLetter( statusMap[ app.applicationStatusId ] ) || 'N/A' }
                                         </span>
                                     </div>
 
