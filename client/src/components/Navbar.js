@@ -15,7 +15,6 @@ import {
   UserCheck,
   ChevronDown
 } from "lucide-react";
-import atslogo1URL from "../assets/img/logo1.png";
 
 const superNavItems = [
   { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
@@ -23,11 +22,12 @@ const superNavItems = [
 ];
 
 const adminNavItems = [
-  { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { label: "Users", path: "/all-users", icon: <Users className="w-5 h-5" /> },
-  { label: "Application Statuses", path: "/application-statuses", icon: <FileText className="w-5 h-5" /> },
-  { label: "Interview Status", path: "/interview-rounds", icon: <Calendar className="w-5 h-5" /> },
-  { label: "Job Status", path: "/job-statuses", icon: <Calendar className="w-5 h-5" />}
+  { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-4 h-5" /> },
+  { label: "Users", path: "/all-users", icon: <Users className="w-4 h-5" /> },
+  { label: "Application Statuses", path: "/application-statuses", icon: <FileText className="w-4 h-5" /> },
+  { label: "Interview Status", path: "/interview-rounds", icon: <Calendar className="w-4 h-5" /> },
+  { label: "Job Status", path: "/job-statuses", icon: <Calendar className="w-4 h-5" />},
+   { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="w-4 h-5" /> },
 ];
 
 const hiringManagerNavItems = [
@@ -61,7 +61,7 @@ export const Navbar = () => {
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const location = useLocation();
   const [ company, setCompany ] = useState( [] );
-  console.log( "companyUserName>>>>>>>??????", companyUserName )
+  console.log( "companyUserName>>>>>>>??????", company )
   
   useEffect( () => {
     function fetchCompanyUserName() {

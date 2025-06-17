@@ -8,7 +8,8 @@ import {
     Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight,
     Briefcase, MapPin, Clock, RefreshCw, Filter,
     Calendar1,
-    IndianRupee
+    IndianRupee,
+    Share2
 } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
@@ -159,6 +160,30 @@ export const AllJobs = () => {
         // Reset loading state
         setIsLoadingMore( false );
     }, [ allJobs, currentPage ] );
+
+    // Add this function inside your AllJobs component
+const handleShareJob = (e, job) => {
+  e.stopPropagation();
+  
+  const jobUrl = `${window.location.origin}/${companyUserName}/current-job/${job._id}`;
+  const shareText = `Check out this job opening: ${job.title} at ${companyUserName}`;
+  
+  if (navigator.share) {
+    // Web Share API (mobile devices)
+    navigator.share({
+      title: job.title,
+      text: shareText,
+      url: jobUrl,
+    }).catch(err => {
+      console.log('Error sharing:', err);
+      toast.error('Failed to share job');
+    });
+  } else {
+    // Fallback for desktop browsers
+    const shareWindow = window.open('', '_blank', 'width=600,height=400');
+    shareWindow.document.write(``);
+  }
+};
 
     // Load more jobs for infinite scroll
     const fetchMoreJobs = useCallback( () => {
@@ -544,8 +569,8 @@ export const AllJobs = () => {
                                             onClick={ () => navigate( `/${ companyUserName }/job-detail/${ job._id }` ) }
                                         >
                                             {/* Enhanced Status badge positioned at top right */ }
-                                            <div className="absolute top-3 right-3 z-10">
-                                                <span className={ `inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ job.status === 'Active'
+                                            <div className="flex row-auto right-3 z-10 p-3 justify-end">
+                                                <span className={ `inline-flex items-center px-3  rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${ job.status === 'Active'
                                                     ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
                                                     job.status === 'Closed'
                                                         ? 'bg-red-50 text-red-700 border-red-200 group-hover:bg-red-100 group-hover:text-red-800' :
@@ -556,9 +581,16 @@ export const AllJobs = () => {
                                                         }` }></div>
                                                     { statusMap[ job.status ] }
                                                 </span>
+                                                <button
+                                                    onClick={ ( e ) => handleShareJob( e, job ) }
+                                                    className="flex items-center text-purple-600 group-hover:text-purple-300 font-medium transition-colors duration-200 text-sm hover:bg-purple-50 group-hover:hover:bg-purple-900/20 px-2 py-1 rounded-md"
+                                                >
+                                                    <Share2 className="h-4 w-4 mr-1" />
+                                                    Share
+                                                </button>
                                             </div>
 
-                                            <div className="p-6 pt-12"> {/* Added extra top padding to accommodate badge */ }
+                                            <div className="p-6 pt-2"> {/* Added extra top padding to accommodate badge */ }
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */ }
                                                         <h3 className="text-xl font-bold text-gray-900 group-hover:text-white mb-4 font-DM leading-tight">
@@ -616,6 +648,7 @@ export const AllJobs = () => {
                                                         <Edit className="h-4 w-4 mr-1" />
                                                         View & Edit
                                                     </button>
+                                                   
                                                     <button
                                                         onClick={ ( e ) => {
                                                             e.stopPropagation();
