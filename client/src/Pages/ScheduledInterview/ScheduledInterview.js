@@ -10,7 +10,7 @@ import useScheduledInterview from '../../hooks/useScheduledInterview';
 export const ScheduledInterview = () => {
     const [ page, setPage ] = useState( 1 );
     const limit = 10;
-    const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+    const companyId = JSON.parse( localStorage.getItem( "user" ) )?.company_id;
     const storedUser = localStorage.getItem( "user" );
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerID = interviewer?._id || "";
@@ -135,7 +135,7 @@ export const ScheduledInterview = () => {
     useEffect( () => {
         const fetchInterviewRounds = async () => {
             try {
-                const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
+                const companyId = JSON.parse( localStorage.getItem( "user" ) )?.company_id;
                 const res = await axios.get(
                     `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=1&limit=100&search=`,
                     {
@@ -360,12 +360,6 @@ export const ScheduledInterview = () => {
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
 
-    // Get interviewer name by ID
-    const getInterviewerName = ( interviewerId ) => {
-        const interviewer = interviewers.find( int => int._id === interviewerId );
-        return interviewer ? capitalizeFirstLetter( interviewer.userName || interviewer.name ) : "N/A";
-    };
-
     return (
         <div className="px-8 py-10 w-full min-h-screen"
             style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
@@ -420,7 +414,7 @@ export const ScheduledInterview = () => {
                 </div>
             </div>
 
-          
+
 
             { isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -472,9 +466,7 @@ export const ScheduledInterview = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
                                     { isAdmin && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">
-                                            { getInterviewerName( interview?.interviewerID ) }
-                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.interviewerID?.userName ) || "N/A" }</td>
                                     ) }
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ formatDate( interview.date ) }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
