@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Briefcase, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Briefcase, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
 import axios from 'axios';
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -14,7 +14,10 @@ export const ScheduledInterview = () => {
     const storedUser = localStorage.getItem( "user" );
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerID = interviewer?._id || "";
+    const isAdmin = interviewer?.role === 'admin' || interviewer?.isAdmin; // Check if user is admin
+
     const [ statuses, setStatuses ] = useState( [] );
+    const [ selectedInterviewerId, setSelectedInterviewerId ] = useState( isAdmin ? "" : interviewerID );
 
     // ✅ Correctly using the custom hook inside the component
     const {
@@ -22,7 +25,12 @@ export const ScheduledInterview = () => {
         error,
         isLoading,
         refetchScheduledInterviews
-    } = useScheduledInterview( { page, limit, interviewerID } );
+    } = useScheduledInterview( {
+        page,
+        limit,
+        interviewerID: selectedInterviewerId || ( isAdmin ? "" : interviewerID )
+    } );
+
     const [ interviewers, setInterviewers ] = useState( [] );
     const [ detailedInterview, setDetailedInterview ] = useState( null );
     const [ editForm, setEditForm ] = useState( {
@@ -103,6 +111,12 @@ export const ScheduledInterview = () => {
 
         fetchInterviewers();
     }, [ companyId ] );
+
+    // Handle interviewer filter change
+    const handleInterviewerFilterChange = ( interviewerId ) => {
+        setSelectedInterviewerId( interviewerId );
+        setPage( 1 ); // Reset to first page when filter changes
+    };
 
     const handleEdit = ( interview ) => {
         setDetailedInterview( interview );
@@ -346,6 +360,11 @@ export const ScheduledInterview = () => {
         return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
     };
 
+    // Get interviewer name by ID
+    const getInterviewerName = ( interviewerId ) => {
+        const interviewer = interviewers.find( int => int._id === interviewerId );
+        return interviewer ? capitalizeFirstLetter( interviewer.userName || interviewer.name ) : "N/A";
+    };
 
     return (
         <div className="px-8 py-10 w-full min-h-screen"
@@ -356,11 +375,52 @@ export const ScheduledInterview = () => {
                     <div>
                         <h1 className="text-3xl font-bold text-white flex items-center">
                             <Briefcase className="mr-2 h-6 w-6 text-gray-100" />
-                            Scheduled Interviews
+                            { isAdmin ? "All Scheduled Interviews" : "My Scheduled Interviews" }
                         </h1>
+                        { isAdmin && (
+                            <p className="text-gray-300 text-sm mt-1">
+                                Filter by interviewer to view specific interviews
+                            </p>
+                        ) }
                     </div>
+                    {/* Admin Filter Section */ }
+                    { isAdmin && (
+                        <div className="mb-6 bg-transparent rounded-xl p-4 ml-auto w-fit flex items-center justify-center">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center text-gray-700">
+                                    <Filter className="mr-2 h-5 w-5 text-white" />
+                                    <span className="font-medium text-white">Interviewer:</span>
+                                </div>
+                                <div className="flex-1 min-w-[200px]">
+                                    <select
+                                        value={ selectedInterviewerId }
+                                        onChange={ ( e ) => handleInterviewerFilterChange( e.target.value ) }
+                                        className="w-full border border-gray-300 rounded-xl shadow-sm py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 hover:border-gray-400 transition-colors"
+                                    >
+                                        <option value="">All Interviewers</option>
+                                        { interviewers.map( ( interviewer ) => (
+                                            <option key={ interviewer._id } value={ interviewer._id }>
+                                                { capitalizeFirstLetter( interviewer.userName || interviewer.name ) }
+                                            </option>
+                                        ) ) }
+                                    </select>
+                                </div>
+                                { selectedInterviewerId && (
+                                    <button
+                                        onClick={ () => handleInterviewerFilterChange( "" ) }
+                                        className="px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-1"
+                                    >
+                                        <X className="h-4 w-4" />
+                                        Clear
+                                    </button>
+                                ) }
+                            </div>
+                        </div>
+                    ) }
                 </div>
             </div>
+
+          
 
             { isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -377,9 +437,15 @@ export const ScheduledInterview = () => {
                         🕒 No Interviews Found
                     </h3>
                     <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                        We’re currently in the process of assigning interviewers.
+                        { selectedInterviewerId
+                            ? "No interviews found for the selected interviewer."
+                            : "We're currently in the process of assigning interviewers."
+                        }
                         <br className="hidden sm:block" />
-                        <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
+                        <span className="text-blue-500 font-medium">
+                            { selectedInterviewerId ? "Try selecting a different interviewer." : "Please wait" }
+                        </span>
+                        { !selectedInterviewerId && " while your interview schedule is being prepared." }
                     </p>
                 </div>
             ) : (
@@ -389,6 +455,9 @@ export const ScheduledInterview = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job Title</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Candidate</th>
+                                { isAdmin && (
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
+                                ) }
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Time</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
@@ -402,6 +471,11 @@ export const ScheduledInterview = () => {
                                 <tr key={ interview?._id } className="group hover:bg-gray-700 ">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
+                                    { isAdmin && (
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">
+                                            { getInterviewerName( interview?.interviewerID ) }
+                                        </td>
+                                    ) }
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ formatDate( interview.date ) }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
