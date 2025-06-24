@@ -3,6 +3,7 @@ import upload, { uploadToS3 } from "../../middleware/upload.js";
 import Job from "../../models/Job.js";
 
 const addApplication = async (req, res) => {
+  console.log("testconsole")
   const { jobID, candidateID, applicationStatusId, contactInfo, emailInfo, experience, questions, answers, company_id, jobStatusId } = req.body;
   try {
     if ( !jobID || !candidateID || !applicationStatusId || !contactInfo || !emailInfo || !experience || !company_id || !jobStatusId ) {
@@ -11,6 +12,7 @@ const addApplication = async (req, res) => {
 
     // Check if resume file exists
     let resumeUrl = null;
+    console.log("dtat11111")
     if (req.file) {
       resumeUrl = await uploadToS3(req.file);
     } else {
@@ -31,9 +33,9 @@ const addApplication = async (req, res) => {
       answers: answers || [],
       company_id,
     });
-
+console.log("first")
     await newApplication.save();
-
+console.log("second")
 
     // ✅ Update job status to 'Filled' only if it's the first application
     const existingApplications = await Application.find( { jobID } );

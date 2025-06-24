@@ -12,6 +12,7 @@ export const getInterviews = async ( req, res ) => {console.log("api called")
         const interviewerID = decodeURIComponent( req.query.interviewerID || "" );
         const searchTerm = req.query.searchTerm || '';
         const filterStatus = req.query.filterStatus || '';
+        const filterRound = req.query.filterRound || '';
         const { company_id } = req.headers;
 
         // Pagination calculation
@@ -34,6 +35,11 @@ export const getInterviews = async ( req, res ) => {console.log("api called")
         if ( filterStatus && filterStatus.trim() !== '' && filterStatus.trim() !== 'all' ) {
             filter.status = filterStatus;
         }
+        // Add round filter if provided directly to the initial database query
+        if ( filterRound && filterRound.trim() !== '' && filterRound.trim() !== 'all' ) {
+            filter.roundID = filterRound;
+        }
+
 
         // Get interviews that match the base filter (without search term and candidateID)
         // We'll do the search term and candidateID filtering after populating the fields
