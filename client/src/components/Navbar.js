@@ -13,7 +13,8 @@ import {
   Briefcase,
   Calendar,
   UserCheck,
-  ChevronDown
+  ChevronDown,
+  BriefcaseBusiness
 } from "lucide-react";
 
 const superNavItems = [
@@ -23,11 +24,41 @@ const superNavItems = [
 
 const adminNavItems = [
   { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-4 h-5" /> },
-  { label: "Users", path: "/all-users", icon: <Users className="w-4 h-5" /> },
-  { label: "Application Statuses", path: "/application-statuses", icon: <FileText className="w-4 h-5" /> },
-  { label: "Interview Status", path: "/interview-rounds", icon: <Calendar className="w-4 h-5" /> },
-  { label: "Job Status", path: "/job-statuses", icon: <Calendar className="w-4 h-5" />},
-   { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="w-4 h-5" /> },
+  {
+    label: "Hiring Manager",
+    icon: <FileText className="w-4 h-5" />,
+    subItems: [
+      { label: "Application List", path: "/application-list", icon: <FileText className="w-5 h-5" /> },
+      { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="w-5 h-5" /> },
+      { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> }
+    ]
+  },
+  {
+    label: "Recruiter Manager",
+    icon: <FileText className="w-4 h-5" />,
+    subItems: [
+      { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="w-5 h-5" /> },
+      { label: "Applications", path: "/all-applications", icon: <FileText className="w-5 h-5" /> },
+      { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> },
+    ]
+  },
+  {
+    label: "Interviewer",
+    icon: <FileText className="w-4 h-5" />,
+    subItems: [
+      { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="w-5 h-5" /> },
+    ]
+  },
+  {
+    label: "Configuration",
+    icon: <FileText className="w-4 h-5" />,
+    subItems: [
+      { label: "Users", path: "/all-users", icon: <Users className="w-4 h-5" /> },
+      { label: "Application Statuses", path: "/application-statuses", icon: <FileText className="w-4 h-5" /> },
+      { label: "Interview Status", path: "/interview-rounds", icon: <Calendar className="w-4 h-5" /> },
+      { label: "Job Status", path: "/job-statuses", icon: <Calendar className="w-4 h-5" /> },
+    ]
+  },
 ];
 
 const hiringManagerNavItems = [
@@ -61,7 +92,6 @@ export const Navbar = () => {
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const location = useLocation();
   const [ company, setCompany ] = useState( [] );
-  console.log( "companyUserName>>>>>>>??????", company )
   
   useEffect( () => {
     function fetchCompanyUserName() {
@@ -75,22 +105,18 @@ export const Navbar = () => {
 
     fetchCompanyUserName();
   }, [] );
-  console.log( "navbaer username", companyUserName, typeof companyUserName );
 
    
- 
+  console.log("isDropdownOpen", isDropdownOpen);
    useEffect( () => {
 
      const fetchCompanies = async () => {
        try {
-        console.log("running")
          const response = await fetch(
            `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }`
          )
-         console.log("response112233", response)
          if ( response.ok ) {
            const data = await response.json()
-           console.log( "datacompany", data )
            setCompany( data )
          } else {
            setCompany( [] )
@@ -120,19 +146,6 @@ export const Navbar = () => {
   const toggleDropdown = () => {
     setIsDropdownOpen( ( prev ) => !prev );
   };
-
-  const closeDropdown = ( e ) => {
-    if ( dropdownRef.current && !dropdownRef.current.contains( e.target ) ) {
-      setIsDropdownOpen( false );
-    }
-  };
-
-  useEffect( () => {
-    document.addEventListener( "click", closeDropdown );
-    return () => {
-      document.removeEventListener( "click", closeDropdown );
-    };
-  }, [] );
 
   useEffect( () => {
     const token = localStorage.getItem( "user" );
@@ -173,6 +186,25 @@ export const Navbar = () => {
       }
     }
   }, [ location, loginData ] );
+
+  useEffect( () => {
+    const handleClickOutside = ( event ) => {
+      if ( dropdownRef.current && !dropdownRef.current.contains( event.target ) ) {
+        setIsDropdownOpen( false );
+      }
+    };
+
+    if ( isDropdownOpen ) {
+      document.addEventListener( 'mousedown', handleClickOutside );
+    } else {
+      document.removeEventListener( 'mousedown', handleClickOutside );
+    }
+
+    return () => {
+      document.removeEventListener( 'mousedown', handleClickOutside );
+    };
+  }, [ isDropdownOpen ] );
+
   const logoutHandler = async () => {
     try {
       const res = await fetch( `${ process.env.REACT_APP_BASE_URL }/auth/logout`, {
@@ -180,6 +212,7 @@ export const Navbar = () => {
       } )
       const result = await res.json()
       console.log( "result,result" )
+
       if ( result.success ) {
         localStorage.removeItem( "usertoken" )
         localStorage.removeItem( "user" )
@@ -226,15 +259,51 @@ export const Navbar = () => {
 
             {/* MAIN MENU - Desktop */ }
             <div className="hidden md:flex items-center justify-center space-x-8">
-              { navItems.map( ( { label, path, icon } ) => {
-                const userRole = loginData?.role ? loginData?.role : null
-                // special-case Home to respect companyUserName
-                console.log( "path>>", path )
-                const to =
-                  path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `/${ companyUserName }${ path }`;
+              { navItems.map( ( item ) => {
+                const userRole = loginData?.role ? loginData?.role : null;
 
-                console.log( "to>>>", to )
+                // Handle items with subItems (dropdown)
+                if ( item.subItems ) {
+                  return (
+                    <div key={ item.label } className="relative group" ref={ dropdownRef }>
+                      <button
+                        className={ `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ item.subItems.some( subItem => location.pathname === ( userRole === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }` ) )
+                            ? "text-white bg-slate-600"
+                            : "text-gray-300 hover:text-white hover:border hover:border-white"
+                          }` }
+                      >
+                        { item.icon }
+                        <span>{ item.label }</span>
+                        <ChevronDown className="w-4 h-4 ml-1" />
+                      </button>
 
+                      <div className="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div className="py-1">
+                          { item.subItems.map( ( subItem ) => {
+                            const to = userRole === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }`;
+                            return (
+                              <NavLink
+                                key={ subItem.path }
+                                to={ to }
+                                className={ ( { isActive } ) =>
+                                  `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${ isActive ? "bg-gray-100 font-medium" : ""
+                                  }`
+                                }
+                              >
+                                { subItem.icon && <span className="mr-3">{ subItem.icon }</span> }
+                                { subItem.label }
+                              </NavLink>
+                            );
+                          } ) }
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Handle regular items
+                const path = item.path;
+                const to = path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `/${ companyUserName }${ path }`;
 
                 return (
                   <NavLink
@@ -247,8 +316,8 @@ export const Navbar = () => {
                       }`
                     }
                   >
-                    { icon }
-                    <span>{ label }</span>
+                    { item.icon }
+                    <span>{ item.label }</span>
                   </NavLink>
                 );
               } ) }
@@ -271,6 +340,10 @@ export const Navbar = () => {
                     <div className="absolute right-0 top-12 w-48 mt-2 bg-white rounded-md shadow-lg z-100 py-1 ring-1 ring-black ring-opacity-5 transform origin-top-right transition-all">
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/profile` : "/profile" }
+                        onClick={ () => {
+                          setIsDropdownOpen( false );
+                          setIsMenuOpen( false );
+                         }}
                         className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <UserPen className="w-4 h-4 mr-3 text-gray-600" />
@@ -278,7 +351,11 @@ export const Navbar = () => {
                       </Link>
                       <hr className="my-1 border-gray-200" />
                       <button
-                        onClick={ logoutHandler }
+                        onClick={ () => {
+                          logoutHandler();
+                          setIsDropdownOpen( false );
+                          setIsMenuOpen( false );
+                        }}
                         className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <LogOut className="w-4 h-4 mr-3 text-gray-600 rounded" />

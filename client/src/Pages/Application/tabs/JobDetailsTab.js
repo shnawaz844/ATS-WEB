@@ -45,7 +45,6 @@ const JobDetailsTab = ( { job } ) => {
           }
         } );
         const data = await response.json();
-        console.log( 'Fetched Recruiters:', data );
         setRecruitersList( data );
       } catch ( error ) {
         console.error( 'Error fetching recruiters:', error );

@@ -158,7 +158,6 @@ const ScheduleInterviewModal = ( { isOpen, onClose, application } ) => {
                         throw new Error( `HTTP error! Status: ${ response.status }` );
                     }
                     const data = await response.json();
-                    console.log( "Fetched interviewers>>>>:", data );
                     setInterviewers( data );
                 } catch ( error ) {
                     console.error( "Error fetching interviewers:", error.message );

@@ -113,7 +113,7 @@ const InterviewListing = () => {
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center">
               <Briefcase className="mr-2 h-6 w-6 text-white" />
-              Interview Management
+              Interview Status
             </h1>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto items-center">

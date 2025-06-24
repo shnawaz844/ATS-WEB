@@ -42,6 +42,9 @@ export const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+  const userRole = user.role;
+  const isRecruiterManager = userRole === 'recruiter_manager';
 
   useEffect(() => {
     if (redirect) {

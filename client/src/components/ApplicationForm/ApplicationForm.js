@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useAddUser } from '../../hooks/useUser';
 import {
     FileUp,
     Mail,
@@ -13,6 +14,7 @@ import {
     Lock
 } from "lucide-react";
 import emailjs from "@emailjs/browser";
+import UserDialog from "../UserDialog";
 
 export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobStatuses } ) => {
     const companyUserName = localStorage.getItem( "companyUserName" );
@@ -20,12 +22,29 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
     const [ file, setFile ] = useState( null );
     const [ isSubmitting, setIsSubmitting ] = useState( false );
     const [ successMessage, setSuccessMessage ] = useState( "" );
+    const [ isDialogOpen, setIsDialogOpen ] = useState( false );
+    const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+    const userRole = user.role;
+    const isRecruiterManager = userRole === 'recruiter_manager';
 
-    console.log( "applicationStatusesData >>", applicationStatusesData );
-    console.log( "jobStatuses", jobStatuses );
+    // State for UserDialog
+    const [ showUserDialog, setShowUserDialog ] = useState( false );
+    const [ dialogMode, setDialogMode ] = useState( "add" );
+    const [ userFormData, setUserFormData ] = useState( {
+        userName: "",
+        email: "",
+        password: "",
+        gender: "",
+        address: "",
+        role: "candidate", // Default role for application form
+        company_id: JSON.parse( localStorage.getItem( "user" ) )?.company_id,
+    } );
+
     // Fetch company_id from localStorage (or use the passed prop)
     const companyId = JSON.parse( localStorage.getItem( "user" ) )?.company_id;
     const [ emailStatus, setEmailStatus ] = useState( "" );
+    const [ candidateID, setCandidateID ] = useState( null ); // Initialize as null
+    const { mutate: addUser } = useAddUser();
     const {
         register,
         handleSubmit,
@@ -40,20 +59,32 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
             contactInfo: "",
             emailInfo: "",
             experience: "",
-            // additionalDocuments: null,
             questions: [],
             answers: [],
             companyId: companyId,
         },
     } );
 
-    // Initialize EmailJS (similar to your first document)
+    // Initialize EmailJS
     useEffect( () => {
-        // Initialize EmailJS with your public key
         if ( process.env.REACT_APP_EMAILJS_PUBLIC_KEY ) {
             emailjs.init( process.env.REACT_APP_EMAILJS_PUBLIC_KEY );
         }
     }, [] );
+
+    // Set candidateID based on user role
+    useEffect( () => {
+        if ( loginData ) {
+            if ( isRecruiterManager ) {
+                // For recruiter manager, candidateID will be set when a new candidate is created
+                // or they can select an existing candidate
+                setCandidateID( null );
+            } else if ( loginData.role === 'candidate' ) {
+                // For regular candidates, use their own ID
+                setCandidateID( loginData._id );
+            }
+        }
+    }, [ loginData, isRecruiterManager ] );
 
     // Handle file
     const handleFileUpload = ( e ) => {
@@ -73,7 +104,42 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
         }
     }, [ applicationStatusesData, setValue ] );
 
-    // Improved EmailJS function (based on your first document)
+    // Handle UserDialog form changes
+    const handleUserFormChange = ( e ) => {
+        const { name, value, type, checked } = e.target;
+        setUserFormData( prev => ( {
+            ...prev,
+            [ name ]: type === "checkbox" ? checked : value
+        } ) );
+    };
+
+    const handleCloseDialog = () => {
+        setShowUserDialog( false );
+    };
+
+    // Handle UserDialog form submission
+    const handleUserFormSubmit = ( e ) => {
+        e.preventDefault();
+        if ( dialogMode === 'add' ) {
+            addUser( userFormData, {
+                onSuccess: ( res ) => {
+                    console.log( 'New candidate created:', res.data );
+                    if ( res.data ) {
+                        // Set the newly created candidate's ID
+                        setCandidateID( res.data );
+                        // Update the email field with the new candidate's email
+                        setValue( "emailInfo", userFormData.email );
+                    }
+                    setShowUserDialog( false );
+                },
+                onError: ( error ) => {
+                    console.error( 'Failed to add user:', error );
+                },
+            } );
+        }
+    };
+
+    // Improved EmailJS function
     const sendConfirmationEmail = async ( formData ) => {
         console.log( "formData", formData )
         try {
@@ -116,7 +182,6 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
             console.error( "❌ EmailJS Error:", error );
             setEmailStatus( "Failed to send confirmation email, but application was submitted." );
 
-            // Log detailed error information
             if ( error.status ) {
                 console.error( "Error Status:", error.status );
                 console.error( "Error Text:", error.text );
@@ -127,10 +192,16 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
     };
 
     const onSubmit = async ( data ) => {
-        console.log( "data", data );
+        console.log( "Form data:", data );
 
-        // Check candidate login again as a safeguard
-        if ( !loginData || loginData?.role !== "candidate" ) {
+        // For recruiter manager, ensure candidateID is set
+        if ( isRecruiterManager && !candidateID ) {
+            alert( "Please create or select a candidate first before applying." );
+            return;
+        }
+
+        // Check candidate login for regular candidates
+        if ( !isRecruiterManager && ( !loginData || loginData?.role !== "candidate" ) ) {
             navigate( "/login", {
                 state: {
                     returnUrl: window.location.pathname,
@@ -146,15 +217,20 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
         // Prepare FormData
         const formData = new FormData();
 
-        // ✅ Get job status for "Filled"
+        // Get job status for "Filled"
         const jobStatus = jobStatuses?.filter( status => status.jobStatus === "Filled" );
 
-        // ✅ Get Step 1 status from applicationStatusesData
+        // Get Step 1 status from applicationStatusesData
         const step1Status = applicationStatusesData?.applicationStatuses?.find(
             ( status ) => status.applicationStep === "1"
-        ); 
+        );
 
-        formData.append( "candidateID", loginData._id );
+        // Use the appropriate candidate ID based on user role
+        const finalCandidateID = isRecruiterManager ? candidateID : loginData._id;
+
+        console.log( "Using candidateID:", finalCandidateID );
+
+        formData.append( "candidateID", finalCandidateID );
         formData.append( "jobID", job._id );
         formData.append( "applicationStatusId", step1Status?._id || "" );
         formData.append( "jobStatusId", jobStatus.length ? jobStatus[ 0 ]._id : "" );
@@ -162,7 +238,6 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
         formData.append( "contactInfo", data.contactInfo );
         formData.append( "emailInfo", data.emailInfo );
         formData.append( "experience", data.experience );
-        // formData.append( "additionalDocuments", data.additionalDocuments );
         formData.append( "questions", JSON.stringify( job.applicationForm.question ) );
         formData.append( "answers", JSON.stringify( data.answers ) );
         formData.append( "company_id", companyId );
@@ -185,9 +260,17 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
 
                 // Set success message based on email status
                 if ( emailSent ) {
-                    setSuccessMessage( "Application submitted successfully! Check your email for confirmation." );
+                    setSuccessMessage(
+                        isRecruiterManager
+                            ? "Application submitted successfully on behalf of candidate! Confirmation email sent."
+                            : "Application submitted successfully! Check your email for confirmation."
+                    );
                 } else {
-                    setSuccessMessage( "Application submitted successfully! (Email confirmation may have failed)" );
+                    setSuccessMessage(
+                        isRecruiterManager
+                            ? "Application submitted successfully on behalf of candidate! (Email confirmation may have failed)"
+                            : "Application submitted successfully! (Email confirmation may have failed)"
+                    );
                 }
 
                 // Redirect after a delay
@@ -208,8 +291,8 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
         }
     };
 
-    // If not logged in, don't render the form (useEffect will redirect)
-    if ( !loginData ) {
+    // If not logged in as candidate and not recruiter manager, don't render the form
+    if ( !loginData && !isRecruiterManager ) {
         return (
             <div className="flex flex-col items-center justify-center p-6 bg-blue-50 rounded-lg text-center">
                 <Lock size={ 32 } className="text-red-600 mb-3" />
@@ -240,157 +323,198 @@ export const ApplicationForm = ( { job, loginData, applicationStatusesData, jobS
     }
 
     return (
-        <form onSubmit={ handleSubmit( onSubmit ) } className="space-y-6">
-            {/* Application Status - Hidden from UI but still in form data */ }
-            <input type="hidden" { ...register( "applicationStatus" ) } />
+        <>
+            <form onSubmit={ handleSubmit( onSubmit ) } className="space-y-6">
+                { isRecruiterManager && (
+                    <div className="space-y-4">
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h3 className="text-sm font-medium text-blue-800 mb-2">
+                                Recruiter Manager Mode
+                            </h3>
+                            <p className="text-sm text-blue-600 mb-3">
+                                { candidateID
+                                    ? `Selected Candidate ID: ${ candidateID }`
+                                    : "No candidate selected. Please create a new candidate first."
+                                }
+                            </p>
+                            <button
+                                type="button"
+                                onClick={ () => setShowUserDialog( true ) }
+                                className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                            >
+                                { candidateID ? "Create Another Candidate" : "Create New Candidate" }
+                            </button>
+                        </div>
+                    </div>
+                ) }
 
-            {/* Resume */ }
-            <div className="space-y-2">
-                <label className="flex items-center text-gray-700 font-medium">
-                    <FileText size={ 18 } className="mr-2 text-blue-500" />
-                    Resume
-                </label>
-                <div className="relative">
+                {/* Application Status - Hidden from UI but still in form data */ }
+                <input type="hidden" { ...register( "applicationStatus" ) } />
+
+                {/* Resume */ }
+                <div className="space-y-2">
+                    <label className="flex items-center text-gray-700 font-medium">
+                        <FileText size={ 18 } className="mr-2 text-blue-500" />
+                        Resume
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="file"
+                            id="resume"
+                            onChange={ handleFileUpload }
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            required
+                        />
+                        <div className="flex items-center justify-between px-4 py-3 border border-gray-300 border-dashed rounded-md bg-gray-50 text-gray-500">
+                            <div className="flex items-center">
+                                <FileUp size={ 18 } className="mr-2" />
+                                <span>{ file ? file.name : "Upload resume" }</span>
+                            </div>
+                            <span className="text-sm text-blue-500">Browse</span>
+                        </div>
+                    </div>
+                    <p className="text-xs text-gray-500">PDF, DOCX, or RTF (Max 5MB)</p>
+                </div>
+
+                {/* Contact Info */ }
+                <div className="space-y-2">
+                    <label className="flex items-center text-gray-700 font-medium">
+                        <Mail size={ 18 } className="mr-2 text-blue-500" />
+                        Contact Information
+                    </label>
                     <input
-                        type="file"
-                        id="resume"
-                        onChange={ handleFileUpload }
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        type="number"
+                        { ...register( "contactInfo", { required: true } ) }
+                        placeholder="Phone number"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                     />
-                    <div className="flex items-center justify-between px-4 py-3 border border-gray-300 border-dashed rounded-md bg-gray-50 text-gray-500">
-                        <div className="flex items-center">
-                            <FileUp size={ 18 } className="mr-2" />
-                            <span>{ file ? file.name : "Upload your resume" }</span>
-                        </div>
-                        <span className="text-sm text-blue-500">Browse</span>
+                    { errors.contactInfo && (
+                        <p className="flex items-center text-red-500 text-sm">
+                            <AlertCircle size={ 14 } className="mr-1" />
+                            Contact information is required
+                        </p>
+                    ) }
+                </div>
+
+                {/* Email Info */ }
+                <div className="space-y-2">
+                    <label className="flex items-center text-gray-700 font-medium">
+                        <Mail size={ 18 } className="mr-2 text-blue-500" />
+                        Email Information
+                    </label>
+                    <input
+                        type="email"
+                        { ...register( "emailInfo", { required: true } ) }
+                        placeholder="Email"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    />
+                    { errors.emailInfo && (
+                        <p className="flex items-center text-red-500 text-sm">
+                            <AlertCircle size={ 14 } className="mr-1" />
+                            Email information is required
+                        </p>
+                    ) }
+                </div>
+
+                {/* Experience */ }
+                <div className="space-y-2">
+                    <label className="flex items-center text-gray-700 font-medium">
+                        <Clock size={ 18 } className="mr-2 text-blue-500" />
+                        Relevant Experience
+                    </label>
+                    <textarea
+                        { ...register( "experience", { required: true } ) }
+                        placeholder="Briefly describe relevant experience for this role"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        rows="4"
+                        required
+                    ></textarea>
+                    { errors.experience && (
+                        <p className="flex items-center text-red-500 text-sm">
+                            <AlertCircle size={ 14 } className="mr-1" />
+                            Experience information is required
+                        </p>
+                    ) }
+                </div>
+
+                {/* Application Questions */ }
+                { job.applicationForm.question && job.applicationForm.question.length > 0 && (
+                    <div className="space-y-4">
+                        <h2 className="flex items-center text-lg font-semibold text-gray-800 pb-2 border-b">
+                            <User size={ 18 } className="mr-2 text-blue-500" />
+                            Application Questions
+                        </h2>
+                        { job.applicationForm.question.map( ( question, index ) => (
+                            <div key={ index } className="space-y-2">
+                                <label className="block text-gray-700 font-medium">
+                                    { question }
+                                </label>
+                                <textarea
+                                    { ...register( `answers[${ index }]`, { required: true } ) }
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    rows="3"
+                                    required
+                                ></textarea>
+                                { errors.answers && errors.answers[ index ] && (
+                                    <p className="flex items-center text-red-500 text-sm">
+                                        <AlertCircle size={ 14 } className="mr-1" />
+                                        This question requires an answer
+                                    </p>
+                                ) }
+                            </div>
+                        ) ) }
                     </div>
-                </div>
-                <p className="text-xs text-gray-500">PDF, DOCX, or RTF (Max 5MB)</p>
-            </div>
-
-            {/* Contact Info */ }
-            <div className="space-y-2">
-                <label className="flex items-center text-gray-700 font-medium">
-                    <Mail size={ 18 } className="mr-2 text-blue-500" />
-                    Contact Information
-                </label>
-                <input
-                    type="number"
-                    { ...register( "contactInfo", { required: true } ) }
-                    placeholder="Phone number"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                />
-                { errors.contactInfo && (
-                    <p className="flex items-center text-red-500 text-sm">
-                        <AlertCircle size={ 14 } className="mr-1" />
-                        Contact information is required
-                    </p>
                 ) }
-            </div>
-            {/* Email Info */ }
-            <div className="space-y-2">
-                <label className="flex items-center text-gray-700 font-medium">
-                    <Mail size={ 18 } className="mr-2 text-blue-500" />
-                    Email Information
-                </label>
-                <input
-                    type="string"
-                    { ...register( "emailInfo", { required: true } ) }
-                    placeholder="Email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                />
-                { errors.emailInfo && (
-                    <p className="flex items-center text-red-500 text-sm">
-                        <AlertCircle size={ 14 } className="mr-1" />
-                        Contact information is required
-                    </p>
+
+                {/* Email Status */ }
+                { emailStatus && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                        <p className="text-blue-700 text-sm">{ emailStatus }</p>
+                    </div>
                 ) }
-            </div>
 
-            {/* Experience */ }
-            <div className="space-y-2">
-                <label className="flex items-center text-gray-700 font-medium">
-                    <Clock size={ 18 } className="mr-2 text-blue-500" />
-                    Relevant Experience
-                </label>
-                <textarea
-                    { ...register( "experience", { required: true } ) }
-                    placeholder="Briefly describe your relevant experience for this role"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows="4"
-                    required
-                ></textarea>
-                { errors.experience && (
-                    <p className="flex items-center text-red-500 text-sm">
-                        <AlertCircle size={ 14 } className="mr-1" />
-                        Experience information is required
-                    </p>
-                ) }
-            </div>
+                {/* Submit Button */ }
+                <button
+                    type="submit"
+                    disabled={ isSubmitting || ( isRecruiterManager && !candidateID ) }
+                    className={ `w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition duration-200 ${ isSubmitting || ( isRecruiterManager && !candidateID )
+                            ? "bg-gradient-to-r from-gray-700 to-gray-100 cursor-not-allowed"
+                            : "bg-gray-700 hover:bg-gray-400 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
+                        }` }
+                >
+                    { isSubmitting ? (
+                        <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                        </>
+                    ) : (
+                        <>
+                            <Send size={ 18 } className="mr-2" />
+                            { isRecruiterManager ? "Apply on Behalf of Candidate" : "Apply Now" }
+                        </>
+                    ) }
+                </button>
+            </form>
 
-            {/* Application Questions */ }
-            { job.applicationForm.question && job.applicationForm.question.length > 0 && (
-                <div className="space-y-4">
-                    <h2 className="flex items-center text-lg font-semibold text-gray-800 pb-2 border-b">
-                        <User size={ 18 } className="mr-2 text-blue-500" />
-                        Application Questions
-                    </h2>
-                    { job.applicationForm.question.map( ( question, index ) => (
-                        <div key={ index } className="space-y-2">
-                            <label className="block text-gray-700 font-medium">
-                                { question }
-                            </label>
-                            <textarea
-                                { ...register( `answers[${ index }]`, { required: true } ) }
-                                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                rows="3"
-                                required
-                            ></textarea>
-                            { errors.answers && errors.answers[ index ] && (
-                                <p className="flex items-center text-red-500 text-sm">
-                                    <AlertCircle size={ 14 } className="mr-1" />
-                                    This question requires an answer
-                                </p>
-                            ) }
-                        </div>
-                    ) ) }
-                </div>
-            ) }
-
-            {/* Email Status */ }
-            { emailStatus && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-blue-700 text-sm">{ emailStatus }</p>
-                </div>
-            ) }
-
-            {/* Submit Button */ }
-            <button
-                type="submit"
-                disabled={ isSubmitting }
-                className={ `w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition duration-200 ${ isSubmitting
-                    ? "bg-gradient-to-r from-gray-700 to-gray-100 cursor-not-allowed"
-                    : "bg-gray-700 hover:bg-gray-400 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
-                    }` }
-            >
-                { isSubmitting ? (
-                    <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Submitting...
-                    </>
-                ) : (
-                    <>
-                        <Send size={ 18 } className="mr-2" />
-                        Apply Now
-                    </>
-                ) }
-            </button>
-        </form>
+            {/* User Dialog */ }
+            {
+                showUserDialog && (
+                    <UserDialog
+                        dialogMode={ dialogMode }
+                        formData={ userFormData }
+                        handleFormChange={ handleUserFormChange }
+                        handleFormSubmit={ handleUserFormSubmit }
+                        handleCloseDialog={ () => setShowUserDialog( false ) }
+                        loggedInUser={ loginData }
+                        companies={ [] }
+                    />
+                )
+            }
+        </>
     );
 };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, User, Briefcase, Clock, Filter, FileText, X, Check, AlertTriangle, ChevronDown, Download, ChevronRight, ChevronLeft } from 'lucide-react';
+
+import { Search, User, Briefcase, X, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const AllInterviews = () => {
   const [ activeTab, setActiveTab ] = useState( 'interviews' );
@@ -27,9 +29,10 @@ const AllInterviews = () => {
 
   const [ statuses, setStatuses ] = useState( [] );
   const [ filteredInterviews, setFilteredInterviews ] = useState( [] );
+  const [ hasMore, setHasMore ] = useState( true );
 
   const [ page, setPage ] = useState( 1 );
-  const limit = 10; // Adjust limit as needed
+  const limit = 20;
 
   // Fetch statuses from API
   useEffect( () => {
@@ -42,12 +45,11 @@ const AllInterviews = () => {
 
   // Implement search debounce
   useEffect( () => {
-    // Set a timer to update the debouncedSearch after 500ms of no typing
     const timer = setTimeout( () => {
       setDebouncedSearch( searchTerm );
       setDebouncedStatus( filterStatus )
-      // Reset to page 1 when search term changes
       setPage( 1 );
+      setHasMore( true );
     }, 500 );
 
     // Clear the timer if searchTerm changes before 500ms
@@ -60,51 +62,29 @@ const AllInterviews = () => {
   // Fetch scheduled interviews
   const { assignedInterviews, error: interviewError, isLoading: interviewLoading, refetchAssignedInterviews } = useScheduledInterview( page, limit, debouncedSearch, debouncedStatus );
 
-  const totalPages = assignedInterviews?.totalPages || 1;
-
   useEffect( () => {
-    if ( assignedInterviews?.interviews?.length )
-      setFilteredInterviews( assignedInterviews?.interviews )
-  }, [ assignedInterviews?.interviews ] )
-
-
-  // console.log( "assignedInterviews", assignedInterviews );
-
-  const viewPDF = ( resumeUrl ) => {
-    setPdfUrl( resumeUrl );
-    setIsPdfModalOpen( true );
-  };
-
-  const handleSaveStatus = () => {
-    // Example: send status to backend or handle locally
-    if ( !feedbackForm.status ) {
-      alert( "Please select a status before saving." );
-      return;
+    if ( assignedInterviews?.interviews?.length ) {
+      if ( page === 1 ) {
+        setFilteredInterviews( assignedInterviews.interviews );
+      } else {
+        setFilteredInterviews( prev => [ ...prev, ...assignedInterviews.interviews ] );
+      }
+      setHasMore( page < assignedInterviews.totalPages );
+    } else {
+      setHasMore( false );
     }
-    // Optional: Close modal or show confirmation
-    setIsFeedbackModalOpen( false );
-  };
+  }, [ assignedInterviews?.interviews, page ] );
 
-
-  // Handle Pagination
-  const handleNextPage = () => {
-    if ( page < totalPages ) {
+  const fetchMoreData = () => {
+    if ( hasMore ) {
       setPage( prevPage => prevPage + 1 );
     }
   };
-
-  const handlePreviousPage = () => {
-    if ( page > 1 ) {
-      setPage( prevPage => prevPage - 1 );
-    }
-  };
-
 
   const handleFeedbackClick = async ( selectedInterview ) => {
     setDetailedInterview( selectedInterview );
 
     try {
-      // Find feedback for the selected interview
       let feedbackData = feedbacks.filter( f => f?.interviewId?._id === selectedInterview._id );
 
       if ( !feedbackData.length ) {
@@ -116,8 +96,7 @@ const AllInterviews = () => {
         _id: feedbackData._id,
         feedbackTitle: feedbackData.feedbackTitle || "",
         feedback: feedbackData.feedback || "",
-        starRating: feedbackData.starRating || 0, // if rating exists in your data
-        // attachment: feedbackData.attachment || null,
+        starRating: feedbackData.starRating || 0,
       } );
     } catch ( error ) {
       console.error( "Error fetching feedback:", error );
@@ -127,7 +106,6 @@ const AllInterviews = () => {
         feedbackTitle: "",
         feedback: "",
         starRating: "",
-        // attachment: null,
       } );
     }
 
@@ -221,7 +199,7 @@ const AllInterviews = () => {
 
   const capitalizeFirstLetter = ( string ) => {
     if ( !string ) return '';
-    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
   };
 
   const handleSearchChange = ( e ) => {
@@ -230,7 +208,6 @@ const AllInterviews = () => {
 
   const handleSearchSubmit = ( e ) => {
     e.preventDefault();
-    // The debounce effect will handle the actual search
   };
 
 
@@ -328,95 +305,110 @@ const AllInterviews = () => {
         {/* Content */ }
         <div className=" rounded-t-xl shadow-sm p-6">
           { activeTab === 'interviews' && (
-            <div className="overflow-x-auto rounded-t-xl">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr className='bg-gray-700'>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date & Time</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
+            <InfiniteScroll
+              dataLength={ filteredInterviews.length }
+              next={ fetchMoreData }
+              hasMore={ hasMore }
+              loader={ <div className="text-center py-4">Loading more interviews...</div> }
+              endMessage={
+                filteredInterviews.length > 0 && (
+                  <p className="text-center py-4 text-gray-500">
+                    You've seen all interviews
+                  </p>
+                )
+              }
+            >
 
-                { assignedInterviews?.interviews?.length > 0 && (
-                  assignedInterviews.interviews?.map( ( feedback ) => (
-                    <tbody key={ feedback._id }>
-                      <tr className="group hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <User size={ 20 } className="text-indigo-600" />
+              <div className="overflow-x-auto rounded-t-xl">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr className='bg-gray-700'>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Date & Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+
+                  { filteredInterviews?.length > 0 && (
+                    filteredInterviews?.map( ( feedback ) => (
+                      <tbody key={ feedback._id }>
+                        <tr className="group hover:bg-gray-700">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <User size={ 20 } className="text-indigo-600" />
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">
+                                  { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
+                                </div>
+                                <div className="text-sm text-gray-700 group-hover:text-white">
+                                  { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
+                                </div>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  { feedback.skills?.map( ( skill, index ) => (
+                                    <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
+                                      { skill }
+                                    </span>
+                                  ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
+                                </div>
+                              </div>
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900 group-hover:text-white">
-                                { capitalizeFirstLetter( feedback?.applicationID?.candidateID?.userName ) || "N/A" }
-                              </div>
-                              <div className="text-sm text-gray-700 group-hover:text-white">
-                                { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
-                              </div>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                { feedback.skills?.map( ( skill, index ) => (
-                                  <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                                    { skill }
-                                  </span>
-                                ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
-                              </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 group-hover:text-white">
+                              { feedback.date ? formatDate( feedback.date ) : "No date" }
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( feedback?.interviewerID?.userName ) || "N/A" }</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 group-hover:text-white">
-                            { feedback.date ? formatDate( feedback.date ) : "No date" }
-                          </div>
-                          <div className="text-xs text-gray-500 group-hover:text-white">
-                            { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            value={ feedback.status || "" }
-                            onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
-                            className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
-                          >
-                            <option value="">Select status</option>
-                            { statuses?.map( ( status ) => (
-                              <option key={ status } value={ status._id }>
-                                { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
-                              </option>
-                            ) ) }
-                          </select>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={ () => {
-                              setDetailedInterview( feedback );
-                              setIsDetailModalOpen( true );
-                            } }
-                            className="text-indigo-600 hover:text-indigo-900 group-hover:text-white mr-3"
-                          >
-                            View
-                          </button>
-                          <button
-                            onClick={ () => {
-                              setDetailedInterview( feedback );
-                              handleFeedbackClick( feedback );
-                            } }
-                            className="text-indigo-600 group-hover:text-white hover:text-indigo-900"
-                          >
-                            Feedback
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  ) )
-                ) }
-              </table>
-            </div>
+                            <div className="text-xs text-gray-500 group-hover:text-white">
+                              { feedback.scheduledTime ? formatTime( feedback.scheduledTime ) : "N/A" }
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <select
+                              value={ feedback.status || "" }
+                              onChange={ ( e ) => handleStatusChange( feedback._id, e.target.value ) }
+                              className={ `px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${ getStatusColor( feedback.status ) }` }
+                            >
+                              <option value="">Select status</option>
+                              { statuses?.map( ( status ) => (
+                                <option key={ status } value={ status._id }>
+                                  { status.applicationStatus.charAt( 0 ).toUpperCase() + status.applicationStatus.slice( 1 ) }
+                                </option>
+                              ) ) }
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={ () => {
+                                setDetailedInterview( feedback );
+                                setIsDetailModalOpen( true );
+                              } }
+                              className="text-indigo-600 hover:text-indigo-900 group-hover:text-white mr-3"
+                            >
+                              View
+                            </button>
+                            <button
+                              onClick={ () => {
+                                setDetailedInterview( feedback );
+                                handleFeedbackClick( feedback );
+                              } }
+                              className="text-indigo-600 group-hover:text-white hover:text-indigo-900"
+                            >
+                              Feedback
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    ) )
+                  ) }
+                </table>
+              </div>
+            </InfiniteScroll>
           ) }
         </div>
 
@@ -477,12 +469,6 @@ const AllInterviews = () => {
                     <p className="text-lg font-semibold text-gray-800">{ formatDate( detailedInterview.date ) }</p>
                   </div>
 
-                  {/* Duration */ }
-
-                  {/* <div className="bg-gray-200 rounded-xl p-4">
-                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Duration</h3>
-                    <p className="text-lg font-semibold text-gray-800">{ detailedInterview.duration }</p>
-                  </div> */}
                   {/* { Round Name } */ }
                   <div className="bg-gray-200 rounded-xl p-4">
                     <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Round Name</h3>
@@ -517,7 +503,7 @@ const AllInterviews = () => {
                   <button
                     onClick={ () => {
                       setPdfPreviewUrl( detailedInterview?.applicationID?.resume );
-                      setIsPdfModalOpen( true ); // Opens the PDF modal
+                      setIsPdfModalOpen( true );
                     } }
                     className="px-5 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-300 hover:text-black transition-colors font-medium flex items-center gap-2"
                   >
@@ -617,48 +603,11 @@ const AllInterviews = () => {
                   <div className="flex flex-col items-center justify-center py-3">
                     <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
                     <div className="flex items-center space-x-3">
-                      {/* Assuming getRatingStars is your existing function */ }
-                      {/* We're just wrapping it with styling */ }
                       <div className="text-2xl text-amber-400 transform transition-all duration-300">
                         { getRatingStars( feedbackForm.starRating ) }
                       </div>
                     </div>
                   </div>
-
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
-                    { feedbackForm.attachment ? (
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-700">{ feedbackForm.attachment }</span>
-                        <button
-                          type="button"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={ () => setFeedbackForm( { ...feedbackForm, attachment: null } ) }
-                        >
-                          <X size={ 16 } />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-400 italic">No attachment uploaded</div>
-                    ) }
-                  </div> */}
-
-                  {/* <div className="flex justify-end pt-4 space-x-3">
-                    <button
-                      type="button"
-                      onClick={ () => setIsFeedbackModalOpen( false ) }
-                      className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-200"
-                    >
-                      Close
-                    </button>
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-300 hover:text-black"
-                      onClick={ handleSaveStatus }
-                    >
-                      Save Status
-                    </button>
-                  </div> */}
                 </form>
               </div>
             </div>
@@ -667,58 +616,7 @@ const AllInterviews = () => {
 
       </div>
 
-
-      {/* {totalPages > 1 && ( */ }
-      { filteredInterviews && filteredInterviews.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-100">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={ handlePreviousPage }
-              disabled={ page === 1 }
-              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === 1
-                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
-                }` }
-            >
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Previous
-            </button>
-
-            <div className="hidden sm:flex items-center space-x-1">
-              { [ ...Array( totalPages ) ].map( ( _, i ) => (
-                <button
-                  key={ i }
-                  onClick={ () => setPage( i + 1 ) }
-                  className={ `px-3.5 py-2 text-sm rounded-md ${ page === i + 1
-                    ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
-                    : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
-                    }` }
-                >
-                  { i + 1 }
-                </button>
-              ) ) }
-            </div>
-
-            <span className="sm:hidden text-sm text-gray-600">
-              Page { page } of { totalPages }
-            </span>
-
-            <button
-              onClick={ handleNextPage }
-              disabled={ page === totalPages }
-              className={ `flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${ page === totalPages
-                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
-                }` }
-            >
-              Next
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      ) }
-
-      { !filteredInterviews.length && (
+      { !filteredInterviews.length && !interviewLoading && (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
           <div className="bg-gray-100 p-5 rounded-full mb-4">
             <Briefcase className="h-12 w-12 text-gray-400" />
@@ -733,7 +631,6 @@ const AllInterviews = () => {
               <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
             </p>
           </div>
-
         </div>
       ) }
     </div>

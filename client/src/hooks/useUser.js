@@ -43,7 +43,8 @@ export const useUsers = ({ page, limit = 5, search = '', role }) => {
  * 2. ADD USER
  */
 const addUser = async (formData) => {
-  await axios.post(`${ process.env.REACT_APP_BASE_URL }/auth/register`, formData);
+  const res = await axios.post(`${ process.env.REACT_APP_BASE_URL }/auth/register`, formData);
+  return res.data;
 };
 
 export const useAddUser = () => {

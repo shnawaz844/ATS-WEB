@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 
-const Modal = ( { getStatusColor, isOpen, onClose, app } ) => {
+const Modal = ( { getStatusColor, isOpen, onClose, app, getStatusName } ) => {
     const [ isScrolled, setIsScrolled ] = useState( false );
     const [ activeTab, setActiveTab ] = useState( 'details' ); // 'details' or 'resume'
     const capitalizeFirstLetter = ( string ) => {
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
+
+    
 
     if ( !isOpen ) return null;
 
@@ -71,7 +73,7 @@ const Modal = ( { getStatusColor, isOpen, onClose, app } ) => {
                                         <p className="text-sm font-medium text-gray-500 mb-1">Type</p>
                                         <p className="font-semibold text-gray-800">{ app?.jobID?.type }</p>
                                     </div>
-                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="bg-white rounded-xl p-4 shadow-sm">
                                         <p className="text-sm font-medium text-gray-500 mb-1">Schedule</p>
                                         <p className="font-semibold text-gray-800">{ app?.jobID?.scheduleType }</p>
                                     </div>
@@ -87,7 +89,7 @@ const Modal = ( { getStatusColor, isOpen, onClose, app } ) => {
                                     Application Status
                                 </h3>
                                 <span className={ `px-4 py-2 rounded-full text-sm font-medium ${ getStatusColor( app.applicationStatus ) }` }>
-                                    { capitalizeFirstLetter( app.applicationStatus ) }
+                                    { capitalizeFirstLetter( getStatusName( app.applicationStatusId ) ) }
                                 </span>
                             </div>
 

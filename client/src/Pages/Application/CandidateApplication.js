@@ -20,7 +20,7 @@ const CandidateApplication = () => {
     const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
     const [ debouncedFilters, setDebouncedFilters ] = useState( formInputs );
     const [ currentPage, setCurrentPage ] = useState( 1 );
-    const [ jobsPerPage ] = useState( 6 );
+    const [ jobsPerPage ] = useState( 10 );
     const [ allJobs, setAllJobs ] = useState( [] );
     const [ hasNextPage, setHasNextPage ] = useState( true );
     const [ isLoadingMore, setIsLoadingMore ] = useState( false );
@@ -60,7 +60,6 @@ const CandidateApplication = () => {
     const { data: jobData, isLoading, isError } = useApplicationStatuses(
         debouncedFilters, currentPage, jobsPerPage, companyId
     );
-    console.log( "jobData?????", jobData )
     // Handle input changes for filters
     const handleFilterChange = ( e ) => {
         const { name, value } = e.target;
@@ -85,7 +84,6 @@ const CandidateApplication = () => {
     useEffect( () => {
         if ( jobData?.data ) {
             if ( currentPage === 1 ) {
-                console.log( "jobData????123", jobData )
                 // First page or filter change - replace all jobs
                 setAllJobs( jobData.data );
             } else {
@@ -173,7 +171,6 @@ const CandidateApplication = () => {
         window.scrollTo( { top: 0, behavior: 'smooth' } );
     };
 
-    console.log( "allJobs?????", allJobs )
     return (
         <div className="px-8 py-4 w-full min-h-screen"
             style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }

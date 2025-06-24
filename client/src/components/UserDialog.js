@@ -35,6 +35,7 @@ const UserDialog = ( {
     // Updated submit handler that performs validation
     const onSubmit = ( e ) => {
         e.preventDefault();
+        console.log('eeeeeeeee', e);
         const formErrors = validateForm();
         if ( Object.keys( formErrors ).length > 0 ) {
             setErrors( formErrors );
@@ -56,7 +57,7 @@ const UserDialog = ( {
     return (
         <div
             onClick={ handleOverlayClick }
-            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300"
+            className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 mt-11"
         >
             <div
                 className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300"
@@ -192,6 +193,11 @@ const UserDialog = ( {
                                 <>
                                     <input type="hidden" name="role" value={ formData.role = "admin" } />
                                     <p className="mb-4 text-gray-700">Role: Admin</p>
+                                </>
+                            ) : loggedInUser.role === 'recruiter_manager' ? (
+                                <>
+                                    <input type="hidden" name="role" value={ formData.role = "candidate" } />
+                                    <p className="mb-4 text-gray-700">Role: Candidate</p>
                                 </>
                             ) : (
                                 <div className="mb-4">
