@@ -12,8 +12,6 @@ import {
   Calendar,
   Award,
   Building,
-  Share2,
-  Bookmark,
   ChevronLeft,
   IndianRupee
 } from "lucide-react";
@@ -36,7 +34,7 @@ export const JobDetails = () => {
   }, [] );
 
   const capitalizeFirstLetter = ( string ) => {
-    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
   };
 
   // 2. Fetch the job details
@@ -54,11 +52,6 @@ export const JobDetails = () => {
   } = useApplicationStatuses( {} );
 
   console.log( "this is statuses", applicationStatusesData );
-
-  const toggleBookmark = () => {
-    setIsBookmarked( !isBookmarked );
-    // Here you would add logic to save bookmark to user's profile
-  };
 
   const formatIndianRupee = ( num ) => {
     if ( !num ) return "0";
@@ -170,22 +163,6 @@ export const JobDetails = () => {
                     </div>
                   </div>
                 </div>
-                {/* <div className="flex space-x-2">
-                  <button
-                    onClick={ toggleBookmark }
-                    className={ `p-2 rounded-full ${ isBookmarked ? "bg-blue-50 text-blue-600" : "bg-gray-50 text-gray-500 hover:bg-gray-100"
-                      } transition-colors` }
-                    title="Bookmark"
-                  >
-                    <Bookmark size={ 20 } fill={ isBookmarked ? "currentColor" : "none" } />
-                  </button>
-                  <button
-                    className="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors"
-                    title="Share"
-                  >
-                    <Share2 size={ 20 } />
-                  </button>
-                </div> */}
               </div>
             </div>
           </div>

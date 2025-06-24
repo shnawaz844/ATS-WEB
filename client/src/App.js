@@ -4,7 +4,6 @@ import './App.css';
 import { useAuth } from './hooks/useAuth';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { Home } from './Pages/Employer/Home';
 import { Navbar } from './components/Navbar';
 import { PostJob } from './components/PostJob/PostJob';
@@ -68,10 +67,6 @@ function App() {
   const companyIdFromStorage = localStorage.getItem( 'companyId' );
   const user = localStorage.getItem( 'user' );
 
-  console.log( "slug", slug );
-
-
-
   // Clear company details from localStorage when slug is not available
   useLayoutEffect( () => {
     if ( !slug ) {
@@ -101,7 +96,7 @@ function App() {
         navigate( '/404' );
         return;
       }
-      navigate( `/${ slug }` ); // Redirect to login page with the companyUserName
+      navigate( `/${ slug }` );
       return;
     }
 
@@ -112,12 +107,10 @@ function App() {
       .get( `${ BASE_URL }/companies/companies/${ slug }` )
 
       .then( res => {
-        // Verify if the company ID from API matches the stored on
         if ( companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
           console.error( "Company ID mismatch, invalid access." );
           navigate( '/404' );
         } else {
-          // Optionally update localStorage with the correct company data
           localStorage.setItem( "companyId", res.data._id );
           localStorage.setItem( "companyUserName", slug );
         }
@@ -128,15 +121,11 @@ function App() {
       } );
   }, [ slug, companyUserNameFromStorage, companyIdFromStorage, navigate ] );
 
-  console.log( "process.env.REACT_APP_BASE_URL", process.env.REACT_APP_BASE_URL )
 
   useAuth();
-
-  // Handle company error (when company not found or invalid)
   if ( companyError ) {
     return <div>Company not found</div>;
   }
-
   return (
     <div className="App">
       <Routes>

@@ -1,11 +1,9 @@
 // src/components/Hero/Jobs.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ArrowRight, Award, Building } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 const Jobs = () => {
-    // grab the param or fall back to whatever’s in localStorage
     const { companyUserName } = useParams();
     const storedSlug = localStorage.getItem( "companyUserName" );
     const slug = companyUserName || storedSlug;
@@ -27,7 +25,6 @@ const Jobs = () => {
     // STEP A: validate slug & load companyDetails
     // ————————————————————————————
     useEffect( () => {
-        // no slug at all? bail out, mark as “error”
         if ( !slug ) {
             setCompanyLoading( false );
             setCompanyError( true );
@@ -144,7 +141,6 @@ const Jobs = () => {
 // Card component for displaying each job
 const Card = ( { job } ) => {
     const companyUserName = localStorage.getItem( "companyUserName" );
-    console.log( "companyUserName>>>>>>>", companyUserName )
     return (
         <div className="bg-transparent rounded-xl shadow-lg overflow-hidden border border-gray-500 hover:shadow-xl transition-all group">
             <div className="p-5">

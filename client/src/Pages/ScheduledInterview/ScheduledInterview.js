@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Briefcase, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
+import { Briefcase, ChevronLeft, ChevronRight, Filter, Search, X } from 'lucide-react';
 import axios from 'axios';
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import useScheduledInterview from '../../hooks/useScheduledInterview';
 
 export const ScheduledInterview = () => {
+    const [ searchTerm, setSearchTerm ] = useState( "" );
     const [ page, setPage ] = useState( 1 );
     const limit = 10;
     const companyId = JSON.parse( localStorage.getItem( "user" ) )?.company_id;
@@ -15,9 +16,14 @@ export const ScheduledInterview = () => {
     const interviewer = storedUser ? JSON.parse( storedUser ) : null;
     const interviewerID = interviewer?._id || "";
     const isAdmin = interviewer?.role === 'admin' || interviewer?.isAdmin; // Check if user is admin
+    // Filter states
+    const [ filterStatus, setFilterStatus ] = useState( "" );
+    const [ filterRound, setFilterRound ] = useState( "" );
+    const [ showFilters, setShowFilters ] = useState( false );
 
     const [ statuses, setStatuses ] = useState( [] );
     const [ selectedInterviewerId, setSelectedInterviewerId ] = useState( isAdmin ? "" : interviewerID );
+
 
     // ✅ Correctly using the custom hook inside the component
     const {
@@ -28,7 +34,10 @@ export const ScheduledInterview = () => {
     } = useScheduledInterview( {
         page,
         limit,
-        interviewerID: selectedInterviewerId || ( isAdmin ? "" : interviewerID )
+        searchTerm,
+        filterStatus,
+        filterRound,
+        interviewerID: selectedInterviewerId || ( isAdmin ? "" : interviewerID ),
     } );
 
     const [ interviewers, setInterviewers ] = useState( [] );
@@ -54,6 +63,7 @@ export const ScheduledInterview = () => {
         starRating: "",
     } );
 
+
     const modalRef = useRef();
     const interviewTypes = [ "online", "walkin" ];
     const feedbackTitles = [
@@ -66,6 +76,8 @@ export const ScheduledInterview = () => {
         "Excellent",
         "Above Expectation"
     ];
+    // Check if any filters are active
+    const hasActiveFilters = searchTerm || filterStatus || filterRound;
 
     // Fetch statuses from the API
     useEffect( () => {
@@ -112,6 +124,7 @@ export const ScheduledInterview = () => {
         fetchInterviewers();
     }, [ companyId ] );
 
+
     // Handle interviewer filter change
     const handleInterviewerFilterChange = ( interviewerId ) => {
         setSelectedInterviewerId( interviewerId );
@@ -137,7 +150,7 @@ export const ScheduledInterview = () => {
             try {
                 const companyId = JSON.parse( localStorage.getItem( "user" ) )?.company_id;
                 const res = await axios.get(
-                    `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=1&limit=100&search=`,
+                    `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=1&limit=100&searchTerm=`,
                     {
                         headers: { company_id: companyId },
                     }
@@ -245,7 +258,6 @@ export const ScheduledInterview = () => {
             }
 
             const feedbackData = await response.json();
-            console.log( "Fetched Feedback Data:", feedbackData );
 
             setFeedbackForm( {
                 _id: feedbackData?._id || selectedInterview?._id || "",
@@ -357,7 +369,7 @@ export const ScheduledInterview = () => {
 
     const capitalizeFirstLetter = ( string ) => {
         if ( !string ) return "N/A";
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
     return (
@@ -366,22 +378,20 @@ export const ScheduledInterview = () => {
         >
             <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
                 <div className="flex justify-between items-center w-full">
-                    <div>
+                    {/* Title Section */ }
+                    <div className="flex items-center">
                         <h1 className="text-3xl font-bold text-white flex items-center">
                             <Briefcase className="mr-2 h-6 w-6 text-gray-100" />
                             { isAdmin ? "All Scheduled Interviews" : "My Scheduled Interviews" }
                         </h1>
-                      
                     </div>
-                    {/* Admin Filter Section */ }
-                    { isAdmin && (
-                        <div className="mb-6 bg-transparent rounded-xl p-4 ml-auto w-fit flex items-center justify-center">
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center text-gray-700">
-                                    <Filter className="mr-2 h-5 w-5 text-white" />
-                                    <span className="font-medium text-white">Interviewer:</span>
-                                </div>
-                                <div className="flex-1 min-w-[200px]">
+
+                    {/* Filter/Search Section */ }
+                    <div className="bg-transparent rounded-xl flex items-center gap-3">
+                        {/* Admin Filter Section */ }
+                        { isAdmin && (
+                            <div className="bg-transparent rounded-xl flex items-center justify-center">
+                                <div className="min-w-[200px]">
                                     <select
                                         value={ selectedInterviewerId }
                                         onChange={ ( e ) => handleInterviewerFilterChange( e.target.value ) }
@@ -395,22 +405,114 @@ export const ScheduledInterview = () => {
                                         ) ) }
                                     </select>
                                 </div>
-                                { selectedInterviewerId && (
-                                    <button
-                                        onClick={ () => handleInterviewerFilterChange( "" ) }
-                                        className="px-3 py-2 text-sm bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-1"
-                                    >
-                                        <X className="h-4 w-4" />
-                                        Clear
-                                    </button>
-                                ) }
+                            </div>
+                        ) }
+
+                        {/* Search Bar */ }
+                        <div className="w-[30vw]">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={ searchTerm }
+                                    onChange={ ( e ) => {
+                                        setSearchTerm( e.target.value );
+                                        setPage( 1 );
+                                    } }
+                                    placeholder="Search by candidate name, job title, or round..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
                             </div>
                         </div>
-                    ) }
+
+                        {/* Filter Toggle Button */ }
+                        <button
+                            onClick={ () => setShowFilters( !showFilters ) }
+                            className={ `flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${ showFilters || hasActiveFilters
+                                    ? 'bg-gray-700 text-white border border-blue-300'
+                                    : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+                                }` }
+                        >
+                            <Filter className="h-4 w-4" />
+                            Filters
+                            { hasActiveFilters && (
+                                <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                                    { [ searchTerm, filterStatus, filterRound ].filter( Boolean ).length }
+                                </span>
+                            ) }
+                        </button>
+                    </div>
                 </div>
             </div>
 
+            {/* Search and Filter Section */ }
+            <div className="bg-transparent rounded-xl pb-5">
+                {/* Expandable Filters */ }
+                { showFilters && (
+                    <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 pt-1 border-t border-gray-200">
+                            {/* Status Filter */ }
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                <select
+                                    value={ filterStatus }
+                                    onChange={ ( e ) => {
+                                        setFilterStatus( e.target.value );
+                                        setPage( 1 );
+                                    } }
+                                    className="w-full border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Statuses</option>
+                                    { statuses.map( ( status ) => (
+                                        <option key={ status._id } value={ status._id }>
+                                            { capitalizeFirstLetter( status.applicationStatus ) }
+                                        </option>
+                                    ) ) }
+                                </select>
+                            </div>
 
+                            {/* Round Filter */ }
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Round</label>
+                                <select
+                                    value={ filterRound }
+                                    onChange={ ( e ) => {
+                                        setFilterRound( e.target.value );
+                                        setPage( 1 );
+                                    } }
+                                    className="w-full border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">All Rounds</option>
+                                    { interviewRounds.map( ( round ) => (
+                                        <option key={ round._id } value={ round._id }>
+                                            { round.roundName || 'Unknown Round' }
+                                        </option>
+                                    ) ) }
+                                </select>
+                            </div>
+
+                        </div>
+
+                        {/* Reset Filters Button - Only shown when filters are active */ }
+                        { hasActiveFilters && (
+                            <div className="mt-4 flex justify-end">
+                                <button
+                                    onClick={ () => {
+                                        setSearchTerm( "" );
+                                        setFilterStatus( "" );
+                                        setFilterRound( "" );
+                                        setPage( 1 );
+                                    } }
+                                    className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                    Reset All Filters
+                                </button>
+                            </div>
+                        ) }
+                    </div>
+                ) }
+            </div>
 
             { isLoading ? (
                 <div className="flex justify-center items-center h-64">
@@ -421,21 +523,21 @@ export const ScheduledInterview = () => {
                     <strong className="font-bold">Error! </strong>
                     <span className="block sm:inline">{ error.message || "Failed to load interviews" }</span>
                 </div>
-            ) : assignedInterviews?.interviews?.length === 0 ? (
+            ) : ( isAdmin && !selectedInterviewerId ) || assignedInterviews?.interviews?.length === 0 ? (
                 <div className="text-center animate-fade-in transition-all duration-500 py-16">
                     <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
                         🕒 No Interviews Found
                     </h3>
                     <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                        { selectedInterviewerId
-                            ? "No interviews found for the selected interviewer."
-                            : "We're currently in the process of assigning interviewers."
-                        }
+                        { isAdmin && !selectedInterviewerId
+                            ? "Please select an interviewer to view their scheduled interviews."
+                            : "We're currently in the process of assigning interviewers." }
                         <br className="hidden sm:block" />
                         <span className="text-blue-500 font-medium">
-                            { selectedInterviewerId ? "Try selecting a different interviewer." : "Please wait" }
+                            { isAdmin && !selectedInterviewerId
+                                ? "Choose an interviewer from the dropdown above."
+                                : "Please wait while your interview schedule is being prepared." }
                         </span>
-                        { !selectedInterviewerId && " while your interview schedule is being prepared." }
                     </p>
                 </div>
             ) : (
@@ -468,7 +570,7 @@ export const ScheduledInterview = () => {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ interview.scheduledTime }</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={ `px-2 py-1 rounded-full text-xs font-medium group-hover:text-white` }>
-                                            { statuses?.length && statuses.filter( status => status._id === interview?.status )[ 0 ]?.applicationStatus }
+                                            { statuses?.length && statuses?.filter( status => status._id === interview?.status )[ 0 ]?.applicationStatus }
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -488,7 +590,7 @@ export const ScheduledInterview = () => {
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">
-                                        { interviewRounds?.length && interviewRounds.filter( round => round._id === interview?.roundID )[ 0 ]?.roundName || "N/A" }
+                                        { interviewRounds?.length && interviewRounds?.filter( round => round._id === interview?.roundID )[ 0 ]?.roundName || "N/A" }
                                     </td>
                                 </tr>
                             ) ) }
@@ -578,7 +680,7 @@ export const ScheduledInterview = () => {
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Current Status</p>
                                         <p className={ `font-medium ${ getStatusColor( detailedInterview?.status ) } inline-block px-2 py-1 rounded-full text-xs mt-1` }>
-                                            { statuses?.length && statuses.filter( status => status._id === detailedInterview.status )[ 0 ]?.applicationStatus }
+                                            { statuses?.length && statuses?.filter( status => status._id === detailedInterview.status )[ 0 ]?.applicationStatus }
 
                                         </p>
                                     </div>
@@ -779,7 +881,7 @@ export const ScheduledInterview = () => {
                                     <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Round</p>
                                         <p className="font-medium text-gray-800 mt-1">
-                                            { interviewRounds?.length && interviewRounds.filter( round => round._id === detailedInterview?.roundID )[ 0 ]?.roundName || "N/A" }
+                                            { interviewRounds?.length && interviewRounds?.filter( round => round._id === detailedInterview?.roundID )[ 0 ]?.roundName || "N/A" }
                                         </p>
                                     </div>
 
@@ -840,60 +942,6 @@ export const ScheduledInterview = () => {
                                         placeholder="Provide specific examples and constructive feedback about the candidate's performance..."
                                     />
                                 </div>
-
-                                {/* <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
-                                    <div className="mt-1 flex flex-col space-y-4">
-                                        <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                                            <div className="space-y-1 text-center">
-                                                { !preview && (
-                                                    <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                    </svg>
-                                                ) }
-
-                                                { preview && (
-                                                    <div className="relative">
-                                                        <img
-                                                            src={ preview }
-                                                            alt="Preview"
-                                                            className="mx-auto h-32 w-auto object-contain rounded-md"
-                                                        />
-                                                        <button
-                                                            onClick={ () => { setFile( null ); setPreview( null ); } }
-                                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                ) }
-
-                                                <div className="flex text-sm text-gray-600 justify-center">
-                                                    <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                                        <span>{ file ? "Replace file" : "Upload a file" }</span>
-                                                        <input
-                                                            id="file-upload"
-                                                            name="file-upload"
-                                                            type="file"
-                                                            className="sr-only"
-                                                            onChange={ "" }
-                                                            accept="image/*, application/pdf, .doc, .docx"
-                                                        />
-                                                    </label>
-                                                    { !file && <p className="pl-1">or drag and drop</p> }
-                                                </div>
-
-                                                { file && (
-                                                    <p className="text-sm text-gray-500 mt-2">
-                                                        Selected: { file.name } ({ ( file.size / 1024 ).toFixed( 1 ) } KB)
-                                                    </p>
-                                                ) }
-                                                { !file && <p className="text-xs text-gray-500">PDF, DOC, DOCX, Images up to 10MB</p> }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> */}
-
                             </div>
                         </div>
 

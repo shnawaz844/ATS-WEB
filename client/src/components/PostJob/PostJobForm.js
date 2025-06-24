@@ -32,7 +32,7 @@ const FORM_OPTIONS = {
 };
 
 const capitalizeFirstLetter = ( string ) => {
-  return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+  return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
 };
 
 const FormField = ( {
@@ -241,7 +241,6 @@ export const PostJobForm = ( {
           }
         } );
         const data = await response.json();
-        console.log( 'Fetched Recruiters:', data );
         setRecruitersList( data );
       } catch ( error ) {
         console.error( 'Error fetching recruiters:', error );

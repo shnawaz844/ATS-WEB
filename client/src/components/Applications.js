@@ -77,14 +77,13 @@ export const Applications = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'company_id': companyId  // Add company_id to headers
+                        'company_id': companyId
                     }
                 } );
                 if ( !response.ok ) {
                     throw new Error( `HTTP error! Status: ${ response.status }` );
                 }
                 const data = await response.json();
-                console.log( "Fetched interviewers>>>>:", data );
                 setInterviewers( data );
             } catch ( error ) {
                 console.error( "Error fetching interviewers:", error.message );
@@ -98,7 +97,6 @@ export const Applications = () => {
         setAssignments( ( prev ) => ( { ...prev, [ candidateId ]: interviewerId } ) );
     };
 
-    console.log( "interviewers", interviewers )
     return (
         <div className="w-full min-h-screen bg-gray-50">
             <div className="w-full px-4">
@@ -243,7 +241,7 @@ export const Applications = () => {
 function RenderTableRows( { candidate, onSchedule } ) {
     const tableDataCss = "border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4";
     const capitalizeFirstLetter = ( string ) => {
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
     return (

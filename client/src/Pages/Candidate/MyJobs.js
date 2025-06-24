@@ -197,7 +197,7 @@ const MyJobs = () => {
 
 
     const capitalizeFirstLetter = ( string ) => {
-        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
+        return string?.charAt( 0 )?.toUpperCase() + string?.slice( 1 );
     };
 
 
@@ -328,7 +328,7 @@ const MyJobs = () => {
                 </div>
             ) }
 
-            <Modal isOpen={ isModalOpen } onClose={ () => setIsModalOpen( false ) } app={ selectedApp } getStatusColor={ getStatusColor } />
+            <Modal isOpen={ isModalOpen } onClose={ () => setIsModalOpen( false ) } app={ selectedApp } getStatusColor={ getStatusColor } getStatusName={ getStatusName } />
 
             {/* Enhanced Edit Modal */ }
             { isEditModalOpen && (

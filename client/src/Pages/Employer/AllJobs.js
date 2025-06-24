@@ -5,7 +5,7 @@ import { useJobs } from '../../hooks/useJob';
 import Select from "react-select";
 import { toast } from 'react-toastify';
 import {
-    Search, Plus, Edit, Trash2, ChevronLeft, ChevronRight,
+    Search, Plus, Edit, Trash2,
     Briefcase, MapPin, Clock, RefreshCw, Filter,
     Calendar1,
     IndianRupee,
@@ -24,12 +24,10 @@ export const AllJobs = () => {
     const [ isFilterOpen, setIsFilterOpen ] = useState( false );
     const [ isDeleting, setIsDeleting ] = useState( false );
 
-    //
     const [ jobStatuses, setJobStatuses ] = useState( [] );
     const [ loadingStatuses, setLoadingStatuses ] = useState( false );
     const [ statusError, setStatusError ] = useState( null );
 
-    // New state for infinite scroll
     const [ allJobsList, setAllJobsList ] = useState( [] );
     const [ hasMore, setHasMore ] = useState( true );
     const [ isLoadingMore, setIsLoadingMore ] = useState( false );
@@ -38,7 +36,7 @@ export const AllJobs = () => {
     const companyUserName = localStorage.getItem( "companyUserName" );
 
     const capitalizeFirstLetter = ( string ) => {
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
     useEffect( () => {
@@ -162,33 +160,32 @@ export const AllJobs = () => {
     }, [ allJobs, currentPage ] );
 
     // Add this function inside your AllJobs component
-const handleShareJob = (e, job) => {
-  e.stopPropagation();
-  
-  const jobUrl = `${window.location.origin}/${companyUserName}/current-job/${job._id}`;
-  const shareText = `Check out this job opening: ${job.title} at ${companyUserName}`;
-  
-  if (navigator.share) {
-    // Web Share API (mobile devices)
-    navigator.share({
-      title: job.title,
-      text: shareText,
-      url: jobUrl,
-    }).catch(err => {
-      console.log('Error sharing:', err);
-      toast.error('Failed to share job');
-    });
-  } else {
-    // Fallback for desktop browsers
-    const shareWindow = window.open('', '_blank', 'width=600,height=400');
-    shareWindow.document.write(``);
-  }
-};
+    const handleShareJob = ( e, job ) => {
+        e.stopPropagation();
+
+        const jobUrl = `${ window.location.origin }/${ companyUserName }/current-job/${ job._id }`;
+        const shareText = `Check out this job opening: ${ job.title } at ${ companyUserName }`;
+
+        if ( navigator.share ) {
+            // Web Share API (mobile devices)
+            navigator.share( {
+                title: job.title,
+                text: shareText,
+                url: jobUrl,
+            } ).catch( err => {
+                console.log( 'Error sharing:', err );
+                toast.error( 'Failed to share job' );
+            } );
+        } else {
+            // Fallback for desktop browsers
+            const shareWindow = window.open( '', '_blank', 'width=600,height=400' );
+            shareWindow.document.write( `` );
+        }
+    };
 
     // Load more jobs for infinite scroll
     const fetchMoreJobs = useCallback( () => {
         if ( !isLoading && hasMore && !isLoadingMore ) {
-            console.log( 'Fetching more jobs, current page:', currentPage );
             setIsLoadingMore( true );
             setCurrentPage( prevPage => prevPage + 1 );
         }
@@ -252,7 +249,7 @@ const handleShareJob = (e, job) => {
         // Add these properties to fix the z-index issue
         menu: ( provided ) => ( {
             ...provided,
-            zIndex: 9999, // High z-index to appear above other content
+            zIndex: 9999,
             position: 'absolute',
         } ),
         menuPortal: ( provided ) => ( {
@@ -290,7 +287,6 @@ const handleShareJob = (e, job) => {
 
         } catch ( error ) {
             console.error( 'Error deleting job:', error );
-            console.log( "jobId", jobId )
         } finally {
             setIsDeleting( false );
         }
@@ -392,7 +388,7 @@ const handleShareJob = (e, job) => {
                                                     onChange={ setJobType }
                                                     placeholder="Any type"
                                                     isClearable
-                                                    menuPortalTarget={ document.body } // Add this line
+                                                    menuPortalTarget={ document.body }
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -437,7 +433,7 @@ const handleShareJob = (e, job) => {
                                                     onChange={ setLocationType }
                                                     placeholder="Any location"
                                                     isClearable
-                                                    menuPortalTarget={ document.body } // Add this line
+                                                    menuPortalTarget={ document.body }
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -454,7 +450,7 @@ const handleShareJob = (e, job) => {
                                                             ...provided,
                                                             color: '#94a3b8'
                                                         } ),
-                                                        // Add menu styles here too
+
                                                         menu: ( provided ) => ( {
                                                             ...provided,
                                                             zIndex: 9999,
@@ -483,7 +479,7 @@ const handleShareJob = (e, job) => {
                                                     onChange={ setScheduleType }
                                                     placeholder="Any schedule"
                                                     isClearable
-                                                    menuPortalTarget={ document.body } // Add this line
+                                                    menuPortalTarget={ document.body }
                                                     styles={ {
                                                         ...customSelectStyles,
                                                         control: ( provided, state ) => ( {
@@ -500,7 +496,7 @@ const handleShareJob = (e, job) => {
                                                             ...provided,
                                                             color: '#94a3b8'
                                                         } ),
-                                                        // Add menu styles here too
+
                                                         menu: ( provided ) => ( {
                                                             ...provided,
                                                             zIndex: 9999,
@@ -648,7 +644,7 @@ const handleShareJob = (e, job) => {
                                                         <Edit className="h-4 w-4 mr-1" />
                                                         View & Edit
                                                     </button>
-                                                   
+
                                                     <button
                                                         onClick={ ( e ) => {
                                                             e.stopPropagation();

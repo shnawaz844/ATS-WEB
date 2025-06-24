@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {  useNavigate, useParams } from 'react-router-dom';
+
+import { useNavigate, useParams } from 'react-router-dom';
 import OverviewTab from './tabs/OverviewTab';
 import ApplicationsListTab from './tabs/ApplicationsListTab';
 import JobDetailsTab from './tabs/JobDetailsTab';
@@ -7,20 +8,20 @@ import { ChevronLeft } from 'lucide-react'
 
 const ApplicationJobDetail = () => {
     const { id } = useParams();
-    const [job, setJob] = useState(null);
+    const [ job, setJob ] = useState( null );
     const companyUserName = localStorage.getItem( "companyUserName" );
-    const [page, setPage] = useState('1');
-    const [limit, setLimit] = useState('5');
-    const [search, setSearch] = useState('')
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('applications');
+    const [ page, setPage ] = useState( '1' );
+    const [ limit, setLimit ] = useState( '20' );
+    const [ search, setSearch ] = useState( '' )
+    const [ applications, setApplications ] = useState( [] );
+    const [ loading, setLoading ] = useState( true );
+    const [ error, setError ] = useState( '' );
+    const [ activeTab, setActiveTab ] = useState( 'applications' );
     const navigate = useNavigate();
     // NEW: state for job-statuses
     const [ jobStatuses, setJobStatuses ] = useState( [] );
-     const [ statusMap, setStatusMap ] = useState( {} );
-     const [ loadingStatuses, setLoadingStatuses ] = useState( false );
+    const [ statusMap, setStatusMap ] = useState( {} );
+    const [ loadingStatuses, setLoadingStatuses ] = useState( false );
     const [ toggleCount, setToggleCount ] = useState( 0 );
 
     const onStatusChange = useCallback( () => {
@@ -28,62 +29,62 @@ const ApplicationJobDetail = () => {
     }, [] );
 
 
-    useEffect(() => {
+    useEffect( () => {
         const fetchData = async () => {
             try {
-                setLoading(true);
-                const jobRes = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/current-job/${id}`);
-                if (!jobRes.ok) throw new Error('Error fetching job data');
+                setLoading( true );
+                const jobRes = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/current-job/${ id }` );
+                if ( !jobRes.ok ) throw new Error( 'Error fetching job data' );
                 const jobData = await jobRes.json();
 
-                const appsRes = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/job/${id}?page=${page}&limit=${limit}&search=${search}`);
-                if (!appsRes.ok) throw new Error('Error fetching applications');
+                const appsRes = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/job/${ id }?page=${ page }&limit=${ limit }&search=${ search }` );
+                if ( !appsRes.ok ) throw new Error( 'Error fetching applications' );
                 const appsData = await appsRes.json();
 
-                setJob(jobData);
-                setApplications(appsData);
-            } catch (err) {
-                console.error(err);
-                setError('Failed to load job data or applications.');
+                setJob( jobData );
+                setApplications( appsData );
+            } catch ( err ) {
+                console.error( err );
+                setError( 'Failed to load job data or applications.' );
             } finally {
-                setLoading(false);
+                setLoading( false );
             }
         };
 
         fetchData();
-    }, [id, page, limit, search,toggleCount]);
+    }, [ id, page, limit, search, toggleCount ] );
 
     // NEW: fetch job-statuses on mount
     useEffect( () => {
-       const fetchJobStatuses = async () => {
-         setLoadingStatuses( true );
-         try {
-           const storedUser = JSON.parse( localStorage.getItem( 'user' ) );
-           const companyId = storedUser?.company_id;
-           if ( !companyId ) return;
-   
-           const response = await fetch(
-             `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`,
-             { headers: { company_id: companyId } }
-           );
-           const data = await response.json();
-           if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
-             setJobStatuses( data.jobStatuses );
-             const mapping = {};
-             data.jobStatuses.forEach( entry => {
-               mapping[ entry._id ] = entry.jobStatus;
-             } );
-             setStatusMap( mapping );
-           }
-         } catch ( error ) {
-           console.error( 'Error fetching job statuses:', error );
-         } finally {
-           setLoadingStatuses( false );
-         }
-       };
-   
-       fetchJobStatuses();
-     }, [] );
+        const fetchJobStatuses = async () => {
+            setLoadingStatuses( true );
+            try {
+                const storedUser = JSON.parse( localStorage.getItem( 'user' ) );
+                const companyId = storedUser?.company_id;
+                if ( !companyId ) return;
+
+                const response = await fetch(
+                    `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`,
+                    { headers: { company_id: companyId } }
+                );
+                const data = await response.json();
+                if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
+                    setJobStatuses( data.jobStatuses );
+                    const mapping = {};
+                    data.jobStatuses.forEach( entry => {
+                        mapping[ entry._id ] = entry.jobStatus;
+                    } );
+                    setStatusMap( mapping );
+                }
+            } catch ( error ) {
+                console.error( 'Error fetching job statuses:', error );
+            } finally {
+                setLoadingStatuses( false );
+            }
+        };
+
+        fetchJobStatuses();
+    }, [] );
 
     const capitalizeFirstLetter = ( str ) => {
         if ( !str ) return '';
@@ -91,7 +92,7 @@ const ApplicationJobDetail = () => {
     };
 
 
-    if (!job) {
+    if ( !job ) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <p className="text-gray-500 text-lg">No job found.</p>
@@ -103,8 +104,8 @@ const ApplicationJobDetail = () => {
     const displayStatus = statusMap[ statusId ] || statusId;
     const candidateCount = applications.applications.length;
 
-    const getStatusColor = (status) => {
-        switch (status?.toLowerCase()) {
+    const getStatusColor = ( status ) => {
+        switch ( status?.toLowerCase() ) {
             case 'active': return 'bg-green-100 text-green-800';
             case 'closed': return 'bg-gray-100 text-gray-800';
             case 'draft': return 'bg-yellow-100 text-yellow-800';
@@ -118,13 +119,13 @@ const ApplicationJobDetail = () => {
         >
             <button
                 className="flex items-center text-gray-700 hover:text-gray-500 transition-colors ml-10"
-                onClick={() => window.history.back()}
+                onClick={ () => window.history.back() }
             >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={ 18 } />
                 <span className="ml-1">Back</span>
             </button>
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                {/* Header Section */}
+                {/* Header Section */ }
                 <div className="bg-gray-700 rounded-xl shadow-sm p-6 mb-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
 
@@ -163,11 +164,11 @@ const ApplicationJobDetail = () => {
                 </div>
 
 
-                {/* Tabs Navigation */}
+                {/* Tabs Navigation */ }
                 <div className="bg-transparent rounded-xl shadow-sm mb-6">
                     <div className="border-b border-gray-200">
                         <nav className="flex space-x-8 px-6" aria-label="Tabs">
-                            {[
+                            { [
                                 {
                                     id: 'overview', name: 'Overview', icon: (
                                         <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,44 +190,44 @@ const ApplicationJobDetail = () => {
                                         </svg>
                                     )
                                 }
-                            ].map((tab) => (
+                            ].map( ( tab ) => (
                                 <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`
+                                    key={ tab.id }
+                                    onClick={ () => setActiveTab( tab.id ) }
+                                    className={ `
                                         group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm text-gray-700
-                                        ${activeTab === tab.id
+                                        ${ activeTab === tab.id
                                             ? 'border-white text-white'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }
                                     `}
                                 >
-                                    {tab.icon}
-                                    <span className="ml-2">{tab.name}</span>
+                                    { tab.icon }
+                                    <span className="ml-2">{ tab.name }</span>
                                 </button>
-                            ))}
+                            ) ) }
                         </nav>
                     </div>
 
-                    {/* Tab Content */}
+                    {/* Tab Content */ }
                     <div className="p-6">
-                        { activeTab === 'overview' && <OverviewTab job={job} applications={applications.applications} />}
-                        {activeTab === 'applications' &&
+                        { activeTab === 'overview' && <OverviewTab job={ job } applications={ applications.applications } /> }
+                        { activeTab === 'applications' &&
                             <ApplicationsListTab
-                            job={ job }
-                            onStatusChange={ onStatusChange }
-                                applications={applications.applications}
-                                page={page}
-                                limit={limit}
-                                search={search}
-                                setPage={setPage}
-                                setLimit={setLimit}
-                                setSearch={setSearch}
-                                currentPage={applications.currentPage}
-                                totalApplications={applications.totalApplications}
-                                totalPages={applications.totalPages}
-                            />}
-                        {activeTab === 'details' && <JobDetailsTab job={job} setJob={setJob} />}
+                                job={ job }
+                                onStatusChange={ onStatusChange }
+                                applications={ applications.applications }
+                                page={ page }
+                                limit={ limit }
+                                search={ search }
+                                setPage={ setPage }
+                                setLimit={ setLimit }
+                                setSearch={ setSearch }
+                                currentPage={ applications.currentPage }
+                                totalApplications={ applications.totalApplications }
+                                totalPages={ applications.totalPages }
+                            /> }
+                        { activeTab === 'details' && <JobDetailsTab job={ job } setJob={ setJob } /> }
                     </div>
                 </div>
             </div>

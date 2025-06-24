@@ -13,7 +13,6 @@ const fetchApplicationStatuses = async ( { filters, page, limit } ) => {
         throw new Error( 'Error fetching applications' );
     }
     const json = await res.json();
-    console.log( 'Fetched Data:', json ); // Debugging the API response
     return json;
 };
 

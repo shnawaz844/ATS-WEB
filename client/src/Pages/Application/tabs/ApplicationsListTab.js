@@ -124,7 +124,7 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
     };
 
     const getStatusCount = ( status ) => {
-        return allApps.filter( app => app.applicationStatusId === status ).length;
+        return allApps?.filter( app => app.applicationStatusId === status ).length;
     };
 
     const handleStatusChangeRequest = ( appId, newStatus ) => {
@@ -161,8 +161,8 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
     console.log( "allApps123", allApps )
 
     const filteredApps = allApps
-        .filter( app => statusFilter ? app.applicationStatusId === statusFilter : true )
-        .filter( app =>
+        ?.filter( app => statusFilter ? app.applicationStatusId === statusFilter : true )
+        ?.filter( app =>
             search
                 ? app.candidateID?.userName?.toLowerCase().includes( search.toLowerCase() ) ||
                 app.contactInfo?.toLowerCase().includes( search.toLowerCase() )

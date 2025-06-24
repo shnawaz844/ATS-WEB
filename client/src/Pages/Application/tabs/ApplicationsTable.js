@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+
 import { Link } from 'react-router-dom';
-import { getStatusColor, getColorStyles } from './utils';
-import ScheduleInterviewModal from '../../../components/ScheduleInterviewModal'; // Import the modal
+import { getStatusColor } from './utils';
+import ScheduleInterviewModal from '../../../components/ScheduleInterviewModal';
 
 const ApplicationsTable = ( {
-    job,
     filteredApps,
     statuses,
     onStatusChange,
     onViewResume,
-    page,
     limit,
     search,
     setPage,
@@ -19,7 +18,6 @@ const ApplicationsTable = ( {
     totalApplications,
     totalPages,
 } ) => {
-    console.log( "filteredApps00000", filteredApps );
     const [ searchInput, setSearchInput ] = useState( search );
 
     // Modal state
@@ -27,17 +25,9 @@ const ApplicationsTable = ( {
     const [ selectedApplication, setSelectedApplication ] = useState( null );
 
     const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
-    const userRole = user.role; // Assuming role field exists in user object
+    const userRole = user.role;
     const isHiringManager = userRole === 'hiring_manager';
     const isRecruiterManager = userRole === 'recruiter_manager';
-
-    const statusNameMap = useMemo( () => {
-        return ( statuses || [] ).reduce( ( map, status ) => {
-            map[ status._id ] = status.applicationStatus;
-            console.log( "map", map )
-            return map;
-        }, {} );
-    }, [ statuses ] );
 
     const [ apps, setApps ] = useState( filteredApps );
 
@@ -52,14 +42,13 @@ const ApplicationsTable = ( {
 
     // Handle schedule interview button click
     const handleScheduleInterview = ( app ) => {
-        console.log("jobIdddd", app.jobID._id)
         // Transform the application data to match what ScheduleInterviewModal expects
         const transformedApp = {
             _id: app._id,
             applicationStatusId: app.applicationStatusId,
             company_id: app.company_id || user.company_id,
             jobDetails: {
-                id: app.jobID._id ,
+                id: app.jobID._id,
                 title: app.jobID?.title || app.jobTitle || 'N/A'
             },
             candidateDetails: {
@@ -70,7 +59,6 @@ const ApplicationsTable = ( {
             },
             interview: app.interview || {}
         };
-        console.log( "appppppppp>>>>>>>", transformedApp )
 
         setSelectedApplication( transformedApp );
         setIsScheduleModalOpen( true );
@@ -98,8 +86,8 @@ const ApplicationsTable = ( {
     const debouncedSetSearch = useCallback(
         debounce( ( value ) => {
             setSearch( value );
-            setPage( 1 ); // Reset to first page on new search
-        }, 500 ), // 500ms delay
+            setPage( 1 );
+        }, 500 ),
         [ setSearch, setPage ]
     );
 
@@ -119,13 +107,6 @@ const ApplicationsTable = ( {
         }
     };
 
-    const handleLimitChange = ( e ) => {
-        setLimit( Number( e.target.value ) );
-        setPage( 1 );
-    };
-
-    console.log( "selectedApplication>>>", selectedApplication );
-
     return (
         <div className="space-y-4">
             {/* Search and Limit Controls */ }
@@ -144,20 +125,6 @@ const ApplicationsTable = ( {
                         onChange={ handleSearchChange }
                     />
                 </div>
-                <div className="flex items-center space-x-2">
-                    <label htmlFor="limit" className="text-sm text-gray-600">Show:</label>
-                    <select
-                        id="limit"
-                        className="border border-gray-300 text-gray-900 text-sm rounded-xl p-2"
-                        value={ limit }
-                        onChange={ handleLimitChange }
-                    >
-                        <option value={ 5 }>5</option>
-                        <option value={ 10 }>10</option>
-                        <option value={ 25 }>25</option>
-                        <option value={ 50 }>50</option>
-                    </select>
-                </div>
             </div>
 
             {/* Applications Table */ }
@@ -167,6 +134,9 @@ const ApplicationsTable = ( {
                         <tr>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Candidate
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                Email
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Status
@@ -211,6 +181,10 @@ const ApplicationsTable = ( {
                                                 </div>
                                             </div>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
+                                            { app.emailInfo }
+                                        </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <select
                                                 className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"

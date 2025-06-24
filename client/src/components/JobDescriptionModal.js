@@ -6,7 +6,7 @@ import 'react-quill/dist/quill.snow.css';
 const JobDescriptionModal = ( { job, isOpen, onClose } ) => {
     const companyUserName = localStorage.getItem( "companyUserName" );
     const capitalizeFirstLetter = ( string ) => {
-        return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
     // Function to format number in Indian Rupee format (e.g., 1,00,000)

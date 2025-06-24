@@ -14,7 +14,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                         <div className="flex justify-between items-center">
                             <span>All Applications</span>
                             <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
-                                {allApps.length}
+                                {allApps?.length}
                             </span>
                         </div>
                     </button>

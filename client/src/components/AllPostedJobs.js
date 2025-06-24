@@ -329,7 +329,7 @@ const AllPostedJobs = () => {
 const Card = ( { job, onViewDetails, companyUserName, jobStatusLabel } ) => {
 
   const capitalizeFirstLetter = ( string ) => {
-    return string.charAt( 0 ).toUpperCase() + string.slice( 1 );
+    return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
   };
 
   // Function to format number in Indian Rupee format (e.g., 1,00,000)
