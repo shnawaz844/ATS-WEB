@@ -1,63 +1,87 @@
-import { Box, Image } from 'lucide-react';
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Sparkles, Users, Briefcase, Bot } from "lucide-react"
+import { Link } from 'react-router-dom';
 
-const Banner = () => {
-    const navigate = useNavigate();
+export default function Hero() {
+    return (
+        <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 px-6 py-24 sm:py-14 lg:px-8">
+            <div className="absolute [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 
-    const handleClick = () => {
-        navigate( "/login" ); // Navigate to login page
-    };
-  return (
-      <div className="relative  overflow-hidden">
-          <div className="h-[87vh] flex">
-              {/* First div with updated design */ }
-              <div className="p-6 w-[65vw] flex flex-col justify-center items-center text-white space-y-4">
-                  <div className="ml-16">
-                      <h1 className="text-4xl font-semibold text-center mb-4">
-                          Your  <span className="text-blue-500 relative">Jobify</span> Recruiter for <br /> end-to-end Hiring
-                      </h1>
-                      <p className="text-center text-lg mb-4">
-                          AI-powered screening and assessments: find and interview top candidates from 100+ platforms and hire in 24 hours, all at 10% of the cost.
-                      </p>
+            {/* Subtle floating elements */ }
+            <div className="absolute top-20 left-10 w-2 h-2 bg-blue-400 rounded-full animate-pulse opacity-60"></div>
+            <div
+                className="absolute top-40 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse opacity-40"
+                style={ { animationDelay: "1s" } }
+            ></div>
+            <div
+                className="absolute bottom-40 left-20 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse opacity-50"
+                style={ { animationDelay: "2s" } }
+            ></div>
 
-                      <div className="flex flex-wrap gap-4 justify-center">
-                          <button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white mt-4 px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-green-400" onClick={ handleClick }>
-                              <span className="flex items-center">
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
-                                  </svg>
-                                  Try for Free
-                              </span>
-                          </button>
-                          {/* 
-              <button className="bg-gradient-to-r from-red-500 to-pink-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-red-400">
-                <span className="flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                  </svg>
-                  Request a Free Demo
-                </span>
-              </button> */}
-                      </div>
-                      <div className="flex justify-center mt-4">
-                          <button className="bg-[#0288d1] text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-[#026aa7] transition-all duration-300 ease-in-out transform hover:scale-105">
-                              Explore the Expertia Difference
-                          </button>
-                      </div>
-                  </div>
-              </div>
+            <div className="relative mx-auto max-w-7xl">
+                <div className="text-center">
+                    <div className="flex justify-center mb-6">
+                        <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200/50 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
+                            <Bot className="h-4 w-4 text-blue-600" />
+                            AI-Powered Recruitment Platform
+                            <Sparkles className="h-4 w-4" />
+                        </div>
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+                        Welcome to
+                        <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                            { " " }
+                            Niyukty
+                        </span>
+                    </h1>
+                    <p className="mt-6 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+                        The future of smart hiring is here. Connect top talent with leading companies through our AI-powered
+                        platform. Streamline recruitment with intelligent resume screening, automated interviews, and comprehensive
+                        application tracking.
+                    </p>
+                    <div className="mt-10 flex items-center justify-center gap-x-6">
+                        <Link href="/dashboard">
+                            <button
+                                className="flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full shadow-md"
+                            >
+                                Get Started
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </button>
 
-              <div className="relative w-full h-full min-h-[400px] overflow-hidden rounded-lg">
-                  <img
-                      src="banner2.png"
-                      alt="Banner"
-                      className="w-full h-[85vh] object-contain absolute inset-0 m-auto"
-                  />
-              </div>
-          </div>
-      </div>
-  );
-};
-
-export default Banner;
+                        </Link>
+                        <Link href="/jobs">
+                            <button
+                                variant="outline"
+                                size="lg"
+                                className="px-8 py-3 bg-white/10 border border-gray-600 text-black rounded-full hover:bg-white hover:border-gray-800 hover:text-gray-700 transition-all duration-300 shadow-sm hover:shadow-md text-lg font-medium hover:-translate-y-0.5 backdrop-blur-sm">
+                                Browse Jobs
+                            </button>
+                        </Link>
+                    </div>
+                    <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-16">
+                        <div className="flex flex-col items-center group">
+                            <div className="rounded-full bg-gradient-to-br from-blue-100 to-blue-200 p-4 mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                                <Users className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">10,000+</h3>
+                            <p className="text-sm text-gray-600">Active Candidates</p>
+                        </div>
+                        <div className="flex flex-col items-center group">
+                            <div className="rounded-full bg-gradient-to-br from-purple-100 to-purple-200 p-4 mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                                <Briefcase className="h-6 w-6 text-purple-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">500+</h3>
+                            <p className="text-sm text-gray-600">Partner Companies</p>
+                        </div>
+                        <div className="flex flex-col items-center group">
+                            <div className="rounded-full bg-gradient-to-br from-green-100 to-emerald-200 p-4 mb-4 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                                <Bot className="h-6 w-6 text-green-600" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">95%</h3>
+                            <p className="text-sm text-gray-600">AI Match Accuracy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    )
+}

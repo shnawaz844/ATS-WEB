@@ -1,166 +1,166 @@
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect, useRef } from "react";
+
+const companies = [
+    { name: "TechCorp", logo: "🚀", industry: "Technology" },
+    { name: "InnovateLab", logo: "🔬", industry: "Research" },
+    { name: "FinanceHub", logo: "💰", industry: "Finance" },
+    { name: "HealthTech", logo: "🏥", industry: "Healthcare" },
+    { name: "EduSoft", logo: "📚", industry: "Education" },
+    { name: "GreenEnergy", logo: "🌱", industry: "Energy" },
+    { name: "RetailMax", logo: "🛍️", industry: "Retail" },
+    { name: "CloudSys", logo: "☁️", industry: "Cloud Services" },
+    { name: "DataSphere", logo: "📊", industry: "Analytics" },
+    { name: "MobileFirst", logo: "📱", industry: "Mobile" },
+    { name: "AI Nexus", logo: "🤖", industry: "Artificial Intelligence" },
+    { name: "CyberShield", logo: "🛡️", industry: "Security" },
+];
 
 export default function NewsCarousel() {
-    const [ currentSlide, setCurrentSlide ] = useState( 0 );
+    const firstRowRef = useRef( null );
+    const secondRowRef = useRef( null );
+    const [ isMobile, setIsMobile ] = useState( false );
+    const animationDuration = 40; // seconds for one full cycle
 
-    const slides = [
-        {
-            id: 1,
-            title: "Meet the Seventh class of Google for Startups Accelerator",
-            content: "Today, we are pleased to announce the 20 Seed to Series A startups looking to leverage the power of Generative AI chosen for the 7th class from 1500+ applications...",
-            logo: "/news1.png",
-            logoAlt: "Google for Startups Accelerator 2023"
-        },
-        {
-            id: 2,
-            title: "This HRTech SaaS Startup is Helping SMEs with Virtual Recruitment",
-            content: "Bengaluru-based SaaS startup Expertia AI offers hiring solutions for SMEs, helping them automatically source and identify top 10 candidates from a pool of applicants...",
-            logo: "/news1.png",
-            logoAlt: "YourStory Logo"
-        },
-        {
-            id: 3,
-            title: "Startups That Raised Funding in August 2023",
-            content: "With renewed focus from growth to profitability, the startup ecosystem is going...",
-            logo: "/news1.png",
-            logoAlt: "Funding News Logo"
-        },
-        {
-            id: 4,
-            title: "AI Innovation Leaders of 2023",
-            content: "These emerging startups are revolutionizing industries with cutting-edge AI solutions that address real-world problems...",
-            logo: "/news1.png",
-            logoAlt: "Tech Innovation Logo"
-        }
-    ];
-
-    const goToSlide = ( index ) => {
-        setCurrentSlide( index );
+    const handleResize = () => {
+        setIsMobile( window.innerWidth <= 640 );
     };
 
-    // Auto-advance carousel
     useEffect( () => {
-        const interval = setInterval( () => {
-            setCurrentSlide( ( prev ) => ( prev === slides.length - 1 ? 0 : prev + 1 ) );
-        }, 5000 );
+        handleResize();
+        window.addEventListener( "resize", handleResize );
+        return () => window.removeEventListener( "resize", handleResize );
+    }, [] );
 
-        return () => clearInterval( interval );
-    }, [ currentSlide, slides.length ] );
+    const firstHalfCompanies = companies.slice( 0, 6 );
+    const secondHalfCompanies = companies.slice( 6, 12 );
+    const duplicatedFirstHalf = [ ...firstHalfCompanies, ...firstHalfCompanies ];
+    const duplicatedSecondHalf = [ ...secondHalfCompanies, ...secondHalfCompanies ];
+
+    // Apply animation styles
+    useEffect( () => {
+        const applyAnimation = ( element, animationType ) => {
+            if ( element ) {
+                element.style.animation = `${ animationType } ${ animationDuration }s linear infinite`;
+                element.style.width = '200%';
+                element.style.display = 'flex';
+            }
+        };
+
+        applyAnimation( firstRowRef.current, 'scroll' );
+        applyAnimation( secondRowRef.current, 'scrollReverse' );
+
+        return () => {
+            if ( firstRowRef.current ) firstRowRef.current.style.animation = '';
+            if ( secondRowRef.current ) secondRowRef.current.style.animation = '';
+        };
+    }, [] );
+
+    const handleMouseEnter = ( ref ) => {
+        if ( ref.current ) {
+            ref.current.style.animationPlayState = 'paused';
+        }
+    };
+
+    const handleMouseLeave = ( ref ) => {
+        if ( ref.current ) {
+            ref.current.style.animationPlayState = 'running';
+        }
+    };
 
     return (
-        <div  className="pb-16 backdrop-blur-sm translate-y-10 transition-all duration-700">
-            {/* Header */ }
-            <div className="text-center mb-16">
-                <h1 className="text-4xl font-bold text-gray-100 relative inline-block">
-                    A.T.S in the <span className="text-blue-500 relative">News</span>
-                </h1>
-            </div>
+        <section className="py-24 bg-gray-50 relative overflow-hidden">
+            <style jsx>{ `
+        @keyframes scroll {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+        @keyframes scrollReverse {
+          0% {
+            transform: translateX(-50%);
+          }
+          100% {
+            transform: translateX(0%);
+          }
+        }
+      `}</style>
 
-            {/* Carousel */ }
-            <div className="relative">
-                <div className="overflow-hidden relative rounded-xl shadow-xl">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-purple-500/20 rounded-full blur-[120px]"></div>
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                        Trusted by{ " " }
+                        <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+                            Leading Companies
+                        </span>
+                    </h2>
+                    <p className="mt-4 text-lg text-gray-600">
+                        Join hundreds of companies that trust our platform for their hiring needs
+                    </p>
+                </div>
+
+                <div className="w-full overflow-hidden">
+                    {/* First row */ }
+                    { !isMobile && (
+                        <div
+                            className="flex gap-6"
+                            ref={ firstRowRef }
+                            onMouseEnter={ () => handleMouseEnter( firstRowRef ) }
+                            onMouseLeave={ () => handleMouseLeave( firstRowRef ) }
+                        >
+                            { duplicatedFirstHalf.map( ( company, index ) => (
+                                <div
+                                    key={ `first-${ company.name }-${ index }` }
+                                    className="flex-none relative"
+                                >
+                                    <div
+                                        className="border rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white p-6 text-center w-64"
+                                    >
+                                        <div className="text-4xl mb-3">{ company.logo }</div>
+                                        <h3 className="font-semibold text-gray-900 mb-1">{ company.name }</h3>
+                                        <p className="text-sm text-gray-500">{ company.industry }</p>
+                                    </div>
+                                </div>
+                            ) ) }
+                        </div>
+                    ) }
+
+                    {/* Second row */ }
                     <div
-                        className="flex transition-transform duration-700 ease-in-out"
-                        style={ { transform: `translateX(-${ currentSlide * 100 }%)` } }
+                        className="flex gap-6 mt-6"
+                        ref={ secondRowRef }
+                        onMouseEnter={ () => handleMouseEnter( secondRowRef ) }
+                        onMouseLeave={ () => handleMouseLeave( secondRowRef ) }
                     >
-                        { slides.map( ( slide ) => (
-                            <div key={ slide.id } className="min-w-full flex flex-col md:flex-row gap-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4">
-                                    {/* First Column */ }
-                                    <div className="bg-white/5 p-6 rounded-xl shadow-md border-t-4 border-indigo-500 hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                        <div className="h-12 mb-4 flex items-center">
-                                            <img src={ slide.logo } alt={ slide.logoAlt } className="h-full object-contain" />
-                                        </div>
-                                        <h3 className="text-xl font-semibold mb-3 text-gray-950">
-                                            { slide.title }
-                                        </h3>
-                                        <p className="text-white mb-4 leading-relaxed">
-                                            { slide.content }
-                                        </p>
-                                        <button className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors flex items-center group">
-                                            Read More
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    {/* Second Column - Main Featured Content */ }
-                                    <div className="bg-white/5 p-6 rounded-xl shadow-md border-t-4 border-purple-500 hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                        <div className="h-12 mb-4 flex items-center">
-                                            <img src={ slide.logo } alt={ slide.logoAlt } className="h-full object-contain" />
-                                        </div>
-                                        <h3 className="text-xl font-semibold mb-3 text-gray-950">
-                                            { slide.title }
-                                        </h3>
-                                        <p className="text-white mb-4 leading-relaxed">
-                                            { slide.content }
-                                        </p>
-                                        <button className="text-purple-600 font-medium hover:text-purple-800 transition-colors flex items-center group">
-                                            Read More
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    {/* Third Column */ }
-                                    <div className="bg-white/5 p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                        <div className="h-12 mb-4 flex items-center">
-                                            <img src={ slide.logo } alt={ slide.logoAlt } className="h-full object-contain" />
-                                        </div>
-                                        <h3 className="text-xl font-semibold mb-3 text-gray-950">
-                                            { slide.title }
-                                        </h3>
-                                        <p className="text-white mb-4 leading-relaxed">
-                                            { slide.content }
-                                        </p>
-                                        <button className="text-blue-600 font-medium hover:text-blue-800 transition-colors flex items-center group">
-                                            Read More
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                className="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
+                        { duplicatedSecondHalf.map( ( company, index ) => (
+                            <div
+                                key={ `second-${ company.name }-${ index }` }
+                                className="flex-none relative"
+                            >
+                                <div
+                                    className="border rounded-lg hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white p-6 text-center w-64"
+                                >
+                                    <div className="text-4xl mb-3">{ company.logo }</div>
+                                    <h3 className="font-semibold text-gray-900 mb-1">{ company.name }</h3>
+                                    <p className="text-sm text-gray-500">{ company.industry }</p>
                                 </div>
                             </div>
                         ) ) }
                     </div>
                 </div>
 
-                {/* Enhanced Indicator Dots */ }
-                <div className="flex justify-center gap-3 mt-8">
-                    { slides.map( ( _, index ) => (
-                        <button
-                            key={ index }
-                            onClick={ () => goToSlide( index ) }
-                            className={ `w-12 h-3 rounded-full transition-all duration-300 ${ currentSlide === index
-                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 w-16 shadow-md'
-                                    : 'bg-gray-300 hover:bg-gray-400'
-                                }` }
-                            aria-label={ `Go to slide ${ index + 1 }` }
-                        />
-                    ) ) }
+                <div className="mt-12 text-center">
+                    <p className="text-gray-600">
+                        <span className="font-semibold">500+</span> companies trust our platform •
+                        <span className="font-semibold"> 50,000+</span> successful hires •
+                        <span className="font-semibold"> 95%</span> satisfaction rate
+                    </p>
                 </div>
             </div>
-        </div>
+        </section>
     );
 }

@@ -1,45 +1,60 @@
-import React from 'react';
-import Marquee from 'react-fast-marquee';
+import { Users, Building, CheckCircle, Bot } from "lucide-react"
 
-function Companies() {
+const stats = [
+    {
+        icon: Users,
+        value: "10,000+",
+        label: "Active Job Seekers",
+        description: "Qualified candidates ready to join your team",
+        gradient: "from-blue-500 to-blue-600",
+    },
+    {
+        icon: Building,
+        value: "500+",
+        label: "Partner Companies",
+        description: "Leading organizations trust our platform",
+        gradient: "from-purple-500 to-purple-600",
+    },
+    {
+        icon: CheckCircle,
+        value: "50,000+",
+        label: "Successful Hires",
+        description: "Perfect matches made through our system",
+        gradient: "from-green-500 to-emerald-600",
+    },
+    {
+        icon: Bot,
+        value: "95%",
+        label: "AI Match Accuracy",
+        description: "AI-powered precision in candidate matching",
+        gradient: "from-cyan-500 to-blue-600",
+    },
+]
+
+export default function Companies() {
     return (
-        <div className="w-full py-8 relative overflow-hidden bg-slate-900/50">
-            <div className="flex items-center justify-center w-full">
-                <h2 className="text-center text-gray-100 text-3xl font-semibold mb-10 mt-8 h-20">Trusted by <span className="text-blue-500 relative">Leading Companies
-                </span>
-                </h2>
-            </div>
-            {/* Container with fade effects */ }
-            <div className="relative">
-                {/* Left fade gradient */ }
-                <div className="absolute left-0 top-0 h-full w-24 z-10 "></div>
-
-                {/* Right fade gradient */ }
-                <div className="absolute right-0 top-0 h-full w-24 z-10 "></div>
-
-                {/* Marquee component */ }
-                <div className="px-4 py-6">
-                    <Marquee pauseOnHover={ true } speed={ 40 } gradient={ false }>
-                        <div className="flex items-center space-x-12 mx-4">
-                            { [
-                                "mar1.webp", "mar2.webp", "mar3.webp", "mar4.webp",
-                                "mar5.webp", "mar6.jpg", "mar7.jpg", "mar10.png",
-                                "marr1.webp", "marr2.webp", "marr3.webp"
-                            ].map( ( src, index ) => (
-                                <div key={ index } className="flex flex-col items-center">
-                                    <img
-                                        src={ src }
-                                        alt={ `Company logo ${ index + 1 }` }
-                                        className="w-28 h-28 object-contain filter brightness-100 hover:brightness-125 transition-all duration-300"
-                                    />
+        <section className="py-16 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                    { stats.map( ( stat, index ) => (
+                        <div key={ index } className="text-center text-white group">
+                            <div className="flex justify-center mb-4">
+                                <div
+                                    className={ `rounded-full bg-gradient-to-br ${ stat.gradient } p-4 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 relative` }
+                                >
+                                    <stat.icon className="h-6 w-6 text-white" />
+                                    { stat.label.includes( "AI" ) && (
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                                    ) }
                                 </div>
-                            ) ) }
+                            </div>
+                            <div className="text-3xl font-bold mb-2">{ stat.value }</div>
+                            <div className="text-lg font-medium mb-1 text-blue-100">{ stat.label }</div>
+                            <div className="text-sm text-blue-200">{ stat.description }</div>
                         </div>
-                    </Marquee>
+                    ) ) }
                 </div>
             </div>
-        </div>
-    );
+        </section>
+    )
 }
-
-export default Companies;

@@ -1,185 +1,137 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { MapPin, Clock, DollarSign, Users } from "lucide-react"
+import { Link } from 'react-router-dom'
 
-function About() {
-    const [ activeTab, setActiveTab ] = useState( 0 );
-    const [ isHovering, setIsHovering ] = useState( false );
-    const timerRef = useRef( null );
-
-    const tabs = [
-        { id: 'jobify', label: 'Jobify', icon: '🔍' },
-        { id: 'jobify-screening', label: 'Screening', icon: '🤖' },
-        { id: 'talent-pool', label: 'Talent Pool', icon: '👥' },
-        { id: 'interviews', label: 'Interviews', icon: '💬' },
-        { id: 'tracking', label: 'Tracking', icon: '📊' },
-    ];
-
-    const carouselContent = [
-        {
-            title: "About Jobify",
-            description: "Find the best job's from multiple channels with our advanced AI algorithms.",
-            tags: [ "#Application Tracking System", "#multichannel" ],
-            cta: "Try For Free",
-            color: "from-blue-500 to-purple-600",
-            video: "vedio1.mp4",
-        },
-        {
-            title: "Jobify Screening",
-            description: "Let our advanced algorithms find the most relevant job's, saving you time and effort.",
-            tags: [ "#biasfree", "#culturefit" ],
-            cta: "Try For Free",
-            color: "from-purple-500 to-indigo-600",
-            video: "vedio1.mp4",
-        },
-        {
-            title: "Talent Pool Management",
-            description: "Organize and nurture your talent pool with AI-powered insights and automation.",
-            tags: [ "#organization", "#engagement" ],
-            cta: "Try For Free",
-            color: "from-green-500 to-teal-600",
-            video: "vedio2.mp4",
-        },
-        {
-            title: "Streamlined Interviews",
-            description: "Schedule and conduct interviews efficiently with our integrated platform.",
-            tags: [ "#scheduling", "#feedback" ],
-            cta: "Try For Free",
-            color: "from-orange-500 to-red-600",
-            video: "vedio1.mp4",
-        },
-        {
-            title: "Candidate Tracking",
-            description: "Monitor candidate progress and make data-driven decisions with our tracking tools.",
-            tags: [ "#pipeline", "#analytics" ],
-            cta: "Try For Free",
-            color: "from-pink-500 to-rose-600",
-            video: "vedio2.mp4",
-        },
-    ];
-
-    // Auto-scroll effect
-    useEffect( () => {
-        const startTimer = () => {
-            timerRef.current = setInterval( () => {
-                if ( !isHovering ) {
-                    setActiveTab( prev => ( prev + 1 ) % tabs.length );
-                }
-            }, 5000 ); // Change slide every 5 seconds
-        };
-
-        startTimer();
-
-        return () => {
-            if ( timerRef.current ) {
-                clearInterval( timerRef.current );
-            }
-        };
-    }, [ isHovering, tabs.length ] );
-
-    // Candidate profile section
-    const CandidateCard = () => (
-        <div className="card"> {/* Simple card structure for the profile */ } </div>
-    );
-
-    const handleTabChange = ( index ) => {
-        setActiveTab( index );
-    };
-
-    return (
-        <div className="w-full py-5 bg-slate-900/50 mt-4">
-            {/* Navigation Tabs */ }
-            <div className="flex justify-center mb-5 overflow-x-auto">
-                <div className="flex space-x-8 h-28 items-center">
-                    { tabs.map( ( tab, index ) => (
-                        <button
-                            key={ tab.id }
-                            className="flex flex-col items-center relative group"
-                            onClick={ () => handleTabChange( index ) }
-                        >
-                            <div
-                                className={ `w-14 h-14 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 transform ${ activeTab === index
-                                    ? `bg-gradient-to-br ${ carouselContent[ index ].color } text-white shadow-lg scale-110`
-                                    : 'bg-gray-100 text-white group-hover:bg-gray-200'
-                                    }` }
-                            >
-                                <span className="text-xl">{ tab.icon }</span>
-                            </div>
-                            <span
-                                className={ `text-xs font-medium transition-colors duration-300 ${ activeTab === index ? 'text-amber-500' : 'text-white group-hover:text-white'
-                                    }` }
-                            >
-                                { tab.label }
-                            </span>
-                        </button>
-                    ) ) }
-                </div>
-            </div>
-
-            {/* Carousel Content */ }
-            <div
-                className="relative h-[80vh] flex items-center overflow-hidden pl-16"
-                onMouseEnter={ () => setIsHovering( true ) }
-                onMouseLeave={ () => setIsHovering( false ) }
-            >
-                {/* Background Gradient */ }
-                <div className={ `absolute inset-0 bg-gradient-to-br ${ carouselContent[ activeTab ].color } opacity-5 rounded-3xl` } />
-
-                {/* Content with simple CSS fade */ }
-                <div className="transition-all duration-500 ease-in-out opacity-100 flex flex-row justify-between gap-8 items-center">
-
-                    {/* Left Side - Content */ }
-                    <div className="space-y-6 mb-4 h-[45vh] w-[34vw]">
-                        <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-white">
-                            { carouselContent[ activeTab ].title }
-                        </h2>
-
-                        <div className="flex space-x-3">
-                            { carouselContent[ activeTab ].tags.map( ( tag, i ) => (
-                                <span key={ i } className={ `text-sm font-medium px-3 py-1 rounded-full bg-gradient-to-r ${ carouselContent[ activeTab ].color } bg-opacity-10 text-transparent bg-clip-text` }>
-                                    { tag }
-                                </span>
-                            ) ) }
-                        </div>
-
-                        <p className="text-white text-lg leading-relaxed">
-                            { carouselContent[ activeTab ].description }
-                        </p>
-
-                        <button
-                            className={ `bg-gradient-to-r ${ carouselContent[ activeTab ].color } text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform transition-all duration-300 hover:-translate-y-1` }
-                        >
-                            { carouselContent[ activeTab ].cta }
-                        </button>
-                    </div>
-
-                    {/* Right Side - Visual */ }
-                    <div className="flex justify-center w-[51vw] ml-20 max-w-[65vw] min-w-[40vw] h-[60vh]">
-                        { activeTab >= 0 && (
-                            <div className={ `bg-transparent rounded-2xl shadow-lg w-full h-[60vh] flex items-center justify-center relative overflow-hidden` }>
-                                <div className={ `absolute inset-0 bg-gradient-to-br ${ carouselContent[ activeTab ].color } opacity-10` } />
-                                {/* <div className="relative z-10 flex flex-col items-center"> */}
-
-                                    {/* Embed Video based on activeTab */ }
-                                    <div className=" z-10 h-[60vh] w-[52vw] mb-12">
-                                        <video
-                                            className="w-full h-full object-cover" // Ensures the video covers the container fully
-                                            controls
-                                            autoPlay
-                                            muted
-                                            loop
-                                        >
-                                            <source src={ carouselContent[ activeTab ]?.video } type="video/mp4" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
-                                {/* </div> */}
-                            </div>
-                        ) }
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    );
+// Dummy Badge and Button components if you're not using shadcn/ui
+const Badge = ( { children, variant = "default", className = "" } ) => {
+    const base = "px-2 py-1 rounded text-xs font-medium"
+    const variants = {
+        default: "bg-gray-100 text-gray-800",
+        secondary: "bg-blue-100 text-blue-800",
+        outline: "border border-gray-300 text-gray-600"
+    }
+    return <span className={ `${ base } ${ variants[ variant ] } ${ className }` }>{ children }</span>
 }
 
-export default About;
+const Button = ( { children, variant = "default", size = "md", className = "" } ) => {
+    const base = "rounded font-semibold"
+    const variants = {
+        default: "bg-blue-600 text-white hover:bg-blue-700",
+        outline: "border border-gray-400 text-gray-700 hover:bg-gray-100"
+    }
+    const sizes = {
+        sm: "px-3 py-1 text-sm",
+        md: "px-4 py-2",
+        lg: "px-6 py-3 text-lg"
+    }
+    return <button className={ `${ base } ${ variants[ variant ] } ${ sizes[ size ] } ${ className }` }>{ children }</button>
+}
+
+const featuredJobs = [
+    {
+        id: 1,
+        title: "Senior Software Engineer",
+        company: "TechCorp",
+        location: "San Francisco, CA",
+        type: "Full-time",
+        salary: "$120k - $180k",
+        applicants: 45,
+        posted: "2 days ago",
+        skills: [ "React", "Node.js", "TypeScript" ],
+        logo: "🚀",
+    },
+    {
+        id: 2,
+        title: "Product Manager",
+        company: "InnovateLab",
+        location: "New York, NY",
+        type: "Full-time",
+        salary: "$100k - $150k",
+        applicants: 32,
+        posted: "1 day ago",
+        skills: [ "Strategy", "Analytics", "Leadership" ],
+        logo: "🔬",
+    },
+    {
+        id: 3,
+        title: "UX Designer",
+        company: "FinanceHub",
+        location: "Remote",
+        type: "Contract",
+        salary: "$80k - $120k",
+        applicants: 28,
+        posted: "3 days ago",
+        skills: [ "Figma", "User Research", "Prototyping" ],
+        logo: "💰",
+    },
+]
+
+export default function About() {
+    return (
+        <section className="py-12 bg-white">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Featured Job Opportunities</h2>
+                    <p className="mt-4 text-lg text-gray-600">
+                        Discover your next career opportunity from our curated job listings
+                    </p>
+                </div>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    { featuredJobs.map( ( job ) => (
+                        <div key={ job.id } className="border rounded-lg p-6 hover:shadow-lg transition-shadow duration-300 bg-white">
+                            <div className="mb-6">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-2xl">{ job.logo }</div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold">{ job.title }</h3>
+                                            <p className="text-sm text-gray-500 font-medium">{ job.company }</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="secondary">{ job.type }</Badge>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-4 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                        <MapPin className="h-4 w-4" />
+                                        { job.location }
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Clock className="h-4 w-4" />
+                                        { job.posted }
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm">
+                                    <div className="flex items-center gap-1 text-green-600 font-medium">
+                                        <DollarSign className="h-4 w-4" />
+                                        { job.salary }
+                                    </div>
+                                    <div className="flex items-center gap-1 text-gray-600">
+                                        <Users className="h-4 w-4" />
+                                        { job.applicants } applicants
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    { job.skills.map( ( skill, index ) => (
+                                        <Badge key={ index } variant="outline" className="text-xs">
+                                            { skill }
+                                        </Badge>
+                                    ) ) }
+                                </div>
+                                <button className="mx-auto h-10 flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full shadow-md"
+                                >Apply Now</button>
+                            </div>
+                        </div>
+                    ) ) }
+                </div>
+                <div className="text-center mt-12">
+                    <Link to="/jobs">
+                        <Button variant="outline" size="lg">
+                            View All Jobs
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        </section>
+    )
+}
