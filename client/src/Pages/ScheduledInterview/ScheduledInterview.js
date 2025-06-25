@@ -262,8 +262,8 @@ export const ScheduledInterview = () => {
             setFeedbackForm( {
                 _id: feedbackData?._id || selectedInterview?._id || "",
                 feedbackTitle: feedbackData?.feedbackTitle || selectedInterview?.feedbackTitle || "",
-                feedback: feedbackForm?.feedback || selectedInterview?.feedback || "",
-                starRating: feedbackForm?.starRating || selectedInterview?.starRating,
+                feedback: feedbackData?.feedback || selectedInterview?.feedback || "",
+                starRating: feedbackData?.starRating || selectedInterview?.starRating,
             } );
 
         } catch ( error ) {
@@ -372,6 +372,23 @@ export const ScheduledInterview = () => {
         return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
     };
 
+    const handleResumeView = ( resumeUrl ) => {
+        if ( !resumeUrl ) {
+            toast.error( "Resume not available" );
+            return;
+        }
+
+        // If it's a full URL, open directly
+        if ( resumeUrl.startsWith( 'http://' ) || resumeUrl.startsWith( 'https://' ) ) {
+            window.open( resumeUrl, '_blank', 'noopener,noreferrer' );
+        }
+        // If it's a relative path, construct the full URL
+        else {
+            const fullUrl = `${ process.env.REACT_APP_BASE_URL }/${ resumeUrl }`;
+            window.open( fullUrl, '_blank', 'noopener,noreferrer' );
+        }
+      };
+
     return (
         <div className="px-8 py-10 w-full min-h-screen"
             style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
@@ -429,8 +446,8 @@ export const ScheduledInterview = () => {
                         <button
                             onClick={ () => setShowFilters( !showFilters ) }
                             className={ `flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${ showFilters || hasActiveFilters
-                                    ? 'bg-gray-700 text-white border border-blue-300'
-                                    : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+                                ? 'bg-gray-700 text-white border border-blue-300'
+                                : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
                                 }` }
                         >
                             <Filter className="h-4 w-4" />
@@ -547,6 +564,7 @@ export const ScheduledInterview = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job Title</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Candidate</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Resume</th>
                                 { isAdmin && (
                                     <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Interviewer</th>
                                 ) }
@@ -563,6 +581,18 @@ export const ScheduledInterview = () => {
                                 <tr key={ interview?._id } className="group hover:bg-gray-700 ">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.jobID?.title ) || "N/A" }</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.applicationID?.candidateID?.userName ) || "N/A" }</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        { interview?.applicationID?.resume ? (
+                                            <button
+                                                onClick={ () => handleResumeView( interview.applicationID.resume ) }
+                                                className="text-blue-600 hover:text-blue-900 group-hover:text-white font-medium transition-colors duration-200"
+                                            >
+                                                Open Resume
+                                            </button>
+                                        ) : (
+                                            <span className="text-gray-500 group-hover:text-gray-300">No Resume</span>
+                                        ) }
+                                    </td>
                                     { isAdmin && (
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 group-hover:text-white">{ capitalizeFirstLetter( interview?.interviewerID?.userName ) || "N/A" }</td>
                                     ) }

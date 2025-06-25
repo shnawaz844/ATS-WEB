@@ -26,8 +26,15 @@ const ApplicationsTable = ( {
 
     const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
     const userRole = user.role;
+    const subUserRole = localStorage.getItem( "sub_role" ) || "" ;;
+
+    console.log( "subUserRole", subUserRole, user )
+     
+    // const subrole = ''; //local storage - 'hiring_manager'/'recruiter_manager'
+    // const subrole = JSON.parse( localStorage.setItem( "user" ) || "{}" );
     const isHiringManager = userRole === 'hiring_manager';
     const isRecruiterManager = userRole === 'recruiter_manager';
+    const isAdmin = userRole === 'admin';
 
     const [ apps, setApps ] = useState( filteredApps );
 
@@ -144,12 +151,22 @@ const ApplicationsTable = ( {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Contact
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Resume
-                            </th>
-                            { isHiringManager && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            </th> ) }
+                            { ( ( !subUserRole || subUserRole === 'hiring_manager' ) && !isRecruiterManager ) && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Actions
                             </th> ) }
+                            {/* { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <button
+                                        onClick={ () => onViewResume( app ) }
+                                        className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
+                                    >
+                                        View Resume
+                                    </button>
+                                </td>
+                            ) } */}
                         </tr>
                     </thead>
                     <tbody className="bg-gray-300 divide-y divide-gray-200">
@@ -203,6 +220,7 @@ const ApplicationsTable = ( {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
                                             { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
                                         </td>
+                                        { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <button
                                                 onClick={ () => onViewResume( app ) }
@@ -211,7 +229,8 @@ const ApplicationsTable = ( {
                                                 View Resume
                                             </button>
                                         </td>
-                                        { isHiringManager && (
+                                        )}
+                                        { ( isHiringManager || subUserRole === 'hiring_manager' ) && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={ () => handleScheduleInterview( app ) }
