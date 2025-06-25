@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Search, User, Briefcase, X, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, User, Briefcase, X, ChevronDown } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -12,7 +12,7 @@ const AllInterviews = () => {
   const [ isFeedbackModalOpen, setIsFeedbackModalOpen ] = useState( false );
   const [ filterStatus, setFilterStatus ] = useState( 'all' );
   const [ detailedInterview, setDetailedInterview ] = useState( null );
-  const [ pdfUrl, setPdfUrl ] = useState( null );
+  // const [ pdfUrl, setPdfUrl ] = useState( null );
   const [ isPdfModalOpen, setIsPdfModalOpen ] = useState( false );
   const [ pdfPreviewUrl, setPdfPreviewUrl ] = useState( '' );
   const [ isFeedbackExpanded, setIsFeedbackExpanded ] = useState( false );
@@ -347,13 +347,6 @@ const AllInterviews = () => {
                                 <div className="text-sm text-gray-700 group-hover:text-white">
                                   { capitalizeFirstLetter( feedback.applicationID?.jobID?.title ) || "N/A" }
                                 </div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  { feedback.skills?.map( ( skill, index ) => (
-                                    <span key={ index } className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700">
-                                      { skill }
-                                    </span>
-                                  ) ) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span> }
-                                </div>
                               </div>
                             </div>
                           </td>
@@ -540,7 +533,7 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */ }
         { isFeedbackModalOpen && detailedInterview && (
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
               <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
                 <div>

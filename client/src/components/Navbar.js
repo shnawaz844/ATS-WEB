@@ -92,7 +92,7 @@ export const Navbar = () => {
   const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
   const location = useLocation();
   const [ company, setCompany ] = useState( [] );
-  
+
   useEffect( () => {
     function fetchCompanyUserName() {
       const storedName = localStorage.getItem( "companyUserName" );
@@ -106,28 +106,28 @@ export const Navbar = () => {
     fetchCompanyUserName();
   }, [] );
 
-   
-  console.log("isDropdownOpen", isDropdownOpen);
-   useEffect( () => {
 
-     const fetchCompanies = async () => {
-       try {
-         const response = await fetch(
-           `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }`
-         )
-         if ( response.ok ) {
-           const data = await response.json()
-           setCompany( data )
-         } else {
-           setCompany( [] )
-         }
-       } catch ( error ) {
-         console.error( 'Error fetching companies:', error )
-       }
-     }
+  console.log( "isDropdownOpen", isDropdownOpen );
+  useEffect( () => {
 
-     fetchCompanies();
-   }, [ companyUserName ] )
+    const fetchCompanies = async () => {
+      try {
+        const response = await fetch(
+          `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }`
+        )
+        if ( response.ok ) {
+          const data = await response.json()
+          setCompany( data )
+        } else {
+          setCompany( [] )
+        }
+      } catch ( error ) {
+        console.error( 'Error fetching companies:', error )
+      }
+    }
+
+    fetchCompanies();
+  }, [ companyUserName ] )
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
@@ -143,7 +143,7 @@ export const Navbar = () => {
 
   const handlerIsMenuOpen = () => setIsMenuOpen( !isMenuOpen );
 
-  const toggleDropdown = (e) => {
+  const toggleDropdown = ( e ) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDropdownOpen( ( prev ) => !prev );
@@ -159,7 +159,7 @@ export const Navbar = () => {
 
   useEffect( () => {
     if ( location.pathname === "/" ) {
-      setNavItems( loginData?.role === "super" ? superNavItems : [] ); 
+      setNavItems( loginData?.role === "super" ? superNavItems : [] );
     } else {
       // Reapply the default or user role-based navigation items
       if ( loginData ) {
@@ -224,6 +224,7 @@ export const Navbar = () => {
         localStorage.removeItem( "user" )
         localStorage.removeItem( "email" )
         localStorage.removeItem( "companyId" )
+        localStorage.removeItem( "sub_role" );
 
         setLoginData( null )
         window.location.reload();
@@ -274,8 +275,8 @@ export const Navbar = () => {
                     <div key={ item.label } className="relative group" ref={ dropdownRef }>
                       <button
                         className={ `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ item.subItems.some( subItem => location.pathname === ( userRole === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }` ) )
-                            ? "text-white bg-slate-600"
-                            : "text-gray-300 hover:text-white hover:border hover:border-white"
+                          ? "text-white bg-slate-600"
+                          : "text-gray-300 hover:text-white hover:border hover:border-white"
                           }` }
                       >
                         { item.icon }
@@ -291,6 +292,18 @@ export const Navbar = () => {
                               <NavLink
                                 key={ subItem.path }
                                 to={ to }
+                                onClick={ () => {
+                                  // Set sub_role for Hiring Manager only
+                                  if ( item.label === "Hiring Manager" ) {
+                                    localStorage.setItem( "sub_role", "hiring_manager" );
+                                  } else if ( item.label === "Recruiter Manager" ) {
+                                    localStorage.setItem( "sub_role", "recruiter_manager" );
+                                  } else if ( item.label === "Interviewer" ) {
+                                    localStorage.setItem( "sub_role", "interviewer" );
+                                  }
+                                  setIsDropdownOpen( false );
+                                  setIsMenuOpen( false );
+                                } }
                                 className={ ( { isActive } ) =>
                                   `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${ isActive ? "bg-gray-100 font-medium" : ""
                                   }`
@@ -301,6 +314,7 @@ export const Navbar = () => {
                               </NavLink>
                             );
                           } ) }
+
                         </div>
                       </div>
                     </div>
@@ -349,7 +363,7 @@ export const Navbar = () => {
                         onClick={ () => {
                           setIsDropdownOpen( false );
                           setIsMenuOpen( false );
-                         }}
+                        } }
                         className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <UserPen className="w-4 h-4 mr-3 text-gray-600" />
@@ -361,7 +375,7 @@ export const Navbar = () => {
                           logoutHandler();
                           setIsDropdownOpen( false );
                           setIsMenuOpen( false );
-                        }}
+                        } }
                         className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <LogOut className="w-4 h-4 mr-3 text-gray-600 rounded" />
