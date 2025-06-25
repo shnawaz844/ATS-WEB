@@ -190,28 +190,28 @@ const UserListing = () => {
     <div className="px-8 py-4 w-full min-h-screen"
       style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
     >
-      <div className="max-w-screen-2xl">
-        <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
-          <div className="flex items-center w-full gap-4">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */ }
+        <div className='mb-6 h-auto min-h-[15vh] flex flex-col sm:flex-row items-center justify-between rounded-xl p-4 sm:p-6 bg-gray-700 gap-4 sm:gap-0'>
+          <div className="flex items-center w-full sm:w-auto gap-4">
             <Users className="h-6 w-6 text-white" />
-            <h1 className="text-2xl font-bold text-white">User Management</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">User Management</h1>
           </div>
-
-          <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-grow">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-[20vw] min-w-[200px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search users..."
                 value={ search }
                 onChange={ handleSearchChange }
-                className="w-[20vw] pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
               />
             </div>
 
             <button
               onClick={ handleOpenAddDialog }
-              className="flex items-center px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-600 hover:text-white border border-white transition-colors duration-200 whitespace-nowrap shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-600 hover:text-white border border-white transition-colors duration-200 whitespace-nowrap shadow-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               <span className="font-medium">Add User</span>
@@ -232,36 +232,36 @@ const UserListing = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
               { users.map( ( user ) => (
                 <div
                   key={ user._id }
-                  className="bg-white p-5 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200 flex flex-col"
+                  className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200 flex flex-col"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold text-lg shadow-md">
                         { user.userName.charAt( 0 ).toUpperCase() }
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{ capitalizeFirstLetter( user.userName ) }</h3>
-                        <p className="text-sm text-gray-600">{ user.email }</p>
-                        <p className="text-sm text-gray-600">{ getCompanyNameById( user.company_id ) }</p>
+                        <h3 className="font-semibold text-gray-900 text-base sm:text-lg">{ capitalizeFirstLetter( user.userName ) }</h3>
+                        <p className="text-xs sm:text-sm text-gray-600">{ user.email }</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{ getCompanyNameById( user.company_id ) }</p>
 
                       </div>
 
                     </div>
-                    <div>
+                    <div className='flex gap-1 sm:gap-2'>
                       <button
                         onClick={ () => handleOpenEditDialog( user ) }
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        className="sm:p-2 p-1 hover:bg-gray-100 rounded-full transition-colors "
                         aria-label="Edit user"
                       >
                         <Edit className="h-4 w-4 text-gray-500" />
                       </button>
                       <button
                         onClick={ () => handleDeleteUser( user._id ) }
-                        className="p-2 hover:bg-red-50 rounded-full transition-colors"
+                        className="sm:p-2 p-1 hover:bg-red-50 rounded-full transition-colors"
                         aria-label="Delete user"
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
@@ -270,29 +270,29 @@ const UserListing = () => {
 
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="sm:mt-4 mt-3 flex flex-wrap gap-1 sm:gap-2">
                     { user.role && (
-                      <span className={ `px-3 py-1 text-sm rounded-full font-medium ${ getRoleBadgeColor( user.role ) }` }>
+                      <span className={ `sm:px-3 px-2 py-1 text-xs sm:text-sm rounded-full font-medium ${ getRoleBadgeColor( user.role ) }` }>
                         { formatRole( user.role ) }
                       </span>
                     ) }
 
                     { user.head && (
-                      <span className="px-3 py-1 text-sm rounded-full bg-emerald-100 text-emerald-800 font-medium">
+                      <span className="sm:px-3 px-2 py-1 text-xs sm:text-sm rounded-full bg-emerald-100 text-emerald-800 font-medium">
                         Head
                       </span>
                     ) }
 
                     { user.gender && (
-                      <span className="px-3 py-1 text-sm rounded-full bg-pink-100 text-pink-800 font-medium">
+                      <span className="sm:px-3 px-2 py-1 text-xs sm:text-sm rounded-full bg-pink-100 text-pink-800 font-medium">
                         { capitalizeFirstLetter( user.gender ) }
                       </span>
                     ) }
                   </div>
 
                   { user.address && (
-                    <p className="mt-3 text-sm text-gray-600 flex items-center">
-                      <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                    <p className="sm:px-3 px-2 py-1 text-xs sm:text-sm text-gray-600 flex items-center">
+                      <MapPin className="sm:h-4 h-3 w-3 sm:w-4 mr-1 text-gray-400" />
                       { user.address }
                     </p>
                   ) }
@@ -302,15 +302,15 @@ const UserListing = () => {
 
             {/* Empty state */ }
             { users.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <User className="h-16 w-16 text-gray-300 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-1">No users found</h3>
-                <p className="text-gray-500 mb-4">Try adjusting your search or add a new user</p>
+              <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
+                <User className="sm:h-16 h-12 sm:w-16 w-12 text-gray-300 sm:mb-4 mb-3" />
+                <h3 className="sm:text-lg text-base font-medium text-gray-900 mb-1">No users found</h3>
+                <p className="sm:text-lg text-base text-gray-500 sm:mb-4 mb-3">Try adjusting your search or add a new user</p>
                 <button
                   onClick={ handleOpenAddDialog }
-                  className="px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-400 transition-colors"
+                  className="sm:px-4 px-3 sm:py-2 py-1 bg-gray-700 text-white rounded-xl hover:bg-gray-400 transition-colors text-sm sm:text-base"
                 >
-                  <Plus className="h-4 w-4 inline mr-2" />
+                  <Plus className="sm:h-4 h-3 sm:w-4 w-3 inline sm:mr-2 mr-1" />
                   Add User
                 </button>
               </div>
@@ -318,21 +318,21 @@ const UserListing = () => {
 
             {/* Pagination */ }
             { users.length > 0 && (
-              <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-3 sm:pt-4 mt-3 sm:mt-4 gap-3 sm:gap-0">
                 <button
                   onClick={ () => setCurrentPage( ( p ) => Math.max( 1, p - 1 ) ) }
                   disabled={ currentPage <= 1 }
-                  className={ `flex items-center px-4 py-2 text-sm rounded-lg border ${ currentPage <= 1
+                  className={ `flex items-center px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg border ${ currentPage <= 1
                     ? 'bg-gray-400 text-white border-gray-200 cursor-not-allowed rounded-xl'
                     : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
                     }` }
                 >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  <ChevronLeft className="sm:h-4 h-3 sm:w-4 w-3 mr-1" />
                   Previous
                 </button>
 
                 <div className="flex items-center">
-                  <span className="px-3 py-1 text-sm bg-gray-200 text-black font-medium rounded-xl">
+                  <span className="sm:px-3 px-4 py-1 text-sm bg-gray-200 text-black font-medium rounded-xl">
                     Page { currentPage } of { totalPages }
                   </span>
                 </div>
@@ -340,13 +340,13 @@ const UserListing = () => {
                 <button
                   onClick={ () => setCurrentPage( ( p ) => Math.min( totalPages, p + 1 ) ) }
                   disabled={ currentPage >= totalPages }
-                  className={ `flex items-center px-4 py-2 text-sm rounded-lg border ${ currentPage >= totalPages
+                  className={ `flex items-center px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg border ${ currentPage >= totalPages
                     ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed rounded-xl'
                     : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
                     }` }
                 >
                   Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                  <ChevronRight className="sm:h-4 h-3 sm:w-4 w-3 ml-1" />
                 </button>
               </div>
             ) }
