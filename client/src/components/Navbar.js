@@ -138,12 +138,14 @@ export const Navbar = () => {
     }
   ];
   const [ navItems, setNavItems ] = useState( normalNavItem );
-
   const dropdownRef = useRef( null );
+  const userDropdownRef = useRef( null );
 
   const handlerIsMenuOpen = () => setIsMenuOpen( !isMenuOpen );
 
-  const toggleDropdown = () => {
+  const toggleDropdown = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDropdownOpen( ( prev ) => !prev );
   };
 
@@ -189,19 +191,23 @@ export const Navbar = () => {
 
   useEffect( () => {
     const handleClickOutside = ( event ) => {
-      if ( dropdownRef.current && !dropdownRef.current.contains( event.target ) ) {
+      // Check if click is outside both dropdowns
+      const isOutsideNavDropdown = dropdownRef.current && !dropdownRef.current.contains( event.target );
+      const isOutsideUserDropdown = userDropdownRef.current && !userDropdownRef.current.contains( event.target );
+
+      if ( isOutsideUserDropdown && isDropdownOpen ) {
         setIsDropdownOpen( false );
       }
     };
 
     if ( isDropdownOpen ) {
       document.addEventListener( 'mousedown', handleClickOutside );
-    } else {
-      document.removeEventListener( 'mousedown', handleClickOutside );
+      document.addEventListener( 'touchstart', handleClickOutside );
     }
 
     return () => {
       document.removeEventListener( 'mousedown', handleClickOutside );
+      document.removeEventListener( 'touchstart', handleClickOutside );
     };
   }, [ isDropdownOpen ] );
 
