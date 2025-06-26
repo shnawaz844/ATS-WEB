@@ -58,148 +58,148 @@ const Layout = () => {
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [ companyError, setCompanyError ] = useState( false );
+  const [companyError, setCompanyError] = useState(false);
   const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 
-  const slug = location.pathname.split( '/' )[ 1 ];
-  const companyUserNameFromStorage = localStorage.getItem( 'companyUserName' );
-  const companyIdFromStorage = localStorage.getItem( 'companyId' );
-  const user = localStorage.getItem( 'user' );
+  const slug = location.pathname.split('/')[1];
+  const companyUserNameFromStorage = localStorage.getItem('companyUserName');
+  const companyIdFromStorage = localStorage.getItem('companyId');
+  const user = localStorage.getItem('user');
 
   // Clear company details from localStorage when slug is not available
-  useLayoutEffect( () => {
-    if ( !slug ) {
-      if ( user ) {
-        navigate( `/${ companyIdFromStorage }` );
+  useLayoutEffect(() => {
+    if (!slug) {
+      if (user) {
+        navigate(`/${companyIdFromStorage}`);
         return;
       }
-      localStorage.removeItem( "companyUserName" );
-      localStorage.removeItem( "companyId" );
-      console.log( "Cleared companyUserName from localStorage" );
+      localStorage.removeItem("companyUserName");
+      localStorage.removeItem("companyId");
+      console.log("Cleared companyUserName from localStorage");
     }
-  }, [ slug ] );
+  }, [slug]);
 
 
-  useEffect( () => {
+  useEffect(() => {
     // If user is not logged in (companyUserName is not in localStorage)
-    if ( !companyUserNameFromStorage ) {
-      console.log( 'User not logged in. Redirecting to login...' );
-      navigate( `/${ slug }` ); // Redirect to login page with the companyUserName
+    if (!companyUserNameFromStorage) {
+      console.log('User not logged in. Redirecting to login...');
+      navigate(`/${slug}`); // Redirect to login page with the companyUserName
       return;
     }
 
     // If slug (companyUserName) from route does not match the one stored in localStorage
-    if ( companyUserNameFromStorage !== slug ) {
-      console.log( 'Company mismatch or invalid company user, redirecting...' );
-      if ( user ) {
-        navigate( '/404' );
+    if (companyUserNameFromStorage !== slug) {
+      console.log('Company mismatch or invalid company user, redirecting...');
+      if (user) {
+        navigate('/404');
         return;
       }
-      navigate( `/${ slug }` );
+      navigate(`/${slug}`);
       return;
     }
 
-    setCompanyError( false );
+    setCompanyError(false);
 
     // Fetch company details from API using companyUserName
     axios
-      .get( `${ BASE_URL }/companies/companies/${ slug }` )
+      .get(`${BASE_URL}/companies/companies/${slug}`)
 
-      .then( res => {
-        if ( companyIdFromStorage && res.data._id !== companyIdFromStorage ) {
-          console.error( "Company ID mismatch, invalid access." );
-          navigate( '/404' );
+      .then(res => {
+        if (companyIdFromStorage && res.data._id !== companyIdFromStorage) {
+          console.error("Company ID mismatch, invalid access.");
+          navigate('/404');
         } else {
-          localStorage.setItem( "companyId", res.data._id );
-          localStorage.setItem( "companyUserName", slug );
+          localStorage.setItem("companyId", res.data._id);
+          localStorage.setItem("companyUserName", slug);
         }
-      } )
-      .catch( err => {
-        console.error( "Invalid company slug:", err );
-        setCompanyError( true );
-      } );
-  }, [ slug, companyUserNameFromStorage, companyIdFromStorage, navigate ] );
+      })
+      .catch(err => {
+        console.error("Invalid company slug:", err);
+        setCompanyError(true);
+      });
+  }, [slug, companyUserNameFromStorage, companyIdFromStorage, navigate]);
 
 
   useAuth();
-  if ( companyError ) {
+  if (companyError) {
     return <div>Company not found</div>;
   }
   return (
     <div className="App">
       <Routes>
-        <Route element={ <Layout /> }>
-          {/* Home */ }
-          <Route path="/" element={ <Banner /> } />
-          <Route path="/:companyUserName" element={ <Home /> } />
+        <Route element={<Layout />}>
+          {/* Home */}
+          <Route path="/" element={<Banner />} />
+          <Route path="/:companyUserName" element={<Home />} />
 
-          {/* Authentication */ }
-          <Route path="/:companyUserName/login" element={ <Login /> } />
-          <Route path="/login" element={ <Login /> } />
+          {/* Authentication */}
+          <Route path="/:companyUserName/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
 
-          <Route path="/:companyUserName/signup" element={ <Register /> } />
-          {/* <Route path="/:companyUserName?/signup" element={ <Register /> } /> */ }
+          <Route path="/:companyUserName/signup" element={<Register />} />
+          {/* <Route path="/:companyUserName?/signup" element={ <Register /> } /> */}
 
-          {/* Dashboard */ }
-          <Route path="/:companyUserName/dashboard" element={ <Dashboard /> } />
-          <Route path="/:companyUserName/profile" element={ <Profile /> } />
-          <Route path="/profile" element={ <Profile /> } />
+          {/* Dashboard */}
+          <Route path="/:companyUserName/dashboard" element={<Dashboard />} />
+          <Route path="/:companyUserName/profile" element={<Profile />} />
+          <Route path="/profile" element={<Profile />} />
 
-          {/* Job management */ }
-          <Route path="/:companyUserName/post-job" element={ <PostJob /> } />
-          <Route path="/:companyUserName/all-jobs" element={ <AllJobs /> } />
-          <Route path="/:companyUserName/all-interviews" element={ <AllInterviews /> } />
-          <Route path="/:companyUserName/current-job/:id" element={ <JobDetails /> } />
+          {/* Job management */}
+          <Route path="/:companyUserName/post-job" element={<PostJob />} />
+          <Route path="/:companyUserName/all-jobs" element={<AllJobs />} />
+          <Route path="/:companyUserName/all-interviews" element={<AllInterviews />} />
+          <Route path="/:companyUserName/current-job/:id" element={<JobDetails />} />
 
-          {/* Dynamic route for companyName */ }
-          <Route path="/:companyUserName?/all-posted-jobs" element={ <AllPostedJobs /> } />
+          {/* Dynamic route for companyName */}
+          <Route path="/:companyUserName?/all-posted-jobs" element={<AllPostedJobs />} />
 
-          {/* Applications */ }
-          <Route path="/:companyUserName/job-detail/:id" element={ <ApplicationJobDetail /> } />
+          {/* Applications */}
+          <Route path="/:companyUserName/job-detail/:id" element={<ApplicationJobDetail />} />
 
-          {/* Applications */ }
-          <Route path="/:companyUserName/application-form/:id" element={ <ApplicationForm /> } />
-          <Route path="/:companyUserName/shortlist" element={ <Applications /> } />
-          <Route path="/:companyUserName/shortlist/details/:candidate_id/:job_id" element={ <ShortlistedDetails /> } />
-          <Route path="/:companyUserName/all-applications" element={ <CandidateApplication /> } />
-          <Route path="/:companyUserName/shortlisted-applications" element={ <ShortlistedApplications /> } />
-          <Route path="/:companyUserName/my-jobs" element={ <MyJobs /> } />
-          <Route path="/:companyUserName/application-statuses" element={ <ApplicationListing /> } />
-          <Route path="/:companyUserName/Job-statuses" element={ <Jobstatus /> } />
-          {/* User Management */ }
-          <Route path="/:companyUserName/all-users" element={ <UserListing /> } />
-          <Route path="/all-users" element={ <UserListing /> } />
-          <Route path="/all-companies" element={ <CompanyListing /> } />
+          {/* Applications */}
+          <Route path="/:companyUserName/application-form/:id" element={<ApplicationForm />} />
+          <Route path="/:companyUserName/shortlist" element={<Applications />} />
+          <Route path="/:companyUserName/shortlist/details/:candidate_id/:job_id" element={<ShortlistedDetails />} />
+          <Route path="/:companyUserName/all-applications" element={<CandidateApplication />} />
+          <Route path="/:companyUserName/shortlisted-applications" element={<ShortlistedApplications />} />
+          <Route path="/:companyUserName/my-jobs" element={<MyJobs />} />
+          <Route path="/:companyUserName/application-statuses" element={<ApplicationListing />} />
+          <Route path="/:companyUserName/Job-statuses" element={<Jobstatus />} />
+          {/* User Management */}
+          <Route path="/:companyUserName/all-users" element={<UserListing />} />
+          <Route path="/all-users" element={<UserListing />} />
+          <Route path="/all-companies" element={<CompanyListing />} />
 
-          {/* Interviews */ }
-          <Route path="/:companyUserName/interview-rounds" element={ <InterviewListing /> } />
-          <Route path="/:companyUserName/scheduled-interview" element={ <ScheduledInterview /> } />
-          <Route path="/:companyUserName/assigned-interviews" element={ <AssignedInterviews /> } />
-          <Route path="/:companyUserName/application-list" element={ <ManagerApplicationList /> } />
+          {/* Interviews */}
+          <Route path="/:companyUserName/interview-rounds" element={<InterviewListing />} />
+          <Route path="/:companyUserName/scheduled-interview" element={<ScheduledInterview />} />
+          <Route path="/:companyUserName/assigned-interviews" element={<AssignedInterviews />} />
+          <Route path="/:companyUserName/application-list" element={<ManagerApplicationList />} />
 
-          {/* Candidate */ }
-          <Route path="/shortlist/details/:candidate_id/:job_id" element={ <ShortlistedDetails /> } />
-          <Route path="/all-applications" element={ <CandidateApplication /> } />
-          <Route path="/shortlisted-applications" element={ <ShortlistedApplications /> } />
-          <Route path="/my-jobs" element={ <MyJobs /> } />
-          <Route path="/application-Statuses" element={ <ApplicationListing /> } />
+          {/* Candidate */}
+          <Route path="/shortlist/details/:candidate_id/:job_id" element={<ShortlistedDetails />} />
+          <Route path="/all-applications" element={<CandidateApplication />} />
+          <Route path="/shortlisted-applications" element={<ShortlistedApplications />} />
+          <Route path="/my-jobs" element={<MyJobs />} />
+          <Route path="/application-Statuses" element={<ApplicationListing />} />
 
-          {/* Role-specific Dashboards */ }
-          <Route path="/:companyUserName/recruiter-dashboard" element={ <RecruiterDashboard /> } />
-          <Route path="/:companyUserName/coordinator/review" element={ <CoordinatorDashboard /> } />
-          <Route path="/:companyUserName/hiring_manager" element={ <HiringManagerDashboard /> } />
+          {/* Role-specific Dashboards */}
+          <Route path="/:companyUserName/recruiter-dashboard" element={<RecruiterDashboard />} />
+          <Route path="/:companyUserName/coordinator/review" element={<CoordinatorDashboard />} />
+          <Route path="/:companyUserName/hiring_manager" element={<HiringManagerDashboard />} />
 
-          {/* Candidate */ }
-          <Route path="/:companyUserName/candidate-details/:candidateId/:jobId" element={ <CandidateDetailsPage /> } />
-          <Route path="/:companyUserName/assign-recruiter/:id" element={ <AssignRecruiter /> } />
+          {/* Candidate */}
+          <Route path="/:companyUserName/candidate-details/:candidateId/:jobId" element={<CandidateDetailsPage />} />
+          <Route path="/:companyUserName/assign-recruiter/:id" element={<AssignRecruiter />} />
 
 
 
-          <Route path="*" element={ <NotFound /> } />
+          <Route path="*" element={<NotFound />} />
         </Route>
-        {/* CompanyNotFound route */ }
-        <Route path="/404" element={ <CompanyNotFound /> } />
+        {/* CompanyNotFound route */}
+        <Route path="/404" element={<CompanyNotFound />} />
       </Routes>
     </div>
 

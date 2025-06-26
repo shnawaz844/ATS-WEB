@@ -69,29 +69,29 @@ export default function WhyAts() {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          { features.map( ( feature, index ) => (
+          {features.map((feature, index) => (
             <div
-              key={ index }
+              key={index}
               className="border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/80 backdrop-blur-sm p-6 "
             >
               <div className="mb-6">
                 <div
-                  className={ `w-12 h-12 rounded-xl bg-gradient-to-br ${ feature.gradient } flex items-center justify-center mb-4 shadow-md relative ` }
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-md relative `}
                 >
                   <feature.icon className="h-6 w-6 text-white" />
-                  { ( feature.title.includes( "AI" ) || feature.title.includes( "Bot" ) ) && (
+                  {(feature.title.includes("AI") || feature.title.includes("Bot")) && (
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  ) }
+                  )}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">{ feature.title }</h3>
+                <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
               </div>
               <div>
                 <p className="text-base leading-relaxed text-gray-600">
-                  { feature.description }
+                  {feature.description}
                 </p>
               </div>
             </div>
-          ) ) }
+          ))}
         </div>
       </div>
     </section>
