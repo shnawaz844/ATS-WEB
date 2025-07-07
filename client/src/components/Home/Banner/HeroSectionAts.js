@@ -6,15 +6,15 @@ export default function Hero() {
         <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 px-6 py-24 sm:py-14 lg:px-8">
             <div className="absolute [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 
-            {/* Subtle floating elements */ }
+            {/* Subtle floating elements */}
             <div className="absolute top-20 left-10 w-2 h-2 bg-blue-400 rounded-full animate-pulse opacity-60"></div>
             <div
                 className="absolute top-40 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse opacity-40"
-                style={ { animationDelay: "1s" } }
+                style={{ animationDelay: "1s" }}
             ></div>
             <div
                 className="absolute bottom-40 left-20 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse opacity-50"
-                style={ { animationDelay: "2s" } }
+                style={{ animationDelay: "2s" }}
             ></div>
 
             <div className="relative mx-auto max-w-7xl">
@@ -29,7 +29,7 @@ export default function Hero() {
                     <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
                         Welcome to
                         <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                            { " " }
+                            {" "}
                             Niyukty
                         </span>
                     </h1>
@@ -52,7 +52,7 @@ export default function Hero() {
                             <button
                                 variant="outline"
                                 size="lg"
-                                className="px-8 py-3 bg-white/10 border border-gray-600 text-black rounded-full hover:bg-white hover:border-gray-800 hover:text-gray-700 transition-all duration-300 shadow-sm hover:shadow-md text-lg font-medium hover:-translate-y-0.5 backdrop-blur-sm">
+                                className="px-8 py-2.5 bg-white/10 border border-gray-600 text-black rounded-full hover:bg-white hover:border-gray-800 hover:text-gray-700 transition-all duration-300 shadow-sm hover:shadow-md text-lg font-medium hover:-translate-y-0.5 backdrop-blur-sm">
                                 Browse Jobs
                             </button>
                         </Link>

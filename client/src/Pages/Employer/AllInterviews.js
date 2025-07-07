@@ -4,6 +4,7 @@ import { Search, User, Briefcase, X, ChevronDown, ChevronRight, ChevronLeft } fr
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import BackButtonMobile from '../../components/Mob-back-btn';
 
 const AllInterviews = () => {
   const [activeTab, setActiveTab] = useState('interviews');
@@ -209,12 +210,24 @@ const AllInterviews = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
   };
+  // Add state to track click position
+  const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
+
+  // Modify your button click handler to capture position
+  const handleFeedbackButtonClick = (e) => {
+    setClickPosition({
+      x: e.clientX,
+      y: e.clientY
+    });
+    setIsFeedbackModalOpen(true);
+  };
 
 
   return (
     <div className="px-8 py-4 w-full min-h-screen"
       style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
     >
+      <BackButtonMobile />
       <div className="max-w-screen-2xl">
 
         <div className='mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
@@ -265,7 +278,7 @@ const AllInterviews = () => {
                       Filter by Status:
                     </label>
                     <select
-                      className="w-full appearance-none bg-gray-200 rounded-xl py-1.5 pl-4 pr-8 md:pr-10 focus:outline-none focus:ring-none hover:bg-white h-[5vh] md:h-auto"
+                      className="w-[32vw] sm:w-auto  appearance-none bg-gray-200 rounded-xl py-1.5 pl-4 pr-8 md:pr-10 focus:outline-none focus:ring-none hover:bg-white h-[5vh] md:h-auto border border-red"
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
                     >
@@ -274,11 +287,11 @@ const AllInterviews = () => {
                         <option key={status} value={status._id}>
                           {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
                         </option>
+
                       ))}
+
                     </select>
-                    <div className="absolute inset-y-0 right-0 top-5 md:top-6 flex items-center pr-2 pointer-events-none">
-                      <ChevronDown size={14} className="text-gray-500" />
-                    </div>
+
                   </div>
                 </div>
               </div>
@@ -304,7 +317,7 @@ const AllInterviews = () => {
         </div>
 
         {/* Content */}
-        <div className=" rounded-t-xl shadow-sm p-6">
+        <div className=" rounded-t-xl shadow-sm p-2 sm:p-6 ">
           {activeTab === 'interviews' && (
             <InfiniteScroll
               dataLength={filteredInterviews.length}
@@ -321,7 +334,7 @@ const AllInterviews = () => {
             >
 
               <div className="overflow-x-auto rounded-t-xl">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-20">
                   <thead>
                     <tr className='bg-gray-700'>
                       <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Job & Candidate</th>
@@ -541,75 +554,87 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */}
         {isFeedbackModalOpen && detailedInterview && (
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+          <div
+            className="fixed inset-0 z-50"
+            style={{
+              // Position the backdrop at the click location
+              top: `${clickPosition.y}px`,
+              left: `${clickPosition.x}px`,
+              transform: 'translate(-0%, -0%)'
+            }}
+          >
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
-              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
-                <div>
-                  <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
-                  <p className="text-sm text-white mt-1">Review and submit your evaluation</p>
-                </div>
-                <button
-                  onClick={() => setIsFeedbackModalOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="p-6 overflow-y-auto flex-grow">
-
-                {/* Candidate Info */}
-                <div className="flex items-center mb-4">
-                  <div>
-                    <h3 className="font-medium">{detailedInterview.candidateName}</h3>
-                    <p className="text-sm text-gray-500">{detailedInterview.jobTitle}</p>
-                  </div>
-                </div>
-
-                <form className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Feedback Title</label>
-                    <input
-                      type="text"
-                      readOnly
-                      className="w-full px-4 py-2 border border-gray-200 bg-gray-300 rounded-xl text-black focus:ring-2 focus:ring-indigo-100"
-                      value={feedbackForm.feedbackTitle}
-                      placeholder="e.g., Strong Technical Skills"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
-                    <div className="relative">
-                      <textarea
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
-                        value={capitalizeFirstLetter(feedbackForm.feedback)}
-                        readOnly
-                        rows={isFeedbackExpanded ? 6 : 2}
-                        style={{ overflow: 'hidden' }}
-                      ></textarea>
-                      {feedbackForm.feedback && feedbackForm.feedback.split('\n').length > 2 && (
-                        <button
-                          type="button"
-                          className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
-                          onClick={() => setIsFeedbackExpanded(!isFeedbackExpanded)}
-                        >
-                          {isFeedbackExpanded ? 'Show less' : 'Show more'}
-                        </button>
-                      )}
+              <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+                <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
+                  <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
+                    <div>
+                      <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
+                      <p className="text-sm text-white mt-1">Review and submit your evaluation</p>
                     </div>
+                    <button
+                      onClick={() => setIsFeedbackModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                    >
+                      <X size={20} />
+                    </button>
                   </div>
 
+                  <div className="p-6 overflow-y-auto flex-grow">
 
-                  <div className="flex flex-col items-center justify-center py-3">
-                    <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-2xl text-amber-400 transform transition-all duration-300">
-                        {getRatingStars(feedbackForm.starRating)}
+                    {/* Candidate Info */}
+                    <div className="flex items-center mb-4">
+                      <div>
+                        <h3 className="font-medium">{detailedInterview.candidateName}</h3>
+                        <p className="text-sm text-gray-500">{detailedInterview.jobTitle}</p>
                       </div>
                     </div>
+
+                    <form className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Feedback Title</label>
+                        <input
+                          type="text"
+                          readOnly
+                          className="w-full px-4 py-2 border border-gray-200 bg-gray-300 rounded-xl text-black focus:ring-2 focus:ring-indigo-100"
+                          value={feedbackForm.feedbackTitle}
+                          placeholder="e.g., Strong Technical Skills"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
+                        <div className="relative">
+                          <textarea
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
+                            value={capitalizeFirstLetter(feedbackForm.feedback)}
+                            readOnly
+                            rows={isFeedbackExpanded ? 6 : 2}
+                            style={{ overflow: 'hidden' }}
+                          ></textarea>
+                          {feedbackForm.feedback && feedbackForm.feedback.split('\n').length > 2 && (
+                            <button
+                              type="button"
+                              className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                              onClick={() => setIsFeedbackExpanded(!isFeedbackExpanded)}
+                            >
+                              {isFeedbackExpanded ? 'Show less' : 'Show more'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+
+                      <div className="flex flex-col items-center justify-center py-3">
+                        <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
+                        <div className="flex items-center space-x-3">
+                          <div className="text-2xl text-amber-400 transform transition-all duration-300">
+                            {getRatingStars(feedbackForm.starRating)}
+                          </div>
+                        </div>
+                      </div>
+                    </form>
                   </div>
-                </form>
+                </div>
               </div>
             </div>
           </div>

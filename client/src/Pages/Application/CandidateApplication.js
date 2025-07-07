@@ -5,6 +5,7 @@ import Select from "react-select";
 import {
     Search, Briefcase, MapPin, Clock, RefreshCw, Eye, Filter, Loader2
 } from 'lucide-react';
+import BackButtonMobile from '../../components/Mob-back-btn';
 
 const CandidateApplication = () => {
     const [formInputs, setFormInputs] = useState({
@@ -175,10 +176,11 @@ const CandidateApplication = () => {
         <div className="px-8 py-4 w-full min-h-screen"
             style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
         >
+            <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className='mb-6 h-[20vh] flex items-center rounded-xl p-3 bg-gray-700 '>
                         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full gap-4 lg:gap-0">
                             <div>
                                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center font-DM Sansong">
@@ -213,7 +215,7 @@ const CandidateApplication = () => {
                     </div>
 
                     {/* Filter Toggle Button (Mobile) */}
-                    <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
+                    {/* <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
                             className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm"
@@ -221,7 +223,7 @@ const CandidateApplication = () => {
                             <span className="font-medium text-gray-700">Filters</span>
                             <Filter className="h-5 w-5 text-gray-500" />
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Filters Section */}
                     <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>

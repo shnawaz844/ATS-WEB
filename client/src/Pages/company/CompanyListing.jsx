@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
+import BackButtonMobile from "../../components/Mob-back-btn";
 
 const CompanyListing = () => {
   // State for company data, pagination, and search
@@ -281,6 +282,8 @@ const CompanyListing = () => {
           "linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)",
       }}
     >
+      <BackButtonMobile />
+
       <div className="max-w-screen-2xl">
         {/* Header Section */}
         <div className="mb-6 h-auto sm:h-[15vh] flex flex-col sm:flex-row items-center rounded-xl p-4 bg-gray-700 gap-4 sm:gap-0 justify-between">

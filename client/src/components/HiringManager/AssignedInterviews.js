@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
 import { Briefcase, Search } from "lucide-react";
+import BackButtonMobile from "../Mob-back-btn";
 
 const AssignedInterviews = () => {
     const navigate = useNavigate();
@@ -255,6 +256,7 @@ const AssignedInterviews = () => {
         <div className="px-8 py-4 w-full min-h-screen"
             style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
         >
+            <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div className='mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
@@ -290,7 +292,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-full appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 px-4 md:pl-4 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto"
+                                    className="w-[28vw] sm:w-auto appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 px-4 md:pl-4 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto text-sm md:text-base "
                                 >
                                     <option value="all">All Statuses</option>
                                     {statuses?.map(status => (
@@ -514,7 +516,7 @@ const AssignedInterviews = () => {
                                     </div>
 
                                     <div className="mt-6 flex justify-end">
-                                        <button className="text-[#1a237e] group-hover:text-red-600 text-sm font-medium flex items-center">
+                                        <button className="text-[#1a237e] group-hover:text-blue-600 text-sm font-medium flex items-center">
                                             View Details
                                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -604,7 +606,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={editForm.interviewType}
                                     onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">Select Interview Type</option>
                                     {interviewTypes?.map((type) => (
@@ -612,7 +614,6 @@ const AssignedInterviews = () => {
                                     ))}
                                 </select>
                             </div>
-
                             {editForm.interviewType === 'online' && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Meeting Link</label>
@@ -631,7 +632,7 @@ const AssignedInterviews = () => {
                                 <select
                                     value={editForm.status}
                                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     {statuses?.map((status) => (
                                         <option key={status._id} value={status._id}>
@@ -648,7 +649,7 @@ const AssignedInterviews = () => {
                                         : "Assign Interviewer"}
                                 </label>
                                 <select
-                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={editForm.interviewerID._id || ""}
                                     onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
                                     required

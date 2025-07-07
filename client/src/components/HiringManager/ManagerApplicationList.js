@@ -6,6 +6,7 @@ import {
     Search, Briefcase, MapPin, Clock, RefreshCw, ChevronLeft,
     ChevronRight, Eye, Filter
 } from 'lucide-react';
+import BackButtonMobile from '../Mob-back-btn';
 
 const ApplicationList = () => {
     const [formInputs, setFormInputs] = useState({
@@ -126,6 +127,7 @@ const ApplicationList = () => {
         <div className="px-8 py-4 w-full min-h-screen"
             style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
         >
+            <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
@@ -165,7 +167,7 @@ const ApplicationList = () => {
 
 
                     {/* Filter Toggle Button (Mobile) */}
-                    <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
+                    {/* <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
                             className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm"
@@ -173,7 +175,7 @@ const ApplicationList = () => {
                             <span className="font-medium text-gray-700">Filters</span>
                             <Filter className="h-5 w-5 text-gray-500" />
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Filters Section */}
                     <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>

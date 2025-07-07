@@ -6,6 +6,7 @@ import Select from "react-select";
 import { useQuery } from "@tanstack/react-query";
 import JobDescriptionModal from "./JobDescriptionModal";
 import { Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
+import BackButtonMobile from "./Mob-back-btn";
 
 // Dropdown Options
 const jobTypeOptions = [
@@ -181,6 +182,7 @@ const AllPostedJobs = () => {
     <div className="px-8 py-4 w-full min-h-screen"
       style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
     >
+      <BackButtonMobile />
       <div className="max-w-screen-2xl">
         <div>
           {/* Header Section */}

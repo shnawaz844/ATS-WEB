@@ -12,6 +12,7 @@ import {
     Share2
 } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import BackButtonMobile from '../../components/Mob-back-btn';
 
 export const AllJobs = () => {
     const [search, setSearch] = useState("");
@@ -313,36 +314,40 @@ export const AllJobs = () => {
         <div className="px-8 py-4 w-full min-h-screen"
             style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
         >
+            <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className='mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
-                            <div className="w-full md:w-auto">
-                                <h2 className="text-xl md:text-3xl font-bold text-white flex items-center font-DM Sansong">
-                                    <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-gray-200" />
+                    <div className='mb-6 h-auto min-h-[80px] md:min-h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                        <div className="flex flex-col md:flex-row justify-between items-start w-full gap-3 sm:gap-4">
+                            {/* Title Section */}
+                            <div className="w-full md:w-auto flex-shrink-0">
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center font-DM Sans">
+                                    <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-gray-200" />
                                     Job Board
                                 </h2>
                             </div>
 
-                            <div className='flex flex-col sm:flex-row gap-3 w-full md:w-auto'>
-                                {/* Search Bar */}
-                                <div className="relative rounded-full w-full sm:w-[25vw]">
+                            {/* Search and Buttons Section */}
+                            <div className='flex flex-col xs:flex-row gap-3 w-full md:w-auto'>
+                                {/* Search Bar - responsive width */}
+                                <div className="relative rounded-full w-full xs:w-[60%] sm:w-[40%] md:w-[25vw]">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+                                        <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder="Search job titles, skills, or keywords..."
+                                        placeholder="Search job titles, skills..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="w-full pl-9 md:pl-10 pr-4 py-2 md:py-3 border border-gray-300 shadow-sm transition-all duration-200 h-[5vh] md:h-[6.3vh] focus:outline-none focus:ring-none rounded-xl"
+                                        className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 shadow-sm transition-all duration-200 h-[40px] sm:h-[44px] md:h-[48px] focus:outline-none focus:ring-0 rounded-xl text-sm sm:text-base"
                                     />
                                 </div>
 
-                                <div className="flex gap-3">
+                                {/* Buttons - responsive sizing */}
+                                <div className="flex gap-2 sm:gap-3 w-full xs:w-auto">
                                     <button
-                                        className="inline-flex border items-center px-3 md:px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm w-full sm:w-auto justify-center"
+                                        className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
                                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     >
                                         {isFilterOpen ? "Hide Filters" : "Show Filters"}
@@ -350,9 +355,9 @@ export const AllJobs = () => {
 
                                     <Link
                                         to={`/${companyUserName}/post-job`}
-                                        className="inline-flex border items-center px-3 md:px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm w-full sm:w-auto justify-center"
+                                        className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
                                     >
-                                        <Plus className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                                        <Plus className="mr-1 sm:mr-2 h-4 w-4" />
                                         Post New Job
                                     </Link>
                                 </div>
@@ -361,7 +366,7 @@ export const AllJobs = () => {
                     </div>
 
                     {/* Filter Toggle Button (Mobile) */}
-                    <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
+                    {/* <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
                             className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm"
@@ -369,7 +374,7 @@ export const AllJobs = () => {
                             <span className="font-medium text-gray-700">Filters</span>
                             <Filter className="h-5 w-5 text-gray-500" />
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Filters Section */}
                     <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>

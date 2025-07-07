@@ -65,10 +65,10 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-sm bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-200 p-4 ">
+      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg border border-gray-100 h-[96vh]">
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 ">
           <div className="mx-auto mb-2 flex items-center justify-center rounded-full p-1">
             <img
               src="/ATSLOGO.png"

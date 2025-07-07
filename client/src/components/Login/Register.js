@@ -102,7 +102,7 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gray-200 p-4">
       <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
         {/* Logo */}
         <div className="text-center mb-8">

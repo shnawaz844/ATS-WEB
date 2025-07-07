@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 
 import useScheduledInterview from '../../hooks/useScheduledInterview';
+import BackButtonMobile from '../../components/Mob-back-btn';
 
 export const ScheduledInterview = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -376,6 +377,7 @@ export const ScheduledInterview = () => {
         <div className="px-8 py-10 w-full min-h-screen"
             style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
         >
+            <BackButtonMobile />
             <div className='mb-6 h-auto min-h-[80px] md:h-[15vh] flex items-center rounded-xl p-3 sm:p-4 bg-gray-700'>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
                     {/* Title Section */}
@@ -390,7 +392,7 @@ export const ScheduledInterview = () => {
                     <div className="w-full md:w-auto bg-transparent rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         {/* Admin Filter Section */}
                         {isAdmin && (
-                            <div className="w-full sm:w-auto bg-transparent rounded-xl flex items-center justify-center">
+                            <div className="w-36 sm:w-auto bg-transparent rounded-xl flex items-center justify-center">
                                 <div className="w-full sm:min-w-[200px]">
                                     <select
                                         value={selectedInterviewerId}
@@ -429,8 +431,8 @@ export const ScheduledInterview = () => {
                         <button
                             onClick={() => setShowFilters(!showFilters)}
                             className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-colors h-[40px] sm:h-auto min-w-[44px] ${showFilters || hasActiveFilters
-                                    ? 'bg-gray-700 text-white border border-blue-300'
-                                    : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
+                                ? 'bg-gray-700 text-white border border-blue-300'
+                                : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
                                 }`}
                         >
                             <Filter className="h-4 w-4 flex-shrink-0" />
@@ -462,7 +464,7 @@ export const ScheduledInterview = () => {
                                         setFilterStatus(e.target.value);
                                         setPage(1);
                                     }}
-                                    className="w-full border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-[35vw] sm:w-full  border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">All Statuses</option>
                                     {statuses.map((status) => (
@@ -482,7 +484,7 @@ export const ScheduledInterview = () => {
                                         setFilterRound(e.target.value);
                                         setPage(1);
                                     }}
-                                    className="w-full border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-[35vw] sm:w-full border border-gray-300 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 >
                                     <option value="">All Rounds</option>
                                     {interviewRounds.map((round) => (
@@ -690,13 +692,15 @@ export const ScheduledInterview = () => {
                             </div>
 
                             {/* Edit Form */}
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
+                                {/* Date & Time Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Date Input */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                             </div>
@@ -704,16 +708,18 @@ export const ScheduledInterview = () => {
                                                 type="date"
                                                 value={editForm.date}
                                                 onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                                 min={new Date().toISOString().split('T')[0]}
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Time Input */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
@@ -721,19 +727,20 @@ export const ScheduledInterview = () => {
                                                 type="time"
                                                 value={editForm.time}
                                                 onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Interview Type */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Interview Type</label>
                                     <div className="relative">
                                         <select
                                             value={editForm.interviewType}
                                             onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-3 sm:pl-4 pr-8 sm:pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-sm sm:text-base"
                                         >
                                             <option value="">Select Interview Type</option>
                                             {interviewTypes?.map(type => (
@@ -742,20 +749,21 @@ export const ScheduledInterview = () => {
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 hidden sm:flex items-center px-2 sm:px-3 text-gray-500">
+                                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Conditional Meeting Link */}
                                 {editForm.interviewType === 'online' && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                                 </svg>
                                             </div>
@@ -763,20 +771,21 @@ export const ScheduledInterview = () => {
                                                 type="url"
                                                 value={editForm.meetingLink}
                                                 onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                                 placeholder="https://..."
                                             />
                                         </div>
                                     </div>
                                 )}
 
+                                {/* Status */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                     <div className="relative">
                                         <select
                                             value={editForm.status || detailedInterview?.status}
                                             onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                            className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-3 sm:pl-4 pr-8 sm:pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-sm sm:text-base"
                                         >
                                             {statuses?.map(status => (
                                                 <option key={status.applicationStatus} value={status._id}>
@@ -784,20 +793,21 @@ export const ScheduledInterview = () => {
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 hidden sm:flex items-center px-2 sm:px-3 text-gray-500">
+                                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Conditional Reschedule Reason */}
                                 {editForm.status === 'rescheduled' && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Why Interview Rescheduled?</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
@@ -805,7 +815,7 @@ export const ScheduledInterview = () => {
                                                 type="text"
                                                 value={editForm.reasonRescheduled}
                                                 onChange={(e) => setEditForm({ ...editForm, reasonRescheduled: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                                 placeholder="Why Interview Rescheduled?"
                                             />
                                         </div>
@@ -839,68 +849,66 @@ export const ScheduledInterview = () => {
             {/* Feedback Modal */}
             {isFeedbackModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-md transition-all duration-300">
-                    <div className="bg-white rounded-xl max-w-4xl w-full max-h-[97vh] overflow-hidden shadow-2xl transform transition-all duration-300 border border-gray-200">
+                    <div className="bg-white rounded-xl w-full mx-2 sm:mx-4 md:max-w-4xl max-h-[97vh] overflow-hidden shadow-2xl transform transition-all duration-300 border border-gray-200">
                         {/* Header */}
-                        <div className="flex justify-between items-center p-5 bg-gradient-to-r from-gray-700 to-gray-800 rounded-t-xl">
+                        <div className="flex justify-between items-center p-3 sm:p-5 bg-gradient-to-r from-gray-700 to-gray-800 rounded-t-xl">
                             <div className="flex items-center">
-                                <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <h2 className="text-xl text-white font-bold">Interview Feedback</h2>
+                                <h2 className="text-lg sm:text-xl text-white font-bold">Interview Feedback</h2>
                             </div>
                             <button
                                 onClick={() => setIsFeedbackModalOpen(false)}
-                                className="text-white hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
+                                className="text-white hover:bg-gray-600 rounded-full p-1 sm:p-2 transition-colors duration-200"
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
-                        <div className="overflow-y-auto p-6 max-h-[calc(90vh-120px)]">
+                        <div className="overflow-y-auto p-4 sm:p-6 max-h-[calc(90vh-120px)]">
                             {/* Candidate Details Card */}
-                            <div className="bg-gray-300 p-5 rounded-xl mb-6 border border-gray-200 shadow-sm">
-                                <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
-                                    <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="bg-gray-300 p-3 sm:p-5 rounded-xl mb-4 sm:mb-6 border border-gray-200 shadow-sm">
+                                <h3 className="font-semibold text-md sm:text-lg text-gray-800 mb-2 sm:mb-3 flex items-center">
+                                    <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     Candidate Details
                                 </h3>
-                                <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                                    <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Job Title</p>
                                         <p className="font-medium text-gray-800 mt-1">{capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A"}</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                    <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Applicant</p>
                                         <p className="font-medium text-gray-800 mt-1">{capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A"}</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                    <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Interview Date</p>
                                         <p className="font-medium text-gray-800 mt-1">{formatDate(detailedInterview?.date)}</p>
                                     </div>
-                                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                                    <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100">
                                         <p className="text-gray-500 text-xs uppercase font-medium">Round</p>
                                         <p className="font-medium text-gray-800 mt-1">
                                             {interviewRounds?.length && interviewRounds?.filter(round => round._id === detailedInterview?.roundID)[0]?.roundName || "N/A"}
                                         </p>
                                     </div>
-
-
                                 </div>
                             </div>
 
                             {/* Feedback Form */}
-                            <div className="space-y-6">
-                                <div className='flex justify-between'>
-                                    <div className='w-[48%]'>
+                            <div className="space-y-4 sm:space-y-6">
+                                <div className='flex flex-col sm:flex-row justify-between gap-3 sm:gap-0'>
+                                    <div className='w-full sm:w-[48%]'>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Feedback Rating</label>
                                         <div className="relative">
                                             <select
                                                 value={feedbackForm.feedbackTitle}
                                                 onChange={(e) => setFeedbackForm({ ...feedbackForm, feedbackTitle: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 pl-4 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                                className="block w-36 sm:w-full border border-gray-300 rounded-xl shadow-sm py-2 sm:py-3 pl-3 sm:pl-4 pr-8 sm:pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white text-sm sm:text-base"
                                             >
                                                 <option value="">Select a rating</option>
                                                 {feedbackTitles?.map(title => (
@@ -909,20 +917,26 @@ export const ScheduledInterview = () => {
                                                     </option>
                                                 ))}
                                             </select>
-                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {/* Custom chevron - hidden on mobile, visible on desktop */}
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 hidden sm:flex items-center px-2 sm:px-3 text-gray-500">
+                                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                                 </svg>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className='w-[48%]'>
+                                    <div className="w-full sm:w-[48%] relative">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Star Rating</label>
                                         <select
                                             value={feedbackForm.starRating || ""}
-                                            onChange={(e) => setFeedbackForm({ ...feedbackForm, starRating: Number(e.target.value) })}
-                                            className="block w-full border border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            onChange={(e) =>
+                                                setFeedbackForm({
+                                                    ...feedbackForm,
+                                                    starRating: Number(e.target.value),
+                                                })
+                                            }
+                                            className="block sm:w-full w-36 border border-gray-300 rounded-xl shadow-sm py-2 sm:py-3 px-3 sm:px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base appearance-none"
                                         >
                                             <option value="">Select rating (1 to 5)</option>
                                             {[1, 2, 3, 4, 5]?.map((star) => (
@@ -931,7 +945,15 @@ export const ScheduledInterview = () => {
                                                 </option>
                                             ))}
                                         </select>
+
+                                        {/* Custom Chevron Icon */}
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 hidden sm:flex items-center px-2 sm:px-3 text-gray-500 mt-5">
+                                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
                                     </div>
+
                                 </div>
 
                                 <div>
@@ -940,7 +962,7 @@ export const ScheduledInterview = () => {
                                         value={feedbackForm.feedback}
                                         onChange={(e) => setFeedbackForm({ ...feedbackForm, feedback: e.target.value })}
                                         rows="5"
-                                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                        className="mt-1 block w-full border border-gray-300 rounded-xl shadow-sm py-2 sm:py-3 px-3 sm:px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm sm:text-base"
                                         placeholder="Provide specific examples and constructive feedback about the candidate's performance..."
                                     />
                                 </div>
@@ -948,25 +970,24 @@ export const ScheduledInterview = () => {
                         </div>
 
                         {/* Footer with Actions */}
-                        <div className="px-6 py-4 bg-gray-50 border-t rounded-xl border-gray-200 flex justify-end gap-3">
+                        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t rounded-xl border-gray-200 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                             <button
                                 onClick={() => setIsFeedbackModalOpen(false)}
-                                className="px-4 py-2 bg-white border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                className="px-3 sm:px-4 py-1 sm:py-2 bg-white border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 text-sm sm:text-base"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleFeedbackSubmit}
-                                className="px-5 py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-400 hover:text-black transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
+                                className="px-3 sm:px-5 py-1 sm:py-2 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-400 hover:text-black transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center justify-center text-sm sm:text-base"
                             >
-                                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 {feedbackForm._id ? "Update Feedback" : "Submit Feedback"}
                             </button>
                         </div>
                     </div>
-
                 </div>
             )}
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />

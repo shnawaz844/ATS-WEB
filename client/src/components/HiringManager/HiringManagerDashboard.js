@@ -154,7 +154,7 @@ export default function HiringDashboard() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center">
-                            <h1 className="text-xl md:text-2xl font-bold text-gray-900">HR Dashboard</h1>
+                            <h1 className="text-[1rem] md:text-2xl font-bold text-gray-900">HR Dashboard</h1>
                         </div>
 
                         {/* Search Bar */}
@@ -165,7 +165,7 @@ export default function HiringDashboard() {
                                 </div>
                                 <input
                                     type="text"
-                                    className="block w-full sm:w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                    className="rounded-2xl block w-full sm:w-64 pl-10 pr-3 py-2 border border-gray-300 leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                     placeholder="Search applications..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
