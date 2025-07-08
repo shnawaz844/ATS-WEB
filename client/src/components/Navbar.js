@@ -301,7 +301,7 @@ export const Navbar = () => {
                       <button
                         className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${item.subItems.some(subItem => location.pathname === (userRole === "super" ? subItem.path : `/${companyUserName}${subItem.path}`))
                           ? "text-white bg-slate-600"
-                          : "text-gray-300 hover:text-white hover:border hover:border-white"
+                          : "text-gray-700 hover:text-white hover:border hover:border-white"
                           }`}
                       >
                         {item.icon}
@@ -454,8 +454,6 @@ export const Navbar = () => {
             </div>
           </div>
         </div>
-
-        {/* MOBILE MENU */}
 
         {/* MOBILE MENU */}
         <div>
