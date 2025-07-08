@@ -73,40 +73,98 @@ const Profile = () => {
     return false;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async ( e ) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage("");
+    setLoading( true );
+    setMessage( "" );
 
-    if (!user.userName.trim()) {
-      setMessage("Name is required!");
-      setLoading(false);
+    if ( !user.userName.trim() ) {
+      setMessage( "Name is required!" );
+      setLoading( false );
       return;
     }
 
-    if (user.password && user.password !== user.confirmPassword) {
-      setMessage("Passwords do not match!");
-      setLoading(false);
+    if ( user.password && user.password !== user.confirmPassword ) {
+      setMessage( "Passwords do not match!" );
+      setLoading( false );
       return;
     }
 
-    if (user.password && user.password.length < 6) {
-      setMessage("Password must be at least 6 characters long!");
-      setLoading(false);
+    if ( user.password && user.password.length < 6 ) {
+      setMessage( "Password must be at least 6 characters long!" );
+      setLoading( false );
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setMessage("Profile updated successfully!");
-      setInitialUser({
+    try {
+      const token = localStorage.getItem( "user" );
+      const updateData = {
+        _id: user._id,
         userName: user.userName,
         email: user.email,
         role: user.role,
-      });
-      setUser(prev => ({ ...prev, password: "", confirmPassword: "" }));
-      setLoading(false);
-    }, 2000);
+      };
+
+      if ( user.password.trim() ) {
+        updateData.password = user.password;
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          ...( token && { Authorization: `Bearer ${ token }` } )
+        }
+      };
+
+      const response = await axios.put(
+        `${ process.env.REACT_APP_BASE_URL }/users/update-user/${ user._id }`,
+        updateData,
+        config
+      );
+
+      if ( response.data.success ) {
+        setMessage( "Profile updated successfully!" );
+
+        const updatedUserData = {
+          ...JSON.parse( localStorage.getItem( "user" ) ),
+          userName: user.userName
+        };
+        localStorage.setItem( "user", JSON.stringify( updatedUserData ) );
+
+        // Update initial user to reflect the new changes
+        setInitialUser( {
+          userName: user.userName,
+          email: user.email,
+          role: user.role,
+        } );
+
+        setUser( prev => ( { ...prev, password: "", confirmPassword: "" } ) );
+      } else {
+        setMessage( response.data.message || "Error updating profile" );
+      }
+    } catch ( error ) {
+      console.error( "Update error:", error );
+      if ( error.response ) {
+        const status = error.response.status;
+        const errorMessage = error.response.data?.message || "Error updating profile";
+
+        if ( status === 404 ) {
+          setMessage( "API endpoint not found. Please check your server configuration." );
+        } else if ( status === 401 ) {
+          setMessage( "Unauthorized. Please login again." );
+        } else if ( status === 400 ) {
+          setMessage( errorMessage );
+        } else {
+          setMessage( `Server error: ${ errorMessage }` );
+        }
+      } else if ( error.request ) {
+        setMessage( "Network error. Please check your connection and server status." );
+      } else {
+        setMessage( "An unexpected error occurred" );
+      }
+    } finally {
+      setLoading( false );
+    }
   };
 
   const togglePasswordVisibility = () => {
