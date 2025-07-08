@@ -107,6 +107,29 @@ export const Navbar = () => {
     fetchCompanyUserName();
   }, []);
 
+
+  console.log("isDropdownOpen", isDropdownOpen);
+  useEffect(() => {
+
+    const fetchCompanies = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setCompany(data)
+        } else {
+          setCompany([])
+        }
+      } catch (error) {
+        console.error('Error fetching companies:', error)
+      }
+    }
+
+    fetchCompanies();
+  }, [companyUserName])
+
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
     {
@@ -226,6 +249,7 @@ export const Navbar = () => {
         localStorage.removeItem("user")
         localStorage.removeItem("email")
         localStorage.removeItem("companyId")
+        localStorage.removeItem("sub_role");
 
         setLoginData(null)
         window.location.reload();
@@ -293,6 +317,18 @@ export const Navbar = () => {
                               <NavLink
                                 key={subItem.path}
                                 to={to}
+                                onClick={() => {
+                                  // Set sub_role for Hiring Manager only
+                                  if (item.label === "Hiring Manager") {
+                                    localStorage.setItem("sub_role", "hiring_manager");
+                                  } else if (item.label === "Recruiter Manager") {
+                                    localStorage.setItem("sub_role", "recruiter_manager");
+                                  } else if (item.label === "Interviewer") {
+                                    localStorage.setItem("sub_role", "interviewer");
+                                  }
+                                  setIsDropdownOpen(false);
+                                  setIsMenuOpen(false);
+                                }}
                                 className={({ isActive }) =>
                                   `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${isActive ? "bg-gray-100 font-medium" : ""
                                   }`
@@ -303,6 +339,7 @@ export const Navbar = () => {
                               </NavLink>
                             );
                           })}
+
                         </div>
                       </div>
                     </div>

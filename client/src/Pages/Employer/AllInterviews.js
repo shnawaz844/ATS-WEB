@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Search, User, Briefcase, X, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, User, Briefcase, X, ChevronDown } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -554,112 +554,103 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */}
         {isFeedbackModalOpen && detailedInterview && (
-          <div
-            className="fixed inset-0 z-50"
-            style={{
-              // Position the backdrop at the click location
-              top: `${clickPosition.y}px`,
-              left: `${clickPosition.x}px`,
-              transform: 'translate(-0%, -0%)'
-            }}
-          >
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
-              <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-                <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
-                  <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
-                    <div>
-                      <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
-                      <p className="text-sm text-white mt-1">Review and submit your evaluation</p>
-                    </div>
-                    <button
-                      onClick={() => setIsFeedbackModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
+              <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4 bg-gray-700">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Interview Feedback</h2>
+                  <p className="text-sm text-white mt-1">Review and submit your evaluation</p>
+                </div>
+                <button
+                  onClick={() => setIsFeedbackModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-                  <div className="p-6 overflow-y-auto flex-grow">
+              <div className="p-6 overflow-y-auto flex-grow">
 
-                    {/* Candidate Info */}
-                    <div className="flex items-center mb-4">
-                      <div>
-                        <h3 className="font-medium">{detailedInterview.candidateName}</h3>
-                        <p className="text-sm text-gray-500">{detailedInterview.jobTitle}</p>
-                      </div>
-                    </div>
-
-                    <form className="space-y-5">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Feedback Title</label>
-                        <input
-                          type="text"
-                          readOnly
-                          className="w-full px-4 py-2 border border-gray-200 bg-gray-300 rounded-xl text-black focus:ring-2 focus:ring-indigo-100"
-                          value={feedbackForm.feedbackTitle}
-                          placeholder="e.g., Strong Technical Skills"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
-                        <div className="relative">
-                          <textarea
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
-                            value={capitalizeFirstLetter(feedbackForm.feedback)}
-                            readOnly
-                            rows={isFeedbackExpanded ? 6 : 2}
-                            style={{ overflow: 'hidden' }}
-                          ></textarea>
-                          {feedbackForm.feedback && feedbackForm.feedback.split('\n').length > 2 && (
-                            <button
-                              type="button"
-                              className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
-                              onClick={() => setIsFeedbackExpanded(!isFeedbackExpanded)}
-                            >
-                              {isFeedbackExpanded ? 'Show less' : 'Show more'}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-
-                      <div className="flex flex-col items-center justify-center py-3">
-                        <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
-                        <div className="flex items-center space-x-3">
-                          <div className="text-2xl text-amber-400 transform transition-all duration-300">
-                            {getRatingStars(feedbackForm.starRating)}
-                          </div>
-                        </div>
-                      </div>
-                    </form>
+                {/* Candidate Info */}
+                <div className="flex items-center mb-4">
+                  <div>
+                    <h3 className="font-medium">{detailedInterview.candidateName}</h3>
+                    <p className="text-sm text-gray-500">{detailedInterview.jobTitle}</p>
                   </div>
                 </div>
+
+                <form className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Feedback Title</label>
+                    <input
+                      type="text"
+                      readOnly
+                      className="w-full px-4 py-2 border border-gray-200 bg-gray-300 rounded-xl text-black focus:ring-2 focus:ring-indigo-100"
+                      value={feedbackForm.feedbackTitle}
+                      placeholder="e.g., Strong Technical Skills"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
+                    <div className="relative">
+                      <textarea
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
+                        value={capitalizeFirstLetter(feedbackForm.feedback)}
+                        readOnly
+                        rows={isFeedbackExpanded ? 6 : 2}
+                        style={{ overflow: 'hidden' }}
+                      ></textarea>
+                      {feedbackForm.feedback && feedbackForm.feedback.split('\n').length > 2 && (
+                        <button
+                          type="button"
+                          className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                          onClick={() => setIsFeedbackExpanded(!isFeedbackExpanded)}
+                        >
+                          {isFeedbackExpanded ? 'Show less' : 'Show more'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+
+                  <div className="flex flex-col items-center justify-center py-3">
+                    <label className="block text-base font-medium text-gray-700 mb-3">Rating</label>
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl text-amber-400 transform transition-all duration-300">
+                        {getRatingStars(feedbackForm.starRating)}
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
-        )}
-
-      </div>
-
-      {!filteredInterviews.length && !interviewLoading && (
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="bg-gray-100 p-5 rounded-full mb-4">
-            <Briefcase className="h-12 w-12 text-gray-400" />
-          </div>
-          <div className="text-center animate-fade-in transition-all duration-500">
-            <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
-              No Interviews Scheduled Yet
-            </h3>
-            <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-              It seems there are no interviews matching your criteria right now.
-              <br className="hidden sm:block" />
-              <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
-            </p>
-          </div>
-        </div>
-      )}
+            </div>
     </div>
+  )
+}
+
+      </div >
+
+  {!filteredInterviews.length && !interviewLoading && (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="bg-gray-100 p-5 rounded-full mb-4">
+        <Briefcase className="h-12 w-12 text-gray-400" />
+      </div>
+      <div className="text-center animate-fade-in transition-all duration-500">
+        <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+          No Interviews Scheduled Yet
+        </h3>
+        <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+          It seems there are no interviews matching your criteria right now.
+          <br className="hidden sm:block" />
+          <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
+        </p>
+      </div>
+    </div>
+  )}
+    </div >
   );
 };
 
