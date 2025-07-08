@@ -626,30 +626,28 @@ const AllInterviews = () => {
               </div>
             </div>
           </div>
-            </div>
-    </div>
-  )
-}
+        )
+        }
 
       </div >
-
-  {!filteredInterviews.length && !interviewLoading && (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="bg-gray-100 p-5 rounded-full mb-4">
-        <Briefcase className="h-12 w-12 text-gray-400" />
-      </div>
-      <div className="text-center animate-fade-in transition-all duration-500">
-        <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
-          No Interviews Scheduled Yet
-        </h3>
-        <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-          It seems there are no interviews matching your criteria right now.
-          <br className="hidden sm:block" />
-          <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
-        </p>
-      </div>
-    </div>
-  )}
+      {/* {filter ////} */}
+      {!filteredInterviews.length && !interviewLoading && (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="bg-gray-100 p-5 rounded-full mb-4">
+            <Briefcase className="h-12 w-12 text-gray-400" />
+          </div>
+          <div className="text-center animate-fade-in transition-all duration-500">
+            <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+              No Interviews Scheduled Yet
+            </h3>
+            <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+              It seems there are no interviews matching your criteria right now.
+              <br className="hidden sm:block" />
+              <span className="text-blue-500 font-medium">Please wait</span> while your schedule is being finalized.
+            </p>
+          </div>
+        </div>
+      )}
     </div >
   );
 };
