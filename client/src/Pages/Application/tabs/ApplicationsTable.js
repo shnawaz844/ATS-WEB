@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { getStatusColor } from './utils';
 import ScheduleInterviewModal from '../../../components/ScheduleInterviewModal';
 
-const ApplicationsTable = ( {
+const ApplicationsTable = ({
     filteredApps,
     statuses,
     onStatusChange,
@@ -17,38 +17,38 @@ const ApplicationsTable = ( {
     currentPage,
     totalApplications,
     totalPages,
-} ) => {
-    const [ searchInput, setSearchInput ] = useState( search );
+}) => {
+    const [searchInput, setSearchInput] = useState(search);
 
     // Modal state
-    const [ isScheduleModalOpen, setIsScheduleModalOpen ] = useState( false );
-    const [ selectedApplication, setSelectedApplication ] = useState( null );
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [selectedApplication, setSelectedApplication] = useState(null);
 
-    const user = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userRole = user.role;
-    const subUserRole = localStorage.getItem( "sub_role" ) || "" ;;
+    const subUserRole = localStorage.getItem("sub_role") || "";;
 
-    console.log( "subUserRole", subUserRole, user )
-     
+    console.log("subUserRole", subUserRole, user)
+
     // const subrole = ''; //local storage - 'hiring_manager'/'recruiter_manager'
     // const subrole = JSON.parse( localStorage.setItem( "user" ) || "{}" );
     const isHiringManager = userRole === 'hiring_manager';
     const isRecruiterManager = userRole === 'recruiter_manager';
     const isAdmin = userRole === 'admin';
 
-    const [ apps, setApps ] = useState( filteredApps );
+    const [apps, setApps] = useState(filteredApps);
 
-    useEffect( () => setApps( filteredApps ), [ filteredApps ] );
+    useEffect(() => setApps(filteredApps), [filteredApps]);
 
-    const handleSelect = ( id, newStatus ) => {
-        setApps( curr =>
-            curr.map( a => a._id === id ? { ...a, applicationStatusId: newStatus } : a )
+    const handleSelect = (id, newStatus) => {
+        setApps(curr =>
+            curr.map(a => a._id === id ? { ...a, applicationStatusId: newStatus } : a)
         );
-        onStatusChange( id, newStatus );
+        onStatusChange(id, newStatus);
     };
 
     // Handle schedule interview button click
-    const handleScheduleInterview = ( app ) => {
+    const handleScheduleInterview = (app) => {
         // Transform the application data to match what ScheduleInterviewModal expects
         const transformedApp = {
             _id: app._id,
@@ -67,56 +67,56 @@ const ApplicationsTable = ( {
             interview: app.interview || {}
         };
 
-        setSelectedApplication( transformedApp );
-        setIsScheduleModalOpen( true );
+        setSelectedApplication(transformedApp);
+        setIsScheduleModalOpen(true);
     };
 
-    const debounce = ( func, delay ) => {
+    const debounce = (func, delay) => {
         let timeoutId;
-        return ( ...args ) => {
-            if ( timeoutId ) {
-                clearTimeout( timeoutId );
+        return (...args) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
             }
-            timeoutId = setTimeout( () => {
-                func( ...args );
-            }, delay );
+            timeoutId = setTimeout(() => {
+                func(...args);
+            }, delay);
         };
     };
 
-    const capitalizeFirstLetter = ( str ) => {
-        if ( !str ) return '';
-        return str.charAt( 0 ).toUpperCase() + str.slice( 1 ).toLowerCase();
+    const capitalizeFirstLetter = (str) => {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
 
-    const companyUserName = localStorage.getItem( "companyUserName" );
+    const companyUserName = localStorage.getItem("companyUserName");
 
     const debouncedSetSearch = useCallback(
-        debounce( ( value ) => {
-            setSearch( value );
-            setPage( 1 );
-        }, 500 ),
-        [ setSearch, setPage ]
+        debounce((value) => {
+            setSearch(value);
+            setPage(1);
+        }, 500),
+        [setSearch, setPage]
     );
 
-    useEffect( () => {
-        setSearchInput( search );
-    }, [ search ] );
+    useEffect(() => {
+        setSearchInput(search);
+    }, [search]);
 
-    const handleSearchChange = ( e ) => {
+    const handleSearchChange = (e) => {
         const value = e.target.value;
-        setSearchInput( value );
-        debouncedSetSearch( value );
+        setSearchInput(value);
+        debouncedSetSearch(value);
     };
 
-    const handlePageChange = ( newPage ) => {
-        if ( newPage >= 1 && newPage <= totalPages ) {
-            setPage( newPage );
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setPage(newPage);
         }
     };
 
     return (
         <div className="space-y-4">
-            {/* Search and Limit Controls */ }
+            {/* Search and Limit Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="relative w-full sm:w-64">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -128,13 +128,13 @@ const ApplicationsTable = ( {
                         type="search"
                         className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-xl bg-white"
                         placeholder="Search by name..."
-                        value={ searchInput }
-                        onChange={ handleSearchChange }
+                        value={searchInput}
+                        onChange={handleSearchChange}
                     />
                 </div>
             </div>
 
-            {/* Applications Table */ }
+            {/* Applications Table */}
             <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-700">
@@ -151,12 +151,12 @@ const ApplicationsTable = ( {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Contact
                             </th>
-                            { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Resume
-                            </th> ) }
-                            { ( ( !subUserRole || subUserRole === 'hiring_manager' ) && !isRecruiterManager ) && ( <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            </th>)}
+                            {((!subUserRole || subUserRole === 'hiring_manager') && !isRecruiterManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                                 Actions
-                            </th> ) }
+                            </th>)}
                             {/* { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button
@@ -170,147 +170,151 @@ const ApplicationsTable = ( {
                         </tr>
                     </thead>
                     <tbody className="bg-gray-300 divide-y divide-gray-200">
-                        { filteredApps?.length > 0 ? (
-                            filteredApps.map( ( app ) => {
+                        {filteredApps?.length > 0 ? (
+                            filteredApps.map((app) => {
                                 // Prepare candidateID & jobID for the link
                                 const candidateId = app.candidateID?._id;
                                 const jobId = app.jobID?._id || app.jobID;
-                                const statusColor = getStatusColor( app.applicationStatusId );
+                                const statusColor = getStatusColor(app.applicationStatusId);
 
                                 return (
-                                    <tr key={ app._id } className="group hover:bg-gray-700 ">
+                                    <tr key={app._id} className="group hover:bg-gray-700 ">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
                                                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                                                         <span className="text-lg font-medium text-gray-600">
-                                                            { ( app.candidateID?.userName?.[ 0 ] || 'N' ).toUpperCase() }
+                                                            {(app.candidateID?.userName?.[0] || 'N').toUpperCase()}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className="ml-4">
                                                     <Link
-                                                        to={ `/${ companyUserName }/candidate-details/${ candidateId }/${ jobId }` }
-                                                        className="text-sm font-medium text-blue-600 hover:underline group-hover:text-white"
+                                                        to={`/${companyUserName}/candidate-details/${candidateId}/${jobId}`}
+                                                        className="text-sm font-medium text-blue-600 hover:underline group-hover:text-white "
                                                     >
-                                                        { capitalizeFirstLetter( app.candidateID?.userName ) || 'N/A' }
+                                                        {capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
                                                     </Link>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
-                                            { app.emailInfo }
+                                        <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 group-hover:text-white max-w-[140px] break-words">
+                                            {app.emailInfo}
                                         </td>
+
 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <select
-                                                className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                                value={ app.applicationStatusId }
-                                                onChange={ e => handleSelect( app._id, e.target.value ) }
+                                                className="w-24 px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm"
+                                                value={app.applicationStatusId}
+                                                onChange={e => handleSelect(app._id, e.target.value)}
                                             >
-                                                { statuses?.map( status => (
-                                                    <option key={ status._id } value={ status._id }
-                                                        className="bg-gray-800 text-white hover:bg-gray-600"
+                                                {statuses?.map(status => (
+                                                    <option
+                                                        key={status._id}
+                                                        value={status._id}
+                                                        className="bg-gray-800 text-white"
                                                     >
-                                                        { status.applicationStatus }
+                                                        {status.applicationStatus}
                                                     </option>
-                                                ) ) }
+                                                ))}
                                             </select>
                                         </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
-                                            { app.contactInfo ? `+91 ${ app.contactInfo }` : 'N/A' }
+                                            {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
                                         </td>
-                                        { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <button
-                                                onClick={ () => onViewResume( app ) }
-                                                className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
-                                            >
-                                                View Resume
-                                            </button>
-                                        </td>
-                                        )}
-                                        { ( isHiringManager || subUserRole === 'hiring_manager' ) && (
+                                        {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
-                                                    onClick={ () => handleScheduleInterview( app ) }
+                                                    onClick={() => onViewResume(app)}
+                                                    className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
+                                                >
+                                                    View Resume
+                                                </button>
+                                            </td>
+                                        )}
+                                        {(isHiringManager || subUserRole === 'hiring_manager') && (
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button
+                                                    onClick={() => handleScheduleInterview(app)}
                                                     className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                                 >
                                                     Schedule Interview
                                                 </button>
                                             </td>
-                                        ) }
+                                        )}
                                     </tr>
                                 );
-                            } )
+                            })
                         ) : (
                             <tr>
                                 <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
                                     No applications found matching your search criteria
                                 </td>
                             </tr>
-                        ) }
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Pagination Controls */ }
+            {/* Pagination Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
                 <div className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{ filteredApps?.length > 0 ? ( currentPage - 1 ) * limit + 1 : 0 }</span> to <span className="font-medium">{ Math.min( currentPage * limit, totalApplications ) }</span> of <span className="font-medium">{ totalApplications }</span> applications
+                    Showing <span className="font-medium">{filteredApps?.length > 0 ? (currentPage - 1) * limit + 1 : 0}</span> to <span className="font-medium">{Math.min(currentPage * limit, totalApplications)}</span> of <span className="font-medium">{totalApplications}</span> applications
                 </div>
                 <div className="flex items-center space-x-2">
                     <button
-                        onClick={ () => handlePageChange( 1 ) }
-                        disabled={ currentPage === 1 }
+                        onClick={() => handlePageChange(1)}
+                        disabled={currentPage === 1}
                         className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         &laquo;
                     </button>
                     <button
-                        onClick={ () => handlePageChange( currentPage - 1 ) }
-                        disabled={ currentPage === 1 }
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
                         className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         &lsaquo;
                     </button>
 
-                    {/* Page numbers */ }
-                    { [ ...Array( totalPages ).keys() ]?.map( ( _, index ) => {
+                    {/* Page numbers */}
+                    {[...Array(totalPages).keys()]?.map((_, index) => {
                         const pageNumber = index + 1;
                         if (
                             pageNumber === 1 ||
                             pageNumber === totalPages ||
-                            ( pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1 )
+                            (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
                         ) {
                             return (
                                 <button
-                                    key={ pageNumber }
-                                    onClick={ () => handlePageChange( pageNumber ) }
-                                    className={ `px-3 py-1 border rounded text-sm ${ pageNumber === currentPage
+                                    key={pageNumber}
+                                    onClick={() => handlePageChange(pageNumber)}
+                                    className={`px-3 py-1 border rounded text-sm ${pageNumber === currentPage
                                         ? 'bg-blue-600 text-white'
                                         : 'bg-white text-gray-700 hover:bg-gray-100'
-                                        }` }
+                                        }`}
                                 >
-                                    { pageNumber }
+                                    {pageNumber}
                                 </button>
                             );
-                        } else if ( pageNumber === currentPage - 2 || pageNumber === currentPage + 2 ) {
-                            return <span key={ pageNumber } className="px-1">...</span>;
+                        } else if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                            return <span key={pageNumber} className="px-1">...</span>;
                         }
                         return null;
-                    } ) }
+                    })}
 
                     <button
-                        onClick={ () => handlePageChange( currentPage + 1 ) }
-                        disabled={ currentPage === totalPages }
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
                         className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         &rsaquo;
                     </button>
                     <button
-                        onClick={ () => handlePageChange( totalPages ) }
-                        disabled={ currentPage === totalPages }
+                        onClick={() => handlePageChange(totalPages)}
+                        disabled={currentPage === totalPages}
                         className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         &raquo;
@@ -318,17 +322,17 @@ const ApplicationsTable = ( {
                 </div>
             </div>
 
-            {/* Schedule Interview Modal */ }
-            { isScheduleModalOpen && selectedApplication && (
+            {/* Schedule Interview Modal */}
+            {isScheduleModalOpen && selectedApplication && (
                 <ScheduleInterviewModal
-                    isOpen={ isScheduleModalOpen }
-                    onClose={ () => {
-                        setIsScheduleModalOpen( false );
-                        setSelectedApplication( null );
-                    } }
-                    application={ selectedApplication }
+                    isOpen={isScheduleModalOpen}
+                    onClose={() => {
+                        setIsScheduleModalOpen(false);
+                        setSelectedApplication(null);
+                    }}
+                    application={selectedApplication}
                 />
-            ) }
+            )}
 
         </div>
     );
