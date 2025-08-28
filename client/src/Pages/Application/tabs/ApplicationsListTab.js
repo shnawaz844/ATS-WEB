@@ -1,18 +1,36 @@
 import React, { useEffect, useState } from 'react';
-
 import StatusSidebar from './StatusSidebar';
 import ApplicationsTable from './ApplicationsTable';
 import ConfirmationDialog from './ConfirmationDialog';
 import ResumeModal from './ResumeModal';
-// import { useMediaQuery } from 'react-responsive';
+import { SlidersHorizontal } from 'lucide-react';
 
-const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, search, setPage, setLimit, setSearch, currentPage, totalApplications, totalPages } ) => {
+const ApplicationsListTab = ( {
+    job,
+    onStatusChange,
+    applications,
+    page,
+    limit,
+    search,
+    monthFilter,
+    yearFilter,
+    setPage,
+    setLimit,
+    setSearch,
+    setMonthFilter,
+    setYearFilter,
+    currentPage,
+    totalApplications,
+    totalPages,
+    getMonthOptions,
+    getYearOptions,
+    clearFilters
+} ) => {
     const [ allApps, setAllApps ] = useState( applications );
     const [ statusFilter, setStatusFilter ] = useState( '' );
     const [ statuses, setStatuses ] = useState( [] );
-    // const isMobile = useMediaQuery({ maxWidth: 768 });
-
     const [ isMobile, setIsMobile ] = useState( window.innerWidth <= 768 );
+    const [ showFilters, setShowFilters ] = useState( false ); // ✅ toggle state
 
     useEffect( () => {
         const handleResize = () => {
@@ -23,21 +41,91 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
         return () => window.removeEventListener( 'resize', handleResize );
     }, [] );
 
-    // Update local state when parent applications change
     useEffect( () => {
         setAllApps( applications );
     }, [ applications ] );
 
-    // Add this function to handle status updates from both table and modal
+    // ✅ Filter Section UI
+    const FilterSection = () => (
+        <div className="bg-white shadow-md rounded-xl p-5 border border-gray-100">
+            {/* Header */ }
+            <div className="flex items-center justify-between mb-5 border-b pb-2">
+                <h3 className="text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    Filter Applications
+                </h3>
+
+                <button
+                    onClick={ clearFilters }
+                    className="text-xs font-medium px-3 py-1 rounded-full 
+               bg-red-50 text-red-600 border border-red-200
+               hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+                >
+                    Clear
+                </button>
+            </div>
+
+
+            {/* Filters */ }
+            <div className="grid grid-cols-2 gap-5">
+                {/* Month */ }
+                <div>
+                    <label className="text-xs font-medium text-gray-500 mb-2 block">
+                        Month
+                    </label>
+                    <select
+                        value={ monthFilter }
+                        onChange={ ( e ) => setMonthFilter( e.target.value ) }
+                        className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    >
+                        { getMonthOptions().map( ( option ) => (
+                            <option key={ option.value } value={ option.value }>
+                                { option.label }
+                            </option>
+                        ) ) }
+                    </select>
+                </div>
+
+                {/* Year */ }
+                <div>
+                    <label className="text-xs font-medium text-gray-500 mb-2 block">
+                        Year
+                    </label>
+                    <select
+                        value={ yearFilter }
+                        onChange={ ( e ) => setYearFilter( e.target.value ) }
+                        className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    >
+                        { getYearOptions().map( ( year ) => (
+                            <option key={ year } value={ year }>
+                                { year }
+                            </option>
+                        ) ) }
+                    </select>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Status change functions
+    const [ confirmDialog, setConfirmDialog ] = useState( {
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        applicationId: null,
+        newStatus: ''
+    } );
+
+    const [ resumeModal, setResumeModal ] = useState( {
+        isOpen: false,
+        resumeData: null
+    } );
+
     const handleStatusUpdate = async ( applicationId, newStatus ) => {
         try {
-            // Find the current app
             const app = allApps.find( a => a._id === applicationId );
-
-            // If no change in status, do nothing
             if ( app && app.applicationStatusId === newStatus ) return;
 
-            // Open confirmation dialog
             setConfirmDialog( {
                 isOpen: true,
                 title: 'Update Application Status',
@@ -52,11 +140,9 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
         }
     };
 
-    // Update the confirmStatusChange to call the parent's onStatusChange
     const confirmStatusChange = async ( appId, newStatus ) => {
         try {
             await updateApplicationStatus( appId, newStatus );
-            // Notify parent component to refresh data
             onStatusChange();
             setConfirmDialog( dialog => ( { ...dialog, isOpen: false } ) );
         } catch ( err ) {
@@ -65,23 +151,6 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
         }
     };
 
-    // State for confirmation dialog
-    const [ confirmDialog, setConfirmDialog ] = useState( {
-        isOpen: false,
-        title: '',
-        message: '',
-        onConfirm: null,
-        applicationId: null,
-        newStatus: ''
-    } );
-
-    // State for resume modal
-    const [ resumeModal, setResumeModal ] = useState( {
-        isOpen: false,
-        resumeData: null
-    } );
-
-    // Fetch statuses from API
     useEffect( () => {
         const fetchApplicationStatuses = async () => {
             try {
@@ -99,8 +168,6 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                 if ( !res.ok ) throw new Error( 'Failed to fetch application statuses' );
 
                 const { applicationStatuses } = await res.json();
-
-                // optional: sort by applicationStep so buttons render in step order
                 applicationStatuses.sort( ( a, b ) =>
                     Number( a.applicationStep ) - Number( b.applicationStep )
                 );
@@ -116,19 +183,22 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
 
     const updateApplicationStatus = async ( applicationId, newStatus ) => {
         try {
-            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/update-candidate-application/${ applicationId }`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify( { applicationStatusId: newStatus } ),
-            } );
-            console.log( 'Raw response001:', response );
+            const response = await fetch(
+                `${ process.env.REACT_APP_BASE_URL }/application/update-candidate-application/${ applicationId }`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify( { applicationStatusId: newStatus } ),
+                }
+            );
+
             if ( !response.ok ) {
                 throw new Error( 'Failed to update application status' );
             }
-            console.log( 'component update done, calling parent' );
-            onStatusChange()
+
+            onStatusChange();
             return await response.json();
         } catch ( error ) {
             console.error( 'Error updating application status:', error );
@@ -141,13 +211,9 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
     };
 
     const handleStatusChangeRequest = ( appId, newStatus ) => {
-        // Find the current app
         const app = allApps.find( a => a._id === appId );
-
-        // If no change in status, do nothing
         if ( app && app.applicationStatusId === newStatus ) return;
 
-        // Open confirmation dialog
         setConfirmDialog( {
             isOpen: true,
             title: 'Update Application Status',
@@ -160,7 +226,6 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
 
     const handleViewResume = async ( application ) => {
         try {
-            // Open resume modal
             setResumeModal( {
                 isOpen: true,
                 resumeData: application,
@@ -171,8 +236,6 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
         }
     };
 
-    console.log( "allApps123", allApps )
-
     const filteredApps = allApps
         ?.filter( app => statusFilter ? app.applicationStatusId === statusFilter : true )
         ?.filter( app =>
@@ -182,20 +245,26 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                 : true
         );
 
-    console.log( "filteredApps", filteredApps )
-
     return (
         <div className="flex flex-col md:flex-row gap-6 items-center justify-center">
-            {/* For mobile: Main content first */ }
+            {/* Mobile Layout */ }
             { isMobile && (
                 <>
-                    <div className="flex-1 space-y-6  w-80">
-                        {/* Search Bar */ }
+                    <div className="flex-1 space-y-6 w-80">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Applications List</h2>
+                            {/* ✅ Toggle Button */ }
+                            <button
+                                onClick={ () => setShowFilters( !showFilters ) }
+                                className="text-sm px-3 py-1 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
+                            >
+                                { showFilters ? "Hide Filters" : "Show Filters" }
+                            </button>
                         </div>
 
-                        {/* Applications Table */ }
+                        {/* ✅ Conditional Rendering */ }
+                        { showFilters && <FilterSection /> }
+
                         <ApplicationsTable
                             job={ job }
                             filteredApps={ filteredApps }
@@ -214,7 +283,6 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                         />
                     </div>
 
-                    {/* Sidebar - comes after main content on mobile */ }
                     <StatusSidebar
                         statuses={ statuses }
                         statusFilter={ statusFilter }
@@ -225,10 +293,9 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                 </>
             ) }
 
-            {/* For desktop: Normal order */ }
+            {/* Desktop Layout */ }
             { !isMobile && (
                 <>
-                    {/* Sidebar */ }
                     <StatusSidebar
                         statuses={ statuses }
                         statusFilter={ statusFilter }
@@ -237,14 +304,25 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                         getStatusCount={ getStatusCount }
                     />
 
-                    {/* Main Content */ }
                     <div className="flex-1 space-y-6 w-[70vw]">
-                        {/* Search Bar */ }
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Applications List</h2>
+
+                            {/* ✅ Stylish Toggle Button */ }
+                            <button
+                                onClick={ () => setShowFilters( !showFilters ) }
+                                className={ `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+               bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md
+               hover:from-blue-600 hover:to-indigo-600 transition-all duration-300`}
+                            >
+                                <SlidersHorizontal size={ 16 } />
+                                { showFilters ? "Hide Filters" : "Filter By Month" }
+                            </button>
                         </div>
 
-                        {/* Applications Table */ }
+                        {/* ✅ Conditional Rendering */ }
+                        { showFilters && <FilterSection /> }
+
                         <ApplicationsTable
                             job={ job }
                             filteredApps={ filteredApps }
@@ -260,12 +338,15 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
                             currentPage={ currentPage }
                             totalApplications={ totalApplications }
                             totalPages={ totalPages }
+                            setMonthFilter={ setMonthFilter }
+                            setYearFilter={ setYearFilter }
+                            monthFilter={ monthFilter }
+                            yearFilter={ yearFilter }
                         />
                     </div>
                 </>
             ) }
 
-            {/* These can stay as is since they're modals/dialogs */ }
             <ConfirmationDialog
                 isOpen={ confirmDialog.isOpen }
                 title={ confirmDialog.title }
@@ -277,7 +358,7 @@ const ApplicationsListTab = ( { job, onStatusChange, applications, page, limit, 
             <ResumeModal
                 isOpen={ resumeModal.isOpen }
                 resumeData={ resumeModal.resumeData }
-                onClose={ () => setResumeModal( { ...applications, isOpen: false } ) }
+                onClose={ () => setResumeModal( { ...resumeModal, isOpen: false } ) }
             />
         </div>
     );

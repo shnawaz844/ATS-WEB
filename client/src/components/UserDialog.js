@@ -13,6 +13,7 @@ const UserDialog = ({
 }) => {
     const userRole = JSON.parse(localStorage.getItem('user')).role;
     const [errors, setErrors] = useState({});
+    
 
     // Function to validate the form fields
     const validateForm = () => {
@@ -75,7 +76,7 @@ const UserDialog = ({
                     </button>
                 </div>
                 <div className="max-h-[calc(90vh-150px)] overflow-y-auto">
-                    <form onSubmit={onSubmit} className="p-6 space-y-6">
+                    <form onSubmit={onSubmit} autoComplete='off' className="p-6 space-y-6">
                         <div className="space-y-4">
                             {/* User Name Field */}
                             <div>
@@ -84,9 +85,10 @@ const UserDialog = ({
                                 </label>
                                 <input
                                     type="text"
-                                    name="userName"
+                                    name="user_name"
+                                    autoComplete='new-username'
                                     value={formData.userName}
-                                    onChange={handleFormChange}
+                                    onChange={ ( e ) => handleFormChange( { target: { name: 'userName', value: e.target.value } } ) }
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                 />
@@ -121,9 +123,10 @@ const UserDialog = ({
                                     </label>
                                     <input
                                         type="password"
-                                        name="password"
+                                        name="user_pass"
+                                        autoComplete='new-password'
                                         value={formData.password || ''}
-                                        onChange={handleFormChange}
+                                        onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                                     />

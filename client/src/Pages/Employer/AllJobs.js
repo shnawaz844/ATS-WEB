@@ -319,8 +319,8 @@ export const AllJobs = () => {
                 <div>
                     {/* Header Section */}
                     <div className='mb-6 h-auto min-h-[80px] md:min-h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
-                        <div className="flex flex-col md:flex-row justify-between items-start w-full gap-3 sm:gap-4">
-                            {/* Title Section */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
+                            {/* Title Section - always on top on mobile, aligned left on desktop */ }
                             <div className="w-full md:w-auto flex-shrink-0">
                                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center font-DM Sans">
                                     <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-gray-200" />
@@ -328,33 +328,33 @@ export const AllJobs = () => {
                                 </h2>
                             </div>
 
-                            {/* Search and Buttons Section */}
-                            <div className='flex flex-col xs:flex-row gap-3 w-full md:w-auto'>
-                                {/* Search Bar - responsive width */}
-                                <div className="relative rounded-full w-full xs:w-[60%] sm:w-[40%] md:w-[25vw]">
+                            {/* Search and Buttons Section - column on mobile, row on desktop */ }
+                            <div className='flex flex-col sm:flex-row gap-3 w-full md:w-auto'>
+                                {/* Search Bar - full width on mobile, smaller on desktop */ }
+                                <div className="relative rounded-full w-full md:w-[25vw] lg:w-[20vw]">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                                     </div>
                                     <input
                                         type="text"
                                         placeholder="Search job titles, skills..."
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
+                                        value={ search }
+                                        onChange={ ( e ) => setSearch( e.target.value ) }
                                         className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 shadow-sm transition-all duration-200 h-[40px] sm:h-[44px] md:h-[48px] focus:outline-none focus:ring-0 rounded-xl text-sm sm:text-base"
                                     />
                                 </div>
 
-                                {/* Buttons - responsive sizing */}
-                                <div className="flex gap-2 sm:gap-3 w-full xs:w-auto">
+                                {/* Buttons - row on all screens */ }
+                                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                                     <button
                                         className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
-                                        onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                        onClick={ () => setIsFilterOpen( !isFilterOpen ) }
                                     >
-                                        {isFilterOpen ? "Hide Filters" : "Show Filters"}
+                                        { isFilterOpen ? "Hide Filters" : "Show Filters" }
                                     </button>
 
                                     <Link
-                                        to={`/${companyUserName}/post-job`}
+                                        to={ `/${ companyUserName }/post-job` }
                                         className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
                                     >
                                         <Plus className="mr-1 sm:mr-2 h-4 w-4" />
