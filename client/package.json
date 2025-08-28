@@ -39,7 +39,8 @@
     "react-time-picker": "^7.0.0",
     "react-toastify": "^10.0.5",
     "tailwindcss-animate": "^1.0.7",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",

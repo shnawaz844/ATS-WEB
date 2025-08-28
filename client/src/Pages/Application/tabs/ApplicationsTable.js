@@ -26,7 +26,7 @@ const ApplicationsTable = ({
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userRole = user.role;
-    const subUserRole = localStorage.getItem("sub_role") || "";;
+    const subUserRole = localStorage.getItem("sub_role") || "";
 
     console.log("subUserRole", subUserRole, user)
 
@@ -205,7 +205,7 @@ const ApplicationsTable = ({
 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <select
-                                                className="w-24 px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm"
+                                                className="min-w-32 w-auto px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm"
                                                 value={app.applicationStatusId}
                                                 onChange={e => handleSelect(app._id, e.target.value)}
                                             >
