@@ -48,6 +48,8 @@ app.use("/interviewer-app", interviewerappRoutes);
 app.use("/companies", companyRoutes),
 app.use("/applicationscheduledlist", applicationlistRoutes);
 app.use("/interviewerfeedback", feedbackRoutes);
+app.use("/upload", fileUploadRoute);
+
 // app.use("/interview-result", resultRoutes)
 
 app.use("/interviewerfeedback", feedbackRoutes);

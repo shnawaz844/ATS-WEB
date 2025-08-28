@@ -19,8 +19,9 @@ const upload = multer({
   storage: multer.memoryStorage(), // Store file in memory before uploading to S3
   limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
   fileFilter: (req, file, cb) => {
+    console.log("File filter called for file:", file);
     // Accept only image and PDF files
-    if (file.mimetype.startsWith("image/") || file.mimetype === "application/pdf") {
+    if ( file.mimetype.startsWith( "image/" ) || file.mimetype === "application/pdf" || file.mimetype === "application/msword" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
       cb(null, true);
     } else {
       cb(new Error("Only image and PDF files are allowed!"), false);

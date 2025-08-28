@@ -5,8 +5,23 @@ export const getFeedbacks = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
+        const ratingFilter = req.query.rating;
 
-        const feedbacks = await Feedback.find()
+        let filter = {};
+
+        // Add rating filter logic
+        if ( ratingFilter && ratingFilter !== 'all' ) {
+            if ( ratingFilter === '0' ) {
+                // Filter for no rating (null, undefined, or 0)
+                filter.starRating = { $in: [ null, 0, undefined ] };
+            } else {
+                // Filter for rating >= selected value
+                const minRating = parseInt( ratingFilter );
+                filter.starRating = { $gte: minRating };
+            }
+        }
+
+        const feedbacks = await Feedback.find( filter )
             .skip(skip)
             .limit(limit)
             .populate("interviewId") // Optional: populate related interview details
@@ -25,6 +40,7 @@ export const getFeedbacks = async (req, res) => {
                     
                 ],
             })
+            .sort( { createdAt: -1 } ); 
 
         const total = await Feedback.countDocuments();
 
@@ -32,7 +48,8 @@ export const getFeedbacks = async (req, res) => {
             total,
             page,
             limit,
-            feedbacks
+            feedbacks,
+            hasMore: page * limit < total
         });
     } catch (error) {
         console.error("Error fetching feedbacks:", error);

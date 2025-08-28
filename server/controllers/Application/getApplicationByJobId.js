@@ -13,7 +13,7 @@ const getApplicationsByJobId = async ( req, res ) => {
     const { jobId } = req.params;
 
     // Extract query parameters, provide defaults
-    let { page = 1, limit = 10, search = '' } = req.query;
+    let { page = 1, limit = 10, search = '', month, year } = req.query;
 
     // Convert page and limit to integers
     page = parseInt( page, 10 );
@@ -36,6 +36,25 @@ const getApplicationsByJobId = async ( req, res ) => {
       filter.candidateID = { $in: candidateIds };
     }
 
+    // Month and year filter
+    if ( month && year ) {
+      const startDate = new Date( year, month - 1, 1 );
+      const endDate = new Date( year, month, 0, 23, 59, 59, 999 );
+
+      filter.createdAt = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    } else if ( year ) {
+      const startDate = new Date( year, 0, 1 );
+      const endDate = new Date( year, 11, 31, 23, 59, 59, 999 );
+
+      filter.createdAt = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+
     // Get total count of matching documents for pagination
     const total = await Application.countDocuments( filter );
     const skip = ( page - 1 ) * limit;
@@ -44,6 +63,7 @@ const getApplicationsByJobId = async ( req, res ) => {
     const applications = await Application.find( filter )
       .populate( 'candidateID' ) // Adjust populates to your needs
       .populate( 'jobID' )
+      .sort( { createdAt: -1 } ) 
       .skip( skip )
       .limit( limit );
 
