@@ -3,13 +3,14 @@ import User from "../../models/User.js"; // Import the User model
 import mongoose from "mongoose";
 
 // Function to fetch interviews
-export const getInterviews = async ( req, res ) => {console.log("api called")
+export const getInterviews = async ( req, res ) => {
+    console.log( "api called" )
     try {
         const page = parseInt( req.query.page ) || 1;
         const limit = parseInt( req.query.limit ) || 9;
         const candidateID = req.query.candidateID
         const jobId = req.query.jobID
-        const interviewerID = decodeURIComponent( req.query.interviewerID || "" );
+        const interviewerID = req.query.interviewerID !== 'admin' ? decodeURIComponent( req.query.interviewerID || "" ) : "";
         const searchTerm = req.query.searchTerm || '';
         const filterStatus = req.query.filterStatus || '';
         const filterRound = req.query.filterRound || '';
