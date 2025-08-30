@@ -11,6 +11,8 @@ const fetchScheduledInterviews = async ( { queryKey } ) => {
         apiUrl = `/applicationscheduledlist/scheduled-interviewer-app?page=${ page }&limit=${ limit }&searchTerm=${ searchTerm || '' }&candidateID=${ candidateID }&filterStatus=${ filterStatus || '' }&filterRound=${ filterRound || '' }&jobID=${ jobID || '' }`;
     } else if ( interviewerID ) {
         apiUrl = `/applicationscheduledlist/scheduled-interviewer-app?page=${ page }&limit=${ limit }&searchTerm=${ searchTerm || '' }&interviewerID=${ interviewerID }&filterStatus=${ filterStatus || '' }&filterRound=${ filterRound || '' }&jobID=${ jobID || '' }`;
+    } else if ( interviewerID === 'admin' ) {
+        apiUrl = `/applicationscheduledlist/scheduled-interviewer-app?page=${ page }&limit=${ limit }&searchTerm=${ searchTerm || '' }&filterStatus=${ filterStatus || '' }&filterRound=${ filterRound || '' }&jobID=${ jobID || '' }`;
     }
     console.log( "Fetching scheduled interviews for candidateID:", candidateID );
     console.log( "company_id:", companyId );
@@ -37,7 +39,7 @@ const useScheduledInterview = ( { page, limit, searchTerm, candidateID, jobID, f
         queryKey: [ "ScheduledInterviews", { page, limit, searchTerm, candidateID, jobID, filterStatus, filterRound, interviewerID } ],
         queryFn: fetchScheduledInterviews,
         keepPreviousData: true,
-        enabled: !!candidateID || !!interviewerID, // Only fetch when candidateID or interviewerID is available
+        enabled: !!candidateID || !!interviewerID || interviewerID === 'admin', // Only fetch when candidateID or interviewerID is available
     } );
 
     // Extract the interviews data from response
