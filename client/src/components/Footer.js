@@ -53,17 +53,17 @@ export function Footer() {
                             opportunities through intelligent matching and automated processes.
                         </p>
                         <div className="space-y-3">
-                            <div className="flex items-center gap-2 text-slate-400">
+                            {/* <div className="flex items-center gap-2 text-slate-400">
                                 <Mail className="h-4 w-4" />
                                 <span>contact@niyukty.com</span>
-                            </div>
+                            </div> */}
                             <div className="flex items-center gap-2 text-slate-400">
                                 <Phone className="h-4 w-4" />
-                                <span>+1 (555) 123-4567</span>
+                                <span>+91 8810600135</span>
                             </div>
                             <div className="flex items-center gap-2 text-slate-400">
                                 <MapPin className="h-4 w-4" />
-                                <span>San Francisco, CA</span>
+                                <span>F2 Fintech Pvt Ltd, A-25, M-1 Arv Park, A-Block, Sector 63, Noida</span>
                             </div>
                         </div>
                     </div>
