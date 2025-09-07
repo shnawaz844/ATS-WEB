@@ -99,19 +99,32 @@ const AllInterviews = () => {
       // Apply rating filter on merged data
       mergedData = applyRatingFilter( mergedData );
 
+      console.log( 'Filtered data after rating filter:', mergedData?.length, 'items', assignedInterviews );
+
       if ( page === 1 ) {
         setFilteredInterviews( mergedData );
       } else {
         setFilteredInterviews( prev => [ ...prev, ...mergedData ] );
       }
-      setHasMore( page < assignedInterviews?.totalPages );
+      // ✅ FIXED: Properly handle hasMore for filtered results
+      // If we have filtered results or if we're on page 1, check if there are more pages
+      // If filtering returns no results, don't try to load more
+      if ( debouncedRating !== 'all' ) {
+        // When filtering by rating, stop pagination if no results found
+        setHasMore( mergedData?.length > 0 && page < assignedInterviews?.totalPages );
+      } else {
+        // Normal pagination logic for unfiltered results
+        setHasMore( page < assignedInterviews?.totalPages );
+      }
+
     } else {
       if ( page === 1 ) {
         setFilteredInterviews( [] );
       }
-      setHasMore( false );
+      setHasMore( false ); // ✅ No more data available
     }
   }, [ assignedInterviews?.interviews, feedbacks, page, debouncedRating ] );
+
 
 
   const fetchMoreData = () => {
