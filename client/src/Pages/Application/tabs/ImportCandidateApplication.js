@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus, Send } from 'lucide-react';
+import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus, Send, FolderPen, Filter } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,9 @@ export default function ImportCandidateApplication() {
 
     const navigate = useNavigate();
     const companyUserName = localStorage.getItem( "companyUserName" );
+    const [ selectedUser, setSelectedUser ] = useState( 'all' );
+    const [ availableUsers, setAvailableUsers ] = useState( [] );
+    const [ loadingUsers, setLoadingUsers ] = useState( false );
 
     // User state
     const [ user, setUser ] = useState( {
@@ -28,6 +31,10 @@ export default function ImportCandidateApplication() {
 
     const formatMonth = ( date ) => {
         return new Date( date ).toLocaleString( "default", { month: "long", year: "numeric" } );
+    };
+
+    const handleResetFilter = () => {
+        setSelectedUser( 'all' );
     };
 
     // Fetch user data from localStorage
@@ -47,12 +54,57 @@ export default function ImportCandidateApplication() {
         }
     }, [] );
 
+    // Fetch available users for filter
+    const fetchAvailableUsers = async () => {
+        if ( user.role !== "admin" ) {
+            return;
+        }
+        try {
+            setLoadingUsers( true );
+
+            const queryParams = new URLSearchParams( {
+                page: '1',
+                limit: '100',
+                role: 'recruiter_manager,recruiter'
+            } );
+
+            if ( user.companyId ) {
+                queryParams.append( 'company_id', user.companyId );
+            }
+
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/user/getUsers?${ queryParams }` );
+
+            if ( !response.ok ) throw new Error( 'Failed to fetch users' );
+
+            const data = await response.json();
+
+            // Extract unique user names from the files and combine with fetched users
+            const uniqueUserNames = [ ...new Set( [
+                ...userFiles.map( file => file.userName ),
+                ...( data.users || [] ).map( user => user.userName )
+            ] ) ].filter( name => name && name !== 'Unknown User' );
+
+            setAvailableUsers( uniqueUserNames );
+        } catch ( err ) {
+            console.error( 'Error fetching users:', err );
+        } finally {
+            setLoadingUsers( false );
+        }
+    };
+
     // Fetch user files when user data is available
     useEffect( () => {
         if ( user.userId && user.companyId ) {
             fetchUserFiles();
         }
-    }, [ user.userId, user.companyId ] );
+    }, [ user.userId, user.companyId, selectedUser ] );
+
+    // Fetch available users when userFiles change
+    useEffect( () => {
+        if ( userFiles.length > 0 ) {
+            fetchAvailableUsers();
+        }
+    }, [ userFiles ] );
 
     function capitalizeFirstLetter( string ) {
         if ( !string ) return "";
@@ -68,7 +120,9 @@ export default function ImportCandidateApplication() {
                 companyId: user.companyId,
                 fileType: 'candidate'
             } );
-
+            if ( selectedUser && selectedUser !== 'all' ) {
+                queryParams.append( 'userName', selectedUser );
+            }
             // If user is admin, we don't need user-specific filters
             if ( user.role === 'admin' ) {
                 queryParams.delete( 'userId' );
@@ -88,6 +142,7 @@ export default function ImportCandidateApplication() {
             const transformedFiles = ( data.files || data || [] ).map( file => ( {
                 id: file._id || file.id,
                 fileName: file.filename || file.fileName,
+                originalName: file.originalName || file.fileName || file.filename,
                 fileSize: file.size || file.fileSize,
                 fileUrl: file.file || file.fileUrl,
                 uploadDate: file.uploadDate,
@@ -626,15 +681,12 @@ export default function ImportCandidateApplication() {
         };
 
         return (
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                         <FileSpreadsheet className="text-green-600" size={ 24 } />
                         <div>
-                            <h3 className="font-semibold text-gray-800 truncate max-w-40" title={ file.fileName }>
-                                { file.fileName }
-                            </h3>
-                            <p className="text-sm text-gray-500">{ formatFileSize( file.fileSize ) }</p>
+                            <p className="text-sm text-gray-500"></p>
                         </div>
                     </div>
                     <a
@@ -652,15 +704,31 @@ export default function ImportCandidateApplication() {
                 <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <User size={ 14 } />
-                        <span>{ user.userName || 'Unknown User' }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">File Uploaded By:</span>{ " " }
+                            { file.userName || "Unknown User" }
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <FolderPen size={ 14 } />
+                        <span>
+                            <span className="font-medium text-gray-800">File Name:</span>{ " " }
+                            { file.originalName || "Unknown User" }
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar size={ 14 } />
-                        <span>Created at: { formatDate( file.uploadDate ) }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">Created at:</span>{ " " }
+                            { formatDate( file.uploadDate ) }
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar size={ 14 } />
-                        <span>Month: { formatMonth( file.uploadDate ) }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">Month:</span>{ " " }
+                            { formatMonth( file.uploadDate ) }
+                        </span>
                     </div>
                 </div>
                 <div className="space-y-3 w-full max-w-md mx-auto">
@@ -787,7 +855,7 @@ export default function ImportCandidateApplication() {
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* User Info Header */ }
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
                     {/* Left: User Info */ }
                     <div className="flex items-center gap-4">
                         <div className="bg-blue-500 text-white rounded-full p-3 shadow-md">
@@ -810,55 +878,118 @@ export default function ImportCandidateApplication() {
                     </div>
 
                     {/* Right: Upload Section */ }
-                    {/* { user.role !== 'admin' && ( */}
-                        <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                                <label className="cursor-pointer">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm shadow hover:bg-blue-600 transition-colors">
-                                        <Upload size={ 16 } />
-                                        Upload Candidate File
-                                    </div>
-                                    <input
-                                        type="file"
-                                        accept=".csv,.xlsx,.xls"
-                                        onChange={ handleFileSelect }
-                                        className="hidden"
-                                    />
-                                </label>
+                    {/* { user.role !== 'admin' && ( */ }
+                    <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="cursor-pointer">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm shadow hover:bg-blue-600 transition-colors">
+                                    <Upload size={ 16 } />
+                                    Upload Candidate File
+                                </div>
+                                <input
+                                    type="file"
+                                    accept=".csv,.xlsx,.xls"
+                                    onChange={ handleFileSelect }
+                                    className="hidden"
+                                />
+                            </label>
 
-                                {/* Sample Excel File Download Button */ }
+                            {/* Sample Excel File Download Button */ }
+                            <button
+                                onClick={ () => {
+                                    const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1apSokkTG55Zq5wVncIS3DJA1NcQYhQlv/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
+                                    window.open( sampleFileUrl, '_blank' );
+                                } }
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
+                                title="Download sample Excel template"
+                            >
+                                <Download size={ 16 } />
+                                Sample Excel File
+                            </button>
+                        </div>
+
+                        { fileToUpload && (
+                            <div className="mt-3 text-sm text-gray-600 w-full md:w-auto">
+                                <p className="truncate mb-2">Selected: { fileToUpload.name }</p>
                                 <button
-                                    onClick={ () => {
-                                        const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1apSokkTG55Zq5wVncIS3DJA1NcQYhQlv/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
-                                        window.open( sampleFileUrl, '_blank' );
-                                    } }
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
-                                    title="Download sample Excel template"
+                                    onClick={ uploadFileToServer }
+                                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors"
+                                    disabled={ loading }
                                 >
-                                    <Download size={ 16 } />
-                                    Sample Excel File
+                                    { loading ? "Uploading..." : "Upload" }
                                 </button>
                             </div>
+                        ) }
 
-                            { fileToUpload && (
-                                <div className="mt-3 text-sm text-gray-600 w-full md:w-auto">
-                                    <p className="truncate mb-2">Selected: { fileToUpload.name }</p>
-                                    <button
-                                        onClick={ uploadFileToServer }
-                                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors"
-                                        disabled={ loading }
-                                    >
-                                        { loading ? "Uploading..." : "Upload" }
-                                    </button>
-                                </div>
-                            ) }
-
-                            <p className="mt-2 text-gray-500 text-xs">Supports .csv, .xlsx, and .xls</p>
-                        </div>
-                    {/* // ) } */}
+                        <p className="mt-2 text-gray-500 text-xs">Supports .csv, .xlsx, and .xls</p>
+                    </div>
+                    {/* // ) } */ }
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                {/* Filter Section */ }
+                { user.role === 'admin' && (
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                <Filter size={ 20 } />
+                                Admin Filter
+                            </h2>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex items-center gap-2">
+                                    <label htmlFor="userFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                        Filter by User:
+                                    </label>
+                                    <select
+                                        id="userFilter"
+                                        value={ selectedUser }
+                                        onChange={ ( e ) => setSelectedUser( e.target.value ) }
+                                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={ loadingUsers }
+                                    >
+                                        <option value="all">All Users</option>
+                                        { availableUsers.map( ( userName ) => (
+                                            <option key={ userName } value={ userName }>
+                                                { userName }
+                                            </option>
+                                        ) ) }
+                                    </select>
+                                </div>
+
+                                { selectedUser !== 'all' && (
+                                    <button
+                                        onClick={ handleResetFilter }
+                                        className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                    >
+                                        Clear Filter
+                                    </button>
+                                ) }
+                            </div>
+                        </div>
+
+                        { selectedUser !== 'all' && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-700">
+                                    Showing files uploaded by: <span className="font-semibold">{ selectedUser }</span>
+                                    <span className="ml-2 text-blue-600">
+                                        ({ userFiles.length } file{ userFiles.length !== 1 ? 's' : '' } found)
+                                    </span>
+                                </p>
+                            </div>
+                        ) }
+
+                        { availableUsers.length === 0 && !loadingUsers && (
+                            <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                                <p className="text-sm text-yellow-700">
+                                    No other users found. Only your files are visible.
+                                </p>
+                            </div>
+                        ) }
+                    </div>
+                ) }
+
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
                     { loading && (
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>

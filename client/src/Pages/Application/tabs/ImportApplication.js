@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus } from 'lucide-react';
+import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus, Filter, FolderPen } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function ImportApplication() {
@@ -23,15 +23,20 @@ export default function ImportApplication() {
     const [ hiringManagerMap, setHiringManagerMap ] = useState( {} );
     const [ loadingHiringManagers, setLoadingHiringManagers ] = useState( false );
 
-    // NEW: Recruiter managers state
+    // Recruiter managers state
     const [ recruitersList, setRecruitersList ] = useState( [] );
     const [ recruiterMap, setRecruiterMap ] = useState( {} );
     const [ loadingRecruiters, setLoadingRecruiters ] = useState( false );
 
-    // User state - get this from localStorage
+    // Filter state (same as ImportCandidateApplication)
+    const [ selectedUser, setSelectedUser ] = useState( 'all' );
+    const [ availableUsers, setAvailableUsers ] = useState( [] );
+    const [ loadingUsers, setLoadingUsers ] = useState( false );
+
+    // User state
     const [ user, setUser ] = useState( {
         role: 'hiring_manager',
-        userName: 'shah nawaz ahmad',
+        userName: '',
         userId: null,
         companyId: null
     } );
@@ -39,6 +44,66 @@ export default function ImportApplication() {
     const formatMonth = ( date ) => {
         return new Date( date ).toLocaleString( "default", { month: "long", year: "numeric" } );
     };
+
+    // Filter functions (same as ImportCandidateApplication)
+    const handleResetFilter = () => {
+        setSelectedUser( 'all' );
+    };
+
+    // Fetch available users for filter
+    const fetchAvailableUsers = async () => {
+        if ( user.role !== "admin" ) {
+            return;
+        }
+        try {
+            setLoadingUsers( true );
+
+            const queryParams = new URLSearchParams( {
+                page: '1',
+                limit: '100',
+                role: 'recruiter_manager,recruiter,hiring_manager'
+            } );
+
+            if ( user.companyId ) {
+                queryParams.append( 'company_id', user.companyId );
+            }
+
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/user/getUsers?${ queryParams }` );
+
+            if ( !response.ok ) throw new Error( 'Failed to fetch users' );
+
+            const data = await response.json();
+
+            // Extract unique user names from the files and combine with fetched users
+            const uniqueUserNames = [ ...new Set( [
+                ...userFiles.map( file => file.userName ),
+                ...( data.users || [] ).map( user => user.userName )
+            ] ) ].filter( name => name && name !== 'Unknown User' );
+
+            setAvailableUsers( uniqueUserNames );
+        } catch ( err ) {
+            console.error( 'Error fetching users:', err );
+        } finally {
+            setLoadingUsers( false );
+        }
+    };
+
+    // Fetch user data from localStorage
+    useEffect( () => {
+        try {
+            const userData = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+            console.log( "User data from localStorage:", userData );
+
+            setUser( {
+                role: userData.role || 'hiring_manager',
+                userName: userData.userName || userData.name || '',
+                userId: userData.userId || userData.id || userData._id,
+                companyId: userData.companyId || userData.company_id
+            } );
+        } catch ( error ) {
+            console.error( 'Error parsing user data from localStorage:', error );
+        }
+    }, [] );
 
     // Fetch hiring managers when companyId is available
     useEffect( () => {
@@ -76,9 +141,9 @@ export default function ImportApplication() {
                         if ( managerId ) {
                             // Map by userName (as-is and cleaned versions)
                             if ( userName ) {
-                                map[ userName ] = managerId; // Original format: "shah_nawaz_ahmad"
+                                map[ userName ] = managerId;
                                 map[ userName.toLowerCase() ] = managerId;
-                                map[ userName.replace( /_/g, ' ' ) ] = managerId; // "shah nawaz ahmad"
+                                map[ userName.replace( /_/g, ' ' ) ] = managerId;
                                 map[ userName.replace( /_/g, ' ' ).toLowerCase() ] = managerId;
 
                                 // Handle title case versions
@@ -86,7 +151,7 @@ export default function ImportApplication() {
                                     .split( ' ' )
                                     .map( word => word.charAt( 0 ).toUpperCase() + word.slice( 1 ).toLowerCase() )
                                     .join( ' ' );
-                                map[ titleCase ] = managerId; // "Shah Nawaz Ahmad"
+                                map[ titleCase ] = managerId;
                                 map[ titleCase.toLowerCase() ] = managerId;
                             }
 
@@ -121,7 +186,7 @@ export default function ImportApplication() {
         }
     }, [ user.companyId ] );
 
-    // NEW: Fetch recruiters when companyId is available
+    // Fetch recruiters when companyId is available
     useEffect( () => {
         const fetchRecruiters = async () => {
             if ( !user.companyId ) return;
@@ -230,7 +295,7 @@ export default function ImportApplication() {
                     // build lookup: status name → ID
                     const map = {};
                     data.jobStatuses.forEach( ( st ) => {
-                        map[ st.jobStatus ] = st._id; // Map status name to ID
+                        map[ st.jobStatus ] = st._id;
                     } );
                     setJobStatusMap( map );
                     console.log( "Job status map loaded:", map );
@@ -251,37 +316,19 @@ export default function ImportApplication() {
         }
     }, [ user.companyId ] );
 
-    // Fetch user files from backend on component mount
-    useEffect( () => {
-        // Get user data from localStorage
-        try {
-            const userData = JSON.parse( localStorage.getItem( "user" ) || "{}" );
-            console.log( "User data from localStorage:", userData );
-
-            setUser( {
-                role: userData.role || 'hiring_manager',
-                userName: userData.userName || userData.name || 'shah nawaz ahmad',
-                userId: userData.userId || userData.id || userData._id || 'default_user_id',
-                companyId: userData.companyId || userData.company_id || 'default_company_id'
-            } );
-        } catch ( error ) {
-            console.error( 'Error parsing user data from localStorage:', error );
-            // Set default values if localStorage parsing fails
-            setUser( {
-                role: 'hiring_manager',
-                userName: 'shah nawaz ahmad',
-                userId: 'default_user_id',
-                companyId: 'default_company_id'
-            } );
-        }
-    }, [] );
-
     // Fetch user files when user data is available
     useEffect( () => {
         if ( user.userId && user.companyId ) {
             fetchUserFiles();
         }
-    }, [ user.userId, user.companyId ] );
+    }, [ user.userId, user.companyId, selectedUser ] );
+
+    // Fetch available users when userFiles change
+    useEffect( () => {
+        if ( userFiles.length > 0 ) {
+            fetchAvailableUsers();
+        }
+    }, [ userFiles ] );
 
     function capitalizeFirstLetter( string ) {
         if ( !string ) return "";
@@ -292,19 +339,25 @@ export default function ImportApplication() {
         try {
             setLoading( true );
 
-            // Add query parameters for filtering
             const queryParams = new URLSearchParams( {
                 userId: user.userId,
                 companyId: user.companyId,
-                role: user.role // Add role to query params
+                fileType: 'application'
             } );
+
+            if ( selectedUser && selectedUser !== 'all' ) {
+                queryParams.append( 'userName', selectedUser );
+            }
 
             // If user is admin, we don't need user-specific filters
             if ( user.role === 'admin' ) {
                 queryParams.delete( 'userId' );
                 queryParams.delete( 'companyId' );
-                // Admin can see all files
+                // Admin can see all files, so we only filter by fileType
             }
+
+            // Add role to query params for backend
+            queryParams.append( 'role', user.role );
 
             const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/user-files?${ queryParams }` );
 
@@ -312,10 +365,10 @@ export default function ImportApplication() {
 
             const data = await response.json();
 
-            // Transform the data to match your component expectations
             const transformedFiles = ( data.files || data || [] ).map( file => ( {
                 id: file._id || file.id,
                 fileName: file.filename || file.fileName,
+                originalName: file.originalName || file.fileName || file.filename,
                 fileSize: file.size || file.fileSize,
                 fileUrl: file.file || file.fileUrl,
                 uploadDate: file.uploadDate,
@@ -333,20 +386,19 @@ export default function ImportApplication() {
         }
     };
 
-    // UPDATED: This function now includes hiring manager AND recruiter mapping
+    // Rest of your existing functions remain the same...
+    // (createJobsFromExcelData, fetchAndParseFile, handleFileSelect, uploadFileToServer, etc.)
+
     const createJobsFromExcelData = async ( fileData, fileUrl ) => {
-        // Prevent multiple simultaneous executions
         if ( creatingJobs ) {
             console.log( 'Job creation already in progress' );
             return;
         }
 
-        // Wait for hiring managers, recruiters and statuses to load if they're still loading
         if ( loadingHiringManagers || loadingRecruiters || loadingStatuses ) {
             console.log( 'Waiting for hiring managers, recruiters and job statuses to load...' );
             await new Promise( resolve => setTimeout( resolve, 1000 ) );
 
-            // If still loading after wait, show error
             if ( loadingHiringManagers || loadingRecruiters || loadingStatuses ) {
                 setError( 'Hiring managers, recruiters or job statuses are still loading. Please try again in a moment.' );
                 return;
@@ -367,11 +419,9 @@ export default function ImportApplication() {
         setJobCreationStatus( null );
 
         try {
-            // Map Excel columns to job fields
             const headers = fileData.headers.map( h => h.toLowerCase().trim() );
             const data = fileData.data;
 
-            // Find column indices
             const titleIndex = headers.findIndex( h => h.includes( 'title' ) );
             const locationTypeIndex = headers.findIndex( h => h.includes( 'location type' ) );
             const typeIndex = headers.findIndex( h => h.includes( 'type' ) );
@@ -407,11 +457,9 @@ export default function ImportApplication() {
             const jobsToCreate = [];
             const errors = [];
 
-            // Process each row
             for ( let i = 0; i < data.length; i++ ) {
                 const row = data[ i ];
 
-                // Skip empty rows
                 if ( !row.some( cell => cell && cell.toString().trim() !== '' ) ) continue;
 
                 try {
@@ -419,18 +467,15 @@ export default function ImportApplication() {
                     const hiringManagerName = hiringManagerIndex >= 0 ? row[ hiringManagerIndex ] : '';
                     const recruiterManagerName = recruiterManagerIndex >= 0 ? row[ recruiterManagerIndex ] : '';
 
-                    // Get status ID from the map, fallback to empty string if not found
                     let statusId = '';
                     if ( jobStatusMap[ statusName ] ) {
                         statusId = jobStatusMap[ statusName ];
                     } else {
                         console.warn( `Status "${ statusName }" not found in application status map. Available statuses:`, Object.keys( jobStatusMap ) );
-                        // Try to find a default status
                         statusId = jobStatusMap[ 'Active' ] || jobStatusMap[ 'active' ] || '';
                     }
 
-                    // Get hiring manager ID from the map
-                    let hiringManagerId = user.userId; // Default to current user
+                    let hiringManagerId = user.userId;
                     let actualHiringManagerName = hiringManagerName;
 
                     if ( hiringManagerName && hiringManagerName.toString().trim() !== '' ) {
@@ -438,21 +483,17 @@ export default function ImportApplication() {
 
                         console.log( `Looking up hiring manager: "${ hiringManagerNameStr }"` );
 
-                        // Try exact match first
                         let foundId = hiringManagerMap[ hiringManagerNameStr ];
 
-                        // Try lowercase match
                         if ( !foundId ) {
                             foundId = hiringManagerMap[ hiringManagerNameStr.toLowerCase() ];
                         }
 
-                        // Try with underscores replaced by spaces
                         if ( !foundId ) {
                             const withSpaces = hiringManagerNameStr.replace( /_/g, ' ' );
                             foundId = hiringManagerMap[ withSpaces ] || hiringManagerMap[ withSpaces.toLowerCase() ];
                         }
 
-                        // Try title case version
                         if ( !foundId ) {
                             const titleCase = hiringManagerNameStr
                                 .toLowerCase()
@@ -475,8 +516,7 @@ export default function ImportApplication() {
                         actualHiringManagerName = user.userName || 'Current User';
                     }
 
-                    // Get recruiter manager ID from the map
-                    let recruiterManagerId = user.userId; // Default to current user
+                    let recruiterManagerId = user.userId;
                     let actualRecruiterManagerName = recruiterManagerName;
 
                     if ( recruiterManagerName && recruiterManagerName.toString().trim() !== '' ) {
@@ -484,21 +524,17 @@ export default function ImportApplication() {
 
                         console.log( `Looking up recruiter manager: "${ recruiterManagerNameStr }"` );
 
-                        // Try exact match first
                         let foundId = recruiterMap[ recruiterManagerNameStr ];
 
-                        // Try lowercase match
                         if ( !foundId ) {
                             foundId = recruiterMap[ recruiterManagerNameStr.toLowerCase() ];
                         }
 
-                        // Try with underscores replaced by spaces
                         if ( !foundId ) {
                             const withSpaces = recruiterManagerNameStr.replace( /_/g, ' ' );
                             foundId = recruiterMap[ withSpaces ] || recruiterMap[ withSpaces.toLowerCase() ];
                         }
 
-                        // Try title case version
                         if ( !foundId ) {
                             const titleCase = recruiterManagerNameStr
                                 .toLowerCase()
@@ -522,7 +558,7 @@ export default function ImportApplication() {
                     }
 
                     const experienceRequiredValue = experienceRequiredIndex >= 0 ? row[ experienceRequiredIndex ] : undefined;
-                    let experienceRequired = '0'; // default as string
+                    let experienceRequired = '0';
 
                     if ( experienceRequiredValue !== undefined && experienceRequiredValue !== null ) {
                         experienceRequired = experienceRequiredValue.toString().trim();
@@ -534,7 +570,6 @@ export default function ImportApplication() {
 
                     const jobData = {
                         title: row[ titleIndex ] || 'Untitled Position',
-                        // NOTE: titleCode will be generated in the backend
                         locationType: row[ locationTypeIndex ] || 'On-Site',
                         type: row[ typeIndex ] || 'Full-Time',
                         scheduleType: row[ scheduleTypeIndex ] || 'Flexible',
@@ -559,7 +594,6 @@ export default function ImportApplication() {
                         company_id: user.companyId
                     };
 
-                    // Validate required fields
                     if ( !jobData.title || jobData.title.trim() === '' ) {
                         throw new Error( 'Title is required' );
                     }
@@ -577,7 +611,6 @@ export default function ImportApplication() {
             console.log( `Sending ${ jobsToCreate.length } jobs to backend in ONE API call` );
             console.log( 'Sample job data:', jobsToCreate[ 0 ] );
 
-            // Make ONE API call to backend with ALL job data
             const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/create-jobs-from-file`, {
                 method: 'POST',
                 headers: {
@@ -636,11 +669,10 @@ export default function ImportApplication() {
         }
     };
 
-    // Updated function to fetch and parse Excel file from URL using a proxy endpoint
     const fetchAndParseFile = async ( fileUrl, fileName ) => {
         try {
             setLoadingFileData( true );
-            setError( '' ); // Clear any previous errors
+            setError( '' );
 
             const proxyResponse = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/proxy-file`, {
                 method: 'POST',
@@ -659,7 +691,6 @@ export default function ImportApplication() {
 
             const arrayBuffer = await proxyResponse.arrayBuffer();
 
-            // Parse the file based on its type
             let headers = [];
             let data = [];
 
@@ -925,12 +956,6 @@ export default function ImportApplication() {
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                         <FileSpreadsheet className="text-green-600" size={ 24 } />
-                        <div>
-                            <h3 className="font-semibold text-gray-800 truncate max-w-40" title={ file.fileName }>
-                                { file.fileName }
-                            </h3>
-                            <p className="text-sm text-gray-500">{ formatFileSize( file.fileSize ) }</p>
-                        </div>
                     </div>
                     <a
                         href={ file.fileUrl }
@@ -947,16 +972,34 @@ export default function ImportApplication() {
                 <div className="space-y-2 mb-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <User size={ 14 } />
-                        <span>{ user.userName || 'Unknown User' }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">File Uploaded By:</span>{ " " }
+                            { file.userName || "Unknown User" }
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <FolderPen size={ 14 } />
+                        <span>
+                            <span className="font-medium text-gray-800">File Name:</span>{ " " }
+                            { file.fileName || "Unknown File" }
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar size={ 14 } />
-                        <span>Created at: { formatDate( file.uploadDate ) }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">Created at:</span>{ " " }
+                            { formatDate( file.uploadDate ) }
+                        </span>
                     </div>
+
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar size={ 14 } />
-                        <span>Month: { formatMonth( file.uploadDate ) }</span>
+                        <span>
+                            <span className="font-medium text-gray-800">Month:</span>{ " " }
+                            { formatMonth( file.uploadDate ) }
+                        </span>
                     </div>
+
                 </div>
 
                 <button
@@ -1081,7 +1124,7 @@ export default function ImportApplication() {
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* User Info Header */ }
-                <div className="bg-white rounded-lg shadow-lg p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
+                <div className="bg-white rounded-xl shadow-lg p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
                     {/* Left: User Info */ }
                     <div className="flex items-center gap-4">
                         <div className="bg-blue-500 text-white rounded-full p-3 shadow-md">
@@ -1089,76 +1132,130 @@ export default function ImportApplication() {
                         </div>
                         <div>
                             <h1 className="text-xl font-semibold text-gray-800">
-                                Welcome,{ " " }
-                                <span className="text-blue-600">
-                                    { capitalizeFirstLetter( user.userName ) || "User" }
-                                </span>
+                                Import Job Applications
                             </h1>
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                                     { formatRole( user.role ) }
                                 </span>
+                                <span className="text-gray-500">| { capitalizeFirstLetter( user.userName ) || "User" }</span>
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                                User ID: { user.userId } | Company ID: { user.companyId }
-                                { loadingStatuses && " | Loading statuses..." }
-                                { loadingHiringManagers && " | Loading hiring managers..." }
-                                { !loadingStatuses && jobStatuses.length > 0 && ` | ${ jobStatuses.length } statuses loaded` }
-                                { !loadingHiringManagers && hiringManagersList.length > 0 && ` | ${ hiringManagersList.length } hiring managers loaded` }
+                                Upload job data from Excel/CSV files to create job positions and applications
                             </div>
                         </div>
                     </div>
 
                     {/* Right: Upload Section */ }
-                    {/* { user.role !== 'admin' && ( */}
-                        <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
-                            <div className="flex items-center gap-2 mb-2">
-                                <label className="cursor-pointer">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm shadow hover:bg-blue-600 transition-colors">
-                                        <Upload size={ 16 } />
-                                        Upload File
-                                    </div>
-                                    <input
-                                        type="file"
-                                        accept=".csv,.xlsx,.xls"
-                                        onChange={ handleFileSelect }
-                                        className="hidden"
-                                    />
-                                </label>
+                    <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
+                        <div className="flex items-center gap-2 mb-2">
+                            <label className="cursor-pointer">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm shadow hover:bg-blue-600 transition-colors">
+                                    <Upload size={ 16 } />
+                                    Upload Job File
+                                </div>
+                                <input
+                                    type="file"
+                                    accept=".csv,.xlsx,.xls"
+                                    onChange={ handleFileSelect }
+                                    className="hidden"
+                                />
+                            </label>
 
-                                {/* Sample Excel File Download Button */ }
+                            {/* Sample Excel File Download Button */ }
+                            <button
+                                onClick={ () => {
+                                    const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1Cj3s75X46plhnxhT19QN-yE5SCHs9cq1/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
+                                    window.open( sampleFileUrl, '_blank' );
+                                } }
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
+                                title="Download sample Excel template"
+                            >
+                                <Download size={ 16 } />
+                                Sample Excel File
+                            </button>
+                        </div>
+
+                        { fileToUpload && (
+                            <div className="mt-3 text-sm text-gray-600 w-full md:w-auto">
+                                <p className="truncate mb-2">Selected: { fileToUpload.name }</p>
                                 <button
-                                    onClick={ () => {
-                                        const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1Cj3s75X46plhnxhT19QN-yE5SCHs9cq1/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
-                                        window.open( sampleFileUrl, '_blank' );
-                                    } }
-                                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
-                                    title="Download sample Excel template"
+                                    onClick={ uploadFileToServer }
+                                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors"
+                                    disabled={ loading }
                                 >
-                                    <Download size={ 16 } />
-                                    Sample Excel File
+                                    { loading ? "Uploading..." : "Upload" }
                                 </button>
                             </div>
+                        ) }
 
-                            { fileToUpload && (
-                                <div className="mt-3 text-sm text-gray-600 w-full md:w-auto">
-                                    <p className="truncate mb-2">Selected: { fileToUpload.name }</p>
-                                    <button
-                                        onClick={ uploadFileToServer }
-                                        className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors"
-                                        disabled={ loading }
-                                    >
-                                        { loading ? "Uploading..." : "Upload" }
-                                    </button>
-                                </div>
-                            ) }
-
-                            <p className="mt-2 text-gray-500 text-xs">Supports .csv, .xlsx, and .xls</p>
-                        </div>
-                    {/* // ) } */}
+                        <p className="mt-2 text-gray-500 text-xs">Supports .csv, .xlsx, and .xls</p>
+                    </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                {/* Filter Section (same as ImportCandidateApplication) */ }
+                { user.role === 'admin' && (
+                    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                <Filter size={ 20 } />
+                                Admin Filter
+                            </h2>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex items-center gap-2">
+                                    <label htmlFor="userFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                        Filter by User:
+                                    </label>
+                                    <select
+                                        id="userFilter"
+                                        value={ selectedUser }
+                                        onChange={ ( e ) => setSelectedUser( e.target.value ) }
+                                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={ loadingUsers }
+                                    >
+                                        <option value="all">All Users</option>
+                                        { availableUsers.map( ( userName ) => (
+                                            <option key={ userName } value={ userName }>
+                                                { userName }
+                                            </option>
+                                        ) ) }
+                                    </select>
+                                </div>
+
+                                { selectedUser !== 'all' && (
+                                    <button
+                                        onClick={ handleResetFilter }
+                                        className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                    >
+                                        Clear Filter
+                                    </button>
+                                ) }
+                            </div>
+                        </div>
+
+                        { selectedUser !== 'all' && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-700">
+                                    Showing files uploaded by: <span className="font-semibold">{ selectedUser }</span>
+                                    <span className="ml-2 text-blue-600">
+                                        ({ userFiles.length } file{ userFiles.length !== 1 ? 's' : '' } found)
+                                    </span>
+                                </p>
+                            </div>
+                        ) }
+
+                        { availableUsers.length === 0 && !loadingUsers && (
+                            <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                                <p className="text-sm text-yellow-700">
+                                    No other users found. Only your files are visible.
+                                </p>
+                            </div>
+                        ) }
+                    </div>
+                ) }
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
                     { loading && (
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -1176,7 +1273,7 @@ export default function ImportApplication() {
                     { userFiles.length > 0 && (
                         <div className="mb-8">
                             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                Uploaded User's Report Files ({ userFiles.length })
+                                Uploaded Job Files ({ userFiles.length })
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 { userFiles.map( file => (
@@ -1227,90 +1324,99 @@ export default function ImportApplication() {
                     { uploadedFiles.length === 0 && userFiles.length === 0 && !loading && (
                         <div className="text-center py-12 text-gray-500">
                             <FileSpreadsheet size={ 64 } className="mx-auto mb-4 text-gray-300" />
-                            <p className="text-lg">No files uploaded yet</p>
-                            <p className="text-sm">Upload files to see them here</p>
+                            <p className="text-lg">No job files uploaded yet</p>
+                            <p className="text-sm">Upload job data files to see them here</p>
                         </div>
                     ) }
                 </div>
 
                 {/* Modal for viewing file data */ }
                 { selectedFile && (
-                    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4 animate-fadeIn">
-                        <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-200">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
 
                             {/* Header */ }
-                            <div className="flex items-center justify-between p-5 border-b bg-gradient-to-r from-blue-50 to-white">
-                                <h3 className="text-xl font-semibold text-gray-800">
-                                    { selectedFile.name || selectedFile.fileName }
+                            <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-100">
+                                <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                                    📄 { selectedFile.name || selectedFile.fileName }
                                 </h3>
                                 <button
                                     onClick={ closeFileView }
-                                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                                    className="text-gray-500 hover:text-red-500 transition"
                                 >
-                                    <X size={ 28 } />
+                                    <X size={ 26 } />
                                 </button>
                             </div>
 
-                            {/* File Info */ }
-                            <div className="p-5 border-b bg-gray-50 flex justify-between items-center">
-                                <p className="text-gray-600 text-sm">
+                            {/* Info */ }
+                            <div className="px-6 py-3 bg-gray-50 border-b">
+                                <p className="text-sm text-gray-600">
                                     Showing <span className="font-medium">{ selectedFile.rowCount }</span> rows
-                                    { selectedFile.size && ` • ${ formatFileSize( selectedFile.size ) }` }
+                                    { selectedFile.size && (
+                                        <> • <span className="font-medium">{ formatFileSize( selectedFile.size ) }</span></>
+                                    ) }
                                 </p>
                             </div>
 
                             {/* Table */ }
-                            <div className="p-4 overflow-auto flex-grow">
+                            <div className="p-6 flex-grow">
                                 { selectedFile.headers && selectedFile.data ? (
-                                    <div className="border rounded-xl shadow-sm overflow-auto max-h-[60vh]">
-                                        <table className="min-w-full divide-y divide-gray-200">
-                                            <thead className="bg-gray-100 sticky top-0 z-10">
-                                                <tr>
-                                                    {/* Index Column Header */ }
-                                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-200 sticky left-0 z-20">
-                                                        #
-                                                    </th>
-                                                    { selectedFile.headers.map( ( header, index ) => (
-                                                        <th
-                                                            key={ index }
-                                                            className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-                                                        >
-                                                            { header || `Column ${ index + 1 }` }
+                                    <div className="border rounded-xl shadow-sm overflow-hidden">
+                                        {/* Horizontal + Vertical Scroll */ }
+                                        <div className="overflow-auto max-h-[65vh] w-full">
+                                            <table className="min-w-max divide-y divide-gray-200">
+                                                <thead className="bg-gradient-to-r from-gray-100 to-gray-200 sticky top-0 z-10">
+                                                    <tr>
+                                                        {/* Index Column Header */ }
+                                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide bg-gray-300 sticky left-0 z-20">
+                                                            #
                                                         </th>
-                                                    ) ) }
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-100">
-                                                { selectedFile.data.map( ( row, rowIndex ) => (
-                                                    <tr
-                                                        key={ rowIndex }
-                                                        className="hover:bg-blue-50 transition-colors duration-200"
-                                                    >
-                                                        {/* Index Column Cell */ }
-                                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-50 sticky left-0 z-10 border-r">
-                                                            { rowIndex + 1 }
-                                                        </td>
-                                                        { row.map( ( cell, cellIndex ) => (
-                                                            <td
-                                                                key={ cellIndex }
-                                                                className="px-5 py-3 whitespace-nowrap text-sm text-gray-900"
+                                                        { selectedFile.headers.map( ( header, index ) => (
+                                                            <th
+                                                                key={ index }
+                                                                className="px-5 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wide"
                                                             >
-                                                                { cell }
-                                                            </td>
+                                                                { header || `Column ${ index + 1 }` }
+                                                            </th>
                                                         ) ) }
                                                     </tr>
-                                                ) ) }
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody className="bg-white divide-y divide-gray-100">
+                                                    { selectedFile.data.map( ( row, rowIndex ) => (
+                                                        <tr
+                                                            key={ rowIndex }
+                                                            className={ `hover:bg-gray-50 transition ${ rowIndex % 2 === 0 ? "bg-gray-50/50" : "bg-white"
+                                                                }` }
+                                                        >
+                                                            {/* Index Column Cell */ }
+                                                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-100 sticky left-0 z-10">
+                                                                { rowIndex + 1 }
+                                                            </td>
+
+                                                            { row.map( ( cell, cellIndex ) => (
+                                                                <td
+                                                                    key={ cellIndex }
+                                                                    className="px-5 py-3 whitespace-nowrap text-sm text-gray-800"
+                                                                >
+                                                                    { cell }
+                                                                </td>
+                                                            ) ) }
+                                                        </tr>
+                                                    ) ) }
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12">
-                                        <p className="text-gray-400 text-lg">No data available to display</p>
+                                    <div className="text-center py-10">
+                                        <p className="text-gray-500">No data available to display</p>
                                     </div>
                                 ) }
                             </div>
+
                         </div>
                     </div>
+
                 ) }
 
                 {/* Loading overlay for file data */ }
