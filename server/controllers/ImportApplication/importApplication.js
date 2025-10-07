@@ -82,7 +82,7 @@ export const uploadCandidateFile = async ( req, res ) => {
         }
 
         // Extract user data from request body
-        const { userId, companyId, userName,fileName } = req.body;
+        const { userId, companyId, userName, fileName } = req.body;
 
         // Validate required user data
         if ( !userId || !companyId ) {
@@ -140,9 +140,9 @@ export const getCandidateFiles = async ( req, res ) => {
     try {
         await connectDB();
 
-        const { userId, companyId } = req.query;
+        const { userId, companyId, userName, role } = req.query;
 
-        console.log( "Fetching candidate files with filters:", { userId, companyId } );
+        console.log( "Fetching candidate files with filters:", { userId, companyId, userName, role } );
 
         let query = {};
 
@@ -155,12 +155,29 @@ export const getCandidateFiles = async ( req, res ) => {
             query = { companyId };
         }
 
+        // Add userName filter if provided
+        if ( userName && userName !== 'all' ) {
+            query.userName = { $regex: userName, $options: 'i' };
+        }
+
+        // For admin users, they can see all files regardless of user
+        if ( role === 'admin' ) {
+            // If admin is searching by userName, apply the filter
+            if ( userName && userName !== 'all' ) {
+                query.userName = { $regex: userName, $options: 'i' };
+            } else {
+                // If no userName filter, remove user-specific filters for admin
+                delete query.userId;
+                delete query.companyId;
+            }
+        }
+
         const candidateFiles = await CandidateFile.find( query ).sort( { uploadDate: -1 } );
 
         const transformedFiles = candidateFiles.map( file => ( {
             _id: file._id,
-            fileName: file.filename,
-            originalName: file.originalName,
+            fileName: file.fileName || file.filename,
+            originalName: file.originalName || file.fileName || file.filename,
             fileSize: file.size,
             fileUrl: file.fileUrl,
             uploadDate: file.uploadDate,
@@ -396,7 +413,7 @@ export const createCandidateApplications = async ( req, res ) => {
                                         titleCode: trimmedCode,
                                         applicationId: savedApplication._id,
                                         status: 'applied',
-                                         applicationStatus: {
+                                        applicationStatus: {
                                             id: firstStatusId,
                                             step: firstApplicationStatus.applicationStep,
                                             name: firstApplicationStatus.applicationStatus
@@ -835,9 +852,9 @@ export const getUserFiles = async ( req, res ) => {
     try {
         await connectDB();
 
-        const { userId, companyId, role, fileType } = req.query;
+        const { userId, companyId, role, fileType, userName } = req.query;
 
-        console.log( "Fetching files with filters:", { userId, companyId, role, fileType } );
+        console.log( "Fetching files with filters:", { userId, companyId, role, fileType, userName } );
 
         let query = {};
 
@@ -845,6 +862,11 @@ export const getUserFiles = async ( req, res ) => {
         if ( role === 'admin' ) {
             // Admin can see all files across the system
             query = {};
+
+            // If admin is filtering by userName, apply that filter
+            if ( userName && userName !== 'all' ) {
+                query.userName = { $regex: userName, $options: 'i' };
+            }
         }
         // For non-admin users, apply normal filters
         else if ( userId && companyId ) {
@@ -865,6 +887,11 @@ export const getUserFiles = async ( req, res ) => {
                     'application/vnd.ms-excel.sheet.macroEnabled.12'
                 ]
             };
+        }
+
+        // For non-admin users, if userName filter is provided
+        if ( role !== 'admin' && userName && userName !== 'all' ) {
+            query.userName = { $regex: userName, $options: 'i' };
         }
 
         // Role filter for non-admin users (optional)
@@ -923,7 +950,7 @@ export const proxyFile = async ( req, res ) => {
             } );
         }
         const urlParts = fileUrl.split( '/' );
-        const fileName = urlParts[ urlParts.length - 1 ].split("-")[1];
+        const fileName = urlParts[ urlParts.length - 1 ].split( "-" )[ 1 ];
 
         console.log( `Proxying file request for: ${ fileName }` );
         console.log( `File URL: ${ fileUrl }` );
