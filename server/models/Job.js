@@ -5,6 +5,11 @@ const JobSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    titleCode: {
+        type: String,
+        required: true,
+        unique: true
+    },
     title: {
         type: String,
         required: true
