@@ -22,6 +22,8 @@ const AllInterviews = () => {
   const [ debouncedStatus, setDebouncedStatus ] = useState( '' );
   const [ debouncedRating, setDebouncedRating ] = useState( 'all' );
 
+  console.log( 'pdfPreviewUrl', pdfPreviewUrl, detailedInterview );
+
 
   const [ feedbackForm, setFeedbackForm ] = useState( {
     feedbackTitle: '',
