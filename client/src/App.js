@@ -41,6 +41,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import Banner from './components/Home/Banner/Banner'
 import Jobstatus from './Pages/Application/JobStatus';
 import ImportApplication from './Pages/Application/tabs/ImportApplication';
+import ImportCandidateApplication from './Pages/Application/tabs/ImportCandidateApplication';
 
 
 // Layout component to ensure Navbar and Footer appear on all pages
@@ -152,6 +153,7 @@ function App() {
           <Route path="/:companyUserName/all-jobs" element={<AllJobs />} />
           <Route path="/:companyUserName/all-interviews" element={<AllInterviews />} />
           <Route path="/:companyUserName/import-application" element={ <ImportApplication /> } />
+          <Route path="/:companyUserName/import-candidate-application" element={ <ImportCandidateApplication /> } />
           <Route path="/:companyUserName/current-job/:id" element={<JobDetails />} />
 
           {/* Dynamic route for companyName */}

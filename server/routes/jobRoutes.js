@@ -9,8 +9,10 @@ import { addJob } from '../controllers/Job/addJob.js';
 import { deleteJob } from '../controllers/Job/deleteJob.js';
 import { updateJob } from '../controllers/Job/updateJob.js';
 import { updateJobByCandidate } from '../controllers/Job/updateJobByCandidate.js';
+import { getJobByTitleCode } from '../controllers/Job/jobByTitleCode.js';
 
 router.get('/all-jobs', getJobs);
+router.get( '/job/:titleCode', getJobByTitleCode );
 router.post('/post-job', addJob);
 router.get('/current-job/:id', getJob);
 router.delete('/delete-job/:id', deleteJob);

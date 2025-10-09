@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, Link, useLocation,useParams } from "react-router-dom";
+import { NavLink, Link, useLocation, useParams } from "react-router-dom";
 import {
   UserPen,
   LogOut,
@@ -31,7 +31,7 @@ const adminNavItems = [
       { label: "Application List", path: "/application-list", icon: <FileText className="hidden lg:block w-5 h-5" /> },
       { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
       { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> },
-      { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
+      // { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
     ]
   },
   {
@@ -67,7 +67,7 @@ const hiringManagerNavItems = [
   { label: "Application List", path: "/application-list", icon: <FileText className="hidden lg:block w-5 h-5" /> },
   { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
   { label: "Interviews", path: "/all-interviews" },
-  { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
+  // { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
 ];
 
 const interviewerNavItems = [
@@ -81,6 +81,7 @@ const recruiterNavItems = [
   { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="hidden lg:block w-5 h-5" /> },
   { label: "Applications", path: "/all-applications", icon: <FileText className="hidden lg:block w-5 h-5" /> },
   { label: "Interviews", path: "/all-interviews" },
+  // { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
 ];
 
 const candidateNavItems = [
@@ -371,6 +372,15 @@ export const Navbar = () => {
 
                   { isDropdownOpen && (
                     <div className="absolute right-0 top-12 w-48 mt-2 bg-white rounded-md shadow-lg z-100 py-1 ring-1 ring-black ring-opacity-5 transform origin-top-right transition-all">
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-xs text-gray-500 truncate mt-1">
+                          { loginData?.email }
+                        </p>
+                        <p className="text-xs text-blue-600 font-medium mt-1 capitalize">
+                          { loginData?.role?.replace( '_', ' ' ) }
+                        </p>
+                      </div>
+                      <hr className="my-1 border-gray-200" />
                       <Link
                         to={ companyUserName ? `/${ companyUserName }/profile` : "/profile" }
                         onClick={ () => {

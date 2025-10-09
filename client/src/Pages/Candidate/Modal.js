@@ -3,13 +3,42 @@ import React, { useState } from 'react'
 const Modal = ( { getStatusColor, isOpen, onClose, app, getStatusName } ) => {
     const [ isScrolled, setIsScrolled ] = useState( false );
     const [ activeTab, setActiveTab ] = useState( 'details' ); // 'details' or 'resume'
+
     const capitalizeFirstLetter = ( string ) => {
-        return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
+        return string?.charAt( 0 )?.toUpperCase() + string?.slice( 1 ) || '';
     };
 
-    
+    // Safe JSON parsing for questions and answers
+    const parseQuestionsAndAnswers = () => {
+        try {
+            // Check if questions is already an array
+            if ( Array.isArray( app.questions ) ) {
+                return {
+                    questions: app.questions,
+                    answers: app.answers || []
+                };
+            }
+
+            // Try to parse questions if it's a string
+            const questions = typeof app.questions?.[ 0 ] === 'string'
+                ? JSON.parse( app.questions[ 0 ] )
+                : app.questions || [];
+
+            // Try to parse answers if it's a string
+            const answers = typeof app.answers?.[ 0 ] === 'string'
+                ? JSON.parse( app.answers[ 0 ] )
+                : app.answers || [];
+
+            return { questions, answers };
+        } catch ( error ) {
+            console.error( 'Error parsing questions or answers:', error );
+            return { questions: [], answers: [] };
+        }
+    };
 
     if ( !isOpen ) return null;
+
+    const { questions, answers } = parseQuestionsAndAnswers();
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
@@ -22,7 +51,7 @@ const Modal = ( { getStatusColor, isOpen, onClose, app, getStatusName } ) => {
                             className={ `px-4 py-2 rounded-xl font-medium bg-gray-300 transition-all duration-200 ${ activeTab === 'details'
                                 ? 'hover:bg-gray-100 text-black'
                                 : 'bg-gray-700 text-white border border-white shadow-md'
-                                }` } 
+                                }` }
                         >
                             Application Details
                         </button>
@@ -114,22 +143,24 @@ const Modal = ( { getStatusColor, isOpen, onClose, app, getStatusName } ) => {
                             </div>
 
                             {/* Application Questions */ }
-                            <div className="bg-green-100 rounded-xl p-6 border border-green-100">
-                                <h3 className="text-lg font-semibold mb-4 text-green-800 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Application Questions
-                                </h3>
-                                <div className="space-y-4">
-                                    { JSON.parse( app.questions[ 0 ] ).map( ( question, index ) => (
-                                        <div key={ index } className="bg-white rounded-xl p-4 shadow-sm">
-                                            <p className="text-sm font-medium text-green-600 mb-2">{ capitalizeFirstLetter( question ) }</p>
-                                            <p className="text-gray-700">{ JSON.parse( app.answers[ 0 ] )[ index ] }</p>
-                                        </div>
-                                    ) ) }
+                            { questions.length > 0 && (
+                                <div className="bg-green-100 rounded-xl p-6 border border-green-100">
+                                    <h3 className="text-lg font-semibold mb-4 text-green-800 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Application Questions
+                                    </h3>
+                                    <div className="space-y-4">
+                                        { questions.map( ( question, index ) => (
+                                            <div key={ index } className="bg-white rounded-xl p-4 shadow-sm">
+                                                <p className="text-sm font-medium text-green-600 mb-2">{ capitalizeFirstLetter( question ) }</p>
+                                                <p className="text-gray-700">{ answers[ index ] || 'No answer provided' }</p>
+                                            </div>
+                                        ) ) }
+                                    </div>
                                 </div>
-                            </div>
+                            ) }
                         </div>
                     ) : (
                         <div className="h-[calc(90vh-80px)]">
@@ -139,6 +170,9 @@ const Modal = ( { getStatusColor, isOpen, onClose, app, getStatusName } ) => {
                                 width="800"
                                 height="500"
                             >
+                                <div className="flex items-center justify-center h-full bg-gray-100">
+                                    <p className="text-gray-500">Unable to display resume preview</p>
+                                </div>
                             </object>
                         </div>
                     ) }

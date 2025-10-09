@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus, Filter, FolderPen } from 'lucide-react';
+import { Upload, FileSpreadsheet, X, Download, Eye, Calendar, FileText, Grid, List, User, Loader, Plus, Send, FolderPen, Filter } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useNavigate } from 'react-router-dom';
 
-export default function ImportApplication() {
+export default function ImportCandidateApplication() {
     const [ uploadedFiles, setUploadedFiles ] = useState( [] );
     const [ selectedFile, setSelectedFile ] = useState( null );
     const [ loading, setLoading ] = useState( false );
@@ -11,31 +12,18 @@ export default function ImportApplication() {
     const [ fileToUpload, setFileToUpload ] = useState( null );
     const [ userFiles, setUserFiles ] = useState( [] );
     const [ loadingFileData, setLoadingFileData ] = useState( false );
-    const [ creatingJobs, setCreatingJobs ] = useState( false );
-    const [ jobCreationStatus, setJobCreationStatus ] = useState( null );
-    const [ jobStatuses, setJobStatuses ] = useState( [] );
-    const [ jobStatusMap, setJobStatusMap ] = useState( {} );
-    const [ loadingStatuses, setLoadingStatuses ] = useState( false );
-    const [ statusError, setStatusError ] = useState( null );
+    const [ creatingApplications, setCreatingApplications ] = useState( false );
+    const [ applicationCreationStatus, setApplicationCreationStatus ] = useState( null );
 
-    // Hiring managers state
-    const [ hiringManagersList, setHiringManagersList ] = useState( [] );
-    const [ hiringManagerMap, setHiringManagerMap ] = useState( {} );
-    const [ loadingHiringManagers, setLoadingHiringManagers ] = useState( false );
-
-    // Recruiter managers state
-    const [ recruitersList, setRecruitersList ] = useState( [] );
-    const [ recruiterMap, setRecruiterMap ] = useState( {} );
-    const [ loadingRecruiters, setLoadingRecruiters ] = useState( false );
-
-    // Filter state (same as ImportCandidateApplication)
+    const navigate = useNavigate();
+    const companyUserName = localStorage.getItem( "companyUserName" );
     const [ selectedUser, setSelectedUser ] = useState( 'all' );
     const [ availableUsers, setAvailableUsers ] = useState( [] );
     const [ loadingUsers, setLoadingUsers ] = useState( false );
 
     // User state
     const [ user, setUser ] = useState( {
-        role: 'hiring_manager',
+        role: 'recruiter_manager',
         userName: '',
         userId: null,
         companyId: null
@@ -45,10 +33,26 @@ export default function ImportApplication() {
         return new Date( date ).toLocaleString( "default", { month: "long", year: "numeric" } );
     };
 
-    // Filter functions (same as ImportCandidateApplication)
     const handleResetFilter = () => {
         setSelectedUser( 'all' );
     };
+
+    // Fetch user data from localStorage
+    useEffect( () => {
+        try {
+            const userData = JSON.parse( localStorage.getItem( "user" ) || "{}" );
+            console.log( "User data from localStorage:", userData );
+
+            setUser( {
+                role: userData.role || 'recruiter_manager',
+                userName: userData.userName || userData.name || '',
+                userId: userData.userId || userData.id || userData._id,
+                companyId: userData.companyId || userData.company_id
+            } );
+        } catch ( error ) {
+            console.error( 'Error parsing user data from localStorage:', error );
+        }
+    }, [] );
 
     // Fetch available users for filter
     const fetchAvailableUsers = async () => {
@@ -61,7 +65,7 @@ export default function ImportApplication() {
             const queryParams = new URLSearchParams( {
                 page: '1',
                 limit: '100',
-                role: 'recruiter_manager,recruiter,hiring_manager'
+                role: 'recruiter_manager,recruiter'
             } );
 
             if ( user.companyId ) {
@@ -87,234 +91,6 @@ export default function ImportApplication() {
             setLoadingUsers( false );
         }
     };
-
-    // Fetch user data from localStorage
-    useEffect( () => {
-        try {
-            const userData = JSON.parse( localStorage.getItem( "user" ) || "{}" );
-            console.log( "User data from localStorage:", userData );
-
-            setUser( {
-                role: userData.role || 'hiring_manager',
-                userName: userData.userName || userData.name || '',
-                userId: userData.userId || userData.id || userData._id,
-                companyId: userData.companyId || userData.company_id
-            } );
-        } catch ( error ) {
-            console.error( 'Error parsing user data from localStorage:', error );
-        }
-    }, [] );
-
-    // Fetch hiring managers when companyId is available
-    useEffect( () => {
-        const fetchHiringManagers = async () => {
-            if ( !user.companyId ) return;
-
-            setLoadingHiringManagers( true );
-            try {
-                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/hiringmanager/all-hiring-manager`, {
-                    headers: {
-                        'company_id': user.companyId
-                    }
-                } );
-
-                if ( !response.ok ) {
-                    throw new Error( 'Failed to fetch hiring managers' );
-                }
-
-                const data = await response.json();
-                console.log( 'Hiring Managers API Response:', data );
-
-                if ( data && Array.isArray( data ) ) {
-                    setHiringManagersList( data );
-
-                    // Build comprehensive lookup map
-                    const map = {};
-                    data.forEach( manager => {
-                        const managerId = manager._id;
-
-                        // Extract different name variations
-                        const userName = manager.userName || '';
-                        const email = manager.email || '';
-                        const name = manager.name || '';
-
-                        if ( managerId ) {
-                            // Map by userName (as-is and cleaned versions)
-                            if ( userName ) {
-                                map[ userName ] = managerId;
-                                map[ userName.toLowerCase() ] = managerId;
-                                map[ userName.replace( /_/g, ' ' ) ] = managerId;
-                                map[ userName.replace( /_/g, ' ' ).toLowerCase() ] = managerId;
-
-                                // Handle title case versions
-                                const titleCase = userName.replace( /_/g, ' ' )
-                                    .split( ' ' )
-                                    .map( word => word.charAt( 0 ).toUpperCase() + word.slice( 1 ).toLowerCase() )
-                                    .join( ' ' );
-                                map[ titleCase ] = managerId;
-                                map[ titleCase.toLowerCase() ] = managerId;
-                            }
-
-                            // Map by email
-                            if ( email ) {
-                                map[ email ] = managerId;
-                                map[ email.toLowerCase() ] = managerId;
-                            }
-
-                            // Map by name field if exists
-                            if ( name ) {
-                                map[ name ] = managerId;
-                                map[ name.toLowerCase() ] = managerId;
-                            }
-                        }
-                    } );
-
-                    setHiringManagerMap( map );
-                    console.log( "Hiring manager map loaded:", map );
-                } else {
-                    console.warn( 'Hiring managers data is not an array:', data );
-                }
-            } catch ( error ) {
-                console.error( 'Error fetching hiring managers:', error );
-            } finally {
-                setLoadingHiringManagers( false );
-            }
-        };
-
-        if ( user.companyId ) {
-            fetchHiringManagers();
-        }
-    }, [ user.companyId ] );
-
-    // Fetch recruiters when companyId is available
-    useEffect( () => {
-        const fetchRecruiters = async () => {
-            if ( !user.companyId ) return;
-
-            setLoadingRecruiters( true );
-            try {
-                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/recruiter/all-recruiter`, {
-                    headers: {
-                        'company_id': user.companyId
-                    }
-                } );
-
-                if ( !response.ok ) {
-                    throw new Error( 'Failed to fetch recruiters' );
-                }
-
-                const data = await response.json();
-                console.log( 'Recruiters API Response:', data );
-
-                if ( data && Array.isArray( data ) ) {
-                    setRecruitersList( data );
-
-                    // Build comprehensive lookup map for recruiters
-                    const map = {};
-                    data.forEach( recruiter => {
-                        const recruiterId = recruiter._id;
-
-                        // Extract different name variations
-                        const userName = recruiter.userName || '';
-                        const email = recruiter.email || '';
-                        const name = recruiter.name || '';
-
-                        if ( recruiterId ) {
-                            // Map by userName (as-is and cleaned versions)
-                            if ( userName ) {
-                                map[ userName ] = recruiterId;
-                                map[ userName.toLowerCase() ] = recruiterId;
-                                map[ userName.replace( /_/g, ' ' ) ] = recruiterId;
-                                map[ userName.replace( /_/g, ' ' ).toLowerCase() ] = recruiterId;
-
-                                // Handle title case versions
-                                const titleCase = userName.replace( /_/g, ' ' )
-                                    .split( ' ' )
-                                    .map( word => word.charAt( 0 ).toUpperCase() + word.slice( 1 ).toLowerCase() )
-                                    .join( ' ' );
-                                map[ titleCase ] = recruiterId;
-                                map[ titleCase.toLowerCase() ] = recruiterId;
-                            }
-
-                            // Map by email
-                            if ( email ) {
-                                map[ email ] = recruiterId;
-                                map[ email.toLowerCase() ] = recruiterId;
-                            }
-
-                            // Map by name field if exists
-                            if ( name ) {
-                                map[ name ] = recruiterId;
-                                map[ name.toLowerCase() ] = recruiterId;
-                            }
-                        }
-                    } );
-
-                    setRecruiterMap( map );
-                    console.log( "Recruiter map loaded:", map );
-                } else {
-                    console.warn( 'Recruiters data is not an array:', data );
-                }
-            } catch ( error ) {
-                console.error( 'Error fetching recruiters:', error );
-            } finally {
-                setLoadingRecruiters( false );
-            }
-        };
-
-        if ( user.companyId ) {
-            fetchRecruiters();
-        }
-    }, [ user.companyId ] );
-
-    // Fetch job statuses when companyId is available
-    useEffect( () => {
-        const fetchJobStatuses = async () => {
-            setLoadingStatuses( true );
-            setStatusError( null );
-            try {
-                const companyId = user.companyId;
-                if ( !companyId ) return;
-
-                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
-                    headers: {
-                        'company_id': companyId
-                    }
-                } );
-
-                if ( !response.ok ) {
-                    throw new Error( 'Failed to fetch job statuses' );
-                }
-
-                const data = await response.json();
-                console.log( 'Job Statuses API Response:', data );
-
-                if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
-                    setJobStatuses( data.jobStatuses );
-
-                    // build lookup: status name → ID
-                    const map = {};
-                    data.jobStatuses.forEach( ( st ) => {
-                        map[ st.jobStatus ] = st._id;
-                    } );
-                    setJobStatusMap( map );
-                    console.log( "Job status map loaded:", map );
-                } else {
-                    throw new Error( 'Invalid data format received' );
-                }
-            } catch ( error ) {
-                console.error( 'Error fetching job statuses:', error );
-                setStatusError( error.message );
-                setJobStatuses( [] );
-            } finally {
-                setLoadingStatuses( false );
-            }
-        };
-
-        if ( user.companyId ) {
-            fetchJobStatuses();
-        }
-    }, [ user.companyId ] );
 
     // Fetch user files when user data is available
     useEffect( () => {
@@ -342,13 +118,11 @@ export default function ImportApplication() {
             const queryParams = new URLSearchParams( {
                 userId: user.userId,
                 companyId: user.companyId,
-                fileType: 'application'
+                fileType: 'candidate'
             } );
-
             if ( selectedUser && selectedUser !== 'all' ) {
                 queryParams.append( 'userName', selectedUser );
             }
-
             // If user is admin, we don't need user-specific filters
             if ( user.role === 'admin' ) {
                 queryParams.delete( 'userId' );
@@ -359,7 +133,7 @@ export default function ImportApplication() {
             // Add role to query params for backend
             queryParams.append( 'role', user.role );
 
-            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/user-files?${ queryParams }` );
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/candidate-files?${ queryParams }` );
 
             if ( !response.ok ) throw new Error( 'Failed to fetch user files' );
 
@@ -386,232 +160,144 @@ export default function ImportApplication() {
         }
     };
 
-    // Rest of your existing functions remain the same...
-    // (createJobsFromExcelData, fetchAndParseFile, handleFileSelect, uploadFileToServer, etc.)
+    // Parse Excel/CSV data for candidate applications
+    const parseCandidateData = ( fileData ) => {
+        if ( !fileData || !fileData.headers || !fileData.data ) {
+            throw new Error( 'Invalid file data structure' );
+        }
 
-    const createJobsFromExcelData = async ( fileData, fileUrl ) => {
-        if ( creatingJobs ) {
-            console.log( 'Job creation already in progress' );
+        const headers = fileData.headers.map( h => h.toLowerCase().trim() );
+        const data = fileData.data;
+
+        // Map Excel columns to candidate fields with exact header matching
+        const candidateFields = {
+            fullName: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate full name' ) ||
+                    h.includes( 'full name' ) ||
+                    h.includes( 'name' )
+                )
+            ),
+            email: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate email address' ) ||
+                    h.includes( 'email address' ) ||
+                    ( h.includes( 'email' ) && !h.includes( 'info' ) )
+                )
+            ),
+            password: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate password' ) ||
+                    h.includes( 'password' )
+                )
+            ),
+            address: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate full address' ) ||
+                    h.includes( 'full address' ) ||
+                    ( h.includes( 'address' ) && !h.includes( 'email' ) )
+                )
+            ),
+            gender: headers.findIndex( h =>
+                h && h.includes( 'gender' )
+            ),
+            titleCode: headers.findIndex( h =>
+                h && ( h.includes( 'job title' ) ||
+                    h.includes( 'title code' ) ||
+                    h.includes( 'code' ) )
+            ),
+            contactInfo: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate contact information' ) ||
+                    h.includes( 'contact information' ) ||
+                    ( h.includes( 'contact' ) && !h.includes( 'email' ) )
+                )
+            ),
+            experience: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate relevant experience' ) ||
+                    h.includes( 'relevant experience' ) ||
+                    h.includes( 'experience' )
+                )
+            ),
+            resume: headers.findIndex( h =>
+                h && (
+                    h.includes( 'candidate resume' ) ||
+                    h.includes( 'resume' )
+                )
+            ),
+
+        };
+
+        console.log( 'Header mapping:', {
+            headers: headers,
+            fieldIndices: candidateFields
+        } );
+
+        const candidates = [];
+        const errors = [];
+
+        for ( let i = 0; i < data.length; i++ ) {
+            const row = data[ i ];
+
+            // Skip empty rows
+            if ( !row.some( cell => cell && cell.toString().trim() !== '' ) ) continue;
+
+            try {
+                const candidate = {
+                    userName: row[ candidateFields.fullName ]?.toString().trim() || '',
+                    email: row[ candidateFields.email ]?.toString().trim() || '',
+                    password: row[ candidateFields.password ]?.toString().trim() || 'DefaultPassword123!',
+                    address: row[ candidateFields.address ]?.toString().trim() || '',
+                    gender: row[ candidateFields.gender ]?.toString().trim() || '',
+                    titleCode: row[ candidateFields.titleCode ]
+                        ? row[ candidateFields.titleCode ].toString().trim().split( ',' )
+                        : [],
+                    contactInfo: row[ candidateFields.contactInfo ]?.toString().trim() || '',
+                    experience: row[ candidateFields.experience ]?.toString().trim() || '',
+                    resumeUrl: row[ candidateFields.resume ]?.toString().trim() || '',
+                    role: 'candidate',
+                    company_id: user.companyId
+                };
+
+                // Log the actual values for debugging
+                console.log( `Row ${ i + 1 } data:`, {
+                    userName: candidate.userName,
+                    email: candidate.email,
+                    address: candidate.address,
+                    contactInfo: candidate.contactInfo,
+                    titleCode: candidate.titleCode,
+                } );
+
+                candidates.push( candidate );
+            } catch ( rowError ) {
+                errors.push( `Row ${ i + 1 }: ${ rowError.message }` );
+            }
+        }
+
+        return { candidates, errors, skipped: data.length - candidates.length };
+    };
+
+    // Create candidate applications from Excel data
+    const createCandidateApplications = async ( fileData, fileUrl, candidateFileId ) => {
+        if ( creatingApplications ) {
+            console.log( 'Application creation already in progress' );
             return;
         }
 
-        if ( loadingHiringManagers || loadingRecruiters || loadingStatuses ) {
-            console.log( 'Waiting for hiring managers, recruiters and job statuses to load...' );
-            await new Promise( resolve => setTimeout( resolve, 1000 ) );
-
-            if ( loadingHiringManagers || loadingRecruiters || loadingStatuses ) {
-                setError( 'Hiring managers, recruiters or job statuses are still loading. Please try again in a moment.' );
-                return;
-            }
-        }
-
-        if ( !fileData || !fileData.headers || !fileData.data ) {
-            console.error( "Invalid file data structure received:", {
-                fileDataExists: !!fileData,
-                headersExist: !!fileData?.headers,
-                dataExist: !!fileData?.data,
-                fileData: fileData
-            } );
-            throw new Error( 'No valid data found in the file' );
-        }
-
-        setCreatingJobs( true );
-        setJobCreationStatus( null );
+        setCreatingApplications( true );
+        setApplicationCreationStatus( null );
 
         try {
-            const headers = fileData.headers.map( h => h.toLowerCase().trim() );
-            const data = fileData.data;
+            const { candidates, errors: parseErrors } = parseCandidateData( fileData );
 
-            const titleIndex = headers.findIndex( h => h.includes( 'title' ) );
-            const locationTypeIndex = headers.findIndex( h => h.includes( 'location type' ) );
-            const typeIndex = headers.findIndex( h => h.includes( 'type' ) );
-            const scheduleTypeIndex = headers.findIndex( h => h.includes( 'schedule type' ) );
-            const shiftStartIndex = headers.findIndex( h => h.includes( 'shift start' ) );
-            const shiftEndIndex = headers.findIndex( h => h.includes( 'shift end' ) );
-            const hireTypeIndex = headers.findIndex( h => h.includes( 'hire type' ) );
-            const countryIndex = headers.findIndex( h => h.includes( 'country' ) );
-            const stateIndex = headers.findIndex( h => h.includes( 'state' ) );
-            const cityIndex = headers.findIndex( h => h.includes( 'city' ) );
-            const compensationIndex = headers.findIndex( h => h.includes( 'compensation' ) );
-            const experienceRequiredIndex = headers.findIndex( h =>
-                h.includes( 'experience required' ) ||
-                h.includes( 'experience' ) ||
-                h.includes( 'exp required' ) ||
-                h.includes( 'exp' )
-            );
-            const requiredResourcesIndex = headers.findIndex( h => h.includes( 'required resources' ) );
-            const statusIndex = headers.findIndex( h => h.includes( 'applicationStatus' ) );
-            const hiringManagerIndex = headers.findIndex( h =>
-                h.includes( 'hiring manager' ) ||
-                h.includes( 'hiring_manager' ) ||
-                h.includes( 'manager' ) ||
-                h.includes( 'hiring manager name' )
-            );
-            const recruiterManagerIndex = headers.findIndex( h =>
-                h.includes( 'recruter manager' ) ||
-                h.includes( 'recruiter manager' ) ||
-                h.includes( 'recruiter_manager' ) ||
-                h.includes( 'recruiter' )
-            );
-
-            const jobsToCreate = [];
-            const errors = [];
-
-            for ( let i = 0; i < data.length; i++ ) {
-                const row = data[ i ];
-
-                if ( !row.some( cell => cell && cell.toString().trim() !== '' ) ) continue;
-
-                try {
-                    const statusName = row[ statusIndex ] || 'Active';
-                    const hiringManagerName = hiringManagerIndex >= 0 ? row[ hiringManagerIndex ] : '';
-                    const recruiterManagerName = recruiterManagerIndex >= 0 ? row[ recruiterManagerIndex ] : '';
-
-                    let statusId = '';
-                    if ( jobStatusMap[ statusName ] ) {
-                        statusId = jobStatusMap[ statusName ];
-                    } else {
-                        console.warn( `Status "${ statusName }" not found in application status map. Available statuses:`, Object.keys( jobStatusMap ) );
-                        statusId = jobStatusMap[ 'Active' ] || jobStatusMap[ 'active' ] || '';
-                    }
-
-                    let hiringManagerId = user.userId;
-                    let actualHiringManagerName = hiringManagerName;
-
-                    if ( hiringManagerName && hiringManagerName.toString().trim() !== '' ) {
-                        const hiringManagerNameStr = hiringManagerName.toString().trim();
-
-                        console.log( `Looking up hiring manager: "${ hiringManagerNameStr }"` );
-
-                        let foundId = hiringManagerMap[ hiringManagerNameStr ];
-
-                        if ( !foundId ) {
-                            foundId = hiringManagerMap[ hiringManagerNameStr.toLowerCase() ];
-                        }
-
-                        if ( !foundId ) {
-                            const withSpaces = hiringManagerNameStr.replace( /_/g, ' ' );
-                            foundId = hiringManagerMap[ withSpaces ] || hiringManagerMap[ withSpaces.toLowerCase() ];
-                        }
-
-                        if ( !foundId ) {
-                            const titleCase = hiringManagerNameStr
-                                .toLowerCase()
-                                .split( ' ' )
-                                .map( word => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
-                                .join( ' ' );
-                            foundId = hiringManagerMap[ titleCase ] || hiringManagerMap[ titleCase.toLowerCase() ];
-                        }
-
-                        if ( foundId ) {
-                            hiringManagerId = foundId;
-                            console.log( `✅ Successfully mapped hiring manager "${ hiringManagerNameStr }" to ID: ${ hiringManagerId }` );
-                        } else {
-                            console.warn( `❌ Hiring manager "${ hiringManagerNameStr }" not found. Available managers:`, Object.keys( hiringManagerMap ) );
-                            console.warn( 'Using current user as default hiring manager' );
-                            actualHiringManagerName = user.userName || 'Current User';
-                        }
-                    } else {
-                        console.log( 'ℹ️ No hiring manager specified in Excel, using current user as default' );
-                        actualHiringManagerName = user.userName || 'Current User';
-                    }
-
-                    let recruiterManagerId = user.userId;
-                    let actualRecruiterManagerName = recruiterManagerName;
-
-                    if ( recruiterManagerName && recruiterManagerName.toString().trim() !== '' ) {
-                        const recruiterManagerNameStr = recruiterManagerName.toString().trim();
-
-                        console.log( `Looking up recruiter manager: "${ recruiterManagerNameStr }"` );
-
-                        let foundId = recruiterMap[ recruiterManagerNameStr ];
-
-                        if ( !foundId ) {
-                            foundId = recruiterMap[ recruiterManagerNameStr.toLowerCase() ];
-                        }
-
-                        if ( !foundId ) {
-                            const withSpaces = recruiterManagerNameStr.replace( /_/g, ' ' );
-                            foundId = recruiterMap[ withSpaces ] || recruiterMap[ withSpaces.toLowerCase() ];
-                        }
-
-                        if ( !foundId ) {
-                            const titleCase = recruiterManagerNameStr
-                                .toLowerCase()
-                                .split( ' ' )
-                                .map( word => word.charAt( 0 ).toUpperCase() + word.slice( 1 ) )
-                                .join( ' ' );
-                            foundId = recruiterMap[ titleCase ] || recruiterMap[ titleCase.toLowerCase() ];
-                        }
-
-                        if ( foundId ) {
-                            recruiterManagerId = foundId;
-                            console.log( `✅ Successfully mapped recruiter manager "${ recruiterManagerNameStr }" to ID: ${ recruiterManagerId }` );
-                        } else {
-                            console.warn( `❌ Recruiter manager "${ recruiterManagerNameStr }" not found. Available recruiters:`, Object.keys( recruiterMap ) );
-                            console.warn( 'Using current user as default recruiter manager' );
-                            actualRecruiterManagerName = user.userName || 'Current User';
-                        }
-                    } else {
-                        console.log( 'ℹ️ No recruiter manager specified in Excel, using current user as default' );
-                        actualRecruiterManagerName = user.userName || 'Current User';
-                    }
-
-                    const experienceRequiredValue = experienceRequiredIndex >= 0 ? row[ experienceRequiredIndex ] : undefined;
-                    let experienceRequired = '0';
-
-                    if ( experienceRequiredValue !== undefined && experienceRequiredValue !== null ) {
-                        experienceRequired = experienceRequiredValue.toString().trim();
-
-                        if ( experienceRequired === '' ) {
-                            experienceRequired = '0';
-                        }
-                    }
-
-                    const jobData = {
-                        title: row[ titleIndex ] || 'Untitled Position',
-                        locationType: row[ locationTypeIndex ] || 'On-Site',
-                        type: row[ typeIndex ] || 'Full-Time',
-                        scheduleType: row[ scheduleTypeIndex ] || 'Flexible',
-                        shiftStart: row[ shiftStartIndex ] || '09:00',
-                        shiftEnd: row[ shiftEndIndex ] || '17:00',
-                        hireType: row[ hireTypeIndex ] || 'New',
-                        country: row[ countryIndex ] || 'India',
-                        state: row[ stateIndex ] || '',
-                        city: row[ cityIndex ] || '',
-                        description: `Position for ${ row[ titleIndex ] || 'Untitled Position' }. Imported from Excel file.`,
-                        compensation: row[ compensationIndex ] || '0',
-                        experienceRequired: experienceRequired,
-                        requiredResources: parseInt( row[ requiredResourcesIndex ] ) || 1,
-                        status: statusId,
-                        statusName: statusName,
-                        hiringManagerName: actualHiringManagerName,
-                        recruiterManagerName: actualRecruiterManagerName,
-                        recruiterId: recruiterManagerId,
-                        hiringManagerId: hiringManagerId,
-                        applicationForm: {},
-                        applicants: [],
-                        company_id: user.companyId
-                    };
-
-                    if ( !jobData.title || jobData.title.trim() === '' ) {
-                        throw new Error( 'Title is required' );
-                    }
-
-                    jobsToCreate.push( jobData );
-                } catch ( rowError ) {
-                    errors.push( `Row ${ i + 1 }: ${ rowError.message }` );
-                }
+            if ( candidates.length === 0 ) {
+                throw new Error( 'No valid candidate data found in the file' );
             }
 
-            if ( jobsToCreate.length === 0 ) {
-                throw new Error( 'No valid job data found in the file' );
-            }
+            console.log( `Processing ${ candidates.length } candidates` );
 
-            console.log( `Sending ${ jobsToCreate.length } jobs to backend in ONE API call` );
-            console.log( 'Sample job data:', jobsToCreate[ 0 ] );
-
-            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/create-jobs-from-file`, {
+            const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/create-candidate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -621,43 +307,52 @@ export default function ImportApplication() {
                     fileName: 'excel-import.xlsx',
                     userId: user.userId,
                     companyId: user.companyId,
+                    candidateFileId: candidateFileId,
                     fileData: {
                         headers: fileData.headers,
                         data: fileData.data
                     },
-                    jobStatusMap: jobStatusMap,
-                    hiringManagerMap: hiringManagerMap,
-                    recruiterMap: recruiterMap
+                    candidates: candidates
                 } )
             } );
 
             if ( !response.ok ) {
                 const errorData = await response.json();
-                throw new Error( errorData.error || errorData.message || 'Failed to create jobs' );
+                throw new Error( errorData.error || errorData.message || 'Failed to create candidate applications' );
             }
 
             const result = await response.json();
-
             console.log( "Backend response:", result );
 
-            setJobCreationStatus( {
-                total: result.totalProcessed || jobsToCreate.length,
-                successful: result.jobsCreated || 0,
+            setApplicationCreationStatus( {
+                total: result.totalProcessed || candidates.length,
+                successful: result.createdCandidates || 0,
                 failed: result.errors ? result.errors.length : 0,
                 details: result
             } );
 
-            if ( result.jobsCreated > 0 ) {
-                alert( `Successfully created ${ result.jobsCreated } jobs!` );
+            const successCount = result.created || 0;
+            const errorCount = result.errors?.length || 0;
+
+            if ( successCount > 0 && errorCount === 0 ) {
+                alert( `Successfully processed ${ successCount } candidates!` );
+            } else if ( successCount > 0 && errorCount > 0 ) {
+                alert( `Partially successful: ${ successCount } candidates processed, ${ errorCount } failed. Check console for details.` );
+            } else if ( errorCount > 0 ) {
+                alert( `Failed to process candidates. ${ errorCount } errors occurred. Check console for details.` );
             } else {
-                alert( 'No jobs were created. Please check your file format.' );
+                alert( 'No new candidates were created. All candidates already exist in the system.' );
+            }
+
+            if ( result.errors && result.errors.length > 0 ) {
+                console.error( 'Processing errors:', result.errors );
             }
 
             return result;
 
         } catch ( error ) {
-            console.error( 'Error creating jobs:', error );
-            setJobCreationStatus( {
+            console.error( 'Error creating candidate applications:', error );
+            setApplicationCreationStatus( {
                 total: 0,
                 successful: 0,
                 failed: 0,
@@ -665,14 +360,17 @@ export default function ImportApplication() {
             } );
             throw error;
         } finally {
-            setCreatingJobs( false );
+            setCreatingApplications( false );
         }
     };
 
+    // Fetch and parse file from URL
     const fetchAndParseFile = async ( fileUrl, fileName ) => {
         try {
             setLoadingFileData( true );
             setError( '' );
+
+            const safeFileName = fileName || fileUrl || '';
 
             const proxyResponse = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/proxy-file`, {
                 method: 'POST',
@@ -681,7 +379,7 @@ export default function ImportApplication() {
                 },
                 body: JSON.stringify( {
                     fileUrl: fileUrl,
-                    fileName: fileName
+                    fileName: safeFileName
                 } )
             } );
 
@@ -694,7 +392,7 @@ export default function ImportApplication() {
             let headers = [];
             let data = [];
 
-            if ( fileName.toLowerCase().endsWith( '.csv' ) ) {
+            if ( safeFileName.toLowerCase().endsWith( '.csv' ) ) {
                 const decoder = new TextDecoder( 'utf-8' );
                 const text = decoder.decode( arrayBuffer );
                 const rows = text.split( '\n' ).filter( row => row.trim() );
@@ -731,7 +429,7 @@ export default function ImportApplication() {
             setSelectedFile( parsedFile );
         } catch ( error ) {
             console.error( 'Error fetching and parsing file:', error );
-            setError( `Failed to load and parse the file: ${ error.message }. This might be due to CORS restrictions.` );
+            setError( `Failed to load and parse the file: ${ error.message }` );
         } finally {
             setLoadingFileData( false );
         }
@@ -757,6 +455,7 @@ export default function ImportApplication() {
         }
 
         const formData = new FormData();
+        formData.append( "fileName", fileToUpload.name );
         formData.append( "file", fileToUpload );
         formData.append( "userId", user.userId );
         formData.append( "companyId", user.companyId );
@@ -764,21 +463,24 @@ export default function ImportApplication() {
 
         try {
             setLoading( true );
-            const res = await fetch(
-                `${ process.env.REACT_APP_BASE_URL }/upload/application`,
+
+            // First, upload the file to get the candidateFileId
+            const uploadRes = await fetch(
+                `${ process.env.REACT_APP_BASE_URL }/upload/candidate-upload`,
                 {
                     method: "POST",
                     body: formData
                 }
             );
 
-            const data = await res.json();
+            const uploadData = await uploadRes.json();
 
-            if ( !res.ok ) {
-                throw new Error( data.error || data.message || "Upload failed" );
+            if ( !uploadRes.ok ) {
+                throw new Error( uploadData.error || uploadData.message || "Upload failed" );
             }
 
-            console.log( "File uploaded successfully", data );
+            console.log( "File uploaded successfully", uploadData );
+
             alert( "File uploaded successfully!" );
             setFileToUpload( null );
             setError( "" );
@@ -823,9 +525,9 @@ export default function ImportApplication() {
         return role ? role.replace( /_/g, ' ' ).replace( /\b\w/g, l => l.toUpperCase() ) : 'Unknown Role';
     };
 
-    const fetchAndParseFileForJobCreation = async ( fileUrl, fileName ) => {
+    const fetchAndParseFileForApplicationCreation = async ( fileUrl ) => {
         try {
-            console.log( "Fetching file for job creation from:", fileUrl );
+            console.log( "Fetching file for candidate creation from:", fileUrl );
 
             const proxyResponse = await fetch( `${ process.env.REACT_APP_BASE_URL }/upload/proxy-file`, {
                 method: 'POST',
@@ -834,7 +536,6 @@ export default function ImportApplication() {
                 },
                 body: JSON.stringify( {
                     fileUrl: fileUrl,
-                    fileName: fileName
                 } )
             } );
 
@@ -848,7 +549,7 @@ export default function ImportApplication() {
             let headers = [];
             let data = [];
 
-            if ( fileName.toLowerCase().endsWith( '.csv' ) ) {
+            if ( fileUrl.toLowerCase().endsWith( '.csv' ) ) {
                 const decoder = new TextDecoder( 'utf-8' );
                 const text = decoder.decode( arrayBuffer );
                 const rows = text.split( '\n' ).filter( row => row.trim() );
@@ -887,33 +588,37 @@ export default function ImportApplication() {
             };
 
         } catch ( error ) {
-            console.error( 'Error fetching and parsing file for job creation:', error );
+            console.error( 'Error fetching and parsing file for candidate creation:', error );
             throw error;
         }
     };
 
-    // User File Card Component
+    // User File Card Component for Candidate Applications
     const UserFileCard = React.memo( ( { file } ) => {
-        const handleCreateJobs = async ( e ) => {
+        // Dummy variables to prevent compile error; replace with real logic as needed
+        const isSubmitting = false;
+        const isRecruiterManager = user.role === 'recruiter_manager';
+        const candidateID = file.id;
+
+        // In your handleCreateCandidateApplications function, update the success handling:
+
+        const handleCreateCandidateApplications = async ( e ) => {
             if ( e ) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.nativeEvent.stopImmediatePropagation();
             }
 
-            if ( creatingJobs || loadingHiringManagers || loadingRecruiters ) {
-                console.log( 'Job creation or manager loading in progress - ignoring click' );
+            if ( creatingApplications ) {
+                console.log( 'Candidate application creation in progress - ignoring click' );
                 return;
             }
 
             try {
-                console.log( "Starting job creation process for file:", file.fileName );
-                console.log( "Current hiring manager map:", hiringManagerMap );
-                console.log( "Current application status map:", jobStatusMap );
+                console.log( "Starting candidate application creation process for file:", file );
 
-                const parsedFileData = await fetchAndParseFileForJobCreation( file.fileUrl, file.fileName );
-
-                console.log( "Parsed file data for job creation:", parsedFileData );
+                const parsedFileData = await fetchAndParseFileForApplicationCreation( file.fileUrl );
+                console.log( "Parsed file data for candidate creation:", parsedFileData );
 
                 if ( !parsedFileData ) {
                     throw new Error( 'Failed to parse file data' );
@@ -924,11 +629,35 @@ export default function ImportApplication() {
                     throw new Error( 'Parsed data is missing headers or data' );
                 }
 
-                await createJobsFromExcelData( parsedFileData, file.fileUrl );
+                const result = await createCandidateApplications( parsedFileData, file.fileUrl, file.id );
+
+                const newCandidates = result.created || 0;
+                const existingCandidates = result.existing || 0;
+                const successfulApps = result.jobApplications || 0;
+
+                let message = `✅ Candidates Processed:\n` +
+                    `• ${ newCandidates } new candidates created\n` +
+                    `• ${ existingCandidates } existing candidates found\n` +
+                    `• ${ successfulApps } job applications submitted`;
+
+                if ( result.jobApplicationsDetail ) {
+                    const failedApps = result.jobApplicationsDetail.filter( app =>
+                        app.status === 'job_not_found' || app.status === 'application_failed'
+                    ).length;
+
+                    if ( failedApps > 0 ) {
+                        message += `\n• ${ failedApps } job applications failed`;
+                    }
+                }
+
+                alert( message );
+
+                // Log detailed results for debugging
+                console.log( 'Detailed Application Results:', result );
 
             } catch ( error ) {
-                console.error( 'Error in handleCreateJobs:', error );
-                setError( `Failed to create jobs: ${ error.message }` );
+                console.error( 'Error in handleCreateCandidateApplications:', error );
+                setError( `Failed to create candidate applications: ${ error.message }` );
             }
         };
 
@@ -938,7 +667,7 @@ export default function ImportApplication() {
                 e.stopPropagation();
             }
 
-            if ( loadingFileData || creatingJobs ) return;
+            if ( loadingFileData || creatingApplications ) return;
 
             try {
                 setLoadingFileData( true );
@@ -952,10 +681,13 @@ export default function ImportApplication() {
         };
 
         return (
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow">
+            <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                         <FileSpreadsheet className="text-green-600" size={ 24 } />
+                        <div>
+                            <p className="text-sm text-gray-500"></p>
+                        </div>
                     </div>
                     <a
                         href={ file.fileUrl }
@@ -981,7 +713,7 @@ export default function ImportApplication() {
                         <FolderPen size={ 14 } />
                         <span>
                             <span className="font-medium text-gray-800">File Name:</span>{ " " }
-                            { file.fileName || "Unknown File" }
+                            { file.originalName || "Unknown User" }
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -991,7 +723,6 @@ export default function ImportApplication() {
                             { formatDate( file.uploadDate ) }
                         </span>
                     </div>
-
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Calendar size={ 14 } />
                         <span>
@@ -999,48 +730,48 @@ export default function ImportApplication() {
                             { formatMonth( file.uploadDate ) }
                         </span>
                     </div>
+                </div>
+                <div className="space-y-3 w-full max-w-md mx-auto">
+                    {/* View File Button */ }
+                    <button
+                        onClick={ handleViewFile }
+                        disabled={ loadingFileData || creatingApplications }
+                        className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        { loadingFileData ? (
+                            <>
+                                <Loader className="animate-spin" size={ 16 } />
+                                Loading...
+                            </>
+                        ) : (
+                            <>
+                                <Eye size={ 16 } />
+                                View File
+                            </>
+                        ) }
+                    </button>
 
+                    {/* Create Candidate Applications Button */ }
+                    <button
+                        onClick={ handleCreateCandidateApplications }
+                        disabled={ loadingFileData || creatingApplications }
+                        className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        { creatingApplications ? (
+                            <>
+                                <Loader className="animate-spin" size={ 16 } />
+                                Creating Candidates...
+                            </>
+                        ) : (
+                            <>
+                                <Plus size={ 16 } />
+                                Create Candidate Applications
+                            </>
+                        ) }
+                    </button>
                 </div>
 
-                <button
-                    onClick={ handleViewFile }
-                    disabled={ loadingFileData || creatingJobs }
-                    className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-2"
-                >
-                    { loadingFileData ? (
-                        <>
-                            <Loader className="animate-spin" size={ 16 } />
-                            Loading...
-                        </>
-                    ) : (
-                        <>
-                            <Eye size={ 16 } />
-                            View File
-                        </>
-                    ) }
-                </button>
-                <button
-                    onClick={ handleCreateJobs }
-                    disabled={ loadingFileData || creatingJobs || loadingStatuses || loadingHiringManagers }
-                    className="w-full flex items-center justify-center gap-2 bg-green-500 text-white py-2 px-4 rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    { creatingJobs ? (
-                        <>
-                            <Loader className="animate-spin" size={ 16 } />
-                            Creating Jobs...
-                        </>
-                    ) : loadingStatuses || loadingHiringManagers ? (
-                        <>
-                            <Loader className="animate-spin" size={ 16 } />
-                            Loading Data...
-                        </>
-                    ) : (
-                        <>
-                            <Plus size={ 16 } />
-                            Create Jobs from File
-                        </>
-                    ) }
-                </button>
+
             </div>
         );
     } );
@@ -1132,7 +863,7 @@ export default function ImportApplication() {
                         </div>
                         <div>
                             <h1 className="text-xl font-semibold text-gray-800">
-                                Import Job Applications
+                                Import Candidate Applications
                             </h1>
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
@@ -1141,18 +872,19 @@ export default function ImportApplication() {
                                 <span className="text-gray-500">| { capitalizeFirstLetter( user.userName ) || "User" }</span>
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                                Upload job data from Excel/CSV files to create job positions and applications
+                                Upload candidate data from Excel/CSV files to create candidate accounts and applications
                             </div>
                         </div>
                     </div>
 
                     {/* Right: Upload Section */ }
+                    {/* { user.role !== 'admin' && ( */ }
                     <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
                         <div className="flex items-center gap-2 mb-2">
                             <label className="cursor-pointer">
                                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500 text-white text-sm shadow hover:bg-blue-600 transition-colors">
                                     <Upload size={ 16 } />
-                                    Upload Job File
+                                    Upload Candidate File
                                 </div>
                                 <input
                                     type="file"
@@ -1165,7 +897,7 @@ export default function ImportApplication() {
                             {/* Sample Excel File Download Button */ }
                             <button
                                 onClick={ () => {
-                                    const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1Cj3s75X46plhnxhT19QN-yE5SCHs9cq1/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
+                                    const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1apSokkTG55Zq5wVncIS3DJA1NcQYhQlv/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
                                     window.open( sampleFileUrl, '_blank' );
                                 } }
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
@@ -1191,9 +923,10 @@ export default function ImportApplication() {
 
                         <p className="mt-2 text-gray-500 text-xs">Supports .csv, .xlsx, and .xls</p>
                     </div>
+                    {/* // ) } */ }
                 </div>
 
-                {/* Filter Section (same as ImportCandidateApplication) */ }
+                {/* Filter Section */ }
                 { user.role === 'admin' && (
                     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1255,6 +988,7 @@ export default function ImportApplication() {
                     </div>
                 ) }
 
+
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     { loading && (
                         <div className="text-center py-8">
@@ -1273,7 +1007,7 @@ export default function ImportApplication() {
                     { userFiles.length > 0 && (
                         <div className="mb-8">
                             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                                Uploaded Job Files ({ userFiles.length })
+                                Uploaded Candidate Files ({ userFiles.length })
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 { userFiles.map( file => (
@@ -1324,8 +1058,8 @@ export default function ImportApplication() {
                     { uploadedFiles.length === 0 && userFiles.length === 0 && !loading && (
                         <div className="text-center py-12 text-gray-500">
                             <FileSpreadsheet size={ 64 } className="mx-auto mb-4 text-gray-300" />
-                            <p className="text-lg">No job files uploaded yet</p>
-                            <p className="text-sm">Upload job data files to see them here</p>
+                            <p className="text-lg">No candidate files uploaded yet</p>
+                            <p className="text-sm">Upload candidate data files to see them here</p>
                         </div>
                     ) }
                 </div>

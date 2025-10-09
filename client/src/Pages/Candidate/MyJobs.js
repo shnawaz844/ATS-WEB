@@ -281,10 +281,14 @@ const MyJobs = () => {
 
                                     <div className="flex justify-between mt-5 pt-3 border-t border-gray-100">
                                         <button
-                                            onClick={() => {
-                                                setSelectedApp(app);
-                                                setIsModalOpen(true);
-                                            }}
+                                            onClick={ () => {
+                                                if ( app && app._id ) { 
+                                                    setSelectedApp( app );
+                                                    setIsModalOpen( true );
+                                                } else {
+                                                    toast.error( 'Unable to load application details' );
+                                                }
+                                            } }
                                             className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
                                         >
                                             <EyeIcon className="h-4 w-4 mr-1" /> View

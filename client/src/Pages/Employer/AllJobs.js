@@ -639,6 +639,15 @@ export const AllJobs = () => {
                                                             })}
                                                         </span>
                                                     </div>
+                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                        <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                        <span className="text-sm">
+                                                            Job Code:{ " " }
+                                                            <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
+                                                                { job.titleCode || "N/A" }
+                                                            </span>
+                                                        </span>
+                                                    </div>
                                                 </div>
 
                                                 <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
