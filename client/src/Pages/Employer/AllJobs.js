@@ -574,6 +574,20 @@ export const AllJobs = () => {
                                         >
                                             {/* Enhanced Status badge positioned at top right */}
                                             <div className="flex row-auto right-3 z-10 p-3 justify-end">
+                                                {/* Copy Job Code Button */ }
+                                                <button
+                                                    onClick={ ( e ) => {
+                                                        e.stopPropagation();
+                                                        navigator.clipboard.writeText( job.titleCode || "N/A" );
+                                                        toast.success( 'Job code copied to clipboard!' );
+                                                    } }
+                                                    className="flex items-center text-amber-600 group-hover:text-amber-300 font-medium transition-colors duration-200 text-sm hover:bg-amber-50 group-hover:hover:bg-amber-900/20 px-2 py-1 rounded-md"
+                                                >
+                                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Copy Code
+                                                </button>
                                                 <span className={`inline-flex items-center px-3  rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${job.status === 'Active'
                                                     ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
                                                     job.status === 'Closed'
@@ -585,6 +599,7 @@ export const AllJobs = () => {
                                                         }`}></div>
                                                     {statusMap[job.status]}
                                                 </span>
+                                              
                                                 <button
                                                     onClick={(e) => handleShareJob(e, job)}
                                                     className="flex items-center text-purple-600 group-hover:text-purple-300 font-medium transition-colors duration-200 text-sm hover:bg-purple-50 group-hover:hover:bg-purple-900/20 px-2 py-1 rounded-md"
