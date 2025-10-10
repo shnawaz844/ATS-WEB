@@ -685,16 +685,16 @@ const AllInterviews = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Detailed Feedback</label>
                     <div className="relative">
                       <textarea
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 resize-none bg-gray-300 min-h-[20vh] max-h-[30vh] text-black"
                         value={ capitalizeFirstLetter( feedbackForm.feedback ) }
                         readOnly
                         rows={ isFeedbackExpanded ? 6 : 2 }
-                        style={ { overflow: 'hidden' } }
+                        // style={ { overflow: 'hidden' } }
                       ></textarea>
                       { feedbackForm.feedback && feedbackForm.feedback.split( '\n' ).length > 2 && (
                         <button
                           type="button"
-                          className="absolute right-3 bottom-2 text-indigo-600 text-xs font-medium bg-white px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
+                          className="absolute right-3 bottom-2 text-black text-xs font-medium bg-red px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                           onClick={ () => setIsFeedbackExpanded( !isFeedbackExpanded ) }
                         >
                           { isFeedbackExpanded ? 'Show less' : 'Show more' }
