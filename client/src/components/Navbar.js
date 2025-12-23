@@ -360,7 +360,7 @@ export const Navbar = () => {
             {/* User info or Login/Signup - Desktop */ }
             <div className="hidden md:flex items-center">
               { loginData ? (
-                <div className="relative flex items-center space-x-4" ref={ dropdownRef }>
+                <div className="relative flex items-center space-x-4" ref={ userDropdownRef }>
                   <button
                     onClick={ toggleDropdown }
                     className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
