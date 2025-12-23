@@ -6,17 +6,19 @@ import bcrypt from 'bcryptjs';
 const updateUser = async ( req, res ) => {
   try {
     const { _id, userName, email, password, gender, address, role, company_id } = req.body;
+    const { id } = req.params;
 
+    console.log( "Update request111111", req.params )
     console.log( "Update request received:", req.body ); // Debug log
 
-    if ( !_id ) {
+    if ( !id ) {
       return res.status( 400 ).json( {
         success: false,
         message: 'User ID is required',
       } );
     }
 
-    const user = await User.findById( _id );
+    const user = await User.findById( id );
     if ( !user ) {
       return res.status( 404 ).json( {
         success: false,
