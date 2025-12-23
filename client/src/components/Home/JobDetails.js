@@ -23,7 +23,6 @@ export const JobDetails = () => {
   const [ isBookmarked, setIsBookmarked ] = useState( false );
   const [ jobStatuses, setJobStatuses ] = useState( [] );
 
-  console.log( "jobStatuses", jobStatuses )
   // 1. Fetch the logged-in user (if any)
   useEffect( () => {
     const token = localStorage.getItem( "user" );
@@ -104,6 +103,7 @@ export const JobDetails = () => {
       fetchJobStatuses();
     }
   }, [ job?.company_id ] );
+
 
   if ( !job ) {
     return (
