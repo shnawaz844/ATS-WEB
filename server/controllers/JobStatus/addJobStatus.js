@@ -7,6 +7,7 @@ const addJobStatus = async ( req, res ) => {
         // Check if job status already exists
         const existingJobStatus = await JobStatus.findOne( {
             jobStep,
+            company_id
         } );
         if ( existingJobStatus ) {
             return res
