@@ -8,6 +8,7 @@ const addApplicationStatus = async (req, res) => {
     // Check if email already exists
     const existingApplicationStatus = await ApplicationStatus.findOne({
       applicationStep,
+      company_id
     });
     if (existingApplicationStatus) {
       return res
