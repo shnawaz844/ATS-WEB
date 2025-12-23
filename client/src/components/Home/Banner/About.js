@@ -125,7 +125,7 @@ export default function About() {
                     ) ) }
                 </div>
                 <div className="text-center mt-12">
-                    <Link to="/jobs">
+                    <Link to={`/login`}> 
                         <Button variant="outline" size="lg">
                             View All Jobs
                         </Button>
