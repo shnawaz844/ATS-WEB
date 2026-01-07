@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 
+import { useTheme } from "../../context/ThemeContext";
+
 export const Login = () => {
+  const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -65,8 +68,10 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-200 p-4 ">
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg border border-gray-100 h-[96vh]">
+    <div className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-200'
+      }`}>
+      <div className={`w-full max-w-md rounded-3xl p-8 shadow-lg border h-[96vh] transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+        }`}>
         {/* Logo */}
         <div className="text-center mb-8 ">
           <div className="mx-auto mb-2 flex items-center justify-center rounded-full p-1">
@@ -76,8 +81,8 @@ export const Login = () => {
               className="h-20 w-20 object-cover rounded-full" // Makes the image itself rounded
             />
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Welcome back</h1>
-          <p className="text-gray-500 text-sm">Sign in to your ATS account</p>
+          <h1 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Welcome back</h1>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Sign in to your ATS account</p>
         </div>
 
         {/* Error Message */}
@@ -97,7 +102,7 @@ export const Login = () => {
         <div className="space-y-6">
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Email
             </label>
             <div className="relative">
@@ -107,14 +112,17 @@ export const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400"
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                  }`}
               />
             </div>
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Password
             </label>
             <div className="relative">
@@ -124,7 +132,10 @@ export const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400 pr-12"
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all pr-12 ${theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                  }`}
               />
               <button
                 type="button"
@@ -143,7 +154,7 @@ export const Login = () => {
                 type="checkbox"
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="ml-2 text-gray-600">Remember me</span>
+              <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Remember me</span>
             </label>
             <button
               type="button"
@@ -173,12 +184,12 @@ export const Login = () => {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className={`w-full border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}></div>
             </div>
           </div>
           {/* Sign Up Link */}
           <div className="text-center mt-6">
-            <span className="text-gray-600 text-sm">Don't have an account? </span>
+            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Don't have an account? </span>
             <a
               href={`/${companyUserName}/signup`}
               className="text-blue-600 hover:text-blue-500 font-medium text-sm"

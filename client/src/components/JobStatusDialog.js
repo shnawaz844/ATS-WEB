@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { useTheme } from "../context/ThemeContext";
 
 const JobStatusDialog = ({
   dialogMode,
@@ -8,6 +9,7 @@ const JobStatusDialog = ({
   handleFormSubmit,
   handleCloseDialog,
 }) => {
+  const { theme } = useTheme();
 
   // Close the dialog when clicking outside (on the overlay)
   const handleOverlayClick = (e) => {
@@ -18,14 +20,14 @@ const JobStatusDialog = ({
   return (
     <div
       onClick={handleOverlayClick}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all"
+        className="rounded-lg shadow-xl w-full max-w-md transform transition-all bg-white dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
       >
-        <div className="px-6 py-4">
-          <h2 className="text-[1.5rem] font-semibold text-gray-800">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
+          <h2 className="text-[1.5rem] font-semibold text-gray-800 dark:text-white">
             {dialogMode === 'add' ? 'Add New job status' : 'Edit job Status Details'}
           </h2>
         </div>
@@ -33,7 +35,7 @@ const JobStatusDialog = ({
         <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Job Step
               </label>
               <input
@@ -42,12 +44,12 @@ const JobStatusDialog = ({
                 value={formData.jobStep}
                 onChange={handleFormChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Job Status
               </label>
               <input
@@ -56,24 +58,24 @@ const JobStatusDialog = ({
                 value={formData.jobStatus}
                 onChange={handleFormChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
 
           </div>
 
-          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={handleCloseDialog}
-              className="px-4 py-2 text-sm font-medium text-black bg-gray-400 border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 text-sm font-medium border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="px-4 py-2 text-sm font-medium text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] bg-[#9333ea] hover:bg-[#7e22ce]"
             >
               {dialogMode === 'add' ? 'Add Job status' : 'Update job status'}
             </button>

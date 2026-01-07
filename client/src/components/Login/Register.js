@@ -3,7 +3,10 @@ import { Eye, EyeOff, UserPlus } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
+import { useTheme } from "../../context/ThemeContext";
+
 export const Register = () => {
+  const { theme } = useTheme();
   const { companyUserName } = useParams();
 
   // 1) State for company details & ID
@@ -102,8 +105,10 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-200 p-4">
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+    <div className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-200'
+      }`}>
+      <div className={`w-full max-w-md rounded-3xl p-8 shadow-lg border transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+        }`}>
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="mx-auto mb-2 flex items-center justify-center rounded-full p-1">
@@ -113,8 +118,8 @@ export const Register = () => {
               className="h-20 w-20 object-cover rounded-full"
             />
           </div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-500 text-sm">Please fill in your details</p>
+          <h1 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Create Account</h1>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Please fill in your details</p>
         </div>
 
         {/* Error Message */}
@@ -134,7 +139,7 @@ export const Register = () => {
         <div className="space-y-6">
           {/* Full Name Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Full Name
             </label>
             <input
@@ -143,13 +148,16 @@ export const Register = () => {
               value={formData.userName}
               onChange={handleChange}
               placeholder="Ex: Abhishek Sharma"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400"
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                }`}
             />
           </div>
 
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Email Address
             </label>
             <input
@@ -159,13 +167,16 @@ export const Register = () => {
               onChange={handleChange}
               placeholder="Ex: abhisheksharma@gmail.com"
               autoComplete="off"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400"
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                }`}
             />
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Password
             </label>
             <div className="relative">
@@ -175,7 +186,10 @@ export const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400 pr-12"
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all pr-12 ${theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                  }`}
               />
               <button
                 type="button"
@@ -189,7 +203,7 @@ export const Register = () => {
 
           {/* Address Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Address
             </label>
             <input
@@ -198,20 +212,26 @@ export const Register = () => {
               value={formData.address}
               onChange={handleChange}
               placeholder="Ex: A70, Down-Town Street, Mumbai"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 placeholder-gray-400"
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                }`}
             />
           </div>
 
           {/* Gender Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Gender
             </label>
             <select
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 text-gray-900 appearance-none"
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all appearance-none ${theme === 'dark'
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                : 'bg-gray-50 border-gray-200 text-gray-900'
+                }`}
               style={{
                 backgroundImage: "url('data:image/svg+xml;charset=US-ASCII,<svg width=\"20\" height=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M5 8l5 5 5-5z\" fill=\"%236b7280\"/></svg>')",
                 backgroundRepeat: "no-repeat",
@@ -247,12 +267,12 @@ export const Register = () => {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className={`w-full border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}></div>
             </div>
           </div>
           {/* Login Link */}
           <div className="text-center mt-6">
-            <span className="text-gray-600 text-sm">Already have an account? </span>
+            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Already have an account? </span>
             <a
               href={`/${companyUserName}/login`}
               className="text-blue-600 hover:text-blue-500 font-medium text-sm"

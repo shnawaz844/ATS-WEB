@@ -9,7 +9,7 @@ import DiveIn from './DiveIn';
 import ParticlesComponent from '../../Login/Particles';
 const Banner = () => {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden ">
       <HeroSectionAts />
       <Companies />
       <WhyAts />

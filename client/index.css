@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+
+  /* Light Theme - Clean & Professional */
+  :root {
+    --bg: #ffffff;
+    --surface: #f9fafb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --hover-bg: #f3f4f6;
+  }
+
+  /* Dark Theme - Premium & Futuristic */
+  .dark {
+    --bg: #000000;
+    --surface: #0a0a0a;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --border: #1f2937;
+    --card-bg: rgba(17, 24, 39, 0.8);
+    --hover-bg: #1f2937;
+  }
+}
+
+/* Smooth Theme Transitions */
+@layer base {
+  * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -10,6 +44,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg);
+  color: var(--text-primary);
 }
 
 code {

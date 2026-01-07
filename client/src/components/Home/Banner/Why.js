@@ -7,8 +7,8 @@ const features = [
     title: "AI Resume Screening",
     description:
       "Advanced AI algorithms analyze and rank resumes based on job requirements, saving 80% of screening time.",
-    color: "blue",
-    gradient: "from-blue-500 to-blue-600",
+    color: "purple",
+    gradient: "from-purple-500 to-purple-600",
   },
   {
     icon: Bot,
@@ -51,45 +51,78 @@ const features = [
 
 export default function WhyAts() {
   return (
-    <section className="py-24 bg-white">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200/50 px-4 py-2 text-sm font-medium text-blue-700">
-              <Bot className="h-4 w-4" />
-              AI-Powered Features
+    <section className="py-24 relative overflow-hidden">
+      {/* Background pattern */}
+      <div className="absolute inset-0 bg-grid-gray-900/[0.02] dark:bg-grid-white/[0.02] bg-grid opacity-10"></div>
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/10 dark:bg-gradient-to-r dark:from-purple-900/20 dark:to-purple-900/20 border border-purple-600/20 dark:border-purple-800/30 px-4 py-2.5 mb-6 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <Bot className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <span className="text-sm font-medium text-purple-700 dark:text-gray-300">
+                AI-Powered Innovation
+              </span>
             </div>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Revolutionizing Recruitment with AI
+
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            Next-Generation <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400">Recruitment</span>
           </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Our platform combines cutting-edge AI technology with intuitive design to transform how companies hire and
-            candidates find jobs.
+
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Leverage artificial intelligence to streamline your hiring process and find the perfect candidates faster.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="border-0 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/80 backdrop-blur-sm p-6 "
+              className="group relative p-8 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm hover:border-gray-300 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md"
             >
-              <div className="mb-6">
-                <div
-                  className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 shadow-md relative `}
-                >
-                  <feature.icon className="h-6 w-6 text-white" />
-                  {(feature.title.includes("AI") || feature.title.includes("Bot")) && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  )}
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              {/* Icon */}
+              <div className="relative mb-8">
+                <div className="inline-flex p-4 rounded-xl bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700">
+                  <div className={`relative rounded-lg ${feature.gradient} p-3`}>
+                    <feature.icon className="h-6 w-6  text-[#9333ea]" />
+
+                    {/* AI indicator */}
+                    {(feature.title.includes("AI") || feature.title.includes("Intelligent")) && (
+                      <div className="absolute -top-1 -right-1">
+                        <div className="relative">
+                          <div className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                          <div className="relative w-3 h-3 bg-green-400 rounded-full"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">{feature.title}</h3>
+
+                {/* Feature number */}
+                <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+                  {index + 1}
+                </div>
               </div>
-              <div>
-                <p className="text-base leading-relaxed text-gray-600">
+
+              {/* Content */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-gray-800 dark:group-hover:text-gray-100 transition-colors">
+                  {feature.title}
+                </h3>
+
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
+
+              {/* Bottom line indicator */}
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-600 group-hover:w-16 transition-all duration-300"></div>
             </div>
           ))}
         </div>

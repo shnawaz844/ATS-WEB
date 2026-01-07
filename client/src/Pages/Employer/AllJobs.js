@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useJobs } from '../../hooks/useJob';
 import Select from "react-select";
 import { toast } from 'react-toastify';
+import { useTheme } from '../../context/ThemeContext';
 import {
     Search, Plus, Edit, Trash2,
     Briefcase, MapPin, Clock, RefreshCw, Filter,
@@ -15,6 +16,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
 
 export const AllJobs = () => {
+    const { theme } = useTheme();
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [jobType, setJobType] = useState("");
@@ -233,25 +235,38 @@ export const AllJobs = () => {
 
     // Custom styles for react-select
     const customSelectStyles = {
-        control: (provided) => ({
+        control: (provided, state) => ({
             ...provided,
             borderRadius: '0.5rem',
-            borderColor: '#e2e8f0',
+            borderColor: theme === 'dark' ? '#4b5563' : '#e2e8f0',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+            color: theme === 'dark' ? '#ffffff' : '#1e293b',
             boxShadow: 'none',
             '&:hover': {
-                borderColor: '#cbd5e1'
+                borderColor: theme === 'dark' ? '#9ca3af' : '#cbd5e1'
             }
         }),
         option: (provided, state) => ({
             ...provided,
-            backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#eff6ff' : null,
-            color: state.isSelected ? 'white' : '#1e293b',
+            backgroundColor: state.isSelected
+                ? '#3b82f6'
+                : state.isFocused
+                    ? (theme === 'dark' ? '#374151' : '#eff6ff')
+                    : (theme === 'dark' ? '#1f2937' : '#ffffff'),
+            color: state.isSelected
+                ? 'white'
+                : (theme === 'dark' ? '#e5e7eb' : '#1e293b'),
         }),
-        // Add these properties to fix the z-index issue
+        singleValue: (provided) => ({
+            ...provided,
+            color: theme === 'dark' ? '#e5e7eb' : '#1e293b',
+        }),
         menu: (provided) => ({
             ...provided,
             zIndex: 9999,
             position: 'absolute',
+            backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+            border: theme === 'dark' ? '1px solid #4b5563' : '1px solid #e2e8f0',
         }),
         menuPortal: (provided) => ({
             ...provided,
@@ -311,26 +326,25 @@ export const AllJobs = () => {
     );
 
     return (
-        <div className="px-8 py-4 w-full min-h-screen"
-            style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
+        <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}
         >
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className='mb-6 h-auto min-h-[80px] md:min-h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className={`mb-6 h-auto min-h-[80px] md:min-h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? 'border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'}`}>
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
-                            {/* Title Section - always on top on mobile, aligned left on desktop */ }
+                            {/* Title Section - always on top on mobile, aligned left on desktop */}
                             <div className="w-full md:w-auto flex-shrink-0">
-                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white flex items-center font-DM Sans">
-                                    <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-gray-200" />
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#9333ea] flex items-center font-DM Sans">
+                                    <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" />
                                     Job Board
                                 </h2>
                             </div>
 
-                            {/* Search and Buttons Section - column on mobile, row on desktop */ }
+                            {/* Search and Buttons Section - column on mobile, row on desktop */}
                             <div className='flex flex-col sm:flex-row gap-3 w-full md:w-auto'>
-                                {/* Search Bar - full width on mobile, smaller on desktop */ }
+                                {/* Search Bar - full width on mobile, smaller on desktop */}
                                 <div className="relative rounded-full w-full md:w-[25vw] lg:w-[20vw]">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
@@ -338,24 +352,30 @@ export const AllJobs = () => {
                                     <input
                                         type="text"
                                         placeholder="Search job titles, skills..."
-                                        value={ search }
-                                        onChange={ ( e ) => setSearch( e.target.value ) }
-                                        className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 shadow-sm transition-all duration-200 h-[40px] sm:h-[44px] md:h-[48px] focus:outline-none focus:ring-0 rounded-xl text-sm sm:text-base"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        className={`w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border shadow-sm transition-all duration-200 h-[40px] sm:h-[44px] md:h-[48px] focus:outline-none focus:ring-0 rounded-xl text-sm sm:text-base ${theme === 'dark'
+                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                            : 'border-gray-300 bg-white text-black placeholder-gray-500'
+                                            }`}
                                     />
                                 </div>
 
-                                {/* Buttons - row on all screens */ }
+                                {/* Buttons - row on all screens */}
                                 <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                                     <button
                                         className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
-                                        onClick={ () => setIsFilterOpen( !isFilterOpen ) }
+                                        onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     >
-                                        { isFilterOpen ? "Hide Filters" : "Show Filters" }
+                                        {isFilterOpen ? "Hide Filters" : "Show Filters"}
                                     </button>
 
                                     <Link
-                                        to={ `/${ companyUserName }/post-job` }
-                                        className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
+                                        to={`/${companyUserName}/post-job`}
+                                        className={`flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap ${theme === 'dark'
+                                            ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
+                                            : 'bg-gray-300 text-black border-gray-300 hover:bg-gray-700 hover:text-white'
+                                            }`}
                                     >
                                         <Plus className="mr-1 sm:mr-2 h-4 w-4" />
                                         Post New Job
@@ -379,17 +399,17 @@ export const AllJobs = () => {
                     {/* Filters Section */}
                     <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>
                         <div className={isFilterOpen ? 'block' : 'hidden'}>
-                            <div className="max-w-7xl mx-auto bg-gradient-to-br from-gray-300 to-gray-100 p-6 rounded-2xl shadow-lg border-0">
+                            <div className={`max-w-7xl mx-auto p-6 rounded-2xl shadow-lg border-0  ${theme === 'dark' ? 'bg-white/10 to-gray-900 border-gray-700' : 'from-gray-300 to-gray-100'}`}>
                                 <div className="flex justify-center">
                                     <div className="flex flex-wrap justify-center gap-4 items-end max-w-5xl w-full">
 
                                         {/* Job Type Dropdown */}
                                         <div className="flex-1 min-w-48">
-                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                                 <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
                                                 <span>Job Type</span>
                                             </div>
-                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                 <Select
                                                     options={jobTypeOptions}
                                                     value={jobType}
@@ -430,11 +450,11 @@ export const AllJobs = () => {
 
                                         {/* Location Type Dropdown */}
                                         <div className="flex-1 min-w-48">
-                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                                 <MapPin className="mr-2 h-4 w-4 text-teal-500" />
                                                 <span>Location</span>
                                             </div>
-                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                 <Select
                                                     options={locationTypeOptions}
                                                     value={locationType}
@@ -476,11 +496,11 @@ export const AllJobs = () => {
 
                                         {/* Schedule Type Dropdown */}
                                         <div className="flex-1 min-w-48">
-                                            <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                            <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                                 <Clock className="mr-2 h-4 w-4 text-purple-500" />
                                                 <span>Schedule</span>
                                             </div>
-                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                            <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                 <Select
                                                     options={scheduleTypeOptions}
                                                     value={scheduleType}
@@ -538,7 +558,7 @@ export const AllJobs = () => {
 
                     {/* Results Count */}
                     <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
-                        <span className="text-sm text-gray-600">
+                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             {allJobsList.length > 0 ? (
                                 <>Showing <span className="font-medium">{allJobsList.length}</span> of <span className="font-medium">{allJobs.totalCount || 0}</span> jobs</>
                             ) : (
@@ -569,22 +589,25 @@ export const AllJobs = () => {
                                     {allJobsList.map((job) => (
                                         <div
                                             key={job._id}
-                                            className="bg-white hover:bg-gray-700 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-gray-400 group relative"
+                                            className={`rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group relative ${theme === 'dark'
+                                                ? 'bg-white/10 border-gray-700 hover:bg-gray-750'
+                                                : 'bg-white  hover:border-gray-400'
+                                                }`}
                                             onClick={() => navigate(`/${companyUserName}/job-detail/${job._id}`)}
                                         >
                                             {/* Enhanced Status badge positioned at top right */}
                                             <div className="flex row-auto right-3 z-10 p-3 justify-end">
-                                                {/* Copy Job Code Button */ }
+                                                {/* Copy Job Code Button */}
                                                 <button
-                                                    onClick={ ( e ) => {
+                                                    onClick={(e) => {
                                                         e.stopPropagation();
-                                                        navigator.clipboard.writeText( job.titleCode || "N/A" );
-                                                        toast.success( 'Job code copied to clipboard!' );
-                                                    } }
-                                                    className="flex items-center text-amber-600 group-hover:text-amber-300 font-medium transition-colors duration-200 text-sm hover:bg-amber-50 group-hover:hover:bg-amber-900/20 px-2 py-1 rounded-md"
+                                                        navigator.clipboard.writeText(job.titleCode || "N/A");
+                                                        toast.success('Job code copied to clipboard!');
+                                                    }}
+                                                    className="flex items-center text-amber-600 group-hover:text-amber-500 font-medium transition-colors duration-200 text-sm hover:bg-amber-50 group-hover:hover:bg-amber-900/20 px-2 py-1 rounded-md"
                                                 >
                                                     <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={ 2 } d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                     </svg>
                                                     Copy Code
                                                 </button>
@@ -599,10 +622,10 @@ export const AllJobs = () => {
                                                         }`}></div>
                                                     {statusMap[job.status]}
                                                 </span>
-                                              
+
                                                 <button
                                                     onClick={(e) => handleShareJob(e, job)}
-                                                    className="flex items-center text-purple-600 group-hover:text-purple-300 font-medium transition-colors duration-200 text-sm hover:bg-purple-50 group-hover:hover:bg-purple-900/20 px-2 py-1 rounded-md"
+                                                    className="flex items-center text-purple-600 group-hover:text-purple-500 font-medium transition-colors duration-200 text-sm hover:bg-purple-50 group-hover:hover:bg-purple-900/20 px-2 py-1 rounded-md"
                                                 >
                                                     <Share2 className="h-4 w-4 mr-1" />
                                                     Share
@@ -612,7 +635,7 @@ export const AllJobs = () => {
                                             <div className="p-6 pt-2"> {/* Added extra top padding to accommodate badge */}
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */}
-                                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-white mb-4 font-DM leading-tight">
+                                                        <h3 className={`text-xl font-bold mb-4 font-DM leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-[#9333ea]'}`}>
                                                             {capitalizeFirstLetter(job.title)}
                                                         </h3>
                                                         <div className="flex flex-wrap gap-2 mb-4">
@@ -630,21 +653,21 @@ export const AllJobs = () => {
                                                 </div>
 
                                                 <div className="space-y-3">
-                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                         <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
                                                         <span className="text-sm font-medium">
                                                             Compensation: {formatIndianRupee(job.compensation)}
                                                         </span>
                                                     </div>
 
-                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                         <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
                                                         <span className="text-sm">
                                                             {job.city}, {job.state}, {job.country}
                                                         </span>
                                                     </div>
 
-                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                         <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
                                                         <span className="text-sm">
                                                             Posted: {new Date(job.createdAt).toLocaleDateString('en-US', {
@@ -654,12 +677,12 @@ export const AllJobs = () => {
                                                             })}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center text-gray-700 group-hover:text-gray-200">
+                                                    <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                         <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
                                                         <span className="text-sm">
-                                                            Job Code:{ " " }
+                                                            Job Code:{" "}
                                                             <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
-                                                                { job.titleCode || "N/A" }
+                                                                {job.titleCode || "N/A"}
                                                             </span>
                                                         </span>
                                                     </div>
@@ -671,7 +694,7 @@ export const AllJobs = () => {
                                                             e.stopPropagation();
                                                             navigate(`/${companyUserName}/post-job`, { state: { job } });
                                                         }}
-                                                        className="flex items-center text-blue-600 group-hover:text-blue-300 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
+                                                        className="flex items-center text-blue-600 group-hover:text-blue-700 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
                                                     >
                                                         <Edit className="h-4 w-4 mr-1" />
                                                         View & Edit
@@ -683,7 +706,7 @@ export const AllJobs = () => {
                                                             handleDeleteJob(job._id);
                                                         }}
                                                         disabled={isDeleting}
-                                                        className="flex items-center text-red-600 group-hover:text-red-300 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
+                                                        className="flex items-center text-red-600 group-hover:text-red-500 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
                                                     >
                                                         <Trash2 className="h-4 w-4 mr-1" />
                                                         {isDeleting ? 'Deleting...' : 'Delete'}

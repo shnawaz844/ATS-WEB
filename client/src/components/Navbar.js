@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTheme } from "../context/ThemeContext";
 import { NavLink, Link, useLocation, useParams } from "react-router-dom";
 import {
   UserPen,
@@ -16,6 +17,7 @@ import {
   ChevronDown,
   BriefcaseBusiness
 } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const superNavItems = [
   { label: "Users", path: "/all-users", icon: <Users className="hidden lg:block hidden lg:block w-5 h-5" /> },
@@ -90,57 +92,58 @@ const candidateNavItems = [
 ];
 
 export const Navbar = () => {
+  const { theme } = useTheme();
   const { companyUserName: urlCompanyUserName } = useParams();
-  const [ companyUserName, setCompanyUserName ] = useState( null );
-  const [ loginData, setLoginData ] = useState( null );
-  const [ isMenuOpen, setIsMenuOpen ] = useState( false );
-  const [ isDropdownOpen, setIsDropdownOpen ] = useState( false );
+  const [companyUserName, setCompanyUserName] = useState(null);
+  const [loginData, setLoginData] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
-  const [ company, setCompany ] = useState( [] );
-  const [ isLoadingCompany, setIsLoadingCompany ] = useState( false );
-  const toggleMenu = () => setIsMenuOpen( ( prev ) => !prev );
+  const [company, setCompany] = useState([]);
+  const [isLoadingCompany, setIsLoadingCompany] = useState(false);
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   // Update companyUserName when URL changes or from localStorage
-  useEffect( () => {
-    if ( urlCompanyUserName ) {
-      setCompanyUserName( urlCompanyUserName );
+  useEffect(() => {
+    if (urlCompanyUserName) {
+      setCompanyUserName(urlCompanyUserName);
     } else {
-      const storedName = localStorage.getItem( "companyUserName" );
-      if ( storedName ) {
-        setCompanyUserName( storedName );
+      const storedName = localStorage.getItem("companyUserName");
+      if (storedName) {
+        setCompanyUserName(storedName);
       }
     }
-  }, [ urlCompanyUserName ] );
+  }, [urlCompanyUserName]);
   // Fetch company data whenever companyUserName changes
-  useEffect( () => {
+  useEffect(() => {
     const fetchCompanies = async () => {
-      if ( !companyUserName ) {
-        setCompany( [] );
+      if (!companyUserName) {
+        setCompany([]);
         return;
       }
 
-      setIsLoadingCompany( true );
+      setIsLoadingCompany(true);
       try {
         const response = await fetch(
-          `${ process.env.REACT_APP_BASE_URL }/companies/companies/${ companyUserName }`
+          `${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`
         );
 
-        if ( response.ok ) {
+        if (response.ok) {
           const data = await response.json();
-          setCompany( data );
+          setCompany(data);
         } else {
-          setCompany( [] );
+          setCompany([]);
         }
-      } catch ( error ) {
-        console.error( 'Error fetching companies:', error );
-        setCompany( [] );
+      } catch (error) {
+        console.error('Error fetching companies:', error);
+        setCompany([]);
       } finally {
-        setIsLoadingCompany( false );
+        setIsLoadingCompany(false);
       }
     };
 
     fetchCompanies();
-  }, [ companyUserName ] );
+  }, [companyUserName]);
 
   const normalNavItem = [
     { label: "Home", path: "/", icon: <Home className="w-5 h-5" /> },
@@ -151,183 +154,189 @@ export const Navbar = () => {
     }
   ];
 
-  const [ navItems, setNavItems ] = useState( normalNavItem );
-  const dropdownRef = useRef( null );
-  const userDropdownRef = useRef( null );
+  const [navItems, setNavItems] = useState(normalNavItem);
+  const dropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
-  const handlerIsMenuOpen = () => setIsMenuOpen( !isMenuOpen );
+  const handlerIsMenuOpen = () => setIsMenuOpen(!isMenuOpen);
 
-  const toggleDropdown = ( e ) => {
+  const toggleDropdown = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDropdownOpen( ( prev ) => !prev );
+    setIsDropdownOpen((prev) => !prev);
   };
 
-  useEffect( () => {
-    const token = localStorage.getItem( "user" );
-    if ( token ) {
-      const user = JSON.parse( token );
-      setLoginData( user );
+  useEffect(() => {
+    const token = localStorage.getItem("user");
+    if (token) {
+      const user = JSON.parse(token);
+      setLoginData(user);
     }
-  }, [] );
+  }, []);
 
-  useEffect( () => {
-    if ( location.pathname === "/" ) {
-      setNavItems( loginData?.role === "super" ? superNavItems : [] );
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setNavItems(loginData?.role === "super" ? superNavItems : []);
     } else {
       // Reapply the default or user role-based navigation items
-      if ( loginData ) {
-        switch ( loginData.role ) {
+      if (loginData) {
+        switch (loginData.role) {
           case "super":
-            setNavItems( superNavItems );
+            setNavItems(superNavItems);
             break;
           case "admin":
-            setNavItems( adminNavItems );
+            setNavItems(adminNavItems);
             break;
           case "hiring_manager":
-            setNavItems( hiringManagerNavItems );
+            setNavItems(hiringManagerNavItems);
             break;
           case "interviewer":
-            setNavItems( interviewerNavItems );
+            setNavItems(interviewerNavItems);
             break;
           case "recruiter_manager":
-            setNavItems( recruiterNavItems );
+            setNavItems(recruiterNavItems);
             break;
           case "candidate":
-            setNavItems( candidateNavItems );
+            setNavItems(candidateNavItems);
             break;
           default:
-            setNavItems( normalNavItem );
+            setNavItems(normalNavItem);
         }
       }
     }
-  }, [ location, loginData ] );
+  }, [location, loginData]);
 
-  useEffect( () => {
-    const handleClickOutside = ( event ) => {
+  useEffect(() => {
+    const handleClickOutside = (event) => {
       // Check if click is outside both dropdowns
-      const isOutsideNavDropdown = dropdownRef.current && !dropdownRef.current.contains( event.target );
-      const isOutsideUserDropdown = userDropdownRef.current && !userDropdownRef.current.contains( event.target );
+      const isOutsideNavDropdown = dropdownRef.current && !dropdownRef.current.contains(event.target);
+      const isOutsideUserDropdown = userDropdownRef.current && !userDropdownRef.current.contains(event.target);
 
-      if ( isOutsideUserDropdown && isDropdownOpen ) {
-        setIsDropdownOpen( false );
+      if (isOutsideUserDropdown && isDropdownOpen) {
+        setIsDropdownOpen(false);
       }
     };
 
-    if ( isDropdownOpen ) {
-      document.addEventListener( 'mousedown', handleClickOutside );
-      document.addEventListener( 'touchstart', handleClickOutside );
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener( 'mousedown', handleClickOutside );
-      document.removeEventListener( 'touchstart', handleClickOutside );
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [ isDropdownOpen ] );
+  }, [isDropdownOpen]);
 
   const logoutHandler = async () => {
     try {
-      const res = await fetch( `${ process.env.REACT_APP_BASE_URL }/auth/logout`, {
+      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/logout`, {
         method: "POST",
-      } )
+      })
       const result = await res.json()
-      console.log( "result,result" )
+      console.log("result,result")
 
-      if ( result.success ) {
-        localStorage.removeItem( "usertoken" )
-        localStorage.removeItem( "user" )
-        localStorage.removeItem( "email" )
-        localStorage.removeItem( "companyId" )
-        localStorage.removeItem( "sub_role" );
+      if (result.success) {
+        localStorage.removeItem("usertoken")
+        localStorage.removeItem("user")
+        localStorage.removeItem("email")
+        localStorage.removeItem("companyId")
+        localStorage.removeItem("sub_role");
 
-        setLoginData( null )
+        setLoginData(null)
         window.location.reload();
       }
 
-      if ( loginData.role !== "super" ) {
-        window.location.href = `/${ companyUserName }`;
+      if (loginData.role !== "super") {
+        window.location.href = `/${companyUserName}`;
       } else {
         window.location.href = "/";
       }
-    } catch ( err ) {
-      console.error( "Logout error:", err )
+    } catch (err) {
+      console.error("Logout error:", err)
     }
   }
 
   return (
     <div className="w-full sticky top-0 z-50">
-      <nav className="bg-white relative z-50">
+      <nav className={`relative z-50 border-b transition-colors duration-300 ${theme === "dark" ? "bg-black border-gray-800" : "bg-white border-gray-200"
+        }`}>
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
-            {/* BRAND */ }
+            {/* BRAND */}
             <div className="flex items-center">
               <NavLink
-                to={ companyUserName ? `/${ companyUserName }` : "/" }
+                to={companyUserName ? `/${companyUserName}` : "/"}
                 className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
                 <img
-                  src={ companyUserName && company?.image ? company.image : "/ATSLOGO.png" }
-                  className="rounded-full h-12 md:h-14 border-2 border-gray-300"
+                  src={companyUserName && company?.image ? company.image : "/ATSLOGO.png"}
+                  className="rounded-full h-12 md:h-14 border-2 border-gray-700"
                   alt="ATS Logo"
                 />
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent ml-2 hidden sm:block">
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text text-transparent ml-2 hidden sm:block">
                   <span className="font-extrabold text-xl md:text-2xl">
-                    { companyUserName ? company.CompanyUserName : "ATS" }
+                    {companyUserName ? company.CompanyUserName : "ATS"}
                   </span>
                 </span>
               </NavLink>
             </div>
 
-            {/* MAIN MENU - Desktop */ }
+            {/* MAIN MENU - Desktop */}
             <div className="hidden md:flex items-center justify-center space-x-8">
-              { navItems.map( ( item ) => {
+              {navItems.map((item) => {
                 const userRole = loginData?.role ? loginData?.role : null;
 
                 // Handle items with subItems (dropdown)
-                if ( item.subItems ) {
+                if (item.subItems) {
                   return (
-                    <div key={ item.label } className="relative group" ref={ dropdownRef }>
+                    <div key={item.label} className="relative group" ref={dropdownRef}>
                       <button
-                        className={ `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ item.subItems.some( subItem => location.pathname === ( userRole === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }` ) )
-                          ? "text-white bg-slate-600"
-                          : "text-gray-700 hover:text-white hover:border hover:border-white"
-                          }` }
+                        className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${item.subItems.some(subItem => location.pathname === (userRole === "super" ? subItem.path : `/${companyUserName}${subItem.path}`))
+                          ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
+                          : (theme === "dark"
+                            ? "text-gray-300 hover:text-white hover:bg-gray-800 hover:border-gray-700"
+                            : "text-gray-600 hover:text-purple-600 hover:bg-purple-50 hover:border-purple-100")
+                          }`}
                       >
-                        { item.icon }
-                        <span>{ item.label }</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                         <ChevronDown className="w-4 h-4 ml-1" />
                       </button>
 
-                      <div className="absolute left-0 mt-2 w-56 origin-top-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className={`absolute left-0 mt-2 w-56 origin-top-left rounded-md shadow-lg ring-1 focus:outline-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${theme === "dark" ? "bg-gray-900 ring-gray-800" : "bg-white ring-gray-200"
+                        }`}>
                         <div className="py-1">
-                          { item.subItems.map( ( subItem ) => {
-                            const to = userRole === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }`;
+                          {item.subItems.map((subItem) => {
+                            const to = userRole === "super" ? subItem.path : `/${companyUserName}${subItem.path}`;
                             return (
                               <NavLink
-                                key={ subItem.path }
-                                to={ to }
-                                onClick={ () => {
+                                key={subItem.path}
+                                to={to}
+                                onClick={() => {
                                   // Set sub_role for Hiring Manager only
-                                  if ( item.label === "Hiring Manager" ) {
-                                    localStorage.setItem( "sub_role", "hiring_manager" );
-                                  } else if ( item.label === "Recruiter Manager" ) {
-                                    localStorage.setItem( "sub_role", "recruiter_manager" );
-                                  } else if ( item.label === "Interviewer" ) {
-                                    localStorage.setItem( "sub_role", "interviewer" );
+                                  if (item.label === "Hiring Manager") {
+                                    localStorage.setItem("sub_role", "hiring_manager");
+                                  } else if (item.label === "Recruiter Manager") {
+                                    localStorage.setItem("sub_role", "recruiter_manager");
+                                  } else if (item.label === "Interviewer") {
+                                    localStorage.setItem("sub_role", "interviewer");
                                   }
-                                  setIsDropdownOpen( false );
-                                  setIsMenuOpen( false );
-                                } }
-                                className={ ( { isActive } ) =>
-                                  `flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${ isActive ? "bg-gray-100 font-medium" : ""
+                                  setIsDropdownOpen(false);
+                                  setIsMenuOpen(false);
+                                }}
+                                className={({ isActive }) =>
+                                  `flex items-center px-4 py-2 text-sm transition-colors ${isActive
+                                    ? (theme === "dark" ? "bg-gray-800 font-medium text-white" : "bg-purple-50 font-medium text-purple-700")
+                                    : (theme === "dark" ? "text-gray-300 hover:bg-gray-800" : "text-gray-600 hover:bg-gray-50")
                                   }`
                                 }
                               >
-                                { subItem.icon && <span className="mr-3">{ subItem.icon }</span> }
-                                { subItem.label }
+                                {subItem.icon && <span className="mr-3">{subItem.icon}</span>}
+                                {subItem.label}
                               </NavLink>
                             );
-                          } ) }
+                          })}
 
                         </div>
                       </div>
@@ -337,177 +346,198 @@ export const Navbar = () => {
 
                 // Handle regular items
                 const path = item.path;
-                const to = path === "/" ? `/${ companyUserName }` : userRole === "super" ? path : `/${ companyUserName }${ path }`;
+                const to = path === "/" ? `/${companyUserName}` : userRole === "super" ? path : `/${companyUserName}${path}`;
 
                 return (
                   <NavLink
-                    key={ path }
-                    to={ to }
-                    className={ ( { isActive } ) =>
-                      `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-600 ${ isActive
-                        ? "text-white bg-slate-600"
-                        : "text-gray-700 border border-gray-700 hover:text-white hover:border hover:border-white"
+                    key={path}
+                    to={to}
+                    className={({ isActive }) =>
+                      `flex items-center space-x-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                        ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
+                        : (theme === "dark"
+                          ? "text-gray-300 border border-transparent hover:text-white hover:border-gray-700 hover:bg-gray-800"
+                          : "text-gray-600 border border-transparent hover:text-purple-600 hover:border-purple-100 hover:bg-purple-50")
                       }`
                     }
                   >
-                    { item.icon }
-                    <span>{ item.label }</span>
+                    {item.icon}
+                    <span>{item.label}</span>
                   </NavLink>
                 );
-              } ) }
+              })}
             </div>
 
-            {/* User info or Login/Signup - Desktop */ }
+            {/* Theme Toggle - Desktop */}
             <div className="hidden md:flex items-center">
-              { loginData ? (
-                <div className="relative flex items-center space-x-4" ref={ userDropdownRef }>
+              <ThemeToggle />
+            </div>
+
+            {/* User info or Login/Signup - Desktop */}
+            <div className="hidden md:flex items-center">
+              {loginData ? (
+                <div className="relative flex items-center space-x-4" ref={userDropdownRef}>
                   <button
-                    onClick={ toggleDropdown }
-                    className="flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                    onClick={toggleDropdown}
+                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${theme === "dark"
+                      ? "text-white bg-gray-800 hover:bg-gray-700 focus:ring-gray-700"
+                      : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 focus:ring-purple-500"
+                      }`}
                   >
                     <UserCheck className="w-5 h-5 mr-2" />
-                    <span>{ loginData?.userName }</span>
+                    <span>{loginData?.userName}</span>
                     <ChevronDown className="w-4 h-4 ml-2" />
                   </button>
 
-                  { isDropdownOpen && (
-                    <div className="absolute right-0 top-12 w-48 mt-2 bg-white rounded-md shadow-lg z-100 py-1 ring-1 ring-black ring-opacity-5 transform origin-top-right transition-all">
+                  {isDropdownOpen && (
+                    <div className={`absolute right-0 top-12 w-48 mt-2 rounded-md shadow-lg z-100 py-1 ring-1 transform origin-top-right transition-all ${theme === "dark" ? "bg-gray-900 ring-gray-800" : "bg-white ring-gray-200"
+                      }`}>
                       <div className="flex flex-col items-center justify-center">
-                        <p className="text-xs text-gray-500 truncate mt-1">
-                          { loginData?.email }
+                        <p className="text-xs text-gray-400 truncate mt-1">
+                          {loginData?.email}
                         </p>
-                        <p className="text-xs text-blue-600 font-medium mt-1 capitalize">
-                          { loginData?.role?.replace( '_', ' ' ) }
+                        <p className="text-xs text-blue-400 font-medium mt-1 capitalize">
+                          {loginData?.role?.replace('_', ' ')}
                         </p>
                       </div>
-                      <hr className="my-1 border-gray-200" />
+                      <hr className="my-1 border-gray-800" />
                       <Link
-                        to={ companyUserName ? `/${ companyUserName }/profile` : "/profile" }
-                        onClick={ () => {
-                          setIsDropdownOpen( false );
-                          setIsMenuOpen( false );
-                        } }
-                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        to={companyUserName ? `/${companyUserName}/profile` : "/profile"}
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                       >
-                        <UserPen className="w-4 h-4 mr-3 text-gray-600" />
-                        <span>Profile</span>
+                        <UserPen className="w-4 h-4 mr-3 dark:text-gray-400 text-gray-800" />
+                        <span className="dark:text-gray-400 text-gray-800">Profile</span>
                       </Link>
-                      <hr className="my-1 border-gray-200" />
+                      <hr className="my-1 border-gray-800" />
                       <button
-                        onClick={ () => {
+                        onClick={() => {
                           logoutHandler();
-                          setIsDropdownOpen( false );
-                          setIsMenuOpen( false );
-                        } }
-                        className="flex w-full items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          setIsDropdownOpen(false);
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex w-full items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                       >
-                        <LogOut className="w-4 h-4 mr-3 text-gray-600 rounded" />
-                        <span>Logout</span>
+                        <LogOut className="w-4 h-4 mr-3 dark:text-gray-400 text-gray-800 rounded" />
+                        <span className="dark:text-gray-400 text-gray-800">Logout</span>
                       </button>
                     </div>
-                  ) }
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  { location.pathname !== "/" ? (
+                  {location.pathname !== "/" ? (
                     <>
                       <Link
-                        to={ companyUserName ? `/${ companyUserName }/login` : "/login" }
-                        className="px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:border hover:border-white rounded-xl hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                        to={companyUserName ? `/${companyUserName}/login` : "/login"}
+                        className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
+                          ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
+                          : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 focus:ring-purple-500"
+                          }`}
                       >
                         Login
                       </Link>
                       <Link
-                        to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
-                        className="px-4 py-2 text-sm font-medium text-white bg-gray-700 hover:border hover:border-white rounded-xl hover:bg-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                        to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
+                        className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
+                          ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
+                          : "text-white bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                          }`}
                       >
                         Sign Up
                       </Link>
                     </>
                   ) : (
                     <Link
-                      to={ companyUserName ? `/${ companyUserName }/login` : "/login" }
-                      className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-white rounded-xl hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-200"
+                      to={companyUserName ? `/${companyUserName}/login` : "/login"}
+                      className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
+                        ? "text-white bg-gray-800 border border-gray-700 hover:bg-gray-700 focus:ring-gray-700"
+                        : "text-purple-600 bg-white border border-purple-200 hover:bg-purple-50 focus:ring-purple-500"
+                        }`}
                     >
                       Login
                     </Link>
-                  ) }
+                  )}
                 </div>
 
-              ) }
+              )}
             </div>
 
-            {/* HAMBURGER MENU */ }
+            {/* HAMBURGER MENU */}
             <div className="md:hidden flex items-center">
               <button
-                onClick={ handlerIsMenuOpen }
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                onClick={handlerIsMenuOpen}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               >
-                { isMenuOpen ? (
+                {isMenuOpen ? (
                   <X className="block h-6 w-6" />
                 ) : (
                   <Menu className="block h-6 w-6" />
-                ) }
+                )}
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOBILE MENU */ }
+        {/* MOBILE MENU */}
         <div>
-          { isMenuOpen && (
+          {isMenuOpen && (
             <div
-              className="fixed inset-0 z-50 md:hidden bg-black bg-opacity-50"
-              onClick={ () => setIsMenuOpen( false ) }
+              className="fixed inset-0 z-50 md:hidden bg-black bg-opacity-70"
+              onClick={() => setIsMenuOpen(false)}
             >
               <div
-                className="absolute top-0 left-0 w-4/5 max-w-xs h-full bg-slate-800 p-4 overflow-y-auto"
-                onClick={ ( e ) => e.stopPropagation() }
+                className={`absolute top-0 left-0 w-4/5 max-w-xs h-full p-4 overflow-y-auto transition-colors duration-300 ${theme === "dark" ? "bg-gray-900" : "bg-white"
+                  }`}
+                onClick={(e) => e.stopPropagation()}
               >
-                {/* Navigation Items */ }
+                {/* Navigation Items */}
                 <div className="flex flex-col space-y-2 px-3">
-                  {/* Show normalNavItems when not logged in, or navItems when logged in */ }
-                  { ( loginData ? navItems : normalNavItem ).map( ( item ) => {
+                  {/* Show normalNavItems when not logged in, or navItems when logged in */}
+                  {(loginData ? navItems : normalNavItem).map((item) => {
                     // Handle items with subItems (dropdown)
-                    if ( item.subItems ) {
+                    if (item.subItems) {
                       return (
-                        <div key={ item.label } className="flex flex-col">
+                        <div key={item.label} className="flex flex-col">
                           <button
-                            className={ `flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${ item.subItems.some( subItem => location.pathname === ( loginData?.role === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }` ) )
-                              ? "text-white bg-slate-600"
-                              : "text-gray-300 hover:text-white hover:bg-slate-600"
-                              }` }
-                            onClick={ () => {
+                            className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${item.subItems.some(subItem => location.pathname === (loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`))
+                              ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
+                              : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
+                              }`}
+                            onClick={() => {
                               // Toggle subitems visibility for mobile
-                              const subItems = document.getElementById( `subitems-${ item.label }` );
-                              subItems.classList.toggle( 'hidden' );
-                            } }
+                              const subItems = document.getElementById(`subitems-${item.label}`);
+                              subItems.classList.toggle('hidden');
+                            }}
                           >
-                            { item.icon }
-                            <span>{ item.label }</span>
+                            {item.icon}
+                            <span>{item.label}</span>
                             <ChevronDown className="w-4 h-4 ml-1" />
                           </button>
 
-                          <div id={ `subitems-${ item.label }` } className="hidden pl-4">
-                            { item.subItems.map( ( subItem ) => {
-                              const to = loginData?.role === "super" ? subItem.path : `/${ companyUserName }${ subItem.path }`;
+                          <div id={`subitems-${item.label}`} className="hidden pl-4">
+                            {item.subItems.map((subItem) => {
+                              const to = loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`;
                               return (
                                 <NavLink
-                                  key={ subItem.path }
-                                  to={ to }
-                                  onClick={ () => setIsMenuOpen( false ) }
-                                  className={ ( { isActive } ) =>
-                                    `flex items-center px-3 py-2 rounded-md text-base font-medium ${ isActive
-                                      ? "text-white bg-slate-600"
-                                      : "text-gray-300 hover:text-white hover:bg-slate-600"
+                                  key={subItem.path}
+                                  to={to}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className={({ isActive }) =>
+                                    `flex items-center px-3 py-2 rounded-md text-base font-medium ${isActive
+                                      ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
+                                      : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
                                     }`
                                   }
                                 >
-                                  { subItem.icon && <span className="mr-3">{ subItem.icon }</span> }
-                                  { subItem.label }
+                                  {subItem.icon && <span className="mr-3">{subItem.icon}</span>}
+                                  {subItem.label}
                                 </NavLink>
                               );
-                            } ) }
+                            })}
                           </div>
                         </div>
                       );
@@ -515,49 +545,57 @@ export const Navbar = () => {
 
                     // Handle regular items
                     const path = item.path;
-                    const to = path === "/" ? `/${ companyUserName }` : loginData?.role === "super" ? path : `/${ companyUserName }${ path }`;
+                    const to = path === "/" ? `/${companyUserName}` : loginData?.role === "super" ? path : `/${companyUserName}${path}`;
 
                     return (
                       <NavLink
-                        key={ path }
-                        to={ to }
-                        onClick={ () => setIsMenuOpen( false ) }
-                        className={ ( { isActive } ) =>
-                          `flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${ isActive
-                            ? "text-white bg-slate-600"
-                            : "text-gray-300 hover:text-white hover:bg-slate-600"
+                        key={path}
+                        to={to}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${isActive
+                            ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
+                            : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
                           }`
                         }
                       >
-                        { item.icon }
-                        <span>{ item.label }</span>
+                        {item.icon}
+                        <span>{item.label}</span>
                       </NavLink>
                     );
-                  } ) }
+                  })}
                 </div>
 
-                {/* User Actions */ }
-                <div className="mt-6 pt-4 border-t border-gray-700 space-y-2">
-                  { loginData ? (
+                {/* Theme Toggle - Mobile */}
+                <div className="px-3 py-2 border-t border-gray-800">
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Theme:</span>
+                    <ThemeToggle />
+                  </div>
+                </div>
+
+                {/* User Actions */}
+                <div className="mt-6 pt-4 border-t border-gray-800 space-y-2">
+                  {loginData ? (
                     <>
-                      <div className="flex items-center px-3 py-2 text-base font-medium text-gray-300">
+                      <div className="flex items-center px-3 py-2 text-base font-medium dark:text-gray-300 ">
                         <UserCheck className="w-5 h-5 mr-3" />
-                        <span>Signed in as { loginData?.userName }</span>
+                        <span > Signed in as {loginData?.userName}</span>
                       </div>
                       <Link
-                        to={ `/${ companyUserName }/profile` }
-                        onClick={ () => setIsMenuOpen( false ) }
-                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
+                        to={`/${companyUserName}/profile`}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800"
                       >
-                        <UserPen className="w-5 h-5 mr-3" />
+                        <UserPen className="w-5 h-5 mr-3 " />
                         <span>Profile</span>
                       </Link>
                       <button
-                        onClick={ () => {
+                        onClick={() => {
                           logoutHandler();
-                          setIsMenuOpen( false );
-                        } }
-                        className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-600"
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800"
                       >
                         <LogOut className="w-5 h-5 mr-3" />
                         <span>Logout</span>
@@ -566,25 +604,25 @@ export const Navbar = () => {
                   ) : (
                     <>
                       <Link
-                        to={ companyUserName ? `/${ companyUserName }/login` : "/login" }
-                        onClick={ () => setIsMenuOpen( false ) }
-                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700"
+                        to={companyUserName ? `/${companyUserName}/login` : "/login"}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-gray-800 rounded-xl hover:bg-gray-700"
                       >
                         Login
                       </Link>
                       <Link
-                        to={ companyUserName ? `/${ companyUserName }/signup` : "/signup" }
-                        onClick={ () => setIsMenuOpen( false ) }
-                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-slate-600 rounded-xl hover:bg-slate-500"
+                        to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-gray-800 rounded-xl hover:bg-gray-700"
                       >
                         Sign Up
                       </Link>
                     </>
-                  ) }
+                  )}
                 </div>
               </div>
             </div>
-          ) }
+          )}
         </div>
       </nav>
     </div>
