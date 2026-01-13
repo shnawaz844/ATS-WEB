@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTheme } from '../../../context/ThemeContext';
 
 import { Link } from 'react-router-dom';
 import { getStatusColor } from './utils';
@@ -18,6 +19,7 @@ const ApplicationsTable = ({
     totalApplications,
     totalPages,
 }) => {
+    const { theme } = useTheme();
     const [searchInput, setSearchInput] = useState(search);
 
     // Modal state
@@ -126,7 +128,10 @@ const ApplicationsTable = ({
                     </div>
                     <input
                         type="search"
-                        className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-xl bg-white"
+                        className={`block w-full p-2 pl-10 text-sm border rounded-xl bg-white transition-colors duration-300 ${theme === 'dark'
+                            ? 'bg-white/10 border-gray-600 text-white placeholder-gray-400'
+                            : 'bg-white border-gray-300 text-gray-900'
+                            }`}
                         placeholder="Search by name..."
                         value={searchInput}
                         onChange={handleSearchChange}
@@ -135,26 +140,27 @@ const ApplicationsTable = ({
             </div>
 
             {/* Applications Table */}
-            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+            <div className={`overflow-x-auto rounded-xl border shadow-sm transition-colors duration-300 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                }`}>
                 <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-700">
+                    <thead className={theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}>
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Candidate
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Email
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Contact
                             </th>
-                            {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Resume
                             </th>)}
-                            {((!subUserRole || subUserRole === 'hiring_manager') && !isRecruiterManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                            {((!subUserRole || subUserRole === 'hiring_manager') && !isRecruiterManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Actions
                             </th>)}
                             {/* { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
@@ -169,7 +175,8 @@ const ApplicationsTable = ({
                             ) } */}
                         </tr>
                     </thead>
-                    <tbody className="bg-gray-300 divide-y divide-gray-200">
+                    <tbody className={`divide-y divide-gray-200 transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 divide-gray-700' : 'bg-gray-100'
+                        }`}>
                         {filteredApps?.length > 0 ? (
                             filteredApps.map((app) => {
                                 // Prepare candidateID & jobID for the link
@@ -178,7 +185,8 @@ const ApplicationsTable = ({
                                 const statusColor = getStatusColor(app.applicationStatusId);
 
                                 return (
-                                    <tr key={app._id} className="group hover:bg-gray-700 ">
+                                    <tr key={app._id} className={`group transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-700'
+                                        }`}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 h-10 w-10">
@@ -203,9 +211,10 @@ const ApplicationsTable = ({
                                         </td>
 
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-400 group-hover:text-gray-200' : 'text-gray-500 group-hover:text-white'}`}>
                                             <select
-                                                className="min-w-32 w-auto px-4 py-2 rounded-xl bg-gray-700 text-white border border-gray-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm"
+                                                className={`min-w-32 w-auto px-4 py-2 rounded-xl border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-gray-700 text-white border-gray-400'
+                                                    }`}
                                                 value={app.applicationStatusId}
                                                 onChange={e => handleSelect(app._id, e.target.value)}
                                             >
@@ -228,7 +237,7 @@ const ApplicationsTable = ({
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={() => onViewResume(app)}
-                                                    className="text-blue-600 hover:text-blue-800 hover:underline group-hover:text-white"
+                                                    className="text-[#9333ea] hover:text-purple-800 hover:underline group-hover:text-white"
                                                 >
                                                     View Resume
                                                 </button>
@@ -249,7 +258,8 @@ const ApplicationsTable = ({
                             })
                         ) : (
                             <tr>
-                                <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colSpan="5" className={`px-6 py-4 text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                                    }`}>
                                     No applications found matching your search criteria
                                 </td>
                             </tr>
@@ -292,8 +302,10 @@ const ApplicationsTable = ({
                                     key={pageNumber}
                                     onClick={() => handlePageChange(pageNumber)}
                                     className={`px-3 py-1 border rounded text-sm ${pageNumber === currentPage
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : theme === 'dark'
+                                            ? 'bg-gray-800 text-gray-300 border-gray-700 hover:bg-gray-700'
+                                            : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
                                         }`}
                                 >
                                     {pageNumber}

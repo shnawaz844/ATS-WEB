@@ -188,32 +188,32 @@ const UserListing = () => {
   console.log("formData", formData);
 
   return (
-    <div className="sm:px-8 sm:py-4 py-2 px-2 w-full min-h-screen"
-      style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
-    >
+    <div className="sm:px-8 sm:py-4 py-2 px-2 w-full min-h-screen bg-white dark:bg-black transition-colors duration-300">
       <BackButtonMobile />
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className='mb-6 h-auto min-h-[15vh] flex flex-col sm:flex-row items-center justify-between rounded-xl p-4 sm:p-6 bg-gray-700 gap-4 sm:gap-0'>
+        <div className='mb-6 h-auto min-h-[15vh] flex flex-col sm:flex-row items-center justify-between rounded-xl p-4 sm:p-6 backdrop-blur-xl bg-gray-200 dark:bg-transparent dark:border border-gray-600  shadow-sm gap-4 sm:gap-0'>
           <div className="flex items-center w-full sm:w-auto gap-4">
-            <Users className="h-6 w-6 text-white" />
-            <h1 className="text-xl sm:text-2xl font-bold text-white">User Management</h1>
+            <div className="p-3 bg-[#9333ea]/10 rounded-full">
+              <Users className="h-6 w-6 text-[#9333ea] dark:text-[#9333ea]" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <div className="relative w-full sm:w-[20vw] min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search users..."
                 value={search}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#9333ea] focus:border-transparent transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
 
             <button
               onClick={handleOpenAddDialog}
-              className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-gray-700 text-white rounded-xl hover:bg-gray-600 hover:text-white border border-white transition-colors duration-200 whitespace-nowrap shadow-sm"
+              className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors duration-200 whitespace-nowrap shadow-md"
             >
               <Plus className="h-4 w-4 mr-2" />
               <span className="font-medium">Add User</span>
@@ -223,11 +223,11 @@ const UserListing = () => {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader className="h-8 w-8 text-indigo-600 animate-spin" />
+            <Loader className="h-8 w-8 text-[#9333ea] animate-spin" />
           </div>
         ) : isError ? (
-          <div className="bg-red-50 p-4 rounded-lg border border-red-200 my-6">
-            <p className="text-red-600 flex items-center">
+          <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800 my-6">
+            <p className="text-red-600 dark:text-red-400 flex items-center">
               <span className="mr-2">⚠️</span>
               Error: {error.message}
             </p>
@@ -238,17 +238,17 @@ const UserListing = () => {
               {users.map((user) => (
                 <div
                   key={user._id}
-                  className="bg-white p-4 sm:p-5 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200 flex flex-col"
+                  className="backdrop-blur-xl bg-white dark:bg-white/5 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#9333ea]/50 dark:hover:border-[#9333ea]/50 hover:shadow-lg transition-all duration-200 flex flex-col"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                      <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gradient-to-br from-[#9333ea] to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-md">
                         {user.userName.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-base sm:text-lg">{capitalizeFirstLetter(user.userName)}</h3>
-                        <p className="text-xs sm:text-sm text-gray-600">{user.email}</p>
-                        <p className="text-xs sm:text-sm text-gray-600">{getCompanyNameById(user.company_id)}</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">{capitalizeFirstLetter(user.userName)}</h3>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{getCompanyNameById(user.company_id)}</p>
 
                       </div>
 
@@ -256,17 +256,17 @@ const UserListing = () => {
                     <div className='flex gap-1 sm:gap-2'>
                       <button
                         onClick={() => handleOpenEditDialog(user)}
-                        className="sm:p-2 p-1 hover:bg-gray-100 rounded-full transition-colors "
+                        className="sm:p-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-full transition-colors "
                         aria-label="Edit user"
                       >
-                        <Edit className="h-4 w-4 text-gray-500" />
+                        <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user._id)}
-                        className="sm:p-2 p-1 hover:bg-red-50 rounded-full transition-colors"
+                        className="sm:p-2 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                         aria-label="Delete user"
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
                       </button>
                     </div>
 
@@ -293,8 +293,8 @@ const UserListing = () => {
                   </div>
 
                   {user.address && (
-                    <p className="sm:px-3 px-2 py-1 text-xs sm:text-sm text-gray-600 flex items-center">
-                      <MapPin className="sm:h-4 h-3 w-3 sm:w-4 mr-1 text-gray-400" />
+                    <p className="sm:px-3 px-2 py-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                      <MapPin className="sm:h-4 h-3 w-3 sm:w-4 mr-1 text-gray-400 dark:text-gray-500" />
                       {user.address}
                     </p>
                   )}
@@ -305,12 +305,12 @@ const UserListing = () => {
             {/* Empty state */}
             {users.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center">
-                <User className="sm:h-16 h-12 sm:w-16 w-12 text-gray-300 sm:mb-4 mb-3" />
-                <h3 className="sm:text-lg text-base font-medium text-gray-900 mb-1">No users found</h3>
-                <p className="sm:text-lg text-base text-gray-500 sm:mb-4 mb-3">Try adjusting your search or add a new user</p>
+                <User className="sm:h-16 h-12 sm:w-16 w-12 text-gray-300 dark:text-gray-600 sm:mb-4 mb-3" />
+                <h3 className="sm:text-lg text-base font-medium text-gray-900 dark:text-white mb-1">No users found</h3>
+                <p className="sm:text-lg text-base text-gray-500 dark:text-gray-400 sm:mb-4 mb-3">Try adjusting your search or add a new user</p>
                 <button
                   onClick={handleOpenAddDialog}
-                  className="sm:px-4 px-3 sm:py-2 py-1 bg-gray-700 text-white rounded-xl hover:bg-gray-400 transition-colors text-sm sm:text-base"
+                  className="sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base"
                 >
                   <Plus className="sm:h-4 h-3 sm:w-4 w-3 inline sm:mr-2 mr-1" />
                   Add User
@@ -320,13 +320,13 @@ const UserListing = () => {
 
             {/* Pagination */}
             {users.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-3 sm:pt-4 mt-3 sm:mt-4 gap-3 sm:gap-0">
+              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4 mt-3 sm:mt-4 gap-3 sm:gap-0">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage <= 1}
                   className={`flex items-center px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg border ${currentPage <= 1
-                    ? 'bg-gray-400 text-white border-gray-200 cursor-not-allowed rounded-xl'
-                    : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
+                    ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
                     }`}
                 >
                   <ChevronLeft className="sm:h-4 h-3 sm:w-4 w-3 mr-1" />
@@ -334,7 +334,7 @@ const UserListing = () => {
                 </button>
 
                 <div className="flex items-center">
-                  <span className="sm:px-3 px-4 py-1 text-sm bg-gray-200 text-black font-medium rounded-xl">
+                  <span className="sm:px-3 px-4 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-black dark:text-white font-medium rounded-xl">
                     Page {currentPage} of {totalPages}
                   </span>
                 </div>
@@ -343,8 +343,8 @@ const UserListing = () => {
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage >= totalPages}
                   className={`flex items-center px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg border ${currentPage >= totalPages
-                    ? 'bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed rounded-xl'
-                    : 'bg-gray-700 text-white border-gray-300 hover:bg-gray-400 rounded-xl'
+                    ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
                     }`}
                 >
                   Next

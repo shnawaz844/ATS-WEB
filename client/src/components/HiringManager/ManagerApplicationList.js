@@ -8,7 +8,10 @@ import {
 } from 'lucide-react';
 import BackButtonMobile from '../Mob-back-btn';
 
+import { useTheme } from '../../context/ThemeContext';
+
 const ApplicationList = () => {
+    const { theme } = useTheme();
     const [formInputs, setFormInputs] = useState({
         title: '',
         city: '',
@@ -91,16 +94,34 @@ const ApplicationList = () => {
         control: (provided) => ({
             ...provided,
             borderRadius: '0.5rem',
-            borderColor: '#e2e8f0',
+            borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
+            backgroundColor: theme === 'dark' ? '#1f2937' : 'white',
+            color: theme === 'dark' ? 'white' : 'black',
             boxShadow: 'none',
             '&:hover': {
-                borderColor: '#cbd5e1'
+                borderColor: theme === 'dark' ? '#4b5563' : '#cbd5e1'
             }
         }),
         option: (provided, state) => ({
             ...provided,
-            backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#eff6ff' : null,
-            color: state.isSelected ? 'white' : '#1e293b',
+            backgroundColor: state.isSelected
+                ? '#3b82f6'
+                : state.isFocused
+                    ? (theme === 'dark' ? '#374151' : '#eff6ff')
+                    : (theme === 'dark' ? '#1f2937' : 'white'),
+            color: state.isSelected ? 'white' : (theme === 'dark' ? 'white' : '#1e293b'),
+        }),
+        singleValue: (provided) => ({
+            ...provided,
+            color: theme === 'dark' ? 'white' : 'black',
+        }),
+        input: (provided) => ({
+            ...provided,
+            color: theme === 'dark' ? 'white' : 'black',
+        }),
+        menu: (provided) => ({
+            ...provided,
+            backgroundColor: theme === 'dark' ? '#1f2937' : 'white',
         }),
     };
 
@@ -124,18 +145,18 @@ const ApplicationList = () => {
     const allJobs = jobData?.data || [];
 
     return (
-        <div className="px-8 py-4 w-full min-h-screen"
-            style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
-        >
+        <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+            }`}>
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className='mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                    <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
+                        }`}>
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
                             <div className="w-full md:w-auto">
-                                <h2 className="text-xl md:text-3xl font-bold text-white flex items-center">
-                                    <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-white" />
+                                <h2 className="text-xl md:text-3xl font-bold dark:text-[#9333ea] text-[#9333ea] flex items-center">
+                                    <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 dark:text-[#fff] text-[#000]" />
                                     Manage Applications
                                 </h2>
                             </div>
@@ -152,11 +173,17 @@ const ApplicationList = () => {
                                         value={formInputs.title}
                                         onChange={handleFilterChange}
                                         placeholder="Search job titles..."
-                                        className="w-full pl-8 md:pl-10 pr-4 py-2 md:py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[5vh] md:h-[6.3vh]"
+                                        className={`w-full pl-8 md:pl-10 pr-4 py-2 md:py-3 border shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[5vh] md:h-[6.3vh] ${theme === 'dark'
+                                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
+                                            : 'bg-white border-gray-300 text-gray-900'
+                                            }`}
                                     />
                                 </div>
                                 <button
-                                    className="inline-flex border items-center px-4 py-1.5 bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm w-full md:w-auto justify-center"
+                                    className={`inline-flex border items-center px-4 py-1.5 rounded-xl font-medium transition-colors duration-200 shadow-sm w-full md:w-auto justify-center ${theme === 'dark'
+                                        ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700'
+                                        : 'bg-gray-300 border-gray-300 text-black hover:bg-gray-700 hover:text-white hover:border-gray-200'
+                                        }`}
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                 >
                                     {isFilterOpen ? "Hide Filters" : "Show Filters"}
@@ -180,11 +207,12 @@ const ApplicationList = () => {
                     {/* Filters Section */}
                     <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>
                         <div className={isFilterOpen ? 'block' : 'hidden'}>
-                            <div className="max-w-7xl mx-auto bg-gradient-to-br from-gray-300 to-gray-100 p-6 rounded-2xl shadow-lg border-0">
+                            <div className={`max-w-7xl mx-auto p-6 rounded-2xl shadow-lg border-0 ${theme === 'dark' ? 'bg-white/10 border border-gray-800' : 'bg-gradient-to-br from-gray-300 to-gray-100'
+                                }`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
                                     {/* Location Search */}
                                     <div className="lg:col-span-3">
-                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                        <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <MapPin className="mr-2 h-4 w-4 text-blue-500" />
                                             <span>Location</span>
                                         </div>
@@ -194,17 +222,20 @@ const ApplicationList = () => {
                                             value={formInputs.city}
                                             onChange={handleFilterChange}
                                             placeholder="Any location"
-                                            className="w-full px-4 py-3.5 border-0 bg-white/80 backdrop-blur-sm shadow-md rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-300/50 focus:bg-white transition-all duration-300 h-[6.3vh] placeholder-slate-400 text-slate-700"
+                                            className={`w-full px-4 py-3.5 border-0 backdrop-blur-sm shadow-md rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-300/50 transition-all duration-300 h-[6.3vh] ${theme === 'dark'
+                                                ? 'bg-gray-800/80 text-white placeholder-gray-500 focus:bg-gray-800'
+                                                : 'bg-white/80 text-slate-700 placeholder-slate-400 focus:bg-white'
+                                                }`}
                                         />
                                     </div>
 
                                     {/* Employment Type Dropdown */}
                                     <div className="lg:col-span-2">
-                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                        <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
                                             <span>Job Type</span>
                                         </div>
-                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                        <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                             <Select
                                                 options={employmentTypes}
                                                 value={employmentTypes.find(opt => opt.value === formInputs.type)}
@@ -235,11 +266,11 @@ const ApplicationList = () => {
 
                                     {/* Schedule Type Dropdown */}
                                     <div className="lg:col-span-2">
-                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                        <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Clock className="mr-2 h-4 w-4 text-purple-500" />
                                             <span>Schedule</span>
                                         </div>
-                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                        <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                             <Select
                                                 options={scheduleTypes}
                                                 value={scheduleTypes.find(opt => opt.value === formInputs.scheduleType)}
@@ -270,11 +301,11 @@ const ApplicationList = () => {
 
                                     {/* Hire Type Dropdown */}
                                     <div className="lg:col-span-2">
-                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                        <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Briefcase className="mr-2 h-4 w-4 text-orange-500" />
                                             <span>Hire Type</span>
                                         </div>
-                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                        <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                             <Select
                                                 options={hireTypes}
                                                 value={hireTypes.find(opt => opt.value === formInputs.hireType)}
@@ -305,11 +336,11 @@ const ApplicationList = () => {
 
                                     {/* Location Type Dropdown */}
                                     <div className="lg:col-span-2">
-                                        <div className="flex items-center mb-2 text-slate-600 text-sm font-medium">
+                                        <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <MapPin className="mr-2 h-4 w-4 text-teal-500" />
                                             <span>Location Type</span>
                                         </div>
-                                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-md">
+                                        <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                             <Select
                                                 options={locationTypes}
                                                 value={locationTypes.find(opt => opt.value === formInputs.locationType)}
@@ -354,7 +385,7 @@ const ApplicationList = () => {
 
                     {/* Results Count */}
                     <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
-                        <span className="text-sm text-gray-600">
+                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                             {allJobs?.length > 0 ? (
                                 <>Showing <span className="font-medium">{allJobs?.length}</span> of <span className="font-medium">{jobData.totalJobs || 0}</span> jobs</>
                             ) : (
@@ -393,21 +424,22 @@ const ApplicationList = () => {
                         {allJobs?.length > 0 ? (
                             <table className="w-full divide-y divide-gray-200">
                                 <thead>
-                                    <tr className="bg-gray-700 text-left">
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Job Title</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Location</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Type</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Schedule</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Applications</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-white uppercase tracking-wider">Actions</th>
+                                    <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'} text-left`}>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Job Title</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Location</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Type</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Schedule</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Applications</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                                     {allJobs.map((job) => (
-                                        <tr key={job.jobID} className="group hover:bg-gray-700 transition-colors duration-150">
+                                        <tr key={job.jobID} className={`group transition-colors duration-150 ${theme === 'dark' ? 'hover:bg-gray-800 bg-[#1a1a1a]' : 'hover:bg-gray-700 bg-gray-100'
+                                            }`}>
                                             <td className="px-6 py-5 whitespace-nowrap">
-                                                <div className="text-sm font-medium group-hover:text-white">{capitalizeFirstLetter(job.title)}</div>
-                                                <div className="text-xs text-gray-500 mt-1 group-hover:text-white">
+                                                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>{capitalizeFirstLetter(job.title)}</div>
+                                                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500 group-hover:text-white'}`}>
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
                                                         {job.hireType || "New"}
                                                     </span>
@@ -416,29 +448,30 @@ const ApplicationList = () => {
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
+                                            <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'group-hover:text-white'}`}>
                                                 <div className="flex items-start">
                                                     <MapPin className="h-4 w-4 text-gray-400 mt-0.5 mr-1 flex-shrink-0" />
                                                     <div>
-                                                        <div className="text-sm text-gray-900 group-hover:text-white">{job.city || 'N/A'}</div>
+                                                        <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.city || 'N/A'}</div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
-                                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">{job.type || 'N/A'}</div>
+                                            <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
+                                                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.type || 'N/A'}</div>
                                             </td>
-                                            <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
-                                                <div className="text-sm font-medium text-gray-900 group-hover:text-white">{job.scheduleType || 'N/A'}</div>
+                                            <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
+                                                <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.scheduleType || 'N/A'}</div>
                                             </td>
                                             <td className="px-6 py-5 whitespace-nowrap text-center">
                                                 <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(job.applicationCount)}`}>
                                                     {job.applicationCount}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-5 whitespace-nowrap text-sm group-hover:text-white">
+                                            <td className={`px-6 py-5 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
                                                 <button
                                                     onClick={() => navigate(`/${companyUserName}/job-detail/${job.jobID}`)}
-                                                    className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200"
+                                                    className={`flex items-center font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 group-hover:text-white'
+                                                        }`}
                                                 >
                                                     <Eye className="h-4 w-4 mr-1" />
                                                     View
@@ -450,14 +483,14 @@ const ApplicationList = () => {
                             </table>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                                <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                <div className={`p-5 rounded-full mb-4 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
                                     <Briefcase className="h-12 w-12 text-gray-400" />
                                 </div>
                                 <div className="text-center animate-fade-in transition-all duration-500">
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                    <h3 className={`text-2xl font-bold mb-3 tracking-tight leading-snug ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
                                         No Applications Found
                                     </h3>
-                                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                    <p className={`text-md max-w-md mx-auto leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                         It looks like there are no matching applications at the moment.
                                         <br className="hidden sm:block" />
                                         <span className="text-blue-500 font-medium">Try adjusting your filters</span> or come back later.

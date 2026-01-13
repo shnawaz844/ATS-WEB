@@ -22,6 +22,7 @@ import {
     BookText
 } from 'lucide-react';
 import BackButtonMobile from '../../components/Mob-back-btn';
+import { useTheme } from '../../context/ThemeContext';
 
 const fetchApplicationStatuses = async ({ filters = {}, page = 1, limit = 100 }) => {
     const queryParams = new URLSearchParams(filters).toString();
@@ -42,6 +43,7 @@ const fetchApplicationStatuses = async ({ filters = {}, page = 1, limit = 100 })
 
 
 const MyJobs = () => {
+    const { theme } = useTheme();
     const [loginData, setLoginData] = useState(null);
     const [applications, setApplications] = useState([]);
     const [selectedApp, setSelectedApp] = useState(null);
@@ -84,17 +86,24 @@ const MyJobs = () => {
     };
 
     const getStatusColor = (status) => {
+        // Theme-aware status colors could be handled here if needed, 
+        // but these are specific status colors. I'll leave them as is or adjust brightness for dark mode if requested.
+        // For now, these colors (bg-blue-100, etc.) are light.
+        // I will make them slightly darker for dark mode if possible, but they are semantic.
+        // Let's stick to these for now or use opacities.
+        // Actually, for dark mode consistency, I should use darker backgrounds or text.
+        // But let's check if I can just use existing ones for now.
         switch (status) {
             case 'New Submission':
-                return 'bg-blue-100 text-blue-800';
+                return theme === 'dark' ? 'bg-blue-900/30 text-blue-300 border border-blue-800' : 'bg-blue-100 text-blue-800';
             case 'In Review':
-                return 'bg-yellow-100 text-yellow-800';
+                return theme === 'dark' ? 'bg-yellow-900/30 text-yellow-300 border border-yellow-800' : 'bg-yellow-100 text-yellow-800';
             case 'Accepted':
-                return 'bg-green-100 text-green-800';
+                return theme === 'dark' ? 'bg-green-900/30 text-green-300 border border-green-800' : 'bg-green-100 text-green-800';
             case 'Rejected':
-                return 'bg-red-100 text-red-800';
+                return theme === 'dark' ? 'bg-red-900/30 text-red-300 border border-red-800' : 'bg-red-100 text-red-800';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return theme === 'dark' ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -203,11 +212,10 @@ const MyJobs = () => {
 
 
     return (
-        <div className="px-8 py-4 w-full min-h-screen"
-            style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
+        <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}
         >
             <BackButtonMobile />
-            <div className='mb-6 h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+            <div className={`mb-6 h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-700'}`}>
                 <div className="flex justify-center items-center w-full">
                     <h1 className="text-center text-2xl md:text-3xl font-bold text-white flex justify-start items-center">
                         <Briefcase className="inline-block mr-4 mb-1 text-white" />
@@ -228,11 +236,12 @@ const MyJobs = () => {
                         return (
                             <div
                                 key={app._id}
-                                className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                                className={`rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                                    }`}
                             >
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-3">
-                                        <h2 className="text-xl font-bold text-gray-800 capitalize line-clamp-1">
+                                        <h2 className={`text-xl font-bold capitalize line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                                             {capitalizeFirstLetter(app.jobID?.title)}
                                         </h2>
                                         <span
@@ -245,50 +254,50 @@ const MyJobs = () => {
                                     </div>
 
                                     <div className="space-y-2 mb-4">
-                                        <p className="text-sm text-gray-600 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <CircleUser className="h-4 w-4 mr-2" />
                                             {capitalizeFirstLetter(app.candidateID.userName)}
                                         </p>
-                                        <p className="text-sm text-gray-600 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <Mail className="h-4 w-4 mr-2" />
                                             {app.candidateID.email}
                                         </p>
-                                        <p className="text-sm text-gray-600 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <FolderDown className="h-4 w-4 mr-2" />
                                             {app.jobID?.locationType}
                                         </p>
-                                        <p className="text-sm text-gray-700 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                             <MapPin className="h-4 w-4 mr-2" />
                                             {app.jobID?.city}, {app.jobID?.state}
                                         </p>
-                                        <p className="text-sm text-gray-600 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <Clock className="h-4 w-4 mr-2" />
                                             {app.jobID?.shiftStart} - {app.jobID?.shiftEnd}
                                         </p>
-                                        <p className="text-sm text-gray-600 flex items-center">
+                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <div className="h-14 overflow-y-auto pr-1 flex">
                                                 <BookText className="h-4 w-4 mr-2" />
                                                 {capitalizeFirstLetter(app.experience || 'No experience specified')}
                                             </div>
                                         </p>
                                         {app.submittedAt && (
-                                            <p className="text-sm text-gray-600 flex items-center">
+                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                                 <CalendarDays className="h-4 w-4 mr-2" />
                                                 Applied: {new Date(app.submittedAt).toLocaleDateString()}
                                             </p>
                                         )}
                                     </div>
 
-                                    <div className="flex justify-between mt-5 pt-3 border-t border-gray-100">
+                                    <div className={`flex justify-between mt-5 pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
                                         <button
-                                            onClick={ () => {
-                                                if ( app && app._id ) { 
-                                                    setSelectedApp( app );
-                                                    setIsModalOpen( true );
+                                            onClick={() => {
+                                                if (app && app._id) {
+                                                    setSelectedApp(app);
+                                                    setIsModalOpen(true);
                                                 } else {
-                                                    toast.error( 'Unable to load application details' );
+                                                    toast.error('Unable to load application details');
                                                 }
-                                            } }
+                                            }}
                                             className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
                                         >
                                             <EyeIcon className="h-4 w-4 mr-1" /> View
@@ -300,12 +309,12 @@ const MyJobs = () => {
                     })}
                 </div>
             ) : (
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-12 text-center">
+                <div className={`rounded-xl shadow-lg border p-12 text-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <div className="flex justify-center mb-4">
-                        <Briefcase className="h-16 w-16 text-gray-300" />
+                        <Briefcase className={`h-16 w-16 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800">No applications yet</h3>
-                    <p className="mt-2 text-gray-600 max-w-md mx-auto">You haven't submitted any job applications yet. Start exploring open positions to begin your journey.</p>
+                    <h3 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>No applications yet</h3>
+                    <p className={`mt-2 max-w-md mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>You haven't submitted any job applications yet. Start exploring open positions to begin your journey.</p>
                     <button className="mt-6 bg-gray-700 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition-colors shadow-md">
                         Find Jobs
                     </button>
@@ -321,7 +330,7 @@ const MyJobs = () => {
                     >
                         <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                     </button>
-                    <span className="px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200">
+                    <span className={`px-4 py-2 rounded-lg shadow-md border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'}`}>
                         Page {currentPage} of {totalPages}
                     </span>
                     <button
@@ -351,27 +360,27 @@ const MyJobs = () => {
                             </button>
                         </div>
 
-                        <div className="max-h-[calc(90vh-80px)] overflow-y-auto p-8 space-y-8">
+                        <div className={`max-h-[calc(90vh-80px)] overflow-y-auto p-8 space-y-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : ''}`}>
                             {/* Job Info */}
-                            <div className="bg-gray-200 rounded-xl p-6 border border-blue-100">
-                                <h3 className="text-lg font-semibold mb-4 text-blue-800 flex items-center">
+                            <div className={`rounded-xl p-6 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-200 border-blue-100'}`}>
+                                <h3 className={`text-lg font-semibold mb-4 flex items-center ${theme === 'dark' ? 'text-blue-400' : 'text-blue-800'}`}>
                                     <Briefcase className="h-5 w-5 mr-2" />
                                     Job Information
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                                        <p className="text-sm font-medium text-gray-500 mb-1">Title</p>
-                                        <p className="font-semibold text-gray-800">{selectedApp?.jobID?.title}</p>
+                                    <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
+                                        <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Title</p>
+                                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{selectedApp?.jobID?.title}</p>
                                     </div>
-                                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                                        <p className="text-sm font-medium text-gray-500 mb-1">Location</p>
-                                        <p className="font-semibold text-gray-800">
+                                    <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
+                                        <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
+                                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                                             {selectedApp?.jobID?.city}, {selectedApp?.jobID?.state}
                                         </p>
                                     </div>
-                                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                                        <p className="text-sm font-medium text-gray-500 mb-1">Schedule</p>
-                                        <p className="font-semibold text-gray-800">
+                                    <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
+                                        <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Schedule</p>
+                                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                                             {selectedApp?.jobID?.shiftStart} - {selectedApp?.jobID?.shiftEnd}
                                         </p>
                                     </div>
@@ -380,7 +389,7 @@ const MyJobs = () => {
 
                             {/* Resume Upload */}
                             <div className="space-y-1">
-                                <label className="block text-gray-700 font-medium mb-1">Upload Resume</label>
+                                <label className={`block font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Upload Resume</label>
                                 <div className="relative">
                                     <input
                                         type="file"
@@ -389,7 +398,7 @@ const MyJobs = () => {
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                         required
                                     />
-                                    <div className="flex items-center justify-between px-4 py-3 border border-gray-300 border-dashed rounded-md bg-gray-50 text-gray-500">
+                                    <div className={`flex items-center justify-between px-4 py-3 border border-dashed rounded-md ${theme === 'dark' ? 'border-gray-600 bg-gray-800 text-gray-400' : 'border-gray-300 bg-gray-50 text-gray-500'}`}>
                                         <div className="flex items-center">
                                             <FileUp size={18} className="mr-2" />
                                             <span>{file ? file.name : "Upload your resume"}</span>
@@ -402,7 +411,7 @@ const MyJobs = () => {
 
                             {/* Contact Info */}
                             <div>
-                                <label className="block text-gray-700 font-medium mb-2 flex items-center">
+                                <label className={`font-medium mb-2 flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                     <Phone className="h-4 w-4 mr-2" />
                                     Contact Information
                                 </label>
@@ -412,13 +421,14 @@ const MyJobs = () => {
                                     value={updatedApplication?.contactInfo || ''}
                                     onChange={handleInputChange}
                                     placeholder="Phone, email, or other contact methods"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                        }`}
                                 />
                             </div>
 
                             {/* Experience */}
                             <div>
-                                <label className="block text-gray-700 font-medium mb-2 flex items-center">
+                                <label className={`font-medium mb-2 flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                     <FileText className="h-4 w-4 mr-2" />
                                     Work Experience
                                 </label>
@@ -427,28 +437,30 @@ const MyJobs = () => {
                                     value={updatedApplication?.experience || ''}
                                     onChange={handleInputChange}
                                     placeholder="Describe your relevant work experience"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                        }`}
                                     rows="4"
                                 />
                             </div>
 
                             {/* Questions */}
                             {updatedApplication?.questions?.map((question, index) => (
-                                <div key={index} className="bg-green-50 p-4 border border-green-200 rounded-xl space-y-2">
-                                    <label className="block text-sm font-semibold text-green-700">Question {index + 1}</label>
-                                    <div className="bg-white p-3 rounded border border-gray-200 text-gray-700">{question}</div>
-                                    <label className="block text-sm font-medium text-gray-600">Your Answer</label>
+                                <div key={index} className={`p-4 border rounded-xl space-y-2 ${theme === 'dark' ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'}`}>
+                                    <label className={`block text-sm font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>Question {index + 1}</label>
+                                    <div className={`p-3 rounded border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{question}</div>
+                                    <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Your Answer</label>
                                     <textarea
                                         value={updatedApplication?.answers[index] || ''}
                                         onChange={(e) => handleQuestionAnswerChange(index, 'answers', e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                            }`}
                                         rows="3"
                                     />
                                 </div>
                             ))}
 
                             {/* Footer */}
-                            <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                            <div className={`flex justify-end space-x-4 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
                                     className="flex items-center px-4 py-2 bg-gray-300 text-gray-800 rounded-xl hover:bg-gray-300 transition-colors"

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../../../context/ThemeContext';
 
 const ShortlistedApplications = ({ email }) => {
+  const { theme } = useTheme();
   const [shortlistedData, setShortlistedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +43,7 @@ const ShortlistedApplications = ({ email }) => {
   useEffect(() => {
     const fetchShortlistedApplications = async () => {
       try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/get-application-hm/${email}`);
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/application/get-application-hm/${email}`);
         if (!response.ok) {
           throw new Error(`Server error: ${response.status}`);
         }
@@ -59,7 +61,7 @@ const ShortlistedApplications = ({ email }) => {
 
     fetchShortlistedApplications();
   }, [email]);
-  console.log( "fetchShortlistedApplications", setShortlistedData )
+  console.log("fetchShortlistedApplications", setShortlistedData)
 
   if (loading) {
     return <p className="text-center mt-4">Loading...</p>;
@@ -78,19 +80,20 @@ const ShortlistedApplications = ({ email }) => {
   const applicationsToDisplay = shortlistedData.length === 0 ? dummyData : shortlistedData;
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-2xl font-bold mb-4">Shortlisted Applications</h2>
+    <div className={`container mx-auto px-4 py-6 transition-colors duration-300 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Shortlisted Applications</h2>
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 shadow-md rounded">
+        <table className={`min-w-full border shadow-md rounded transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          }`}>
           <thead>
             <tr>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Job Title</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Location</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Type</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Schedule</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Shift</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Compensation</th>
-              <th className="py-3 px-4 bg-gray-100 border-b border-gray-200 text-left">Action</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Job Title</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Location</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Type</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Schedule</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Shift</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Compensation</th>
+              <th className={`py-3 px-4 border-b text-left ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-200 text-gray-900'}`}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -98,14 +101,14 @@ const ShortlistedApplications = ({ email }) => {
               const { jobId, title, location, type, schedule, shift, compensation } = application;
 
               return (
-                <tr key={jobId}>
-                  <td className="py-3 px-4 border-b border-gray-200">{title || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{location || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{type || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{schedule || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{shift || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">{compensation || 'N/A'}</td>
-                  <td className="py-3 px-4 border-b border-gray-200">
+                <tr key={jobId} className={`transition-colors duration-200 ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{title || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{location || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{type || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{schedule || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{shift || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700 text-gray-300' : 'border-gray-200 text-gray-900'}`}>{compensation || 'N/A'}</td>
+                  <td className={`py-3 px-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                     <button
                       onClick={() => handleEdit(application)} // Pass the application for editing
                       className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
@@ -123,12 +126,13 @@ const ShortlistedApplications = ({ email }) => {
       {/* Edit Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className={`rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+            }`}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">Edit Interview Details</h2>
+              <h2 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Edit Interview Details</h2>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className={`transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -138,31 +142,34 @@ const ShortlistedApplications = ({ email }) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Date</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Date</label>
                 <input
                   type="date"
                   value={editForm.date}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Time</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Time</label>
                 <input
                   type="time"
                   value={editForm.time}
                   onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Interview Type</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Type</label>
                 <select
                   value={editForm.interviewType}
                   onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                 >
                   {interviewTypes.map(type => (
                     <option key={type} value={type}>
@@ -173,12 +180,13 @@ const ShortlistedApplications = ({ email }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Meeting Link</label>
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
                 <input
                   type="url"
                   value={editForm.meetingLink}
                   onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+                  className={`mt-1 block w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
+                    }`}
                   placeholder="https://..."
                 />
               </div>

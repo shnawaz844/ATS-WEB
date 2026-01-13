@@ -33,23 +33,23 @@ const FORM_OPTIONS = {
   ],
 };
 
-const capitalizeFirstLetter = ( string ) => {
-  return string?.charAt( 0 ).toUpperCase() + string?.slice( 1 );
+const capitalizeFirstLetter = (string) => {
+  return string?.charAt(0).toUpperCase() + string?.slice(1);
 };
 
-const FormField = ( {
+const FormField = ({
   label,
   error,
   children
-} ) => (
+}) => (
   <div className="space-y-1">
-    <label className="block text-sm font-medium text-gray-700">{ label }</label>
-    { children }
-    { error && <span className="text-sm text-red-500">{ error }</span> }
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    {children}
+    {error && <span className="text-sm text-red-500">{error}</span>}
   </div>
 );
 
-const FormInput = ( {
+const FormInput = ({
   label,
   register,
   name,
@@ -58,32 +58,32 @@ const FormInput = ( {
   placeholder,
   options,
   ...props
-} ) => (
-  <FormField label={ label } error={ error }>
-    { type === 'select' ? (
+}) => (
+  <FormField label={label} error={error}>
+    {type === 'select' ? (
       <select
-        { ...register( name ) }
+        {...register(name)}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        { ...props }
+        {...props}
       >
-        <option value="" disabled>Select { label.toLowerCase() }</option>
-        { options?.map( ( { value, label } ) => (
-          <option key={ value } value={ value }>{ label }</option>
-        ) ) }
+        <option value="" disabled>Select {label.toLowerCase()}</option>
+        {options?.map(({ value, label }) => (
+          <option key={value} value={value}>{label}</option>
+        ))}
       </select>
     ) : (
       <input
-        type={ type }
-        { ...register( name ) }
+        type={type}
+        {...register(name)}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
-        placeholder={ placeholder }
-        { ...props }
+        placeholder={placeholder}
+        {...props}
       />
-    ) }
+    )}
   </FormField>
 );
 
-const LocationPicker = ( {
+const LocationPicker = ({
   selectedCountry,
   setSelectedCountry,
   selectedState,
@@ -92,108 +92,108 @@ const LocationPicker = ( {
   setSelectedCity,
   errors,
   jobToEdit
-} ) => {
+}) => {
   const countries = Country.getAllCountries();
 
   // Get the current country code (either from jobToEdit or selectedCountry)
-  const currentCountryCode = countries.find( c => c.name === jobToEdit?.country )?.isoCode || selectedCountry;
+  const currentCountryCode = countries.find(c => c.name === jobToEdit?.country)?.isoCode || selectedCountry;
 
   // Get states based on current country
-  const states = currentCountryCode ? State.getStatesOfCountry( currentCountryCode ) : [];
+  const states = currentCountryCode ? State.getStatesOfCountry(currentCountryCode) : [];
 
   // Get the current state code (either from jobToEdit or selectedState)
-  const currentStateCode = states.find( s => s.name === jobToEdit?.state )?.isoCode || selectedState;
+  const currentStateCode = states.find(s => s.name === jobToEdit?.state)?.isoCode || selectedState;
 
   // Get cities based on current country and state
-  const cities = currentStateCode ? City.getCitiesOfState( currentCountryCode, currentStateCode ) : [];
+  const cities = currentStateCode ? City.getCitiesOfState(currentCountryCode, currentStateCode) : [];
 
-  const handleCityChange = ( e ) => {
+  const handleCityChange = (e) => {
     const cityName = e.target.value;
-    setSelectedCity( cityName );
-    console.log( "Selected City: ", cityName );
+    setSelectedCity(cityName);
+    console.log("Selected City: ", cityName);
   };
 
   return (
     <div className="space-y-4">
-      <FormField label="Country" error={ errors?.country }>
+      <FormField label="Country" error={errors?.country}>
         <select
-          value={ currentCountryCode }
-          onChange={ ( e ) => {
-            setSelectedCountry( e.target.value );
-            setSelectedState( '' );
-            setSelectedCity( '' );
-          } }
+          value={currentCountryCode}
+          onChange={(e) => {
+            setSelectedCountry(e.target.value);
+            setSelectedState('');
+            setSelectedCity('');
+          }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
         >
           <option value="">Select Country</option>
-          { countries.map( country => (
-            <option key={ country.isoCode } value={ country.isoCode }>
-              { country.name }
+          {countries.map(country => (
+            <option key={country.isoCode} value={country.isoCode}>
+              {country.name}
             </option>
-          ) ) }
+          ))}
         </select>
       </FormField>
 
-      <FormField label="State" error={ errors?.state }>
+      <FormField label="State" error={errors?.state}>
         <select
-          value={ currentStateCode }
-          onChange={ ( e ) => {
-            setSelectedState( e.target.value );
-            setSelectedCity( '' );
-          } }
+          value={currentStateCode}
+          onChange={(e) => {
+            setSelectedState(e.target.value);
+            setSelectedCity('');
+          }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          disabled={ !currentCountryCode }
+          disabled={!currentCountryCode}
         >
           <option value="">Select State</option>
-          { states.map( state => (
-            <option key={ state.isoCode } value={ state.isoCode }>
-              { state.name }
+          {states.map(state => (
+            <option key={state.isoCode} value={state.isoCode}>
+              {state.name}
             </option>
-          ) ) }
+          ))}
         </select>
       </FormField>
 
-      <FormField label="City" error={ errors?.city }>
+      <FormField label="City" error={errors?.city}>
         <select
-          value={ jobToEdit?.city || selectedCity }
-          onChange={ handleCityChange }
+          value={jobToEdit?.city || selectedCity}
+          onChange={handleCityChange}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          disabled={ !currentStateCode }
+          disabled={!currentStateCode}
         >
           <option value="">Select City</option>
-          { cities.map( city => (
-            <option key={ city.name } value={ city.name }>
-              { city.name }
+          {cities.map(city => (
+            <option key={city.name} value={city.name}>
+              {city.name}
             </option>
-          ) ) }
+          ))}
         </select>
       </FormField>
     </div>
   );
 };
 
-const ShiftPicker = ( {
+const ShiftPicker = ({
   shiftStart,
   setShiftStart,
   shiftEnd,
   setShiftEnd,
   errors
-} ) => (
+}) => (
   <div className="grid grid-cols-2 gap-4">
-    <FormField label="Shift Start" error={ errors?.shiftStart }>
+    <FormField label="Shift Start" error={errors?.shiftStart}>
       <TimePicker
-        onChange={ setShiftStart }
-        value={ shiftStart }
-        disableClock={ true }
+        onChange={setShiftStart}
+        value={shiftStart}
+        disableClock={true}
         format="hh:mm a"
         className="w-full"
       />
     </FormField>
-    <FormField label="Shift End" error={ errors?.shiftEnd }>
+    <FormField label="Shift End" error={errors?.shiftEnd}>
       <TimePicker
-        onChange={ setShiftEnd }
-        value={ shiftEnd }
-        disableClock={ true }
+        onChange={setShiftEnd}
+        value={shiftEnd}
+        disableClock={true}
         format="hh:mm a"
         className="w-full"
       />
@@ -202,50 +202,50 @@ const ShiftPicker = ( {
 );
 
 // Title Code Preview Component
-const TitleCodePreview = ( { title, existingJobs } ) => {
-  const [ previewCode, setPreviewCode ] = useState( '' );
+const TitleCodePreview = ({ title, existingJobs }) => {
+  const [previewCode, setPreviewCode] = useState('');
 
-  useEffect( () => {
-    if ( title && title.length > 0 ) {
+  useEffect(() => {
+    if (title && title.length > 0) {
       // Generate preview without making API call
       const generatePreview = () => {
         const cleanTitle = title
-          .replace( /[^a-zA-Z0-9\s]/g, '' )
-          .replace( /\s+/g, ' ' )
+          .replace(/[^a-zA-Z0-9\s]/g, '')
+          .replace(/\s+/g, ' ')
           .trim();
 
-        const words = cleanTitle.split( ' ' );
+        const words = cleanTitle.split(' ');
         let titleAbbr = '';
 
-        if ( words.length === 1 ) {
-          titleAbbr = words[ 0 ].substring( 0, 4 ).toUpperCase();
-        } else if ( words.length === 2 ) {
-          titleAbbr = words.map( word => word.substring( 0, 2 ) ).join( '' ).toUpperCase();
+        if (words.length === 1) {
+          titleAbbr = words[0].substring(0, 4).toUpperCase();
+        } else if (words.length === 2) {
+          titleAbbr = words.map(word => word.substring(0, 2)).join('').toUpperCase();
         } else {
-          titleAbbr = words.slice( 0, 3 ).map( word => word.charAt( 0 ) ).join( '' ).toUpperCase();
+          titleAbbr = words.slice(0, 3).map(word => word.charAt(0)).join('').toUpperCase();
         }
 
         const now = new Date();
-        const timestamp = `${ now.getFullYear().toString().slice( -2 ) }${ ( now.getMonth() + 1 ).toString().padStart( 2, '0' ) }${ now.getDate().toString().padStart( 2, '0' ) }`;
+        const timestamp = `${now.getFullYear().toString().slice(-2)}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
 
         // Estimate sequence (this will be calculated accurately on backend)
         const estimatedSequence = '001';
 
-        setPreviewCode( `${ titleAbbr }-${ estimatedSequence }-${ timestamp }` );
+        setPreviewCode(`${titleAbbr}-${estimatedSequence}-${timestamp}`);
       };
 
       generatePreview();
     } else {
-      setPreviewCode( '' );
+      setPreviewCode('');
     }
-  }, [ title, existingJobs ] );
+  }, [title, existingJobs]);
 
-  if ( !previewCode ) return null;
+  if (!previewCode) return null;
 
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
       <p className="text-sm text-blue-800 font-medium">
-        Title Code Preview: <span className="font-mono">{ previewCode }</span>
+        Title Code Preview: <span className="font-mono">{previewCode}</span>
       </p>
       <p className="text-xs text-blue-600 mt-1">
         This code will be generated automatically when you submit the form
@@ -254,7 +254,7 @@ const TitleCodePreview = ( { title, existingJobs } ) => {
   );
 };
 
-export const PostJobForm = ( {
+export const PostJobForm = ({
   jobToEdit,
   handleSubmit,
   onSubmit,
@@ -280,135 +280,135 @@ export const PostJobForm = ( {
   hiringManagersList,
   jobStatus,
   setJobStatus
-} ) => {
-  const [ isHead, setIsHead ] = React.useState( false );
-  const [ recruitersList, setRecruitersList ] = useState( [] );
-  const [ existingJobs, setExistingJobs ] = useState( [] );
-  const [ titleCode, setTitleCode ] = useState( jobToEdit?.titleCode || '' );
-  const companyId = JSON.parse( localStorage.getItem( "user" ) ).company_id;
-  const [ jobStatuses, setJobStatuses ] = useState( [] );
-  const [ loadingStatuses, setLoadingStatuses ] = useState( false );
-  const [ statusError, setStatusError ] = useState( null );
+}) => {
+  const [isHead, setIsHead] = React.useState(false);
+  const [recruitersList, setRecruitersList] = useState([]);
+  const [existingJobs, setExistingJobs] = useState([]);
+  const [titleCode, setTitleCode] = useState(jobToEdit?.titleCode || '');
+  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
+  const [jobStatuses, setJobStatuses] = useState([]);
+  const [loadingStatuses, setLoadingStatuses] = useState(false);
+  const [statusError, setStatusError] = useState(null);
 
-  useEffect( () => {
-    console.log( "Recruiter Role in useEffect:", recruiterRole );
-    if ( recruiterRole === true ) {
-      setIsHead( true );
+  useEffect(() => {
+    console.log("Recruiter Role in useEffect:", recruiterRole);
+    if (recruiterRole === true) {
+      setIsHead(true);
     } else {
-      setIsHead( false );
+      setIsHead(false);
     }
-  }, [ recruiterRole ] );
+  }, [recruiterRole]);
 
   // Fetch existing jobs for title code generation
-  useEffect( () => {
+  useEffect(() => {
     const fetchExistingJobs = async () => {
       try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/all-jobs`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
           headers: {
             'company_id': companyId
           }
-        } );
+        });
         const data = await response.json();
-        if ( data.success ) {
-          setExistingJobs( data.jobs );
+        if (data.success) {
+          setExistingJobs(data.jobs);
         }
-      } catch ( error ) {
-        console.error( 'Error fetching existing jobs:', error );
+      } catch (error) {
+        console.error('Error fetching existing jobs:', error);
       }
     };
 
     fetchExistingJobs();
-  }, [ companyId ] );
+  }, [companyId]);
 
-  useEffect( () => {
+  useEffect(() => {
     const fetchRecruiters = async () => {
       try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/recruiter/all-recruiter`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`, {
           headers: {
             'company_id': companyId
           }
-        } );
+        });
         const data = await response.json();
-        setRecruitersList( data );
-      } catch ( error ) {
-        console.error( 'Error fetching recruiters:', error );
+        setRecruitersList(data);
+      } catch (error) {
+        console.error('Error fetching recruiters:', error);
       }
     };
 
     fetchRecruiters();
-  }, [] );
+  }, []);
 
-  useEffect( () => {
+  useEffect(() => {
     const fetchJobStatuses = async () => {
-      setLoadingStatuses( true );
-      setStatusError( null );
+      setLoadingStatuses(true);
+      setStatusError(null);
       try {
-        const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
           headers: {
             'company_id': companyId
           }
-        } );
+        });
 
-        if ( !response.ok ) {
-          throw new Error( 'Failed to fetch job statuses' );
+        if (!response.ok) {
+          throw new Error('Failed to fetch job statuses');
         }
 
         const data = await response.json();
-        console.log( 'Job Statuses API Response:', data );
+        console.log('Job Statuses API Response:', data);
 
-        if ( data.jobStatuses && Array.isArray( data.jobStatuses ) ) {
-          setJobStatuses( data.jobStatuses );
+        if (data.jobStatuses && Array.isArray(data.jobStatuses)) {
+          setJobStatuses(data.jobStatuses);
         } else {
-          throw new Error( 'Invalid data format received' );
+          throw new Error('Invalid data format received');
         }
-      } catch ( error ) {
-        console.error( 'Error fetching job statuses:', error );
-        setStatusError( error.message );
-        setJobStatuses( [] );
+      } catch (error) {
+        console.error('Error fetching job statuses:', error);
+        setStatusError(error.message);
+        setJobStatuses([]);
       } finally {
-        setLoadingStatuses( false );
+        setLoadingStatuses(false);
       }
     };
 
     fetchJobStatuses();
-  }, [ companyId ] );
+  }, [companyId]);
 
-  const statusOptions = Array.isArray( jobStatuses )
+  const statusOptions = Array.isArray(jobStatuses)
     ? jobStatuses
-      .sort( ( a, b ) => parseInt( a.jobStep ) - parseInt( b.jobStep ) )
-      .map( status => ( {
+      .sort((a, b) => parseInt(a.jobStep) - parseInt(b.jobStep))
+      .map(status => ({
         value: status._id,
         label: status.jobStatus
-      } ) )
+      }))
     : [];
 
   // Enhanced onSubmit to handle title code
-  const enhancedOnSubmit = async ( data ) => {
+  const enhancedOnSubmit = async (data) => {
     try {
       // Add title code to data if it's a new job
-      if ( !jobToEdit ) {
+      if (!jobToEdit) {
         data.titleCode = titleCode;
       }
 
       // Call the original onSubmit function
-      await onSubmit( data );
-    } catch ( error ) {
-      console.error( 'Error in form submission:', error );
+      await onSubmit(data);
+    } catch (error) {
+      console.error('Error in form submission:', error);
     }
   };
 
   return (
     <div className="min-h-screen py-12"
-      style={ { background: 'linear-gradient(135deg, #ffffff, #808080)' } }>
+    >
       <BackButtonMobile />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            { jobToEdit ? 'Edit Job Posting' : 'Create New Job Posting' }
+          <h1 className="text-3xl font-bold text-center text-black dark:text-white mb-8">
+            {jobToEdit ? 'Edit Job Posting' : 'Create New Job Posting'}
           </h1>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <form onSubmit={ handleSubmit( enhancedOnSubmit ) } className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+            <form onSubmit={handleSubmit(enhancedOnSubmit)} className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
               <div className="space-y-4 sm:space-y-6">
                 <div className="border-b border-gray-200 pb-3 sm:pb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Job Details</h2>
@@ -420,23 +420,23 @@ export const PostJobForm = ( {
                 <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <FormInput
-                      label={ capitalizeFirstLetter( "Title" ) }
-                      register={ register }
+                      label={capitalizeFirstLetter("Title")}
+                      register={register}
                       name="title"
-                      error={ errors?.title }
+                      error={errors?.title}
                       placeholder="Ex: Software Engineer"
                     />
                     <TitleCodePreview
-                      title={ watch?.title }
-                      existingJobs={ existingJobs }
+                      title={watch?.title}
+                      existingJobs={existingJobs}
                     />
                   </div>
 
-                  { jobToEdit && (
+                  {jobToEdit && (
                     <FormField label="Title Code">
                       <input
                         type="text"
-                        value={ jobToEdit.titleCode }
+                        value={jobToEdit.titleCode}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
                         disabled
                       />
@@ -444,180 +444,180 @@ export const PostJobForm = ( {
                         Title code cannot be changed for existing jobs
                       </p>
                     </FormField>
-                  ) }
+                  )}
 
                   <FormInput
                     label="Location Type"
-                    register={ register }
+                    register={register}
                     name="locationType"
                     type="select"
-                    options={ FORM_OPTIONS.location }
-                    error={ errors?.locationType }
+                    options={FORM_OPTIONS.location}
+                    error={errors?.locationType}
                   />
 
                   <FormInput
                     label="Employment Type"
-                    register={ register }
+                    register={register}
                     name="type"
                     type="select"
-                    options={ FORM_OPTIONS.employment }
-                    error={ errors?.type }
+                    options={FORM_OPTIONS.employment}
+                    error={errors?.type}
                   />
 
                   <FormInput
                     label="Schedule Type"
-                    register={ register }
+                    register={register}
                     name="scheduleType"
                     type="select"
-                    options={ FORM_OPTIONS.schedule }
-                    error={ errors?.scheduleType }
+                    options={FORM_OPTIONS.schedule}
+                    error={errors?.scheduleType}
                   />
 
                   <ShiftPicker
-                    shiftStart={ shiftStart }
-                    setShiftStart={ setShiftStart }
-                    shiftEnd={ shiftEnd }
-                    setShiftEnd={ setShiftEnd }
-                    errors={ errors }
+                    shiftStart={shiftStart}
+                    setShiftStart={setShiftStart}
+                    shiftEnd={shiftEnd}
+                    setShiftEnd={setShiftEnd}
+                    errors={errors}
                   />
 
                   <FormInput
                     label="Hire Type"
-                    register={ register }
+                    register={register}
                     name="hireType"
                     type="select"
-                    options={ FORM_OPTIONS.hire }
-                    error={ errors?.hireType }
+                    options={FORM_OPTIONS.hire}
+                    error={errors?.hireType}
                   />
 
                   <FormInput
                     label="Compensation"
-                    register={ register }
+                    register={register}
                     name="compensation"
-                    error={ errors?.compensation }
+                    error={errors?.compensation}
                     placeholder="Ex: 50000"
                   />
 
                   <FormInput
                     label="Experience Required (years)"
-                    register={ register }
+                    register={register}
                     name="experienceRequired"
-                    error={ errors?.experienceRequired }
+                    error={errors?.experienceRequired}
                     placeholder="Ex: 3"
                   />
 
                   <FormInput
                     label="Required Number of Resources"
-                    register={ register }
+                    register={register}
                     name="requiredResources"
                     type="number"
-                    error={ errors?.requiredResources }
+                    error={errors?.requiredResources}
                     placeholder="Ex: 5"
                   />
 
-                  {/* Fixed Status Field */ }
-                  <FormField label="Status" error={ errors?.status || statusError }>
+                  {/* Fixed Status Field */}
+                  <FormField label="Status" error={errors?.status || statusError}>
                     <select
-                      value={ jobStatus }
-                      { ...register( "status", {
+                      value={jobStatus}
+                      {...register("status", {
                         required: "Status is required"
-                      } ) }
-                      onChange={ ( e ) => setJobStatus( e.target.value ) }
+                      })}
+                      onChange={(e) => setJobStatus(e.target.value)}
                       className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
-                      disabled={ loadingStatuses }
+                      disabled={loadingStatuses}
                     >
                       <option value="">Select Status</option>
-                      { loadingStatuses ? (
+                      {loadingStatuses ? (
                         <option>Loading statuses...</option>
                       ) : statusOptions && statusOptions.length > 0 ? (
-                        statusOptions.map( ( status ) => (
-                          <option key={ status.value } value={ status.value }>
-                            { status.label }
+                        statusOptions.map((status) => (
+                          <option key={status.value} value={status.value}>
+                            {status.label}
                           </option>
-                        ) )
+                        ))
                       ) : (
                         <option disabled>No statuses available</option>
-                      ) }
+                      )}
                     </select>
                   </FormField>
 
-                  {/* Conditional Recruiter Name Field */ }
-                  { isHead && (
-                    <FormField label="Recruiter" error={ errors?.recruiterId }>
+                  {/* Conditional Recruiter Name Field */}
+                  {isHead && (
+                    <FormField label="Recruiter" error={errors?.recruiterId}>
                       <select
-                        value={ jobToEdit?.recruiterId }
-                        { ...register( "recruiterId" ) }
+                        value={jobToEdit?.recruiterId}
+                        {...register("recruiterId")}
                         className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                       >
                         <option value="">Select Recruiter</option>
-                        { recruitersList && recruitersList.length > 0 ? (
-                          recruitersList.map( ( recruiter ) => (
-                            <option key={ recruiter._id } value={ recruiter._id }>
-                              { recruiter.userName }
+                        {recruitersList && recruitersList.length > 0 ? (
+                          recruitersList.map((recruiter) => (
+                            <option key={recruiter._id} value={recruiter._id}>
+                              {recruiter.userName}
                             </option>
-                          ) )
+                          ))
                         ) : (
                           <option disabled>No recruiters found</option>
-                        ) }
+                        )}
                       </select>
                     </FormField>
-                  ) }
+                  )}
 
-                  <FormField label="Hiring Manager" error={ errors?.hiringManagerId }>
+                  <FormField label="Hiring Manager" error={errors?.hiringManagerId}>
                     <select
-                      value={ jobToEdit?.hiringManagerId }
-                      { ...register( "hiringManagerId", {
+                      value={jobToEdit?.hiringManagerId}
+                      {...register("hiringManagerId", {
                         required: "Hiring Manager is required"
-                      } ) }
+                      })}
                       className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
                     >
                       <option value="">Select Hiring Manager</option>
-                      { hiringManagersList && hiringManagersList.length > 0 ? (
-                        hiringManagersList.map( ( manager ) => (
-                          <option key={ manager._id } value={ manager._id }>
-                            { manager.userName }
+                      {hiringManagersList && hiringManagersList.length > 0 ? (
+                        hiringManagersList.map((manager) => (
+                          <option key={manager._id} value={manager._id}>
+                            {manager.userName}
                           </option>
-                        ) )
+                        ))
                       ) : (
                         <option disabled>No hiring managers found</option>
-                      ) }
+                      )}
                     </select>
                   </FormField>
 
                   <div className="col-span-1 md:col-span-2">
                     <LocationPicker
-                      selectedCountry={ selectedCountry }
-                      setSelectedCountry={ setSelectedCountry }
-                      selectedState={ selectedState }
-                      setSelectedState={ setSelectedState }
-                      selectedCity={ selectedCity }
-                      setSelectedCity={ setSelectedCity }
-                      errors={ errors }
-                      jobToEdit={ jobToEdit }
+                      selectedCountry={selectedCountry}
+                      setSelectedCountry={setSelectedCountry}
+                      selectedState={selectedState}
+                      setSelectedState={setSelectedState}
+                      selectedCity={selectedCity}
+                      setSelectedCity={setSelectedCity}
+                      errors={errors}
+                      jobToEdit={jobToEdit}
                     />
                   </div>
                 </div>
               </div>
 
-              <FormField label="Description" error={ errors?.description }>
+              <FormField label="Description" error={errors?.description}>
                 <Controller
                   name="description"
-                  control={ control }
-                  render={ ( { field } ) => (
+                  control={control}
+                  render={({ field }) => (
                     <ReactQuill
-                      { ...field }
+                      {...field}
                       theme="snow"
                       className="bg-white border rounded text-sm sm:text-base"
                     />
-                  ) }
+                  )}
                 />
               </FormField>
 
               <CandidateForm
-                questions={ questions }
-                setQuestions={ setQuestions }
-                addQuestion={ addQuestion }
-                handleDeleteQuestion={ handleDeleteQuestion }
+                questions={questions}
+                setQuestions={setQuestions}
+                addQuestion={addQuestion}
+                handleDeleteQuestion={handleDeleteQuestion}
               />
 
               <div className="flex justify-center">
@@ -625,7 +625,7 @@ export const PostJobForm = ( {
                   type="submit"
                   className="px-6 sm:px-8 py-2 sm:py-3 bg-gray-700 text-white font-medium hover:bg-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm sm:text-base"
                 >
-                  { jobToEdit ? 'Update Job Post' : 'Create Job Post' }
+                  {jobToEdit ? 'Update Job Post' : 'Create Job Post'}
                 </button>
               </div>
             </form>

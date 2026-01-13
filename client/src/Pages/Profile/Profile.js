@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { AlertCircle, CheckCircle, Eye, EyeOff, Lock, Mail, Shield, User, Sparkles, Save, ChevronLeft } from "lucide-react";
 import BackButtonMobile from "../../components/Mob-back-btn";
-
+import { useTheme } from "../../context/ThemeContext";
 
 const Profile = () => {
+  const { theme } = useTheme();
   const [user, setUser] = useState({
     _id: "",
     userName: "",
@@ -73,31 +74,31 @@ const Profile = () => {
     return false;
   };
 
-  const handleSubmit = async ( e ) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading( true );
-    setMessage( "" );
+    setLoading(true);
+    setMessage("");
 
-    if ( !user.userName.trim() ) {
-      setMessage( "Name is required!" );
-      setLoading( false );
+    if (!user.userName.trim()) {
+      setMessage("Name is required!");
+      setLoading(false);
       return;
     }
 
-    if ( user.password && user.password !== user.confirmPassword ) {
-      setMessage( "Passwords do not match!" );
-      setLoading( false );
+    if (user.password && user.password !== user.confirmPassword) {
+      setMessage("Passwords do not match!");
+      setLoading(false);
       return;
     }
 
-    if ( user.password && user.password.length < 6 ) {
-      setMessage( "Password must be at least 6 characters long!" );
-      setLoading( false );
+    if (user.password && user.password.length < 6) {
+      setMessage("Password must be at least 6 characters long!");
+      setLoading(false);
       return;
     }
 
     try {
-      const token = localStorage.getItem( "user" );
+      const token = localStorage.getItem("user");
       const updateData = {
         _id: user._id,
         userName: user.userName,
@@ -105,65 +106,65 @@ const Profile = () => {
         role: user.role,
       };
 
-      if ( user.password.trim() ) {
+      if (user.password.trim()) {
         updateData.password = user.password;
       }
 
       const config = {
         headers: {
           'Content-Type': 'application/json',
-          ...( token && { Authorization: `Bearer ${ token }` } )
+          ...(token && { Authorization: `Bearer ${token}` })
         }
       };
 
       const response = await axios.put(
-        `${ process.env.REACT_APP_BASE_URL }/users/update-user/${ user._id }`,
+        `${process.env.REACT_APP_BASE_URL}/users/update-user/${user._id}`,
         updateData,
         config
       );
 
-      if ( response.data.success ) {
-        setMessage( "Profile updated successfully!" );
+      if (response.data.success) {
+        setMessage("Profile updated successfully!");
 
         const updatedUserData = {
-          ...JSON.parse( localStorage.getItem( "user" ) ),
+          ...JSON.parse(localStorage.getItem("user")),
           userName: user.userName
         };
-        localStorage.setItem( "user", JSON.stringify( updatedUserData ) );
+        localStorage.setItem("user", JSON.stringify(updatedUserData));
 
         // Update initial user to reflect the new changes
-        setInitialUser( {
+        setInitialUser({
           userName: user.userName,
           email: user.email,
           role: user.role,
-        } );
+        });
 
-        setUser( prev => ( { ...prev, password: "", confirmPassword: "" } ) );
+        setUser(prev => ({ ...prev, password: "", confirmPassword: "" }));
       } else {
-        setMessage( response.data.message || "Error updating profile" );
+        setMessage(response.data.message || "Error updating profile");
       }
-    } catch ( error ) {
-      console.error( "Update error:", error );
-      if ( error.response ) {
+    } catch (error) {
+      console.error("Update error:", error);
+      if (error.response) {
         const status = error.response.status;
         const errorMessage = error.response.data?.message || "Error updating profile";
 
-        if ( status === 404 ) {
-          setMessage( "API endpoint not found. Please check your server configuration." );
-        } else if ( status === 401 ) {
-          setMessage( "Unauthorized. Please login again." );
-        } else if ( status === 400 ) {
-          setMessage( errorMessage );
+        if (status === 404) {
+          setMessage("API endpoint not found. Please check your server configuration.");
+        } else if (status === 401) {
+          setMessage("Unauthorized. Please login again.");
+        } else if (status === 400) {
+          setMessage(errorMessage);
         } else {
-          setMessage( `Server error: ${ errorMessage }` );
+          setMessage(`Server error: ${errorMessage}`);
         }
-      } else if ( error.request ) {
-        setMessage( "Network error. Please check your connection and server status." );
+      } else if (error.request) {
+        setMessage("Network error. Please check your connection and server status.");
       } else {
-        setMessage( "An unexpected error occurred" );
+        setMessage("An unexpected error occurred");
       }
     } finally {
-      setLoading( false );
+      setLoading(false);
     }
   };
 
@@ -185,35 +186,38 @@ const Profile = () => {
       message.toLowerCase().includes("network"));
 
   return (
-    <div className="px-8 py-4 w-full min-h-screen flex flex-col items-center justify-center"
-      style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
-    >
+    <div className={`px-8 py-4 w-full min-h-screen flex flex-col items-center justify-center transition-colors duration-300 ${theme === "dark" ? "bg-black" : "bg-gray-50"
+      }`}>
       <BackButtonMobile />
       <div className="w-full max-w-4xl relative">
         {/* Floating decorative elements */}
-        <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 blur-xl animate-pulse"></div>
-
+        <div className="absolute -top-6 -left-6 w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full opacity-20 blur-xl animate-pulse"></div>
 
         {/* Main card with glassmorphism effect */}
-        <div className="bg-white/30 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden relative">
+        <div className={`backdrop-blur-2xl border rounded-3xl shadow-2xl overflow-hidden relative transition-all duration-300 ${theme === "dark"
+          ? "bg-black border-white/20"
+          : "bg-white border-gray-200"
+          }`}>
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-blue/5 pointer-events-none"></div>
+          <div className={`absolute inset-0 bg-gradient-to-br pointer-events-none ${theme === "dark"
+            ? "from-white/10 via-transparent to-blue/5"
+            : "from-blue-500/5 via-transparent to-purple-500/5"
+            }`}></div>
 
           {/* Header Section */}
-          <div className="relative p-8 text-center bg-gradient-to-r from-slate-900/80 via-blue-900/80 to-purple-900/80 backdrop-blur-sm">
-            {/* Floating particles effect */}
-            <div className="absolute inset-0 overflow-hidden">
-              <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white/40 rounded-full animate-ping" style={{ animationDelay: '0s' }}></div>
-              <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-blue-300/60 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
-              <div className="absolute top-1/2 left-3/4 w-1.5 h-1.5 bg-purple-300/60 rounded-full animate-ping" style={{ animationDelay: '4s' }}></div>
-            </div>
+          <div className={`relative p-8 text-center backdrop-blur-sm ${theme === "dark"
+            ? "bg-white/10"
+            : "bg-gray-200"
+            }`}>
 
             {/* Profile Avatar with enhanced effects */}
             <div className="relative z-10 mb-6">
               <div className="w-24 h-24 mx-auto relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-500 via-gray-700 to-white rounded-full animate-spin-slow opacity-75"></div>
-                <div className="absolute inset-1 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 transition-all duration-300">
-                  <User className="w-10 h-10 text-white drop-shadow-lg" />
+                <div className={`absolute inset-1 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 ${theme === "dark" ? "bg-white/20 group-hover:bg-white/30" : "bg-white/60 group-hover:bg-white/80"
+                  }`}>
+                  <User className={`w-10 h-10 drop-shadow-lg ${theme === "dark" ? "text-white" : "text-gray-700"
+                    }`} />
                 </div>
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
                   <Sparkles className="w-3 h-3 text-white" />
@@ -221,12 +225,11 @@ const Profile = () => {
               </div>
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
-              <span className="bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
-                Profile Settings
-              </span>
+            <h1 className={`text-4xl font-bold mb-2 tracking-tight ${theme === "dark" ? "text-white" : "text-gray-900"
+              }`}>
+              <span>Profile Settings</span>
             </h1>
-            <p className="text-blue-100/80 text-lg">Customize your personal information</p>
+            <p className={`text-lg ${theme === "dark" ? "text-white" : "text-gray-600"}`}>Customize your personal information</p>
           </div>
 
           {/* Form Section */}
@@ -251,9 +254,10 @@ const Profile = () => {
             <div className="space-y-8">
               {/* Personal Information Section */}
               <div className="space-y-6">
-                <h3 className="flex items-center gap-3 text-xl font-semibold text-gray-800 pb-2 border-b border-gray-200/50">
-                  <div className="w-8 h-8 bg-gradient-to-r from-gray-800 to-white rounded-xl flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                <h3 className={`flex items-center gap-3 text-xl font-semibold pb-2 border-b ${theme === "dark" ? "text-gray-100 border-gray-200/50" : "text-gray-900 border-gray-200"
+                  }`}>
+                  <div className="w-8 h-8 bg-gradient-to-r from-gray-100 to-white rounded-xl flex items-center justify-center shadow-sm">
+                    <User className="w-4 h-4 text-black" />
                   </div>
                   Personal Information
                 </h3>
@@ -261,7 +265,8 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Name Field */}
                   <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
+                    <label className={`flex items-center gap-2 text-sm font-semibold mb-3 ${theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}>
                       <User className="w-4 h-4 text-blue-500" />
                       Full Name *
                     </label>
@@ -272,7 +277,10 @@ const Profile = () => {
                         value={user.userName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-4 bg-white/50 border-2 border-gray-200/50 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-300 backdrop-blur-sm hover:bg-white/70"
+                        className={`w-full px-4 py-4 border-2 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-300 backdrop-blur-sm ${theme === "dark"
+                          ? "bg-gray-800/50 border-gray-700 text-white"
+                          : "bg-white border-gray-200 text-gray-900"
+                          }`}
                         placeholder="Enter your full name"
                       />
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -281,7 +289,8 @@ const Profile = () => {
 
                   {/* Email Field */}
                   <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-3">
+                    <label className={`flex items-center gap-2 text-sm font-semibold mb-3 ${theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}>
                       <Mail className="w-4 h-4 text-gray-400" />
                       Email Address
                     </label>
@@ -291,13 +300,17 @@ const Profile = () => {
                         name="email"
                         value={user.email}
                         disabled
-                        className="w-full px-4 py-4 bg-gray-100/70 border-2 border-gray-200/30 rounded-xl text-gray-500 cursor-not-allowed backdrop-blur-sm"
+                        className={`w-full px-4 py-4 border-2 rounded-xl cursor-not-allowed backdrop-blur-sm ${theme === "dark"
+                          ? "bg-gray-800/30 border-gray-700/30 text-gray-400"
+                          : "bg-gray-50 border-gray-200 text-gray-500"
+                          }`}
                       />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <Lock className="w-4 h-4 text-gray-400" />
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                    <p className={`text-xs mt-2 flex items-center gap-1 ${theme === "dark" ? "text-gray-300" : "text-gray-500"
+                      }`}>
                       <Shield className="w-3 h-3" />
                       Email cannot be modified for security reasons
                     </p>
@@ -306,7 +319,8 @@ const Profile = () => {
 
                 {/* Role Field */}
                 <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-3">
+                  <label className={`flex items-center gap-2 text-sm font-semibold mb-3 ${theme === "dark" ? "text-gray-100" : "text-gray-700"
+                    }`}>
                     <Shield className="w-4 h-4 text-gray-400" />
                     Account Role
                   </label>
@@ -316,37 +330,47 @@ const Profile = () => {
                       name="role"
                       value={user.role}
                       disabled
-                      className="w-full px-4 py-4 bg-gray-100/70 border-2 border-gray-200/30 rounded-xl text-gray-500 cursor-not-allowed backdrop-blur-sm"
+                      className={`w-full px-4 py-4 border-2 rounded-xl cursor-not-allowed backdrop-blur-sm ${theme === "dark"
+                        ? "bg-gray-800/30 border-gray-700/30 text-gray-400"
+                        : "bg-gray-50 border-gray-200 text-gray-500"
+                        }`}
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                       <Lock className="w-4 h-4 text-gray-400" />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Role is managed by system administrators</p>
+                  <p className={`text-xs mt-2 ${theme === "dark" ? "text-gray-200" : "text-gray-500"
+                    }`}>Role is managed by system administrators</p>
                 </div>
               </div>
 
               {/* Security Section */}
-              <div className="space-y-6 pt-6 border-t border-gray-200/50">
-                <h3 className="flex items-center gap-3 text-xl font-semibold text-gray-800">
-                  <div className="w-8 h-8 bg-gradient-to-r from-gray-800 to-white rounded-xl flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-white" />
+              <div className={`space-y-6 pt-6 border-t ${theme === "dark" ? "border-gray-200/50" : "border-gray-200"
+                }`}>
+                <h3 className={`flex items-center gap-3 text-xl font-semibold ${theme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }`}>
+                  <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                    <Lock className="w-4 h-4 text-black" />
                   </div>
                   Security Settings
-                  <span className="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Optional</span>
+                  <span className="text-sm font-normal text-gray-100 bg-gray-500 px-3 py-1 rounded-full">Optional</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* New Password */}
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">New Password</label>
+                    <label className={`block text-sm font-semibold mb-3 ${theme === "dark" ? "text-gray-100" : "text-gray-700"
+                      }`}>New Password</label>
                     <div className="relative">
                       <input
                         type={showPassword ? "text" : "password"}
                         name="password"
                         value={user.password}
                         onChange={handleChange}
-                        className="w-full px-4 py-4 pr-12 bg-white/50 border-2 border-gray-200/50 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300 backdrop-blur-sm hover:bg-white/70"
+                        className={`w-full px-4 py-4 pr-12 border-2 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300 backdrop-blur-sm ${theme === "dark"
+                          ? "bg-gray-800/50 border-gray-700 text-white"
+                          : "bg-white border-gray-200 text-gray-900"
+                          }`}
                         placeholder="Enter new password"
                       />
                       <button
@@ -368,14 +392,18 @@ const Profile = () => {
 
                   {/* Confirm Password */}
                   <div className="group">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">Confirm Password</label>
+                    <label className={`block text-sm font-semibold mb-3 ${theme === "dark" ? "text-gray-100" : "text-gray-700"
+                      }`}>Confirm Password</label>
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         value={user.confirmPassword}
                         onChange={handleChange}
-                        className="w-full px-4 py-4 pr-12 bg-white/50 border-2 border-gray-200/50 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300 backdrop-blur-sm hover:bg-white/70"
+                        className={`w-full px-4 py-4 pr-12 border-2 rounded-xl placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300 backdrop-blur-sm ${theme === "dark"
+                          ? "bg-gray-800/50 border-gray-700 text-white"
+                          : "bg-white border-gray-200 text-gray-900"
+                          }`}
                         placeholder="Confirm new password"
                       />
                       <button
@@ -397,8 +425,8 @@ const Profile = () => {
                   onClick={handleSubmit}
                   disabled={loading || !hasChanges()}
                   className={`group relative w-full py-4 px-8 rounded-2xl font-semibold text-lg transition-all duration-300 transform ${loading || !hasChanges()
-                    ? "bg-gray-300/50 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-gray-800 via-gray-400 to-white text-white hover:from-white hover:via-gray-800 hover:to-gray-700 hover:scale-105 hover:shadow-2xl active:scale-95"
+                    ? "bg-gray-400 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-purple-600 via-blue-400 to- text-white hover:from-white hover:via-gray-800 hover:to-gray-700 hover:scale-105 hover:shadow-2xl active:scale-95"
                     } overflow-hidden`}
                 >
                   {/* Button background animation */}

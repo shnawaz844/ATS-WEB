@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import JobDescriptionModal from "./JobDescriptionModal";
 import { Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 import BackButtonMobile from "./Mob-back-btn";
+import { useTheme } from "../context/ThemeContext";
 
 // Dropdown Options
 const jobTypeOptions = [
@@ -31,6 +32,7 @@ const scheduleTypeOptions = [
 
 
 const AllPostedJobs = () => {
+  const { theme } = useTheme();
   const companyUserName = localStorage.getItem("companyUserName");
   const [companyDetails, setCompanyDetails] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -177,22 +179,78 @@ const AllPostedJobs = () => {
   });
 
   if (isError) return <div>Error fetching jobs</div>;
+  const selectStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff", // gray-800
+      borderColor: theme === "dark" ? "#4b5563" : "#d1d5db", // gray-600
+      boxShadow: "none", // ❌ removes white glow
+      "&:hover": {
+        borderColor: theme === "dark" ? "#6b7280" : "#a855f7",
+      },
+    }),
+
+    menu: (base) => ({
+      ...base,
+      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+      border: theme === "dark" ? "1px solid #374151" : "1px solid #e5e7eb",
+    }),
+
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused
+        ? theme === "dark"
+          ? "#374151"
+          : "#ede9fe"
+        : "transparent",
+      color: theme === "dark" ? "#e5e7eb" : "#111827",
+    }),
+
+    singleValue: (base) => ({
+      ...base,
+      color: theme === "dark" ? "#f9fafb" : "#111827",
+    }),
+
+    placeholder: (base) => ({
+      ...base,
+      color: theme === "dark" ? "#9ca3af" : "#6b7280",
+    }),
+
+    input: (base) => ({
+      ...base,
+      color: theme === "dark" ? "#ffffff" : "#111827",
+    }),
+
+    indicatorSeparator: () => ({
+      display: "none", // optional clean look
+    }),
+
+    dropdownIndicator: (base) => ({
+      ...base,
+      color: theme === "dark" ? "#9ca3af" : "#6b7280",
+      "&:hover": {
+        color: "#a855f7",
+      },
+    }),
+  };
+
 
   return (
-    <div className="px-8 py-4 w-full min-h-screen"
-      style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
+    <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === "dark" ? "bg-black" : "bg-gradient-to-r from-gray-100 to-white"
+      }`}
     >
       <BackButtonMobile />
       <div className="max-w-screen-2xl">
         <div>
           {/* Header Section */}
-          <div className="mb-6 h-auto sm:h-[25vh] relative flex flex-col sm:flex-row items-center justify-center rounded-xl p-4 sm:p-6 md:p-8 bg-gray-700">
+          <div className={`mb-6 h-auto sm:h-[25vh] relative flex flex-col sm:flex-row items-center justify-center rounded-xl p-4 sm:p-6 md:p-8 transition-colors duration-300 ${theme === "dark" ? "bg-white/10 border-white/20 hover:border-purple-500/50" : "bg-gradient-to-r from-gray-100 to-white shadow-md"
+            }`}>
             {/* Main content centered */}
             <div className="text-center w-full">
-              <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-black dark:text-white mb-4 sm:mb-6">
                 Explore Our Opportunities
               </h1>
-              <p className="text-sm sm:text-base text-white mb-4 sm:mb-8 px-2 sm:px-0">
+              <p className="text-sm sm:text-base dark:text-white/90  text-black mb-4 sm:mb-8 px-2 sm:px-0">
                 Find your perfect role from our wide range of positions across different departments and locations.
               </p>
             </div>
@@ -200,7 +258,10 @@ const AllPostedJobs = () => {
             {/* Filter button — responsive placement */}
             <div className="w-full sm:w-auto flex justify-center sm:absolute sm:top-4 sm:right-4">
               <button
-                className="inline-flex items-center px-4 py-2 text-sm sm:text-base border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm"
+                className={`inline-flex items-center px-4 py-2 text-sm sm:text-base border rounded-xl font-medium transition-colors duration-200 shadow-sm ${theme === "dark"
+                  ? "bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+                  : "bg-white text-gray-900 border-gray-300 hover:bg-gray-100"
+                  }`}
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
               >
                 {isFilterOpen ? "Hide Filters" : "Show Filters"}
@@ -224,7 +285,10 @@ const AllPostedJobs = () => {
                   placeholder="Search jobs..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full sm:w-64 p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-400 h-[6.3vh]"
+                  className={`w-full sm:w-64 p-3 border rounded-xl shadow-sm focus:ring-2 focus:ring-purple-400 h-[6.3vh] transition-colors duration-200 ${theme === "dark"
+                    ? "bg-[#1a1a1a] text-white border-gray-600 placeholder-gray-400"
+                    : "bg-white text-gray-900 border-gray-300 placeholder-gray-500"
+                    }`}
                 />
 
                 {/* Job Type Dropdown */}
@@ -235,6 +299,7 @@ const AllPostedJobs = () => {
                     onChange={setJobType}
                     placeholder="Job Type"
                     isClearable
+                    styles={selectStyles}
                   />
                 </div>
 
@@ -246,6 +311,7 @@ const AllPostedJobs = () => {
                     onChange={setLocationType}
                     placeholder="Location Type"
                     isClearable
+                    styles={selectStyles}
                   />
                 </div>
 
@@ -257,6 +323,7 @@ const AllPostedJobs = () => {
                     onChange={setScheduleType}
                     placeholder="Schedule Type"
                     isClearable
+                    styles={selectStyles}
                   />
                 </div>
               </div>
@@ -277,16 +344,21 @@ const AllPostedJobs = () => {
                     jobStatusLabel={statusMap[job.status]} // pass status text
                     onViewDetails={() => setSelectedJob(job)}
                     companyUserName={companyUserName}
+                    theme={theme}
                   />
                 ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-              <div className="bg-gray-100 p-5 rounded-full mb-4">
-                <Briefcase className="h-12 w-12 text-gray-400" />
+              <div className={`p-5 rounded-full mb-4 ${theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                }`}>
+                <Briefcase className={`h-12 w-12 ${theme === "dark" ? "text-gray-500" : "text-gray-400"
+                  }`} />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">No jobs found</h3>
-              <p className="text-gray-500 max-w-md mb-6">
+              <h3 className={`text-lg font-medium mb-1 ${theme === "dark" ? "text-white" : "text-gray-900"
+                }`}>No jobs found</h3>
+              <p className={`max-w-md mb-6 ${theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}>
                 Opportunities are on the way. Stay tuned!
               </p>
             </div>
@@ -294,13 +366,16 @@ const AllPostedJobs = () => {
 
 
           {/* Pagination Controls */}
-          <div className="flex items-center justify-between border-t border-gray-200 pt-6 mt-2">
+          <div className={`flex items-center justify-between border-t pt-6 mt-2 ${theme === "dark" ? "border-gray-700" : "border-gray-200"
+            }`}>
             <button
               onClick={() => setPage((old) => Math.max(old - 1, 1))}
               disabled={page === 1}
-              className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === 1
-                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+              className={`flex items-center px-4 py-2 text-sm rounded-xl transition-colors duration-200 ${page === 1
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : theme === "dark"
+                  ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600'
+                  : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
                 }`}
             >
               <ChevronLeft className="mr-1 h-4 w-4" />
@@ -308,16 +383,20 @@ const AllPostedJobs = () => {
             </button>
 
             <div className="flex items-center gap-1">
-              <span className="px-3 py-1 bg-gray-300 text-black rounded-full font-medium">{page}</span>
-              <span className="text-sm text-gray-500">of {data?.totalPages}</span>
+              <span className={`px-3 py-1 rounded-full font-medium ${theme === "dark" ? "bg-[#9333ea] text-white" : "bg-[#9333ea]/10 text-[#9333ea]"
+                }`}>{page}</span>
+              <span className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"
+                }`}>of {data?.totalPages}</span>
             </div>
 
             <button
               onClick={() => setPage((old) => Math.min(data?.totalPages, old + 1))}
               disabled={page === data?.totalPages}
-              className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === data?.totalPages
-                ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-                : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+              className={`flex items-center px-4 py-2 text-sm rounded-xl transition-colors duration-200 ${page === data?.totalPages
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : theme === "dark"
+                  ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600'
+                  : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
                 }`}
             >
               Next
@@ -336,7 +415,7 @@ const AllPostedJobs = () => {
   );
 };
 
-const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel }) => {
+const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme }) => {
 
   const capitalizeFirstLetter = (string) => {
     return string?.charAt(0).toUpperCase() + string?.slice(1);
@@ -365,24 +444,35 @@ const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel }) => {
     return formatSingle(str);
   };
   return (
-    <div className="bg-white relative rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-all group">
+    <div
+      className={`relative rounded-xl shadow-lg overflow-hidden border hover:shadow-xl transition-all group backdrop-blur-xl ${theme === "dark"
+        ? "bg-white/10 border-white/20 hover:border-purple-500/50"
+        : "bg-gray-100 border-gray-200 hover:border-purple-500/30"
+        }`}
+    >
+
 
       {/* ✅ Main Content */}
       <div className="p-5 pt-5">
-        <h2 className="text-lg font-bold text-gray-800 capitalize">
+        <h2 className={`text-lg font-bold capitalize ${theme === "dark" ? "text-white" : "text-gray-800"
+          }`}>
           {job.title || "Software Engineer"}
         </h2>
-        <p className="text-[1rem] text-gray-600 pt-2">
+        <p className={`text-[1rem] pt-2 ${theme === "dark" ? "text-gray-300" : "text-gray-600"
+          }`}>
           {job.type} | {job.scheduleType}
         </p>
-        <p className="text-sm text-gray-700 pt-2">
+        <p className={`text-sm pt-2 ${theme === "dark" ? "text-gray-400" : "text-gray-700"
+          }`}>
           {job.city}, {job.state} | {job.locationType}
         </p>
-        <p className="text-sm text-gray-600 pt-2">
+        <p className={`text-sm pt-2 font-medium ${theme === "dark" ? "text-green-400" : "text-gray-600"
+          }`}>
           ₹{formatIndianRupee(job.compensation)}/Annum
         </p>
 
-        <div className="text-sm text-purple-800 mb-4 min-h-16 line-clamp-3 pt-2 mt-2">
+        <div className={`text-sm mb-4 min-h-16 line-clamp-3 pt-2 mt-2 ${theme === "dark" ? "text-purple-300" : "text-purple-800"
+          }`}>
           <div
             dangerouslySetInnerHTML={{
               __html: capitalizeFirstLetter(job.description),
@@ -391,18 +481,22 @@ const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel }) => {
         </div>
 
         <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-500">
+          <div className={`text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}>
             {job.experienceRequired} Years Experience.
           </div>
           <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
             <button
               onClick={onViewDetails}
-              className="bg-gray-300 text-black px-3 py-2 rounded-full hover:bg-gray-400 hover:text-black transition-colors text-sm"
+              className={`px-3 py-2 rounded-full transition-colors text-sm ${theme === "dark"
+                ? "bg-gray-700 text-white hover:bg-gray-600"
+                : "bg-gray-200 text-black hover:bg-gray-300"
+                }`}
             >
               View Details
             </button>
             <Link to={`/${companyUserName}/current-job/${job._id}`}>
-              <button className="bg-gray-700 text-white px-4 py-2 rounded-full hover:bg-gray-800 hover:text-white transition-colors text-sm sm:text-base w-full sm:w-auto">
+              <button className="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors text-sm sm:text-base w-full sm:w-auto">
                 Apply Now
               </button>
             </Link>
