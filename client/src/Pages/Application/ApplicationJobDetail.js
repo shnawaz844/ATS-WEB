@@ -14,9 +14,10 @@ const ApplicationJobDetail = () => {
     const [ limit, setLimit ] = useState( '20' );
     const [ search, setSearch ] = useState( '' );
     const [ monthFilter, setMonthFilter ] = useState( '' );
-    const [ yearFilter, setYearFilter ] = useState( new Date().getFullYear() );
+    const [ yearFilter, setYearFilter ] = useState( );
     const [ applications, setApplications ] = useState( [] );
     const [ loading, setLoading ] = useState( true );
+    
     const [ error, setError ] = useState( '' );
     const [ activeTab, setActiveTab ] = useState( 'applications' );
     const navigate = useNavigate();

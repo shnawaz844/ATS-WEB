@@ -64,7 +64,6 @@ const ApplicationsListTab = ( {
                 </button>
             </div>
 
-
             {/* Filters */ }
             <div className="grid grid-cols-2 gap-5">
                 {/* Month */ }
@@ -77,6 +76,8 @@ const ApplicationsListTab = ( {
                         onChange={ ( e ) => setMonthFilter( e.target.value ) }
                         className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                     >
+                        {/* Add "All Months" option */ }
+                        <option value="">All Months</option>
                         { getMonthOptions().map( ( option ) => (
                             <option key={ option.value } value={ option.value }>
                                 { option.label }
@@ -95,6 +96,8 @@ const ApplicationsListTab = ( {
                         onChange={ ( e ) => setYearFilter( e.target.value ) }
                         className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                     >
+                        {/* Add "All Years" option */ }
+                        <option value="">All Years</option>
                         { getYearOptions().map( ( year ) => (
                             <option key={ year } value={ year }>
                                 { year }
