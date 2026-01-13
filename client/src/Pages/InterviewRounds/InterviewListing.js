@@ -3,7 +3,10 @@ import { useInterviews, useAddInterview, useUpdateInterview } from "../../hooks/
 import InterViewDialog from "../../components/InterViewDialog";
 import { AlertCircle, Briefcase, ChevronLeft, ChevronRight, Edit, Search } from "lucide-react";
 
+import { useTheme } from "../../context/ThemeContext";
+
 const InterviewListing = () => {
+  const { theme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
 
@@ -105,16 +108,15 @@ const InterviewListing = () => {
   };
 
   return (
-    <div
-      className="px-4 sm:px-6 md:px-8 py-4 w-full min-h-screen"
-      style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
-    >
+    <div className="px-4 sm:px-6 md:px-8 py-4 w-full min-h-screen transition-colors duration-300 bg-white dark:bg-black">
       <div className="max-w-screen-2xl mx-auto">
         {/* Header Section */}
-        <div className='mb-6 min-h-[80px] sm:h-[15vh] flex flex-col sm:flex-row items-center justify-between rounded-xl p-4 bg-gray-700 gap-4'>
+        <div className="mb-6 min-h-[80px] sm:h-[15vh] flex flex-col sm:flex-row items-center justify-between rounded-xl p-4 gap-4 transition-all duration-300 backdrop-blur-xl bg-gray-200 dark:bg-transparent border border-gray-200 dark:border-gray-600 shadow-sm">
           <div className="flex items-center w-full sm:w-auto">
-            <Briefcase className="mr-2 h-6 w-6 text-white" />
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">
+            <div className="p-3 bg-[#9333ea]/10 rounded-full">
+              <Briefcase className="h-6 w-6 text-[#9333ea]" />
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold ml-3 text-gray-900 dark:text-white">
               Interview Status
             </h1>
           </div>
@@ -122,21 +124,21 @@ const InterviewListing = () => {
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search rounds..."
                 value={search}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[40px] sm:h-[48px] text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] focus:border-transparent duration-200 h-[40px] sm:h-[48px] text-sm sm:text-base bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
 
             {/* Add Button */}
             <button
               onClick={handleOpenAddDialog}
-              className="flex items-center justify-center px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-xl border border-white hover:bg-gray-600 transition-all duration-200 shadow-sm w-full sm:w-full text-sm sm:text-base"
+              className="flex items-center justify-center px-3 sm:px-4 py-2 bg-[#9333ea] hover:bg-[#7e22ce] text-white rounded-xl transition-all duration-200 shadow-md w-full sm:w-full text-sm sm:text-base"
             >
               <span className="mr-2"><strong>+</strong></span>
               <span>Add New Round</span>
@@ -148,15 +150,15 @@ const InterviewListing = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 px-2 sm:px-0">
           {isLoading && (
             <div className="col-span-full h-64 flex items-center justify-center">
-              <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-[#9333ea] border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
 
           {isError && (
             <div className="col-span-full h-64 flex items-center justify-center px-4">
-              <div className="bg-red-50 p-4 rounded-lg flex items-center gap-3 max-w-md w-full">
-                <AlertCircle className="text-red-500 h-5 w-5" />
-                <p className="text-red-600 text-sm sm:text-base">Error: {error.message}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center gap-3 max-w-md w-full border border-red-200 dark:border-red-800">
+                <AlertCircle className="text-red-500 dark:text-red-400 h-5 w-5" />
+                <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">Error: {error.message}</p>
               </div>
             </div>
           )}
@@ -164,28 +166,28 @@ const InterviewListing = () => {
           {interviews.map((interview) => (
             <div
               key={interview._id}
-              className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all duration-200"
+              className="backdrop-blur-xl bg-white dark:bg-white/5 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#9333ea]/50 dark:hover:border-[#9333ea]/50 hover:shadow-lg transition-all duration-200"
             >
               <div className="flex flex-col">
                 <div className="flex items-center flex-wrap gap-1">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">Round Name:</h3>
-                  <p className="text-sm sm:text-base font-semibold text-purple-800">{interview.roundName}</p>
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Name:</h3>
+                  <p className="text-sm sm:text-base font-semibold text-[#9333ea] dark:text-[#a855f7]">{interview.roundName}</p>
                 </div>
                 <div className="flex items-center flex-wrap gap-1 mt-2">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">Round Number:</h3>
-                  <p className="text-xs sm:text-sm font-semibold text-green-800">{interview.roundNumber}</p>
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Number:</h3>
+                  <p className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{interview.roundNumber}</p>
                 </div>
                 <button
                   onClick={() => handleOpenEditDialog(interview)}
-                  className="self-end p-1 sm:p-2 hover:bg-gray-100 rounded-full transition-colors mt-2"
+                  className="self-end p-1 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-full transition-colors mt-2"
                   aria-label="Edit"
                 >
-                  <Edit className="h-4 w-4 text-gray-600" />
+                  <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 
-              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
-                <div className="flex justify-between text-xs text-gray-500">
+              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                   <span>ID: {interview._id.substring(0, 8)}...</span>
                   <span>Updated: {new Date(interview.updatedAt).toLocaleDateString()}</span>
                 </div>
@@ -195,13 +197,13 @@ const InterviewListing = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-6 mt-2 gap-4 sm:gap-0 px-2 sm:px-0">
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-2 gap-4 sm:gap-0 px-2 sm:px-0">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
             className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === 1
-              ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-              : 'bg-gray-700 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+              ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+              : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
               }`}
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
@@ -209,18 +211,18 @@ const InterviewListing = () => {
           </button>
 
           <div className="flex items-center gap-1">
-            <span className="px-3 py-1 bg-gray-200 text-black rounded-full font-medium text-xs sm:text-sm">
+            <span className="px-3 py-1 rounded-full font-medium text-xs sm:text-sm bg-gray-200 dark:bg-gray-700 text-black dark:text-white">
               {currentPage}
             </span>
-            <span className="text-xs sm:text-sm text-gray-500">of {totalPages}</span>
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">of {totalPages}</span>
           </div>
 
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
             className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === totalPages
-              ? 'bg-gray-400 text-white cursor-not-allowed rounded-xl'
-              : 'bg-gray-700 text-white hover:bg-gray-400 rounded-xl'
+              ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+              : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
               }`}
           >
             Next

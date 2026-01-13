@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react"
+import { useTheme } from "../context/ThemeContext"
 
 const navigation = {
     main: [
@@ -34,8 +35,13 @@ const navigation = {
 }
 
 export function Footer() {
+    const { theme } = useTheme();
+
     return (
-        <footer className="py-12 border-t border-white/10 bg-white text-gray-800">
+        <footer className={`py-12 border-t transition-colors duration-300 ${theme === "dark"
+                ? "bg-black border-white/10 text-gray-300"
+                : "bg-gray-50 border-gray-200 text-gray-600"
+            }`}>
             <div className="max-w-screen-xl mx-auto px-6 py-16 lg:px-8">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
                     {/* Brand Section */}
@@ -48,7 +54,7 @@ export function Footer() {
                                 Niyukty
                             </span>
                         </a>
-                        <p className="text-slate-400 mb-6 max-w-md">
+                        <p className={`mb-6 max-w-md ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                             Revolutionizing recruitment with AI-powered solutions. Connect the right talent with the right
                             opportunities through intelligent matching and automated processes.
                         </p>
@@ -57,11 +63,11 @@ export function Footer() {
                                 <Mail className="h-4 w-4" />
                                 <span>contact@niyukty.com</span>
                             </div> */}
-                            <div className="flex items-center gap-2 text-slate-400">
+                            <div className={`flex items-center gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <Phone className="h-4 w-4" />
                                 <span>+91 8810600135</span>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-400">
+                            <div className={`flex items-center gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <MapPin className="h-4 w-4" />
                                 <span>F2 Fintech Pvt Ltd, A-25, M-1 Arv Park, A-Block, Sector 63, Noida</span>
                             </div>
@@ -70,11 +76,12 @@ export function Footer() {
 
                     {/* Quick Links */}
                     <div>
-                        <h4 className="text-gray-800 font-semibold text-lg mb-4">Quick Links</h4>
+                        <h4 className={`font-semibold text-lg mb-4 ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>Quick Links</h4>
                         <ul className="space-y-2">
                             {navigation.main.slice(0, 4).map((item) => (
                                 <li key={item.name}>
-                                    <a href={item.href} className="text-slate-400 hover:text-gray-800 transition-colors">
+                                    <a href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                        }`}>
                                         {item.name}
                                     </a>
                                 </li>
@@ -84,11 +91,12 @@ export function Footer() {
 
                     {/* Legal */}
                     <div>
-                        <h4 className="text-gray-800 font-semibold text-lg mb-4">Legal</h4>
+                        <h4 className={`font-semibold text-lg mb-4 ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>Legal</h4>
                         <ul className="space-y-2">
                             {navigation.main.slice(4).map((item) => (
                                 <li key={item.name}>
-                                    <a href={item.href} className="text-slate-400 hover:text-gray-800 transition-colors">
+                                    <a href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                        }`}>
                                         {item.name}
                                     </a>
                                 </li>
@@ -98,25 +106,29 @@ export function Footer() {
 
                     {/* Resources */}
                     <div>
-                        <h4 className="text-gray-800 font-semibold text-lg mb-4">Resources</h4>
+                        <h4 className={`font-semibold text-lg mb-4 ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>Resources</h4>
                         <ul className="space-y-2">
                             <li>
-                                <a href="#" className="text-slate-400 hover:text-gray-800 transition-colors">
+                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    }`}>
                                     Blog
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="text-slate-400 hover:text-gray-800 transition-colors">
+                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    }`}>
                                     Documentation
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="text-slate-400 hover:text-gray-800 transition-colors">
+                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    }`}>
                                     Support
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="text-slate-400 hover:text-gray-800 transition-colors">
+                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    }`}>
                                     Guides
                                 </a>
                             </li>
@@ -125,11 +137,13 @@ export function Footer() {
                 </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-slate-400 text-sm">© {new Date().getFullYear()} Niyukty. All rights reserved.</p>
+                <div className={`mt-12 pt-8 flex flex-col md:flex-row justify-between items-center border-t ${theme === "dark" ? "border-white/10" : "border-gray-200"
+                    }`}>
+                    <p className={`text-sm ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>© {new Date().getFullYear()} Niyukty. All rights reserved.</p>
                     <div className="flex gap-4 mt-4 md:mt-0">
                         {navigation.social.map((item) => (
-                            <a key={item.name} href={item.href} className="text-slate-400 hover:text-gray-800 transition-colors">
+                            <a key={item.name} href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-500 hover:text-purple-600"
+                                }`}>
                                 <span className="sr-only">{item.name}</span>
                                 <item.icon className="h-5 w-5" />
                             </a>

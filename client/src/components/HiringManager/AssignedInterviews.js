@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
+import { useTheme } from "../../context/ThemeContext";
 import { Briefcase, Search } from "lucide-react";
 import BackButtonMobile from "../Mob-back-btn";
 
 const AssignedInterviews = () => {
+    const { theme } = useTheme();
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const itemsPerPage = 1; // Number of interviews per page
@@ -221,19 +223,20 @@ const AssignedInterviews = () => {
         }
     };
 
-    // Get status color for visual indication
+    // Get status color for visual indication // 
     const getStatusColor = (status) => {
+        const isDark = theme === 'dark';
         switch (status?.toLowerCase()) {
             case 'scheduled':
-                return 'bg-blue-100 text-blue-800';
+                return isDark ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800';
             case 'completed':
-                return 'bg-green-100 text-green-800';
+                return isDark ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-800';
             case 'cancelled':
-                return 'bg-red-100 text-red-800';
+                return isDark ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-800';
             case 'rescheduled':
-                return 'bg-yellow-100 text-yellow-800';
+                return isDark ? 'bg-yellow-900/30 text-yellow-300' : 'bg-yellow-100 text-yellow-800';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800';
         }
     };
 
@@ -253,16 +256,16 @@ const AssignedInterviews = () => {
     console.log("editform", editForm)
 
     return (
-        <div className="px-8 py-4 w-full min-h-screen"
-            style={{ background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' }}
-        >
+        <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+            }`}>
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
-                <div className='mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 bg-gray-700'>
+                <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
+                    }`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
                         <div className="w-full md:w-auto">
-                            <h2 className="text-xl md:text-3xl font-bold text-white flex items-center">
-                                <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-white" />
+                            <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
+                                <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-black dark:text-white" />
                                 Assigned Interviews
                             </h2>
                         </div>
@@ -270,7 +273,7 @@ const AssignedInterviews = () => {
                         {/* Search and Filter */}
                         <div className='flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto'>
                             <div className="w-full md:w-[35vw]">
-                                <label className="block text-white text-xs font-bold mb-1 md:mb-2">
+                                <label className="block text-black dark:text-white text-xs font-bold mb-1 md:mb-2">
                                     Search:
                                 </label>
                                 <div className="relative">
@@ -280,19 +283,23 @@ const AssignedInterviews = () => {
                                         placeholder="Search by job, candidate or interview type..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="w-full pl-8 md:pl-10 pr-4 py-2 md:py-3 border border-gray-300 shadow-sm rounded-xl focus:outline-none duration-200 h-[5vh] md:h-[6.3vh]"
+                                        className={`w-full pl-8 md:pl-10 pr-4 py-2 md:py-3 border shadow-sm rounded-xl focus:outline-none duration-200 h-[5vh] md:h-[6.3vh] ${theme === 'dark'
+                                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
+                                            : 'bg-white border-gray-300 text-gray-900'
+                                            }`}
                                     />
                                 </div>
                             </div>
 
                             <div className="w-full md:w-1/3">
-                                <label className="block text-white text-xs font-bold mb-1 md:mb-2">
+                                <label className="block text-black dark:text-white text-xs font-bold mb-1 md:mb-2">
                                     Filter by Status:
                                 </label>
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="w-[28vw] sm:w-auto appearance-none bg-gray-200 hover:bg-white rounded-xl py-2 px-4 md:pl-4 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto text-sm md:text-base "
+                                    className={`w-[28vw] sm:w-auto appearance-none rounded-xl py-2 px-4 md:pl-4 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto text-sm md:text-base ${theme === 'dark' ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-200 hover:bg-white text-gray-900'
+                                        }`}
                                 >
                                     <option value="all">All Statuses</option>
                                     {statuses?.map(status => (
@@ -316,11 +323,11 @@ const AssignedInterviews = () => {
 
                         {/* Header section with title and controls */}
                         <div className="relative z-10 flex flex-col sm:flex-row justify-start items-start sm:items-center mb-6 gap-4">
-                            <div className="shadow-sm px-5 py-3 rounded-2xl">
-                                <h2 className="text-2xl font-bold  bg-clip-text text-black">
+                            <div className={`shadow-sm px-5 py-3 rounded-2xl ${theme === 'dark' ? 'bg-gray-900/50 backdrop-blur-sm' : ''}`}>
+                                <h2 className={`text-2xl font-bold  bg-clip-text ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                                     Today's Interviews
                                 </h2>
-                                <p className="text-white text-sm">
+                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-white'}`}>
                                     {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                                 </p>
                             </div>
@@ -350,12 +357,15 @@ const AssignedInterviews = () => {
                                         <div
                                             key={interview._id}
                                             onClick={() => handleInterviewClick(interview)}
-                                            className="group bg-[#b8e1e1] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100"
+                                            className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border ${theme === 'dark'
+                                                ? 'bg-gray-800 border-gray-700'
+                                                : 'bg-[#b8e1e1] border-gray-100'
+                                                }`}
                                         >
                                             <div className="p-4">
                                                 {/* Header with job title and status */}
                                                 <div className="flex justify-between items-center mb-3">
-                                                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
+                                                    <h3 className={`text-lg font-semibold line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
                                                         {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
                                                     </h3>
                                                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${textColor} ${bgLight}`}>
@@ -375,13 +385,13 @@ const AssignedInterviews = () => {
                                                             </span>
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium text-gray-800">
+                                                            <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                                                                 Applicant Name :   {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
                                                             </p>
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                                 Interview Type :    {capitalizeFirstLetter(interview.interviewerType) || "N/A"} Interview
                                                             </p>
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                                 Interviewer :   {capitalizeFirstLetter(interview.interviewerID.userName) || "N/A"}
                                                             </p>
                                                         </div>
@@ -398,8 +408,8 @@ const AssignedInterviews = () => {
                                             </div>
 
                                             {/* Footer */}
-                                            <div className="flex justify-end items-center px-4 py-3 bg-gray-300 mt-2">
-                                                <button className="text-sm text-black font-medium flex items-center gap-1">
+                                            <div className={`flex justify-end items-center px-4 py-3 mt-2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                                                <button className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                                                     Details
                                                     <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -408,7 +418,7 @@ const AssignedInterviews = () => {
                                             </div>
 
                                             {/* Status indicator line */}
-                                            <div className={"h-1 w-full bg-white"}></div>
+                                            <div className={`h-1 w-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}></div>
                                         </div>
                                     );
                                 })}
@@ -436,7 +446,7 @@ const AssignedInterviews = () => {
                 )}
 
                 {/* All Other Interviews */}
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">All Assigned Interviews</h2>
+                <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>All Assigned Interviews</h2>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -469,15 +479,19 @@ const AssignedInterviews = () => {
                             .map((interview) => (
                                 <div
                                     key={interview._id}
-                                    className="bg-white p-6 rounded-xl border border-gray-100 cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-indigo-50 group"
+                                    className={`p-6 rounded-xl border cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group ${theme === 'dark'
+                                        ? 'bg-white/10 border-gray-700 hover:border-purple-500/50'
+                                        : 'bg-white border-gray-100 hover:border-indigo-50'
+                                        }`}
                                     onClick={() => handleInterviewClick(interview)}
                                 >
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#1a237e] transition-colors">
+                                            <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white group-hover:text-purple-500' : 'text-gray-900 group-hover:text-purple-500'
+                                                }`}>
                                                 {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
                                             </h3>
-                                            <p className="text-sm text-gray-500 mt-1">
+                                            <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                 Applicant Name :  {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
                                             </p>
                                         </div>
@@ -487,27 +501,27 @@ const AssignedInterviews = () => {
                                     </div>
 
                                     <div className="space-y-3 mt-4">
-                                        <div className="flex items-center text-sm text-gray-600">
+                                        <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                             </svg>
                                             Interview Type :   {capitalizeFirstLetter(interview.interviewerType) || "N/A"}
                                         </div>
 
-                                        <div className="flex items-center text-sm text-gray-600">
+                                        <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             Scheduled Date :   {formatDate(interview.date)}
                                         </div>
 
-                                        <div className="flex items-center text-sm text-gray-600">
+                                        <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             Scheduled Time :   {interview.scheduledTime}
                                         </div>
-                                        <div className="flex items-center text-sm text-gray-600">
+                                        <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                             <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
@@ -516,7 +530,8 @@ const AssignedInterviews = () => {
                                     </div>
 
                                     <div className="mt-6 flex justify-end">
-                                        <button className="text-[#1a237e] group-hover:text-blue-600 text-sm font-medium flex items-center">
+                                        <button className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 group-hover:text-purple-600'
+                                            }`}>
                                             View Details
                                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -535,14 +550,16 @@ const AssignedInterviews = () => {
 
                     <div
                         ref={modalRef}
-                        className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300"
+                        className={`rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-100'
+                            }`}
                     >
                         {/* Modal Header */}
-                        <div className="sticky top-0 bg-gray-700 z-10 border rounded-t-xl border-white px-6 py-4 flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-white">Update Interview Details</h2>
+                        <div className={`sticky top-0 z-10 border rounded-t-xl px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-md'
+                            }`}>
+                            <h2 className="text-xl font-bold dark:text-white text-gray-800">Update Interview Details</h2>
                             <button
                                 onClick={() => setIsEditModalOpen(false)}
-                                className="text-white hover:text-black focus:outline-none p-1 rounded-full hover:bg-gray-300"
+                                className="text-red-500 hover:text-black focus:outline-none p-1 rounded-full hover:bg-gray-300"
                                 aria-label="Close"
                             >
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,8 +568,9 @@ const AssignedInterviews = () => {
                             </button>
                         </div>
 
-                        <div className="bg-gray-300 p-5 rounded-xl m-6 mt-4 mb-6 border border-gray-200">
-                            <h3 className="font-semibold text-lg text-gray-800 mb-3 flex items-center">
+                        <div className={`p-5 rounded-xl m-6 mt-4 mb-6 border ${theme === 'dark' ? 'bg-white/10 border-gray-600' : 'bg-gray-200 border-gray-200 shadow-md'
+                            }`}>
+                            <h3 className={`font-semibold text-lg mb-3 flex items-center ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
                                 <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
@@ -560,15 +578,15 @@ const AssignedInterviews = () => {
                             </h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div className="space-y-1">
-                                    <p className="text-xs font-medium text-gray-500">JOB TITLE</p>
-                                    <p className="font-medium">{capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A"}</p>
+                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>JOB TITLE</p>
+                                    <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A"}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-xs font-medium text-gray-500">APPLICANT</p>
-                                    <p className="font-medium">{capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A"}</p>
+                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>APPLICANT</p>
+                                    <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A"}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-xs font-medium text-gray-500">STATUS</p>
+                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>STATUS</p>
                                     <span className={`font-medium ${getStatusColor(detailedInterview?.status)} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs`}>
                                         {statuses?.length && statuses.find(statusItem => statusItem._id === detailedInterview?.status)?.applicationStatus
                                             ? capitalizeFirstLetter(statuses.find(statusItem => statusItem._id === detailedInterview?.status).applicationStatus)
@@ -581,32 +599,35 @@ const AssignedInterviews = () => {
                         <div className="px-6 pb-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Date</label>
+                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Date</label>
                                     <input
                                         type="date"
                                         value={editForm.date}
                                         onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                            }`}
                                         min={new Date().toISOString()?.split('T')[0]}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Time</label>
+                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Time</label>
                                     <input
                                         type="time"
                                         value={editForm.time}
                                         onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                            }`}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Interview Type</label>
+                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Type</label>
                                 <select
                                     value={editForm.interviewType}
                                     onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                        }`}
                                 >
                                     <option value="">Select Interview Type</option>
                                     {interviewTypes?.map((type) => (
@@ -616,23 +637,25 @@ const AssignedInterviews = () => {
                             </div>
                             {editForm.interviewType === 'online' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Meeting Link</label>
+                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
                                     <input
                                         type="url"
                                         value={editForm.meetingLink}
                                         onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                        className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                            }`}
                                         placeholder="https://meet.google.com/..."
                                     />
                                 </div>
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Update Status</label>
+                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Update Status</label>
                                 <select
                                     value={editForm.status}
                                     onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                        }`}
                                 >
                                     {statuses?.map((status) => (
                                         <option key={status._id} value={status._id}>
@@ -643,13 +666,14 @@ const AssignedInterviews = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                     {editForm.interviewerID
                                         ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm.interviewerID._id)?.userName || "Not Found"}`
                                         : "Assign Interviewer"}
                                 </label>
                                 <select
-                                    className="sm:w-full w-32 border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                        }`}
                                     value={editForm.interviewerID._id || ""}
                                     onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
                                     required
@@ -662,25 +686,26 @@ const AssignedInterviews = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes (Optional)</label>
+                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Notes (Optional)</label>
                                 <textarea
-                                    className="w-full border border-gray-300 rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                        }`}
                                     rows="3"
                                     placeholder="Add any additional notes about this interview..."
                                 ></textarea>
                             </div>
 
                             {/* Buttons - No Logic Changes */}
-                            <div className="flex justify-end space-x-3 pt-4">
+                            <div className="flex justify-end space-x-3 pt-4 ">
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-300 transition-colors"
+                                    className=" dark:text-white text-gray-800 px-4 py-2.5 border border-gray-300 rounded-xl font-medium  dark:hover:bg-purple-800 transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleUpdateInterview}
-                                    className="px-4 py-2.5 bg-gray-700 rounded-xl text-white hover:text-black font-medium hover:bg-gray-300 transition-colors"
+                                    className="px-4 py-2.5 bg-[#9333ea] rounded-xl text-white hover:text-white  font-medium hover:bg-purple-800 transition-colors"
                                 >
                                     Update Interview
                                 </button>

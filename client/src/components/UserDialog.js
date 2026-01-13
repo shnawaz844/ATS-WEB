@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const UserDialog = ({
     handleCloseDialog,
@@ -11,9 +12,10 @@ const UserDialog = ({
     loggedInUser,
     companies
 }) => {
+    const { theme } = useTheme();
     const userRole = JSON.parse(localStorage.getItem('user')).role;
     const [errors, setErrors] = useState({});
-    
+
 
     // Function to validate the form fields
     const validateForm = () => {
@@ -60,17 +62,18 @@ const UserDialog = ({
             onClick={handleOverlayClick}
             className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300 mt-11"
         >
+
             <div
-                className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300"
+                className="rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 bg-white dark:bg-gray-800"
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >
-                <div className="relative flex justify-center items-center p-5 border-b bg-gray-700 border border-white rounded-t-xl">
-                    <h2 className="text-2xl font-semibold text-white">
+                <div className="relative flex justify-center items-center p-5 border-b rounded-t-xl bg-gray-100 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                         {dialogMode === 'add' ? 'Add New User' : 'Edit User Details'}
                     </h2>
                     <button
                         onClick={handleCloseDialog}
-                        className="absolute right-4 text-white hover:bg-white/20 rounded-full p-1 transition-all duration-200"
+                        className="absolute right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full p-1 transition-all duration-200"
                     >
                         <X size={20} />
                     </button>
@@ -80,7 +83,7 @@ const UserDialog = ({
                         <div className="space-y-4">
                             {/* User Name Field */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                     User Name
                                 </label>
                                 <input
@@ -88,9 +91,9 @@ const UserDialog = ({
                                     name="user_name"
                                     autoComplete='new-username'
                                     value={formData.userName}
-                                    onChange={ ( e ) => handleFormChange( { target: { name: 'userName', value: e.target.value } } ) }
+                                    onChange={(e) => handleFormChange({ target: { name: 'userName', value: e.target.value } })}
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
                                 {errors.userName && (
                                     <p className="text-red-500 text-sm mt-1">{errors.userName}</p>
@@ -99,7 +102,7 @@ const UserDialog = ({
 
                             {/* Email Field */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                     Email
                                 </label>
                                 <input
@@ -108,7 +111,7 @@ const UserDialog = ({
                                     value={formData.email}
                                     onChange={handleFormChange}
                                     required
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
                                 {errors.email && (
                                     <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -118,7 +121,7 @@ const UserDialog = ({
                             {/* Password Field (only in 'add' mode) */}
                             {dialogMode === 'add' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                         Password
                                     </label>
                                     <input
@@ -128,7 +131,7 @@ const UserDialog = ({
                                         value={formData.password || ''}
                                         onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
                                         required
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                        className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     />
                                     {errors.password && (
                                         <p className="text-red-500 text-sm mt-1">{errors.password}</p>
@@ -138,14 +141,14 @@ const UserDialog = ({
 
                             {/* Gender Field */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                     Gender
                                 </label>
                                 <select
                                     name="gender"
                                     value={formData.gender}
                                     onChange={handleFormChange}
-                                    className="sm:w-full w-40 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    className="sm:w-full w-40 px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                     <option value="">Select Gender</option>
                                     <option value="male">Male</option>
@@ -156,7 +159,7 @@ const UserDialog = ({
 
                             {/* Address Field */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                     Address
                                 </label>
                                 <input
@@ -164,14 +167,14 @@ const UserDialog = ({
                                     name="address"
                                     value={formData.address || ''}
                                     onChange={handleFormChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                                    className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
                             </div>
 
                             {/* Company Dropdown (visible for super users) */}
                             {loggedInUser.role === 'super' && (
                                 <div className="mb-4">
-                                    <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Company
                                     </label>
                                     <select
@@ -179,7 +182,7 @@ const UserDialog = ({
                                         name="company_id"
                                         value={formData.company_id || ''}
                                         onChange={handleFormChange}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                                        className="mt-1 block w-full rounded-md shadow-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-[#9333ea] focus:border-[#9333ea]"
                                     >
                                         <option value="">Select a company</option>
                                         {companies?.map((company) => (
@@ -195,16 +198,16 @@ const UserDialog = ({
                             {loggedInUser.role === 'super' ? (
                                 <>
                                     <input type="hidden" name="role" value={formData.role = "admin"} />
-                                    <p className="mb-4 text-gray-700">Role: Admin</p>
+                                    <p className="mb-4 text-gray-700 dark:text-gray-300">Role: Admin</p>
                                 </>
                             ) : loggedInUser.role === 'recruiter_manager' ? (
                                 <>
                                     <input type="hidden" name="role" value={formData.role = "candidate"} />
-                                    <p className="mb-4 text-gray-700">Role: Candidate</p>
+                                    <p className="mb-4 text-gray-700 dark:text-gray-300">Role: Candidate</p>
                                 </>
                             ) : (
                                 <div className="mb-4">
-                                    <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Role
                                     </label>
                                     <select
@@ -212,7 +215,7 @@ const UserDialog = ({
                                         name="role"
                                         value={formData.role}
                                         onChange={handleFormChange}
-                                        className="mt-1 block sm:w-full w-32 rounded-md border-gray-300 shadow-sm"
+                                        className="mt-1 block sm:w-full w-32 rounded-md shadow-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-[#9333ea] focus:border-[#9333ea]"
                                     >
                                         <option value="admin">Admin</option>
                                         <option value="recruiter_manager">Recruiter Manager</option>
@@ -231,26 +234,26 @@ const UserDialog = ({
                                         name="head"
                                         checked={formData.head || false}
                                         onChange={handleFormChange}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-[#9333ea] focus:ring-[#9333ea] border-gray-300 rounded"
                                     />
-                                    <label className="ml-2 text-sm text-gray-700">
+                                    <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                                         Are you a head?
                                     </label>
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 type="button"
                                 onClick={handleCloseDialog}
-                                className="px-4 py-2 text-sm font-medium text-black bg-gray-400 border border-gray-300 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="px-4 py-2 text-sm font-medium border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-xl hover:bg-gray-400 hover:text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="px-4 py-2 text-sm font-medium text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] bg-[#9333ea] hover:bg-[#7e22ce]"
                             >
                                 {dialogMode === 'add' ? 'Add User' : 'Update User'}
                             </button>

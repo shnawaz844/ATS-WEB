@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 // Icon Components
 const SearchIcon = () => (
@@ -37,6 +38,7 @@ const initialApplications = [
 
 // Stats Component
 const Stats = () => {
+    const { theme } = useTheme();
     const totalApplications = initialApplications.length;
     const activeApplications = initialApplications.filter(app =>
         ["Interview", "Screening", "Shortlisted"].includes(app.status)).length;
@@ -54,10 +56,11 @@ const Stats = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-                <div key={index} className="bg-white rounded-xl shadow-sm p-6">
-                    <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
+                <div key={index} className={`rounded-xl shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                    }`}>
+                    <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{stat.title}</h3>
                     <div className="mt-2 flex items-baseline gap-2">
-                        <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                        <p className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
                         <span className={`text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
                             {stat.change}
                         </span>
@@ -70,27 +73,28 @@ const Stats = () => {
 
 // Recent Applications Table
 const RecentApplications = ({ applications }) => {
+    const { theme } = useTheme();
     return (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className={`rounded-xl shadow-sm overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
             <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
+                <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Recent Applications</h2>
             </div>
             <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                    <thead className={theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}>
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Position</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stage</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied Date</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Applicant</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Position</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Status</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Stage</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Applied Date</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className={`divide-y ${theme === 'dark' ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200'}`}>
                         {applications.map((app) => (
                             <tr key={app.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.applicantName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.jobTitle}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{app.applicantName}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.jobTitle}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full
                                         ${app.status === 'Offered' ? 'bg-purple-100 text-purple-800' :
@@ -101,8 +105,8 @@ const RecentApplications = ({ applications }) => {
                                         {app.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.stage}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{app.appliedDate}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.stage}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.appliedDate}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -114,6 +118,7 @@ const RecentApplications = ({ applications }) => {
 
 // Summary Cards Component
 const SummaryCards = ({ applications }) => {
+    const { theme } = useTheme();
     const statusCounts = applications.reduce((acc, app) => {
         acc[app.status] = (acc[app.status] || 0) + 1;
         return acc;
@@ -130,9 +135,9 @@ const SummaryCards = ({ applications }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(statusCounts).map(([status, count]) => (
-                <div key={status} className="bg-white rounded-xl shadow-sm p-6">
+                <div key={status} className={`rounded-xl shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
                     <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium text-gray-900">{status}</h3>
+                        <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{status}</h3>
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[status]}`}>
                             {count}
                         </span>
@@ -145,27 +150,31 @@ const SummaryCards = ({ applications }) => {
 
 // Main Dashboard Component
 export default function HiringDashboard() {
+    const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
 
     return (
-        <div className="min-h-screen bg-gray-50 ">
+        <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
             {/* Top Navigation Bar - Now responsive */}
-            <nav className="bg-white border-b border-gray-200 w-full z-30 top-28">
+            <nav className={`border-b w-full z-30 top-28 ${theme === 'dark' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
                         <div className="flex items-center">
-                            <h1 className="text-[1rem] md:text-2xl font-bold text-gray-900">HR Dashboard</h1>
+                            <h1 className={`text-[1rem] md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>HR Dashboard</h1>
                         </div>
 
                         {/* Search Bar */}
                         <div className="flex items-center">
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <SearchIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                                    <SearchIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                                 </div>
                                 <input
                                     type="text"
-                                    className="rounded-2xl block w-full sm:w-64 pl-10 pr-3 py-2 border border-gray-300 leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                    className={`rounded-2xl block w-full sm:w-64 pl-10 pr-3 py-2 border leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm ${theme === 'dark'
+                                            ? 'bg-gray-800 border-gray-700 text-white'
+                                            : 'bg-gray-50 border-gray-300 text-gray-900'
+                                        }`}
                                     placeholder="Search applications..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}

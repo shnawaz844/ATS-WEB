@@ -1,54 +1,50 @@
 import { useState } from 'react';
 
 export default function ReadytoDiv() {
-    const [ isHovered, setIsHovered ] = useState( false );
+    const [isHovered, setIsHovered] = useState(false);
 
     return (
         <>
-            <div className="w-full bg-gradient-to-br from-blue-500 to-indigo-600 py-20 border-0 shadow-2xl overflow-hidden relative">
-                {/* Abstract shapes in background */ }
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                    <div className="absolute top-10 left-10 w-36 h-36 bg-purple-500 rounded-full blur-2xl"></div>
-                    <div className="absolute bottom-10 right-10 w-52 h-52 bg-indigo-500 rounded-full blur-2xl"></div>
+            <div className="w-full relative overflow-hidden py-10 ">
+                {/* Subtle background pattern */}
+                <div className="absolute inset-0 opacity-5"
+                    style={{
+                        backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                             radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)`
+                    }}>
                 </div>
 
-                <div className="max-w-4xl mx-auto text-center px-6 relative z-10">
-                    <h2 className="text-gray-100 text-4xl md:text-5xl font-extrabold tracking-tight leading-tight mb-6">
-                        Ready to <span className="text-white">dive in</span>?
+                <div className="max-w-3xl mx-auto text-center px-6 relative">
+                    <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
+                        Ready to begin your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400">journey</span>?
                     </h2>
 
-                    <p className="text-gray-200 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-                        Join thousands of satisfied users and experience the difference today.
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-xl mx-auto">
+                        Start transforming your recruitment process today. Experience the power of AI-driven hiring.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                         <button
-                            className={ `bg-white border border-black  text-black font-semibold py-3 px-8 rounded-full shadow-md ` }
-                            onMouseEnter={ () => setIsHovered( true ) }
-                            onMouseLeave={ () => setIsHovered( false ) }
+                            className="px-8 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
                         >
                             Start Free Trial
                         </button>
 
                         <a
                             href="#learn-more"
-                            className="text-gray-200 hover:text-white text-base font-medium 
-                            border border-white rounded-full py-3 px-7  transition-colors"
+                            className="px-8 py-3.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
-                            Learn more →
+                            Learn More
                         </a>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-2 text-purple-300 text-sm md:text-base">
-                        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clipRule="evenodd"
-                            />
+                    <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-500 text-sm">
+                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
-                        <p className='text-gray-200'>No credit card required</p>
-                        <span role="img" aria-label="peace sign">✌️</span>
+                        <span>No credit card required • 14-day free trial • Cancel anytime</span>
                     </div>
                 </div>
             </div>

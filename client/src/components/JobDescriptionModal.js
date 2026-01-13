@@ -2,8 +2,10 @@ import { Briefcase, Building, Calendar, CircleX, Clock, IndianRupee, MapPinHouse
 import React from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { useTheme } from '../context/ThemeContext';
 
 const JobDescriptionModal = ({ job, isOpen, onClose }) => {
+    const { theme } = useTheme();
     const companyUserName = localStorage.getItem("companyUserName");
     const capitalizeFirstLetter = (string) => {
         return string?.charAt(0).toUpperCase() + string?.slice(1);
@@ -36,7 +38,7 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm p-4 ">
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-indigo-100/50 transform transition-all duration-300 ease-in-out hover:shadow-3xl mx-4 sm:mx-0">
+            <div className={`relative rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out hover:shadow-3xl mx-4 sm:mx-0 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-indigo-100/50'}`}>
                 {/* Close Button */}
                 <button
                     onClick={onClose}
@@ -46,25 +48,25 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
                 </button>
 
                 {/* Job Title Section */}
-                <div className="bg-gray-700 flex items-center justify-center text-white p-4 sm:p-6 rounded-t-2xl">
+                <div className={`${theme === 'dark' ? 'bg-gray-900 border-b border-gray-700' : 'bg-gray-700'} flex items-center justify-center text-white p-4 sm:p-6 rounded-t-2xl`}>
                     <h2 className="text-xl sm:text-3xl font-bold tracking-tight text-center">
                         {capitalizeFirstLetter(job.title)}
                     </h2>
                 </div>
 
                 {/* Compensation Section */}
-                <div className="p-4 sm:p-6 bg-gray-100 border-b border-indigo-100">
+                <div className={`p-4 sm:p-6 border-b ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-indigo-100'}`}>
                     <div className="flex items-center space-x-4">
-                        <IndianRupee className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
+                        <IndianRupee className={`w-5 h-5 sm:w-6 sm:h-6 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
                         <div>
                             <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Annual Compensation</p>
-                            <p className="text-xl sm:text-2xl font-bold text-indigo-800">{formatIndianRupee(job.compensation)}/Annum</p>
+                            <p className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>{formatIndianRupee(job.compensation)}/Annum</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Job Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-6 bg-white">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 p-3 sm:p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
                     {[
                         { icon: Briefcase, label: 'Job Type', value: job.type },
                         { icon: Calendar, label: 'Schedule', value: job.scheduleType },
@@ -76,11 +78,11 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
                         { icon: MapPinned, label: 'State', value: job.state },
                         { icon: Navigation, label: 'City', value: job.city }
                     ].map(({ icon: Icon, label, value }, index) => (
-                        <div key={index} className="flex items-start space-x-3 bg-gray-200 p-2 sm:p-3 rounded-xl hover:bg-indigo-100/50 transition-colors">
-                            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                        <div key={index} className={`flex items-start space-x-3 p-2 sm:p-3 rounded-xl transition-colors ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-indigo-100/50'}`}>
+                            <Icon className={`w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider">{label}</p>
-                                <p className="text-sm font-medium text-gray-800">{value}</p>
+                                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>{value}</p>
                             </div>
                         </div>
                     ))}
@@ -88,7 +90,7 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
 
                 {/* Job Description */}
                 <div className="rounded-xl p-2">
-                    <div className="prose max-w-none bg-gray-200 p-3 sm:p-4 rounded-xl">
+                    <div className={`prose max-w-none p-3 sm:p-4 rounded-xl ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200'}`}>
                         <ReactQuill
                             value={job.description}
                             readOnly={true}
@@ -99,9 +101,9 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="bg-gray-100 p-4 sm:p-6 rounded-b-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="text-sm text-gray-600 flex items-center space-x-2">
-                        <span className="font-medium text-black text-lg">{job.experienceRequired} Years</span>
+                <div className={`${theme === 'dark' ? 'bg-gray-900 border-t border-gray-700' : 'bg-gray-100'} p-4 sm:p-6 rounded-b-2xl flex flex-col sm:flex-row justify-between items-center gap-4`}>
+                    <div className={`text-sm flex items-center space-x-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <span className={`font-medium text-lg ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{job.experienceRequired} Years</span>
                         <span>Experience Required</span>
                     </div>
                     <a
