@@ -10,17 +10,18 @@ import { useTheme } from '../../context/ThemeContext';
 const ApplicationJobDetail = () => {
     const { theme } = useTheme();
     const { id } = useParams();
-    const [job, setJob] = useState(null);
-    const companyUserName = localStorage.getItem("companyUserName");
-    const [page, setPage] = useState('1');
-    const [limit, setLimit] = useState('20');
-    const [search, setSearch] = useState('');
-    const [monthFilter, setMonthFilter] = useState('');
-    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('applications');
+    const [ job, setJob ] = useState( null );
+    const companyUserName = localStorage.getItem( "companyUserName" );
+    const [ page, setPage ] = useState( '1' );
+    const [ limit, setLimit ] = useState( '20' );
+    const [ search, setSearch ] = useState( '' );
+    const [ monthFilter, setMonthFilter ] = useState( '' );
+    const [ yearFilter, setYearFilter ] = useState( );
+    const [ applications, setApplications ] = useState( [] );
+    const [ loading, setLoading ] = useState( true );
+    
+    const [ error, setError ] = useState( '' );
+    const [ activeTab, setActiveTab ] = useState( 'applications' );
     const navigate = useNavigate();
     // NEW: state for job-statuses
     const [jobStatuses, setJobStatuses] = useState([]);
