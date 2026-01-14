@@ -35,8 +35,8 @@ function Card({ job }) {
   const { theme } = useTheme();
   return (
     <div className={`shadow-lg rounded-xl p-4 transition-all duration-300 border ${theme === "dark"
-        ? "bg-white/5 border-white/10 hover:bg-white/10"
-        : "bg-white border-gray-100 hover:shadow-xl hover:border-purple-200"
+      ? "bg-white/5 border-white/10 hover:bg-white/10"
+      : "bg-white border-red-100 hover:shadow-xl hover:border-purple-200"
       }`}>
       {/* Card Header */}
       <div className="flex items-center gap-3">

@@ -8,14 +8,24 @@ const PowerfulFeatures = React.forwardRef((_props, ref) => {
     return (
         <div
             ref={ref}
-            className="py-24 translate-y-10 transition-all duration-700"
+            className="translate-y-10 transition-all duration-700"
         >
             <div className="max-w-screen-xl mx-auto px-4">
-                <div className={`text-center mb-16 transition-colors duration-300`}>
-                    <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                <div className="text-center mb-16 transition-colors duration-300">
+                    <h2
+                        className={`text-3xl md:text-4xl font-bold mb-4 ${theme === "dark"
+                            ? "text-white"
+                            : "text-gray-900 tracking-tight"
+                            }`}
+                    >
                         Powerful Features
                     </h2>
-                    <p className={`max-w-2xl mx-auto ${theme === "dark" ? "text-slate-300" : "text-slate-600"}`}>
+                    <p
+                        className={`max-w-2xl mx-auto text-base md:text-lg ${theme === "dark"
+                            ? "text-slate-300"
+                            : "text-gray-900"
+                            }`}
+                    >
                         Everything you need to streamline your recruitment process and find the best candidates
                     </p>
                 </div>
@@ -55,19 +65,39 @@ const PowerfulFeatures = React.forwardRef((_props, ref) => {
                     ].map((feature, index) => (
                         <div
                             key={index}
-                            className={`backdrop-blur-sm p-8 rounded-xl transition-all duration-300 border ${theme === "dark"
+                            className={`group p-8 rounded-2xl transition-all duration-300 border ${theme === "dark"
                                 ? "bg-white/5 border-white/10 hover:bg-white/10"
-                                : "bg-white border-gray-200 hover:shadow-lg hover:border-purple-100"
+                                : "bg-gradient-to-br from-white via-white to-purple-50/40 border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-purple-200"
                                 }`}
                         >
-                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-6 ${theme === "dark" ? "bg-white/5" : "bg-purple-50"
-                                }`}>
-                                <feature.icon className="text-purple-400" size={24} />
+                            <div
+                                className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 ${theme === "dark"
+                                    ? "bg-white/5"
+                                    : "bg-purple-100 group-hover:bg-purple-200"
+                                    }`}
+                            >
+                                <feature.icon
+                                    className="text-purple-500"
+                                    size={26}
+                                />
                             </div>
-                            <h3 className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+
+                            <h3
+                                className={`text-xl font-semibold mb-3 ${theme === "dark"
+                                    ? "text-white"
+                                    : "text-gray-900"
+                                    }`}
+                            >
                                 {feature.title}
                             </h3>
-                            <p className={theme === "dark" ? "text-slate-300" : "text-slate-600"}>
+
+                            <p
+                                className={
+                                    theme === "dark"
+                                        ? "text-slate-300"
+                                        : "text-gray-800 leading-relaxed"
+                                }
+                            >
                                 {feature.desc}
                             </p>
                         </div>
@@ -75,6 +105,7 @@ const PowerfulFeatures = React.forwardRef((_props, ref) => {
                 </div>
             </div>
         </div>
+
     );
 });
 export default PowerfulFeatures;

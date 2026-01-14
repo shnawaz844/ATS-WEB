@@ -304,13 +304,13 @@ export default function Dashboard() {
   const safeJobs = Array.isArray(jobs) ? jobs : [];
 
   return (
-    <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === "dark" ? "bg-black" : "bg-gray-50"
+    <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === "dark" ? "bg-black" : "bg-gradient-to-br from-purple-300 via-blue-100 to-indigo-200"
       }`}>
       <div className="max-w-7xl mx-auto">
         <div className="dashboard-header mb-8">
           <h1 className={`text-3xl font-bold transition-colors duration-300 ${theme === "dark" ? "text-gray-200" : "text-gray-900"
             }`}>ATS Admin Dashboard</h1>
-          <p className={`mt-2 transition-colors duration-300 ${theme === "dark" ? "text-gray-300" : "text-gray-600"
+          <p className={`mt-2 transition-colors duration-300 ${theme === "dark" ? "text-gray-300" : "text-gray-800"
             }`}>
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
@@ -344,11 +344,11 @@ export default function Dashboard() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 ">
           <div className={`p-12 rounded-xl shadow-md border transition-all duration-300 ${theme === "dark"
-              ? "bg-transparent border-purple-600"
-              : "bg-white border-purple-200 shadow-lg"
+            ? "bg-transparent border-purple-600"
+            : "bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg"
             }`}>
             <div className="chart-header flex justify-between items-center mb-4">
-              <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-800"
+              <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-900"
                 }`}>Applications per Job</h2>
               <span className={`rounded-full p-1 font-semibold text-purple-800 ${theme === "dark" ? "bg-gray-100" : "bg-purple-100"
                 }`}>Total: {applications.length} applications</span>
@@ -359,13 +359,13 @@ export default function Dashboard() {
           </div>
 
           <div className={`p-6 rounded-xl shadow-md border transition-all duration-300 ${theme === "dark"
-              ? "border-purple-600"
-              : "bg-white border-purple-200 shadow-lg"
+            ? "border-purple-600"
+            : "bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg"
             }`}>
             <div className="chart-header flex justify-between items-center mb-4">
-              <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-800"
+              <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-900"
                 }`}>Daily Applications</h2>
-              <span className={`transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-600"
+              <span className={`transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-800"
                 }`}>Historical Trend</span>
             </div>
             <div className="h-80">
@@ -376,29 +376,29 @@ export default function Dashboard() {
 
         {/* Jobs Section - Limited to 5 jobs */}
         <div className={`p-8 rounded-xl shadow-md mb-8 border transition-all duration-300 ${theme === "dark"
-            ? "border-purple-600"
-            : "bg-white border-purple-200 shadow-lg"
+          ? "border-purple-600"
+          : "bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg"
           }`}>
           <div className="chart-header flex justify-between items-center mb-6">
-            <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-800"
+            <h2 className={`text-xl font-semibold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-900"
               }`}>Recent Jobs</h2>
-            <span className={`transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-600"
+            <span className={`transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-800"
               }`}>Showing {Math.min(5, safeJobs.length)} of {totalJobs} jobs</span>
           </div>
 
           {/* Jobs List Table - Limited to 5 jobs */}
           <div className={`overflow-x-auto rounded-lg transition-all duration-300 ${theme === "dark"
-              ? "backdrop-blur-xl bg-white/10 border border-white/20"
-              : "bg-white border border-gray-200"
+            ? "backdrop-blur-xl bg-white/10 border border-white/20"
+            : "bg-white border border-gray-200"
             }`}>
             <table className={`min-w-full divide-y ${theme === "dark" ? "divide-gray-700 text-gray-100" : "divide-gray-200 text-gray-900"
               }`}>
               <thead className={`${theme === "dark"
-                  ? "backdrop-blur-xl bg-white/10 border border-white/20"
-                  : "bg-gray-50 border-b border-gray-200"
+                ? "backdrop-blur-xl bg-white/10 border border-white/20"
+                : "bg-gray-100 border-b border-gray-200"
                 }`}>
                 <tr>
-                  <th className={`px-6 py-4 text-left text-xs font-medium uppercase tracking-wider border-b ${theme === "dark" ? "text-gray-300 border-gray-700" : "text-gray-500 border-gray-200"
+                  <th className={`px-6 py-4 text-left text-xs font-medium uppercase tracking-wider border-b ${theme === "dark" ? "text-gray-300 border-gray-700" : "text-gray-700 border-gray-200"
                     }`}>
                     Job Title
                   </th>
@@ -437,18 +437,18 @@ export default function Dashboard() {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-md border ${theme === "dark"
-                            ? "bg-gray-800 text-gray-300 border-gray-700"
-                            : "bg-gray-100 text-gray-700 border-gray-200"
+                          ? "bg-gray-800 text-gray-300 border-gray-700"
+                          : "bg-gray-100 text-gray-700 border-gray-200"
                           }`}>
                           {job.type || 'N/A'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <div className="flex flex-col">
-                          <span className={`font-medium ${theme === "dark" ? "text-gray-200" : "text-gray-700"
+                          <span className={`font-medium ${theme === "dark" ? "text-gray-200" : "text-gray-900"
                             }`}>{job.city || 'Not specified'}</span>
                           {job.locationType && (
-                            <span className={`text-xs mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-500"
+                            <span className={`text-xs mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-700"
                               }`}>({job.locationType})</span>
                           )}
                         </div>
@@ -463,7 +463,7 @@ export default function Dashboard() {
                           {statusName}
                         </span>
                       </td>
-                      <td className={`px-6 py-4 text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"
+                      <td className={`px-6 py-4 text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-700"
                         }`}>
                         {job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
@@ -484,8 +484,8 @@ export default function Dashboard() {
               <button
                 onClick={() => navigate(`/${companyUserName}/all-jobs`)}
                 className={`inline-flex items-center px-6 py-3 font-semibold rounded-full transition-colors duration-200 shadow-sm ${theme === "dark"
-                    ? "bg-white text-purple-600 hover:bg-purple-600 hover:text-white"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
+                  ? "bg-white text-purple-600 hover:bg-purple-600 hover:text-white"
+                  : "bg-purple-600 text-white hover:bg-purple-700"
                   }`}
               >
                 View All {totalJobs} Jobs
@@ -493,8 +493,8 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className={`text-center py-12 rounded-lg border ${theme === "dark"
-                ? "bg-transparent border-gray-700"
-                : "bg-white border-gray-200"
+              ? "bg-transparent border-gray-700"
+              : "bg-white border-gray-200"
               }`}>
               <div className="text-gray-400 text-3xl mb-4">📋</div>
               <p className={`text-lg font-medium ${theme === "dark" ? "text-gray-500" : "text-gray-600"
@@ -511,7 +511,7 @@ export default function Dashboard() {
             <button
               onClick={fetchMoreData}
               disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-3 bg-[#9333ea] text-white rounded-full hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Loading...' : 'Load More Applications'}
             </button>

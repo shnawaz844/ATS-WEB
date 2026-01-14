@@ -29,7 +29,7 @@ export default function Hero() {
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    <p className="mt-6 text-lg leading-8 text-gray-800 dark:text-gray-300 max-w-2xl mx-auto">
                         Revolutionizing recruitment with AI-powered solutions. Connect top talent with leading companies through our intelligent hiring platform.
                     </p>
 
@@ -37,7 +37,7 @@ export default function Hero() {
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                         <a href="/dashboard">
                             <button className="group relative inline-flex items-center justify-center px-8 py-3.5 font-medium rounded-full bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5">
-                                <span>Get Started</span>
+                                <span >Get Started</span>
                                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 blur opacity-50 group-hover:opacity-70 transition-opacity"></div>
                             </button>
@@ -77,7 +77,7 @@ export default function Hero() {
                         ].map((stat, index) => (
                             <div
                                 key={index}
-                                className="group relative p-6 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-300 hover:scale-105 shadow-md"
+                                className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-gray-700 transition-all duration-300 hover:scale-105 shadow-md"
                             >
                                 {/* Hover effect background */}
                                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>

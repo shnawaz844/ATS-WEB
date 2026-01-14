@@ -243,7 +243,7 @@ const AllPostedJobs = () => {
       <div className="max-w-screen-2xl">
         <div>
           {/* Header Section */}
-          <div className={`mb-6 h-auto sm:h-[25vh] relative flex flex-col sm:flex-row items-center justify-center rounded-xl p-4 sm:p-6 md:p-8 transition-colors duration-300 ${theme === "dark" ? "bg-white/10 border-white/20 hover:border-purple-500/50" : "bg-gradient-to-r from-gray-100 to-white shadow-md"
+          <div className={`mb-6 h-auto sm:h-[25vh] relative flex flex-col sm:flex-row items-center justify-center rounded-xl p-4 sm:p-6 md:p-8 transition-colors duration-300 ${theme === "dark" ? "bg-white/10 border-white/20 hover:border-purple-500/50" : "bg-gray-200 shadow-md"
             }`}>
             {/* Main content centered */}
             <div className="text-center w-full">

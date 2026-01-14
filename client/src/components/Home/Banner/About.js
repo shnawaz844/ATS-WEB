@@ -61,7 +61,7 @@ export default function About() {
                         Top <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400">Career Roles</span>
                     </h2>
 
-                    <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-800 dark:text-gray-400 max-w-2xl mx-auto">
                         Discover exclusive opportunities from industry-leading companies
                     </p>
                 </div>
@@ -71,7 +71,7 @@ export default function About() {
                     {featuredJobs.map((job) => (
                         <div
                             key={job.id}
-                            className="group relative p-6 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm hover:border-gray-300 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md"
+                            className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md h-full flex flex-col"
                         >
                             {/* Glow effect */}
                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -81,8 +81,8 @@ export default function About() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-4">
                                         {/* Company Logo */}
-                                        <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 border border-gray-300 dark:border-gray-700 flex items-center justify-center">
-                                            <span className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                        <div className="w-12 h-12 rounded-xl bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                                            <span className="text-2xl font-bold text-gray-800 dark:text-gray-300">
                                                 {job.logo}
                                             </span>
                                         </div>
@@ -92,18 +92,18 @@ export default function About() {
                                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-gray-800 dark:group-hover:text-gray-100">
                                                 {job.title}
                                             </h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">
+                                            <p className="text-sm text-gray-700 dark:text-gray-400 font-medium mt-1">
                                                 {job.company}
                                             </p>
                                         </div>
                                     </div>
 
                                     {/* Job Type Badge */}
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${job.type === 'Full-time'
+                                    <span className={`inline-flex items-center px-4 py-1 rounded-full text-xs font-medium ${job.type === 'Full-time'
                                         ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800'
                                         : job.type === 'Remote'
                                             ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-800'
-                                            : 'bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-300 dark:border-gray-700'
+                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                                         }`}>
                                         {job.type}
                                     </span>
@@ -111,15 +111,15 @@ export default function About() {
                             </div>
 
                             {/* Job Details */}
-                            <div className="space-y-5 relative">
+                            <div className="space-y-5 relative flex-grow flex flex-col">
                                 {/* Location & Time */}
                                 <div className="flex items-center gap-4 text-sm">
-                                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                        <MapPin className="h-4 w-4 text-gray-500" />
+                                    <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300">
+                                        <MapPin className="h-4 w-4 text-gray-600" />
                                         <span>{job.location}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                        <Clock className="h-4 w-4 text-gray-500" />
+                                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-400">
+                                        <Clock className="h-4 w-4 text-gray-600" />
                                         <span>{job.posted}</span>
                                     </div>
                                 </div>
@@ -131,8 +131,8 @@ export default function About() {
                                             <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500">Salary</p>
-                                            <p className="font-semibold text-green-600 dark:text-green-300">{job.salary}</p>
+                                            <p className="text-xs text-gray-600">Salary</p>
+                                            <p className="font-semibold text-green-700 dark:text-green-300">{job.salary}</p>
                                         </div>
                                     </div>
 
@@ -141,20 +141,20 @@ export default function About() {
                                             <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500">Applicants</p>
-                                            <p className="font-semibold text-purple-600 dark:text-purple-300">{job.applicants}</p>
+                                            <p className="text-xs text-gray-600">Applicants</p>
+                                            <p className="font-semibold text-purple-700 dark:text-purple-300">{job.applicants}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Skills */}
-                                <div className="pt-4 border-t border-gray-300 dark:border-gray-800">
-                                    <p className="text-sm text-gray-500 mb-3">Required Skills</p>
+                                <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex-grow">
+                                    <p className="text-sm text-gray-600 mb-3">Required Skills</p>
                                     <div className="flex flex-wrap gap-2">
                                         {job.skills.map((skill, index) => (
                                             <span
                                                 key={index}
-                                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700"
+                                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white/80 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
                                             >
                                                 {skill}
                                             </span>
@@ -163,7 +163,7 @@ export default function About() {
                                 </div>
 
                                 {/* Apply Button */}
-                                <div className="pt-4">
+                                <div className="pt-4 mt-auto">
                                     <button className="group w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
                                         <span>Apply Now</span>
                                         <svg

@@ -13,17 +13,17 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
     return (
         <div className="space-y-12 mt-5">
             <div className="border-t border-b border-gray-200 pb-4">
-                <h2 className="text-xl font-semibold text-gray-900 mt-5">Candidate Form</h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-5">Candidate Form</h2>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-200">
                     Add screening questions for candidates.
                 </p>
             </div>
 
             <div className="space-y-6">
                 {questions.map((q, index) => (
-                    <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                    <div key={index} className="p-4 bg-gray-50 dark:bg-transparent rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                            <label className="text-sm font-medium text-gray-700">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
                                 Question {index + 1}
                             </label>
                             <button
@@ -54,7 +54,7 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
                                 newQuestions[index].question = e.target.value;
                                 setQuestions(newQuestions);
                             }}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400 mb-3"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors placeholder:text-gray-400 mb-3 dark:bg-transparent"
                             placeholder="Enter your question"
                             required
                         />
@@ -71,7 +71,7 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
                                     }}
                                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                 />
-                                <span className="text-sm text-gray-700">Yes</span>
+                                <span className="text-sm text-gray-700 dark:text-gray-200">Yes</span>
                             </label>
                             <label className="flex items-center space-x-2">
                                 <input
@@ -84,7 +84,7 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
                                     }}
                                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                                 />
-                                <span className="text-sm text-gray-700">No</span>
+                                <span className="text-sm text-gray-700 dark:text-gray-200">No</span>
                             </label>
                         </div>
                     </div>
@@ -94,7 +94,7 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
                     <button
                         type="button"
                         onClick={addQuestion}
-                        className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors dark-text-gray-200"
                     >
                         Add Question
                     </button>

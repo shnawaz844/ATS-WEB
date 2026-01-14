@@ -122,6 +122,7 @@ li {
 }
 
 @keyframes customShake {
+
   0%,
   100% {
     transform: translateX(0) rotate(0deg);
@@ -187,11 +188,11 @@ li {
   background: linear-gradient(blue, crimson);
 }
 
-.sidebar-label-container:hover input ~ .checkmark {
+.sidebar-label-container:hover input~.checkmark {
   background-color: #ccc;
 }
 
-.sidebar-label-container input:checked ~ .checkmark {
+.sidebar-label-container input:checked~.checkmark {
   background-color: #2196f3;
 }
 
@@ -201,7 +202,7 @@ li {
   display: none;
 }
 
-.sidebar-label-container input:checked ~ .checkmark:after {
+.sidebar-label-container input:checked~.checkmark:after {
   display: block;
 }
 
@@ -259,6 +260,7 @@ li {
   color: transparent;
   background-image: linear-gradient(to right, #6366f1, #a855f7);
 }
+
 :root {
   --bg: #ffffff;
   --surface: #f5f5f5;
@@ -271,4 +273,32 @@ li {
   --surface: #1a1a1a;
   --text-primary: #ffffff;
   --text-secondary: #b3b3b3;
+}
+
+/* For dark mode */
+.dark-quill .ql-toolbar .ql-stroke {
+  stroke: #ffffff !important;
+}
+
+.dark-quill .ql-toolbar .ql-fill {
+  fill: #ffffff !important;
+}
+
+.dark-quill .ql-toolbar .ql-picker-label,
+.dark-quill .ql-toolbar .ql-picker-item {
+  color: #ffffff !important;
+}
+
+/* For light mode */
+.light-quill .ql-toolbar .ql-stroke {
+  stroke: #000000 !important;
+}
+
+.light-quill .ql-toolbar .ql-fill {
+  fill: #000000 !important;
+}
+
+.light-quill .ql-toolbar .ql-picker-label,
+.light-quill .ql-toolbar .ql-picker-item {
+  color: #000000 !important;
 }

@@ -115,7 +115,7 @@ export const Hero = () => {
 
   return (
 
-    <div className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+    <div className={`relative min-h-screen overflow-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gradient-to-br from-purple-300 via-blue-100 to-indigo-200'}`}>
       {/* Particles Background */}
       <div className="absolute top-0 left-0 w-full h-full -z-10">
         {/* <ParticlesComponent /> */}
