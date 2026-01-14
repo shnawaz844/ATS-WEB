@@ -209,22 +209,23 @@ const CandidateApplication = () => {
                     <div className="mb-6 h-[20vh] flex items-center rounded-xl p-4 backdrop-blur-xl bg-gray-200  dark:bg-transparent dark:border border-gray-600 shadow-sm">
                         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full gap-4 lg:gap-6">
                             <div className="flex items-center">
-                                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#9333ea] flex items-center font-DM Sansong">
-                                    <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" />
+                                <h2 className="text-lg sm:text-2xl lg:text-2xl font-bold text-[#9333ea] flex items-center font-DM Sansong">
+                                    <div className="p-3 mr-2  bg-[#9333ea]/10 rounded-full">
+                                        <Briefcase className=" h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" /></div>
                                     Candidate Applications
                                 </h2>
                             </div>
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 ml-20">
                                 <button
-                                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-sm sm:text-base text-white font-math shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out whitespace-nowrap"
+                                    className="sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base"
                                     onClick={() => navigate(`/${companyUserName}/import-application`)}
                                 >
                                     Import Job
                                 </button>
 
                                 <button
-                                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-sm sm:text-base text-white font-math shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 ease-in-out whitespace-nowrap"
+                                    className="sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base"
                                     onClick={() => navigate(`/${companyUserName}/import-candidate-application`)}
                                 >
                                     Import Candidate Application

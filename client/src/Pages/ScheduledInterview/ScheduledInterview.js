@@ -395,12 +395,15 @@ export const ScheduledInterview = () => {
         <div className="px-8 py-10 w-full min-h-screen bg-white dark:bg-black transition-colors duration-300"
         >
             <BackButtonMobile />
-            <div className='mb-6 h-auto min-h-[80px] md:h-[15vh] flex items-center rounded-xl p-3 sm:p-4 backdrop-blur-xl dark:bg-black/10  backdrop-blur-xl bg-gray-100 border border-white/20 shadow-md'>
+            <div className='mb-6 h-auto min-h-[80px] md:h-[15vh] flex items-center rounded-xl p-3 sm:p-4 backdrop-blur-xl dark:bg-black/10  bg-gray-200 border border-white/20 shadow-md'>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
                     {/* Title Section */}
                     <div className="flex items-center w-full md:w-auto">
                         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                            <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
+                            <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
+
+                                <Briefcase className=" h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
+                            </div>
                             {isAdmin ? "All Scheduled Interviews" : "My Scheduled Interviews"}
                         </h1>
                     </div>
@@ -409,7 +412,7 @@ export const ScheduledInterview = () => {
                     <div className="w-full md:w-auto bg-transparent rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         {/* Admin Filter Section */}
                         {isAdmin && (
-                            <div className="w-36 sm:w-auto bg-transparent rounded-xl flex items-center justify-center">
+                            <div className="w-36 sm:w-auto bg-transparent rounded-xl flex items-center justify-center ">
                                 <div className="w-full sm:min-w-[200px]">
                                     <select
                                         value={selectedInterviewerId}
@@ -447,17 +450,17 @@ export const ScheduledInterview = () => {
                         {/* Enhanced Filter Button (Mobile Optimized) */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${showFilters || hasActiveFilters
+                            className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl transition-colors ${showFilters || hasActiveFilters
                                 ? 'bg-gray-700 text-white border border-blue-300'
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700'
                                 }`}
                         >
-                            <Filter className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm sm:text-base whitespace-nowrap">
-                                {window.innerWidth < 640 ? '' : 'Filters'}
+                            <Filter className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
+                            <span className="hidden sm:inline text-sm whitespace-nowrap">
+                                Filters
                             </span>
                             {hasActiveFilters && (
-                                <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 min-w-[18px] text-center flex-shrink-0">
+                                <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 min-w-[18px] h-[18px] sm:min-w-[20px] sm:h-[20px] flex items-center justify-center flex-shrink-0">
                                     {[searchTerm, filterStatus, filterRound].filter(Boolean).length}
                                 </span>
                             )}
@@ -471,7 +474,11 @@ export const ScheduledInterview = () => {
                 {/* Expandable Filters */}
                 {showFilters && (
                     <div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 pt-1 border-t border-gray-200 dark:border-gray-700">
+                        <div className="  grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2
+  gap-4 pt-1
+  border-t border-gray-200 dark:border-gray-700
+  w-full lg:w-[50vw] mx-auto
+">
                             {/* Status Filter */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>

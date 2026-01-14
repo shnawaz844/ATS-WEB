@@ -332,54 +332,59 @@ export const AllJobs = () => {
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className={`mb-6 h-auto min-h-[80px] md:min-h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? 'border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'}`}>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
-                            {/* Title Section - always on top on mobile, aligned left on desktop */}
-                            <div className="w-full md:w-auto flex-shrink-0">
-                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#9333ea] flex items-center font-DM Sans">
-                                    <Briefcase className="mr-2 h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" />
-                                    Job Board
-                                </h2>
-                            </div>
-
-                            {/* Search and Buttons Section - column on mobile, row on desktop */}
-                            <div className='flex flex-col sm:flex-row gap-3 w-full md:w-auto'>
-                                {/* Search Bar - full width on mobile, smaller on desktop */}
-                                <div className="relative rounded-full w-full md:w-[25vw] lg:w-[20vw]">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Search job titles, skills..."
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        className={`w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border shadow-sm transition-all duration-200 h-[40px] sm:h-[44px] md:h-[48px] focus:outline-none focus:ring-0 rounded-xl text-sm sm:text-base ${theme === 'dark'
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                                            : 'border-gray-300 bg-white text-black placeholder-gray-500'
-                                            }`}
-                                    />
+                    <div>
+                        {/* Header Section */}
+                        <div className={`mb-6 h-auto min-h-[80px] lg:min-h-[15vh] flex items-center rounded-xl p-4 sm:p-5 lg:p-6 transition-colors duration-300 ${theme === 'dark' ? 'border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'}`}>
+                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-4 lg:gap-6">
+                                {/* Title Section - always on top on mobile/tablet, aligned left on desktop */}
+                                <div className="w-full lg:w-auto flex-shrink-0">
+                                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#9333ea] flex items-center font-DM Sans">
+                                        <div className="p-2.5 sm:p-3 mx-2 bg-[#9333ea]/10 rounded-full">
+                                            <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" />
+                                        </div>
+                                        Job Board
+                                    </h2>
                                 </div>
 
-                                {/* Buttons - row on all screens */}
-                                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                                    <button
-                                        className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border bg-gray-300 text-black rounded-xl font-medium hover:bg-gray-700 hover:text-white hover:border-gray-200 transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap"
-                                        onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                    >
-                                        {isFilterOpen ? "Hide Filters" : "Show Filters"}
-                                    </button>
+                                {/* Search and Buttons Section - column on mobile/tablet, row on desktop */}
+                                <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 w-full lg:w-auto'>
+                                    {/* Search Bar - full width on mobile/tablet, fixed width on desktop */}
+                                    <div className="relative rounded-full w-full sm:flex-1 lg:w-[300px] xl:w-[350px]">
+                                        <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                                            <Search className="h-5 w-5 text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Search job titles, skills..."
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            className={`w-full pl-10 sm:pl-11 pr-4 py-2.5 sm:py-3 border shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 rounded-xl text-sm sm:text-base ${theme === 'dark'
+                                                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                                                : 'border-gray-300 bg-white text-black placeholder-gray-500'
+                                                }`}
+                                        />
+                                    </div>
 
-                                    <Link
-                                        to={`/${companyUserName}/post-job`}
-                                        className={`flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap ${theme === 'dark'
-                                            ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
-                                            : 'bg-gray-300 text-black border-gray-300 hover:bg-gray-700 hover:text-white'
-                                            }`}
-                                    >
-                                        <Plus className="mr-1 sm:mr-2 h-4 w-4" />
-                                        Post New Job
-                                    </Link>
+                                    {/* Buttons - row on all screens */}
+                                    <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                                        <button
+                                            className={`inline-flex border items-center justify-center px-3 sm:px-4 py-1.5 rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap ${theme === 'dark'
+                                                ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
+                                                : 'bg-gray-300 text-black hover:bg-gray-700 hover:text-white hover:border-gray-200'
+                                                }`}
+                                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                        >
+                                            {isFilterOpen ? "Hide Filters" : "Show Filters"}
+                                        </button>
+
+                                        <Link
+                                            to={`/${companyUserName}/post-job`}
+                                            className={`flex-1 sm:flex-none flex items-center justify-center px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 bg-[#9333ea] text-white rounded-xl font-medium hover:bg-[#7e22ce] transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap ${theme === 'dark' ? '' : ''}`}
+                                        >
+                                            <Plus className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                                            Post New Job
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>

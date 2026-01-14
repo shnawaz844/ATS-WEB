@@ -103,7 +103,7 @@ const Jobs = () => {
 
     // 6) Render the cards
     return (
-        <div className="py-24 backdrop-blur-sm">
+        <div className="py-5 backdrop-blur-sm">
             <div className="max-w-screen-xl mx-auto px-4">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-800 mb-4">
@@ -170,17 +170,18 @@ const Card = ({ job }) => {
     return (
         <div
             className="
-    bg-transparent 
-    rounded-xl 
-    shadow-lg 
-    overflow-hidden 
-    border 
-    border-gray-200 
-    dark:border-white/10 
-    hover:shadow-xl 
-    transition-all 
-    group
-  "
+  bg-gradient-to-br from-white via-white to-purple-50/40
+  dark:bg-white/5
+  dark:from-transparent dark:via-transparent dark:to-transparent
+  rounded-xl
+  shadow-sm
+  overflow-hidden
+  border border-gray-200 dark:border-white/10
+  hover:shadow-xl hover:-translate-y-1 hover:border-purple-200
+  transition-all
+  group
+"
+
         >
 
             <div className="p-5">

@@ -70,7 +70,7 @@ const ApplicationsListTab = ({
                 </button>
             </div>
 
-            {/* Filters */ }
+            {/* Filters */}
             <div className="grid grid-cols-2 gap-5">
                 {/* Month */}
                 <div>
@@ -85,11 +85,11 @@ const ApplicationsListTab = ({
                             : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
                             }`}
                     >
-                        {/* Add "All Months" option */ }
+                        {/* Add "All Months" option */}
                         <option value="">All Months</option>
-                        { getMonthOptions().map( ( option ) => (
-                            <option key={ option.value } value={ option.value }>
-                                { option.label }
+                        {getMonthOptions().map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
                             </option>
                         ))}
                     </select>
@@ -108,11 +108,11 @@ const ApplicationsListTab = ({
                             : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
                             }`}
                     >
-                        {/* Add "All Years" option */ }
+                        {/* Add "All Years" option */}
                         <option value="">All Years</option>
-                        { getYearOptions().map( ( year ) => (
-                            <option key={ year } value={ year }>
-                                { year }
+                        {getYearOptions().map((year) => (
+                            <option key={year} value={year}>
+                                {year}
                             </option>
                         ))}
                     </select>
@@ -325,7 +325,7 @@ const ApplicationsListTab = ({
 
                     <div className="flex-1 space-y-6 w-[70vw]">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">Applications List</h2>
+                            <h2 className="text-xl font-semibold">Applications List </h2>
 
                             {/* ✅ Stylish Toggle Button */}
                             <button

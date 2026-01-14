@@ -156,7 +156,9 @@ const ApplicationList = () => {
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 md:gap-0">
                             <div className="w-full md:w-auto">
                                 <h2 className="text-xl md:text-3xl font-bold dark:text-[#9333ea] text-[#9333ea] flex items-center">
-                                    <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 dark:text-[#fff] text-[#000]" />
+                                    <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
+                                        <Briefcase className=" h-5 w-5 md:h-6 md:w-6 dark:text-[#fff] text-[#000]" />
+                                    </div>
                                     Manage Applications
                                 </h2>
                             </div>

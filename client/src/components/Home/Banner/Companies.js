@@ -49,7 +49,7 @@ export default function Companies() {
                     <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
                         Real-time <span className="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400 bg-clip-text text-transparent">Insights</span>
                     </h2>
-                    <p className="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <p className="mt-4 text-lg text-gray-800 dark:text-gray-400 max-w-2xl mx-auto">
                         Track your recruitment performance with comprehensive analytics and metrics
                     </p>
                 </div>
@@ -58,7 +58,7 @@ export default function Companies() {
                     {stats.map((stat, index) => (
                         <div
                             key={index}
-                            className="group relative p-6 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 shadow-md"
+                            className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 shadow-md"
                         >
                             {/* Glow effect on hover */}
                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

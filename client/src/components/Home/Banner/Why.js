@@ -81,14 +81,14 @@ export default function WhyAts() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group relative p-8 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-gray-800 backdrop-blur-sm hover:border-gray-300 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md"
+              className="group relative p-8 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md"
             >
               {/* Glow effect on hover */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               {/* Icon */}
               <div className="relative mb-8">
-                <div className="inline-flex p-4 rounded-xl bg-gray-200 dark:bg-[#1a1a1a] border border-gray-300 dark:border-gray-700">
+                <div className="inline-flex p-4 rounded-xl bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700">
                   <div className={`relative rounded-lg ${feature.gradient} p-3`}>
                     <feature.icon className="h-6 w-6  text-[#9333ea]" />
 
@@ -116,7 +116,7 @@ export default function WhyAts() {
                   {feature.title}
                 </h3>
 
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-400 leading-relaxed">
                   {feature.description}
                 </p>
               </div>

@@ -1,4 +1,3 @@
-// PostJobForm.js
 import React, { useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { Country, State, City } from 'country-state-city';
@@ -9,6 +8,7 @@ import 'react-quill/dist/quill.snow.css';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
 import BackButtonMobile from '../Mob-back-btn';
+import { useTheme } from '../../context/ThemeContext';
 
 const FORM_OPTIONS = {
   location: [
@@ -41,13 +41,16 @@ const FormField = ({
   label,
   error,
   children
-}) => (
-  <div className="space-y-1">
-    <label className="block text-sm font-medium text-gray-700">{label}</label>
-    {children}
-    {error && <span className="text-sm text-red-500">{error}</span>}
-  </div>
-);
+}) => {
+  const { theme } = useTheme();
+  return (
+    <div className="space-y-1">
+      <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+      {children}
+      {error && <span className="text-sm text-red-500">{error}</span>}
+    </div>
+  );
+};
 
 const FormInput = ({
   label,
@@ -58,30 +61,36 @@ const FormInput = ({
   placeholder,
   options,
   ...props
-}) => (
-  <FormField label={label} error={error}>
-    {type === 'select' ? (
-      <select
-        {...register(name)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-        {...props}
-      >
-        <option value="" disabled>Select {label.toLowerCase()}</option>
-        {options?.map(({ value, label }) => (
-          <option key={value} value={value}>{label}</option>
-        ))}
-      </select>
-    ) : (
-      <input
-        type={type}
-        {...register(name)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder:text-gray-400"
-        placeholder={placeholder}
-        {...props}
-      />
-    )}
-  </FormField>
-);
+}) => {
+  const { theme } = useTheme();
+  const inputClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors 
+    ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`;
+
+  return (
+    <FormField label={label} error={error}>
+      {type === 'select' ? (
+        <select
+          {...register(name)}
+          className={inputClasses}
+          {...props}
+        >
+          <option value="" disabled className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Select {label.toLowerCase()}</option>
+          {options?.map(({ value, label }) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          {...register(name)}
+          className={inputClasses}
+          placeholder={placeholder}
+          {...props}
+        />
+      )}
+    </FormField>
+  );
+};
 
 const LocationPicker = ({
   selectedCountry,
@@ -107,6 +116,10 @@ const LocationPicker = ({
   // Get cities based on current country and state
   const cities = currentStateCode ? City.getCitiesOfState(currentCountryCode, currentStateCode) : [];
 
+  const { theme } = useTheme();
+  const selectClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors 
+    ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
+
   const handleCityChange = (e) => {
     const cityName = e.target.value;
     setSelectedCity(cityName);
@@ -123,7 +136,7 @@ const LocationPicker = ({
             setSelectedState('');
             setSelectedCity('');
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          className={selectClasses}
         >
           <option value="">Select Country</option>
           {countries.map(country => (
@@ -141,7 +154,7 @@ const LocationPicker = ({
             setSelectedState(e.target.value);
             setSelectedCity('');
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          className={selectClasses}
           disabled={!currentCountryCode}
         >
           <option value="">Select State</option>
@@ -157,7 +170,7 @@ const LocationPicker = ({
         <select
           value={jobToEdit?.city || selectedCity}
           onChange={handleCityChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          className={selectClasses}
           disabled={!currentStateCode}
         >
           <option value="">Select City</option>
@@ -281,6 +294,7 @@ export const PostJobForm = ({
   jobStatus,
   setJobStatus
 }) => {
+  const { theme } = useTheme();
   const [isHead, setIsHead] = React.useState(false);
   const [recruitersList, setRecruitersList] = useState([]);
   const [existingJobs, setExistingJobs] = useState([]);
@@ -398,21 +412,20 @@ export const PostJobForm = ({
   };
 
   return (
-    <div className="min-h-screen py-12"
-    >
+    <div className={`min-h-screen py-12 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
       <BackButtonMobile />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold text-center text-black dark:text-white mb-8">
+          <h1 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {jobToEdit ? 'Edit Job Posting' : 'Create New Job Posting'}
           </h1>
 
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className={`rounded-2xl shadow-xl overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
             <form onSubmit={handleSubmit(enhancedOnSubmit)} className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
               <div className="space-y-4 sm:space-y-6">
-                <div className="border-b border-gray-200 pb-3 sm:pb-4">
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Job Details</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500">
+                <div className={`border-b pb-3 sm:pb-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <h2 className={`text-lg sm:text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Job Details</h2>
+                  <p className={`mt-1 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     Fill in the basic information about the position.
                   </p>
                 </div>
@@ -437,10 +450,10 @@ export const PostJobForm = ({
                       <input
                         type="text"
                         value={jobToEdit.titleCode}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+                        className={`w-full px-4 py-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}
                         disabled
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                         Title code cannot be changed for existing jobs
                       </p>
                     </FormField>
@@ -523,7 +536,7 @@ export const PostJobForm = ({
                         required: "Status is required"
                       })}
                       onChange={(e) => setJobStatus(e.target.value)}
-                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
+                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                       disabled={loadingStatuses}
                     >
                       <option value="">Select Status</option>
@@ -547,7 +560,7 @@ export const PostJobForm = ({
                       <select
                         value={jobToEdit?.recruiterId}
                         {...register("recruiterId")}
-                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
+                        className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                       >
                         <option value="">Select Recruiter</option>
                         {recruitersList && recruitersList.length > 0 ? (
@@ -569,7 +582,7 @@ export const PostJobForm = ({
                       {...register("hiringManagerId", {
                         required: "Hiring Manager is required"
                       })}
-                      className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base"
+                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="">Select Hiring Manager</option>
                       {hiringManagersList && hiringManagersList.length > 0 ? (
@@ -607,7 +620,7 @@ export const PostJobForm = ({
                     <ReactQuill
                       {...field}
                       theme="snow"
-                      className="bg-white border rounded text-sm sm:text-base"
+                      className={`${theme === 'dark' ? 'dark-quill' : 'light-quill'} border rounded text-sm sm:text-base`}
                     />
                   )}
                 />
@@ -623,7 +636,7 @@ export const PostJobForm = ({
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="px-6 sm:px-8 py-2 sm:py-3 bg-gray-700 text-white font-medium hover:bg-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors text-sm sm:text-base"
+                  className="px-6 sm:px-8 py-2 sm:py-3 bg-[#9333ea] text-white font-medium hover:bg-[#9333ea] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] focus:ring-offset-2 transition-colors text-sm sm:text-base"
                 >
                   {jobToEdit ? 'Update Job Post' : 'Create Job Post'}
                 </button>
