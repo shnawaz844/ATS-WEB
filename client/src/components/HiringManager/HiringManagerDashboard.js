@@ -56,12 +56,14 @@ const Stats = () => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-                <div key={index} className={`rounded-xl shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                <div key={index} className={`rounded-xl shadow-md border p-6 transition-all duration-300 ${theme === 'dark'
+                    ? 'bg-white/5 border-gray-600 text-gray-100'
+                    : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'
                     }`}>
                     <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{stat.title}</h3>
                     <div className="mt-2 flex items-baseline gap-2">
                         <p className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
-                        <span className={`text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={`text-sm ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
                             {stat.change}
                         </span>
                     </div>
@@ -75,38 +77,40 @@ const Stats = () => {
 const RecentApplications = ({ applications }) => {
     const { theme } = useTheme();
     return (
-        <div className={`rounded-xl shadow-sm overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-            <div className="p-6">
+        <div className={`rounded-xl shadow-md border overflow-hidden transition-all duration-300 ${theme === 'dark'
+            ? 'bg-transparent border-gray-600'
+            : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'}`}>
+            <div className="p-6 border-b border-gray-200 dark:border-purple-600/30">
                 <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Recent Applications</h2>
             </div>
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className={theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}>
+            <div className={`overflow-x-auto ${theme === 'dark' ? 'bg-black/20' : 'bg-white/40'}`}>
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className={theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}>
                         <tr>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Applicant</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Position</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Status</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Stage</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Applied Date</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Applicant</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Position</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Status</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Stage</th>
+                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Applied Date</th>
                         </tr>
                     </thead>
-                    <tbody className={`divide-y ${theme === 'dark' ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-200'}`}>
+                    <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                         {applications.map((app) => (
-                            <tr key={app.id}>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{app.applicantName}</td>
+                            <tr key={app.id} className={`transition-colors ${theme === 'dark' ? 'hover:bg-purple-900/10 bg-white/10' : 'hover:bg-purple-50/30'}`}>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{app.applicantName}</td>
                                 <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.jobTitle}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full
-                                        ${app.status === 'Offered' ? 'bg-purple-100 text-purple-800' :
-                                            app.status === 'Interview' ? 'bg-blue-100 text-blue-800' :
-                                                app.status === 'Shortlisted' ? 'bg-green-100 text-green-800' :
-                                                    app.status === 'Screening' ? 'bg-yellow-100 text-yellow-800' :
-                                                        'bg-red-100 text-red-800'}`}>
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${app.status === 'Offered' ? theme === 'dark' ? 'bg-purple-900/30 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200' :
+                                        app.status === 'Interview' ? theme === 'dark' ? 'bg-blue-900/30 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200' :
+                                            app.status === 'Shortlisted' ? theme === 'dark' ? 'bg-green-900/30 text-green-300 border-green-700' : 'bg-green-100 text-green-800 border-green-200' :
+                                                app.status === 'Screening' ? theme === 'dark' ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700' : 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                                                    theme === 'dark' ? 'bg-red-900/30 text-red-300 border-red-700' : 'bg-red-100 text-red-800 border-red-200'
+                                        }`}>
                                         {app.status}
                                     </span>
                                 </td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.stage}</td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.appliedDate}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{app.stage}</td>
+                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{app.appliedDate}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -124,21 +128,26 @@ const SummaryCards = ({ applications }) => {
         return acc;
     }, {});
 
-    const statusColors = {
-        'Offered': 'bg-purple-100 text-purple-800',
-        'Interview': 'bg-blue-100 text-blue-800',
-        'Shortlisted': 'bg-green-100 text-green-800',
-        'Screening': 'bg-yellow-100 text-yellow-800',
-        'Rejected': 'bg-red-100 text-red-800'
+    const getStatusStyle = (status) => {
+        const isDark = theme === 'dark';
+        switch (status) {
+            case 'Offered': return isDark ? 'bg-purple-900/30 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200';
+            case 'Interview': return isDark ? 'bg-blue-900/30 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'Shortlisted': return isDark ? 'bg-green-900/30 text-green-300 border-green-700' : 'bg-green-100 text-green-800 border-green-200';
+            case 'Screening': return isDark ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700' : 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            default: return isDark ? 'bg-red-900/30 text-red-300 border-red-700' : 'bg-red-100 text-red-800 border-red-200';
+        }
     };
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Object.entries(statusCounts).map(([status, count]) => (
-                <div key={status} className={`rounded-xl shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                <div key={status} className={`rounded-xl shadow-md border p-6 transition-all duration-300 ${theme === 'dark'
+                    ? 'bg-white/5 border-gray-600'
+                    : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'}`}>
                     <div className="flex items-center justify-between">
-                        <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{status}</h3>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[status]}`}>
+                        <h3 className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{status}</h3>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyle(status)}`}>
                             {count}
                         </span>
                     </div>
@@ -154,81 +163,69 @@ export default function HiringDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
-            {/* Top Navigation Bar - Now responsive */}
-            <nav className={`border-b w-full z-30 top-28 ${theme === 'dark' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <div className="flex items-center">
-                            <h1 className={`text-[1rem] md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>HR Dashboard</h1>
-                        </div>
+        <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === "dark"
+            ? "bg-black"
+            : ""}`}>
 
-                        {/* Search Bar */}
-                        <div className="flex items-center">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <SearchIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
-                                </div>
-                                <input
-                                    type="text"
-                                    className={`rounded-2xl block w-full sm:w-64 pl-10 pr-3 py-2 border leading-5 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm ${theme === 'dark'
-                                            ? 'bg-gray-800 border-gray-700 text-white'
-                                            : 'bg-gray-50 border-gray-300 text-gray-900'
-                                        }`}
-                                    placeholder="Search applications..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-
-                            {/* Icons */}
-                            <div className="ml-2 sm:ml-4 flex items-center space-x-2 sm:space-x-4">
-                                <button className="p-1 sm:p-2 text-gray-400 hover:text-gray-500">
-                                    <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                                </button>
-                                <button className="p-1 sm:p-2 text-gray-400 hover:text-gray-500">
-                                    <BellIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                                </button>
-                                <button className="p-1 sm:p-2 text-gray-400 hover:text-gray-500">
-                                    <SettingsIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Main Content */}
-            <main className="pt-8 sm:pt-16 pb-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Date Display */}
-                    <div className="my-4 sm:my-6">
-                        <div className="text-xs sm:text-sm text-gray-500">
+            <div className="max-w-7xl mx-auto space-y-8 ">
+                {/* Header Section */}
+                <div className={`flex flex-col md:flex-row md:items-center justify-between  rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
+                    }`}>
+                    <div>
+                        <h1 className={`text-3xl font-bold transition-colors duration-300 ${theme === "dark" ? "text-[#9333ea]" : "text-[#9333ea]"}`}>
+                            HR Dashboard
+                        </h1>
+                        <p className={`mt-2 ${theme === "dark" ? "text-gray-400" : "text-gray-800"}`}>
                             {new Date().toLocaleDateString('en-US', {
                                 weekday: 'long',
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
                             })}
+                        </p>
+                    </div>
+
+                    {/* Search and Actions */}
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                <SearchIcon />
+                            </div>
+                            <input
+                                type="text"
+                                className={`rounded-full block w-full sm:w-64 pl-10 pr-3 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 ${theme === 'dark'
+                                    ? 'bg-gray-800/50 border-gray-600 text-white placeholder-gray-400'
+                                    : 'bg-white/50 border-white/50 text-gray-900 placeholder-gray-500 shadow-sm'
+                                    }`}
+                                placeholder="Search applications..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <button className={`p-2.5 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-white/50 hover:bg-white/80 text-gray-600 shadow-sm'}`}>
+                                <CalendarIcon />
+                            </button>
+                            <button className={`p-2.5 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-white/50 hover:bg-white/80 text-gray-600 shadow-sm'}`}>
+                                <BellIcon />
+                            </button>
+                            <button className={`p-2.5 rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-white/50 hover:bg-white/80 text-gray-600 shadow-sm'}`}>
+                                <SettingsIcon />
+                            </button>
                         </div>
                     </div>
-
-                    {/* Stats Section */}
-                    <div className="mb-6 sm:mb-8">
-                        <Stats />
-                    </div>
-
-                    {/* Summary Cards */}
-                    <div className="mb-6 sm:mb-8">
-                        <SummaryCards applications={initialApplications} />
-                    </div>
-
-                    {/* Recent Applications */}
-                    <div className="mt-6 sm:mt-8">
-                        <RecentApplications applications={initialApplications} />
-                    </div>
                 </div>
-            </main>
+
+                {/* Stats Section */}
+                <Stats />
+
+                {/* Summary Cards */}
+                <SummaryCards applications={initialApplications} />
+
+                {/* Recent Applications */}
+                <RecentApplications applications={initialApplications} />
+            </div>
         </div>
     );
 }

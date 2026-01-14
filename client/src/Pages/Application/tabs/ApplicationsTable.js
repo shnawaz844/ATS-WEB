@@ -117,7 +117,7 @@ const ApplicationsTable = ({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 ">
             {/* Search and Limit Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="relative w-full sm:w-64">
@@ -199,21 +199,23 @@ const ApplicationsTable = ({
                                                 <div className="ml-4">
                                                     <Link
                                                         to={`/${companyUserName}/candidate-details/${candidateId}/${jobId}`}
-                                                        className="text-sm font-medium text-blue-600 hover:underline group-hover:text-white "
+                                                        className="text-sm font-medium text-purple-600 hover:underline group-hover:text-white "
                                                     >
                                                         {capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
                                                     </Link>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 group-hover:text-white max-w-[140px] break-words">
+                                        <td className="px-6 py-4 whitespace-normal text-sm text-gray-800 group-hover:text-white dark:text-gray-200 max-w-[140px] break-words">
                                             {app.emailInfo}
                                         </td>
 
 
                                         <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-400 group-hover:text-gray-200' : 'text-gray-500 group-hover:text-white'}`}>
                                             <select
-                                                className={`min-w-32 w-auto px-4 py-2 rounded-xl border shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-gray-700 text-white border-gray-400'
+                                                className={`min-w-32 w-auto px-4 py-2 rounded-xl border shadow-sm focus:border-[#9333ea] focus:ring-2 focus:ring-purple-300 text-sm ${theme === 'dark'
+                                                    ? 'bg-[#9333ea] text-white border-purple-800 hover:bg-[#7e22ce]'
+                                                    : 'bg-[#9333ea] text-white border-purple-600 hover:bg-[#a855f7]'
                                                     }`}
                                                 value={app.applicationStatusId}
                                                 onChange={e => handleSelect(app._id, e.target.value)}
@@ -230,7 +232,7 @@ const ApplicationsTable = ({
                                             </select>
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 group-hover:text-white">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
                                             {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
                                         </td>
                                         {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (

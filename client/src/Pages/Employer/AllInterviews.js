@@ -279,11 +279,11 @@ const AllInterviews = () => {
 
   const renderRatingFilter = () => (
     <div className="relative w-full">
-      <label className="block text-gray-900 dark:text-white text-xs font-bold mb-1 md:mb-2">
+      <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
         Filter by Rating:
       </label>
       <select
-        className={`w-[32vw] sm:w-auto appearance-none rounded-xl py-1.5 pl-4 pr-8 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto border ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' : 'bg-gray-200 web-text-black hover:bg-white'}`}
+        className={`w-full sm:min-w-[180px] lg:w-auto appearance-none rounded-xl py-2.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' : 'bg-gray-200 hover:bg-white border-gray-300'}`}
         value={ratingFilter}
         onChange={(e) => setRatingFilter(e.target.value)}
       >
@@ -309,22 +309,24 @@ const AllInterviews = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
             <div>
               <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                <Briefcase className="mr-2 h-5 w-5 md:h-6 md:w-6 text-gray-900 dark:text-white" />
+                <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
+                  <Briefcase className="h-5 w-5 md:h-6 md:w-6 text-gray-900 dark:text-white" />
+                </div>
                 Interview Management
               </h2>
             </div>
 
             {/* Search and Filter */}
-            <div className='flex items-center w-full md:w-auto'>
-              <div className="flex flex-col md:flex-row md:justify-between gap-3 w-full md:w-[50vw]">
-                <div className="w-full md:w-[67%]">
-                  <label className="block text-gray-900 dark:text-white text-xs font-bold mb-1 md:mb-2">
+            <div className='flex items-center w-full lg:w-auto px-4 sm:px-0'>
+              <div className="flex flex-col lg:flex-row lg:justify-between gap-4 w-full lg:w-[50vw]">
+                <div className="w-full lg:w-[67%]">
+                  <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
                     Search:
                   </label>
                   <form onSubmit={handleSearchSubmit} autoComplete="off">
                     <div className="relative rounded-full">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 md:h-5 md:w-5 text-gray-400" />
+                        <Search className="h-5 w-5 text-gray-400" />
                       </div>
                       <input
                         type="text"
@@ -332,7 +334,7 @@ const AllInterviews = () => {
                         value={searchTerm}
                         onChange={handleSearchChange}
                         placeholder="Search by candidate name, job title, interviewer..."
-                        className={`w-full pl-9 md:pl-10 pr-8 md:pr-4 py-1.5 border shadow-sm rounded-xl focus:outline-none focus:ring-none duration-200 h-[5vh] md:h-[6.3vh] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 bg-white'}`}
+                        className={`w-full pl-10 pr-10 py-2.5 border shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 duration-200 text-sm ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 bg-white'}`}
                       />
                       {searchTerm && (
                         <button
@@ -340,33 +342,30 @@ const AllInterviews = () => {
                           onClick={() => setSearchTerm('')}
                           className="absolute inset-y-0 right-3 flex items-center"
                         >
-                          <X className="h-3 w-3 md:h-4 md:w-4 text-gray-400 hover:text-gray-600" />
+                          <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
                         </button>
                       )}
                     </div>
                   </form>
                 </div>
 
-                <div className="flex gap-2 w-full md:w-auto">
-                  <div className="relative w-full">
-                    <label className="block text-gray-900 dark:text-white text-xs font-bold mb-1 md:mb-2">
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                  <div className="relative w-full sm:flex-1 lg:w-auto">
+                    <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
                       Filter by Status:
                     </label>
                     <select
-                      className={`w-[32vw] sm:w-auto appearance-none rounded-xl py-1.5 pl-4 pr-8 md:pr-10 focus:outline-none focus:ring-none h-[5vh] md:h-auto border ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' : 'bg-gray-200 hover:bg-white border-red'}`}
+                      className={`w-full sm:min-w-[180px] lg:w-auto appearance-none rounded-xl py-2.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600' : 'bg-gray-200 hover:bg-white border-gray-300'}`}
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
                     >
                       <option value="all">All Status</option>
                       {statuses?.map((status) => (
-                        <option key={status} value={status._id}>
+                        <option key={status._id} value={status._id}>
                           {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
                         </option>
-
                       ))}
-
                     </select>
-
                   </div>
                   {renderRatingFilter()}
                 </div>

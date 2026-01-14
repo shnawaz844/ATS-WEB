@@ -213,7 +213,7 @@ const Profile = () => {
             {/* Profile Avatar with enhanced effects */}
             <div className="relative z-10 mb-6">
               <div className="w-24 h-24 mx-auto relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-500 via-gray-700 to-white rounded-full animate-spin-slow opacity-75"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-700 to-white rounded-full animate-spin-slow opacity-75"></div>
                 <div className={`absolute inset-1 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300 ${theme === "dark" ? "bg-white/20 group-hover:bg-white/30" : "bg-white/60 group-hover:bg-white/80"
                   }`}>
                   <User className={`w-10 h-10 drop-shadow-lg ${theme === "dark" ? "text-white" : "text-gray-700"

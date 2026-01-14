@@ -1124,7 +1124,7 @@ export default function ImportApplication() {
         <div className="min-h-screen bg-gray-50 dark:bg-black p-6">
             <div className="max-w-7xl mx-auto">
                 {/* User Info Header */}
-                <div className="bg-gray-100 shadow-md dark:bg-white/10 rounded-xl  p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
+                <div className="bg-gray-200 shadow-md dark:bg-white/10 rounded-xl  p-6 mb-6 flex flex-col md:flex-row items-start justify-between">
                     {/* Left: User Info */}
                     <div className="flex items-center gap-4">
                         <div className="bg-[#9333ea] text-white rounded-full p-3 shadow-md">
@@ -1135,7 +1135,7 @@ export default function ImportApplication() {
                                 Import Job Applications
                             </h1>
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                <span className="bg-blue-100 text-[#9333ea] px-2 py-1 rounded-full">
                                     {formatRole(user.role)}
                                 </span>
                                 <span className="text-gray-500 dark:text-gray-200">| {capitalizeFirstLetter(user.userName) || "User"}</span>
@@ -1150,7 +1150,7 @@ export default function ImportApplication() {
                     <div className="mt-4 md:mt-0 flex flex-col items-end text-right">
                         <div className="flex items-center gap-2 mb-2">
                             <label className="cursor-pointer">
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#9333ea] text-white text-sm shadow hover:bg-blue-600 transition-colors">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#9333ea] text-white text-sm shadow hover:bg-[#9333ea] transition-colors">
                                     <Upload size={16} />
                                     Upload Job File
                                 </div>
@@ -1168,7 +1168,7 @@ export default function ImportApplication() {
                                     const sampleFileUrl = 'https://docs.google.com/spreadsheets/d/1Cj3s75X46plhnxhT19QN-yE5SCHs9cq1/edit?usp=drive_link&ouid=114134967406279256151&rtpof=true&sd=true';
                                     window.open(sampleFileUrl, '_blank');
                                 }}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-green-500 text-white text-sm shadow hover:bg-green-600 transition-colors"
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#9333ea] text-white text-sm shadow hover:bg-[#9333ea] transition-colors"
                                 title="Download sample Excel template"
                             >
                                 <Download size={16} />
@@ -1181,7 +1181,7 @@ export default function ImportApplication() {
                                 <p className="truncate mb-2">Selected: {fileToUpload.name}</p>
                                 <button
                                     onClick={uploadFileToServer}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition-colors"
+                                    className="flex items-center gap-1 px-3 py-1.5 text-sm bg-[#9333ea]text-white rounded-lg shadow hover:bg-[#9333ea] transition-colors"
                                     disabled={loading}
                                 >
                                     {loading ? "Uploading..." : "Upload"}
@@ -1195,23 +1195,23 @@ export default function ImportApplication() {
 
                 {/* Filter Section (same as ImportCandidateApplication) */}
                 {user.role === 'admin' && (
-                    <div className="bg-gray-100  rounded-xl shadow-md p-6 mb-6">
+                    <div className="bg-gray-200 dark:bg-white/10 rounded-xl shadow-md p-6 mb-6">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                                 <Filter size={20} />
                                 Admin Filter
                             </h2>
 
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <div className="flex items-center gap-2">
-                                    <label htmlFor="userFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                    <label htmlFor="userFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap dark:text-gray-100">
                                         Filter by User:
                                     </label>
                                     <select
                                         id="userFilter"
                                         value={selectedUser}
                                         onChange={(e) => setSelectedUser(e.target.value)}
-                                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] text-black"
                                         disabled={loadingUsers}
                                     >
                                         <option value="all">All Users</option>
@@ -1226,7 +1226,7 @@ export default function ImportApplication() {
                                 {selectedUser !== 'all' && (
                                     <button
                                         onClick={handleResetFilter}
-                                        className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors whitespace-nowrap"
+                                        className="px-3 py-2 text-sm bg-[#9333ea] text-white rounded-lg hover:bg-[#9333ea] transition-colors whitespace-nowrap"
                                     >
                                         Clear Filter
                                     </button>
@@ -1236,9 +1236,9 @@ export default function ImportApplication() {
 
                         {selectedUser !== 'all' && (
                             <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-blue-700">
+                                <p className="text-sm text-[#9333ea]">
                                     Showing files uploaded by: <span className="font-semibold">{selectedUser}</span>
-                                    <span className="ml-2 text-blue-600">
+                                    <span className="ml-2 text-[#9333ea]">
                                         ({userFiles.length} file{userFiles.length !== 1 ? 's' : ''} found)
                                     </span>
                                 </p>
@@ -1246,8 +1246,8 @@ export default function ImportApplication() {
                         )}
 
                         {availableUsers.length === 0 && !loadingUsers && (
-                            <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
-                                <p className="text-sm text-yellow-700">
+                            <div className="w-[25vw] flex justify-center items-center mt-3 p-3 bg-yellow-50 dark:bg-white/20 rounded-full">
+                                <p className="text-sm text-yellow-700 dark:text-white">
                                     No other users found. Only your files are visible.
                                 </p>
                             </div>
@@ -1258,7 +1258,7 @@ export default function ImportApplication() {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                     {loading && (
                         <div className="text-center py-8">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#9333ea]"></div>
                             <p className="mt-2 text-gray-600">Processing file...</p>
                         </div>
                     )}
@@ -1424,7 +1424,7 @@ export default function ImportApplication() {
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg p-6 shadow-xl">
                             <div className="flex items-center gap-3">
-                                <Loader className="animate-spin text-blue-500" size={24} />
+                                <Loader className="animate-spin text-[#9333ea]" size={24} />
                                 <p className="text-gray-700">Loading file data...</p>
                             </div>
                         </div>

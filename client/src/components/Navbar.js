@@ -271,7 +271,7 @@ export const Navbar = () => {
               >
                 <img
                   src={companyUserName && company?.image ? company.image : "/ATSLOGO.png"}
-                  className="rounded-full h-12 md:h-14 border-2 border-gray-700"
+                  className="rounded-full h-12 md:h-14"
                   alt="ATS Logo"
                 />
                 <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text text-transparent ml-2 hidden sm:block">
@@ -283,7 +283,7 @@ export const Navbar = () => {
             </div>
 
             {/* MAIN MENU - Desktop */}
-            <div className="hidden md:flex items-center justify-center space-x-8">
+            <div className="hidden xl:flex items-center justify-center space-x-8">
               {navItems.map((item) => {
                 const userRole = loginData?.role ? loginData?.role : null;
 
@@ -369,12 +369,13 @@ export const Navbar = () => {
             </div>
 
             {/* Theme Toggle - Desktop */}
-            <div className="hidden md:flex items-center">
-              <ThemeToggle />
-            </div>
+
 
             {/* User info or Login/Signup - Desktop */}
-            <div className="hidden md:flex items-center">
+            <div className="hidden xl:flex items-center">
+              <div className="mr-5">
+                <ThemeToggle />
+              </div>
               {loginData ? (
                 <div className="relative flex items-center space-x-4" ref={userDropdownRef}>
                   <button
@@ -393,36 +394,36 @@ export const Navbar = () => {
                     <div className={`absolute right-0 top-12 w-48 mt-2 rounded-md shadow-lg z-100 py-1 ring-1 transform origin-top-right transition-all ${theme === "dark" ? "bg-gray-900 ring-gray-800" : "bg-white ring-gray-200"
                       }`}>
                       <div className="flex flex-col items-center justify-center">
-                        <p className="text-xs text-gray-400 truncate mt-1">
+                        <p className={`text-xs truncate mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
                           {loginData?.email}
                         </p>
-                        <p className="text-xs text-blue-400 font-medium mt-1 capitalize">
+                        <p className={`text-xs font-medium mt-1 capitalize ${theme === "dark" ? "text-blue-400" : "text-blue-600"}`}>
                           {loginData?.role?.replace('_', ' ')}
                         </p>
                       </div>
-                      <hr className="my-1 border-gray-800" />
+                      <hr className={`my-1 ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`} />
                       <Link
                         to={companyUserName ? `/${companyUserName}/profile` : "/profile"}
                         onClick={() => {
                           setIsDropdownOpen(false);
                           setIsMenuOpen(false);
                         }}
-                        className="flex items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
+                        className={`flex items-center px-4 py-3 text-sm transition-colors ${theme === "dark" ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"}`}
                       >
-                        <UserPen className="w-4 h-4 mr-3 dark:text-gray-400 text-gray-800" />
-                        <span className="dark:text-gray-400 text-gray-800">Profile</span>
+                        <UserPen className={`w-4 h-4 mr-3 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`} />
+                        <span className={theme === "dark" ? "text-gray-300" : "text-gray-700"}>Profile</span>
                       </Link>
-                      <hr className="my-1 border-gray-800" />
+                      <hr className={`my-1 ${theme === "dark" ? "border-gray-800" : "border-gray-200"}`} />
                       <button
                         onClick={() => {
                           logoutHandler();
                           setIsDropdownOpen(false);
                           setIsMenuOpen(false);
                         }}
-                        className="flex w-full items-center px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
+                        className={`flex w-full items-center px-4 py-3 text-sm transition-colors ${theme === "dark" ? "text-gray-300 hover:bg-gray-800" : "text-gray-700 hover:bg-gray-100"}`}
                       >
-                        <LogOut className="w-4 h-4 mr-3 dark:text-gray-400 text-gray-800 rounded" />
-                        <span className="dark:text-gray-400 text-gray-800">Logout</span>
+                        <LogOut className={`w-4 h-4 mr-3 rounded ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`} />
+                        <span className={theme === "dark" ? "text-gray-300" : "text-gray-700"}>Logout</span>
                       </button>
                     </div>
                   )}
@@ -467,7 +468,7 @@ export const Navbar = () => {
             </div>
 
             {/* HAMBURGER MENU */}
-            <div className="md:hidden flex items-center">
+            <div className="xl:hidden flex items-center">
               <button
                 onClick={handlerIsMenuOpen}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -486,7 +487,7 @@ export const Navbar = () => {
         <div>
           {isMenuOpen && (
             <div
-              className="fixed inset-0 z-50 md:hidden bg-black bg-opacity-70"
+              className="fixed inset-0 z-50 xl:hidden bg-black bg-opacity-70"
               onClick={() => setIsMenuOpen(false)}
             >
               <div
