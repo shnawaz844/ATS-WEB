@@ -200,40 +200,40 @@ const CandidateApplication = () => {
     return (
         <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : ''
             }`}
-
         >
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className="mb-6 h-[20vh] flex items-center rounded-xl p-4 backdrop-blur-xl bg-gray-200  dark:bg-transparent dark:border border-gray-600 shadow-sm">
-                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full gap-4 lg:gap-6">
-                            <div className="flex items-center">
+                    <div className="mb-6 h-auto lg:h-[20vh] flex items-center rounded-xl p-4 sm:p-6 lg:p-4 backdrop-blur-xl bg-gray-200 dark:bg-transparent dark:border border-gray-600 shadow-sm">
+                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center w-full gap-6 lg:gap-6 py-4 lg:py-0">
+                            <div className="flex items-center lg:w-auto">
                                 <h2 className="text-lg sm:text-2xl lg:text-2xl font-bold text-[#9333ea] flex items-center font-DM Sansong">
-                                    <div className="p-3 mr-2  bg-[#9333ea]/10 rounded-full">
-                                        <Briefcase className=" h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" /></div>
+                                    <div className="p-3 mr-2 bg-[#9333ea]/10 rounded-full">
+                                        <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 text-black dark:text-white" />
+                                    </div>
                                     Candidate Applications
                                 </h2>
                             </div>
                             {/* Action Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 ml-20">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full lg:w-auto lg:ml-20">
                                 <button
-                                    className="sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base"
+                                    className="flex-1 lg:flex-none sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base font-medium active:scale-95"
                                     onClick={() => navigate(`/${companyUserName}/import-application`)}
                                 >
                                     Import Job
                                 </button>
 
                                 <button
-                                    className="sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base"
+                                    className="flex-1 lg:flex-none sm:px-4 px-3 sm:py-2 py-1 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-colors text-sm sm:text-base font-medium active:scale-95"
                                     onClick={() => navigate(`/${companyUserName}/import-candidate-application`)}
                                 >
                                     Import Candidate Application
                                 </button>
                             </div>
-                            <div className='flex flex-col sm:flex-row gap-2 sm:gap-4'>
+                            <div className='flex flex-col sm:flex-row gap-2 sm:gap-4 w-full lg:w-auto'>
                                 {/* Search Bar */}
-                                <div className="relative rounded-full flex-1 sm:flex-none">
+                                <div className="relative rounded-full flex-[3]">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                                     </div>
@@ -250,7 +250,7 @@ const CandidateApplication = () => {
                                     />
                                 </div>
                                 <button
-                                    className={`inline-flex border items-center justify-center px-3 sm:px-4 py-1.5 rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap ${theme === 'dark'
+                                    className={`flex-[1] lg:flex-none inline-flex border items-center justify-center px-3 sm:px-4 py-1.5 rounded-xl font-medium transition-all duration-200 shadow-sm text-sm sm:text-base whitespace-nowrap active:scale-95 ${theme === 'dark'
                                         ? 'bg-gray-700 text-white border-gray-600 hover:bg-gray-600'
                                         : 'bg-gray-300 text-black hover:bg-gray-700 hover:text-white hover:border-gray-200'
                                         }`}
@@ -280,7 +280,7 @@ const CandidateApplication = () => {
                                 }`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
                                     {/* Location Search */}
-                                    <div className="lg:col-span-3">
+                                    <div className="md:col-span-1 lg:col-span-3">
                                         <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <MapPin className="mr-2 h-4 w-4 text-blue-500" />
                                             <span>Location</span>
@@ -299,7 +299,7 @@ const CandidateApplication = () => {
                                     </div>
 
                                     {/* Employment Type Dropdown */}
-                                    <div className="lg:col-span-2">
+                                    <div className="md:col-span-1 lg:col-span-2">
                                         <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
                                             <span>Job Type</span>
@@ -334,7 +334,7 @@ const CandidateApplication = () => {
                                     </div>
 
                                     {/* Schedule Type Dropdown */}
-                                    <div className="lg:col-span-2">
+                                    <div className="md:col-span-1 lg:col-span-2">
                                         <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Clock className="mr-2 h-4 w-4 text-purple-500" />
                                             <span>Schedule</span>
@@ -369,7 +369,7 @@ const CandidateApplication = () => {
                                     </div>
 
                                     {/* Hire Type Dropdown */}
-                                    <div className="lg:col-span-2">
+                                    <div className="md:col-span-1 lg:col-span-2">
                                         <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <Briefcase className="mr-2 h-4 w-4 text-orange-500" />
                                             <span>Hire Type</span>
@@ -404,7 +404,7 @@ const CandidateApplication = () => {
                                     </div>
 
                                     {/* Location Type Dropdown */}
-                                    <div className="lg:col-span-2">
+                                    <div className="md:col-span-1 lg:col-span-2">
                                         <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
                                             <MapPin className="mr-2 h-4 w-4 text-teal-500" />
                                             <span>Location Type</span>
@@ -438,7 +438,7 @@ const CandidateApplication = () => {
                                         </div>
                                     </div>
 
-                                    <div className="lg:col-span-1">
+                                    <div className="md:col-span-1 lg:col-span-1">
                                         <button
                                             type="button"
                                             onClick={handleResetFilters}
@@ -453,8 +453,8 @@ const CandidateApplication = () => {
                     </div>
 
                     {/* Results Count */}
-                    <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
-                        <span className="text-sm text-gray-600">
+                    <div className="px-6 py-3 border-gray-100 flex justify-between items-center text-sm">
+                        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                             {allJobs?.length > 0 ? (
                                 <>Showing <span className="font-medium">{allJobs?.length}</span> of <span className="font-medium">{jobData?.totalJobs || 0}</span> jobs</>
                             ) : (
@@ -464,7 +464,7 @@ const CandidateApplication = () => {
                         {allJobs?.length > 10 && (
                             <button
                                 onClick={scrollToTop}
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                                className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                             >
                                 Back to top ↑
                             </button>
@@ -503,12 +503,12 @@ const CandidateApplication = () => {
                                 <table className="w-full divide-y divide-gray-200">
                                     <thead>
                                         <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'} text-left`}>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Job Title</th>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Location</th>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Type</th>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Schedule</th>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Applications</th>
-                                            <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Job Title</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Location</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Type</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Schedule</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider text-center">Applications</th>
+                                            <th className="px-3 md:px-5 lg:px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200">
@@ -518,7 +518,7 @@ const CandidateApplication = () => {
                                                 className={`group transition-colors duration-150 ${theme === 'dark' ? 'hover:bg-gray-800 bg-white/10' : 'hover:bg-gray-700 bg-gray-100'}`}
                                                 ref={index === allJobs.length - 1 ? lastJobElementRefCallback : null}
                                             >
-                                                <td className="px-6 py-5 whitespace-nowrap">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap">
                                                     <div className="text-sm font-medium group-hover:text-white">{capitalizeFirstLetter(job.title)}</div>
                                                     <div className="text-xs text-gray-500 mt-1 group-hover:text-white">
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
@@ -529,7 +529,7 @@ const CandidateApplication = () => {
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap group-hover:text-white">
                                                     <div className="flex items-start">
                                                         <MapPin className="h-4 w-4 text-gray-400 mt-0.5 mr-1 flex-shrink-0" />
                                                         <div>
@@ -537,18 +537,18 @@ const CandidateApplication = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap group-hover:text-white">
                                                     <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{job.type || 'N/A'}</div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap group-hover:text-white">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap group-hover:text-white">
                                                     <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{job.scheduleType || 'N/A'}</div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-center">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap text-center">
                                                     <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(job.applicationCount)}`}>
                                                         {job.applicationCount}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-sm group-hover:text-white">
+                                                <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap text-sm group-hover:text-white">
                                                     <button
                                                         onClick={() => navigate(`/${companyUserName}/job-detail/${job.jobID}`)}
                                                         className="flex items-center text-blue-600 group-hover:text-white font-medium transition-colors duration-200"
