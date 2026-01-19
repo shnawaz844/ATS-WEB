@@ -1,4 +1,3 @@
-const key = 'AIzaSyAoRPa-NfI_5UNUU97suby3xc86tsgi_XE';
 fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + key)
     .then(r => r.json())
     .then(d => {
