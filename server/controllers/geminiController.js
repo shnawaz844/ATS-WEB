@@ -59,13 +59,26 @@ export const generateJobDescription = async (req, res) => {
         IMPORTANT: Whenever you mention the company name "${capitalizedCompany}" in any section (especially in "About the Company"), you must wrap it in <strong style="background-color: yellow; padding: 2px 4px; border-radius: 4px;">...</strong> to highlight it.
         Do not wrap the output in markdown code blocks.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        const result = await model.generateContentStream(prompt);
 
-        res.status(200).json({ success: true, description: text });
+        // Set headers for streaming
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        let fullText = "";
+        for await (const chunk of result.stream) {
+            const chunkText = chunk.text();
+            fullText += chunkText;
+            res.write(chunkText);
+        }
+
+        res.end();
     } catch (error) {
         console.error("Error generating job description:", error);
-        res.status(500).json({ success: false, message: "Failed to generate description", error: error.message });
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, message: "Failed to generate description", error: error.message });
+        } else {
+            res.end();
+        }
     }
 };
