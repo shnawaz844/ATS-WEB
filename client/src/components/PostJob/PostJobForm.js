@@ -317,6 +317,9 @@ export const PostJobForm = ({
     }
 
     setIsGeneratingAI(true);
+    // Clear existing description before starting stream
+    setValue("description", "");
+
     try {
       const companyUserName = localStorage.getItem("companyUserName");
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/ai/generate-description`, {
@@ -327,20 +330,44 @@ export const PostJobForm = ({
         body: JSON.stringify({ jobTitle, companyUserName }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setValue("description", data.description);
-      } else {
-        console.error("AI Generation failed:", data.message, data.error);
-        alert(`Failed to generate description: ${data.message} ${data.error ? '(' + data.error + ')' : ''}`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to generate description");
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let cumulativeText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value, { stream: true });
+        cumulativeText += chunkText;
+
+        // Update form value incrementally
+        setValue("description", cumulativeText);
+      }
+
     } catch (error) {
       console.error("Error generating description:", error);
-      alert("Error generating description");
+      alert(`Error generating description: ${error.message}`);
     } finally {
       setIsGeneratingAI(false);
     }
   };
+
+  const descriptionValue = watch("description");
+
+  useEffect(() => {
+    if (isGeneratingAI) {
+      const editor = document.querySelector('#ai-description-editor .ql-editor');
+      if (editor && editor.lastElementChild) {
+        editor.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  }, [descriptionValue, isGeneratingAI]);
 
   useEffect(() => {
     console.log("Recruiter Role in useEffect:", recruiterRole);
@@ -650,7 +677,7 @@ export const PostJobForm = ({
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1" id="ai-description-editor">
                 <div className="flex justify-between items-center gap-3">
                   <label
                     className={`text-sm font-semibold tracking-wide ${theme === "dark" ? "text-gray-200" : "text-gray-800"
