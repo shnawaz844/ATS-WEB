@@ -274,6 +274,7 @@ export const PostJobForm = ({
   errors,
   register,
   control,
+  setValue,
   watch,
   shiftStart,
   setShiftStart,
@@ -303,6 +304,70 @@ export const PostJobForm = ({
   const [jobStatuses, setJobStatuses] = useState([]);
   const [loadingStatuses, setLoadingStatuses] = useState(false);
   const [statusError, setStatusError] = useState(null);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const handleGenerateDescription = async () => {
+    const jobTitle = watch("title");
+    if (!jobTitle) {
+      alert("Please enter a clean job title first"); // Using alert as toast is not imported here, or I should check if toast is waiting parent? PostJob has toast. PostJobForm doesn't seem to import toast.
+      // Wait, PostJobForm doesn't import toast. I'll just use native alert or console for now, or assume toast is available if I import it. 
+      // Let's check imports. PostJobForm imports React, Controller, etc. No toast.
+      // I'll stick to alert or just simple UI feedback.
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    // Clear existing description before starting stream
+    setValue("description", "");
+
+    try {
+      const companyUserName = localStorage.getItem("companyUserName");
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/ai/generate-description`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobTitle, companyUserName }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to generate description");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let cumulativeText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value, { stream: true });
+        cumulativeText += chunkText;
+
+        // Update form value incrementally
+        setValue("description", cumulativeText);
+      }
+
+    } catch (error) {
+      console.error("Error generating description:", error);
+      alert(`Error generating description: ${error.message}`);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
+  const descriptionValue = watch("description");
+
+  useEffect(() => {
+    if (isGeneratingAI) {
+      const editor = document.querySelector('#ai-description-editor .ql-editor');
+      if (editor && editor.lastElementChild) {
+        editor.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  }, [descriptionValue, isGeneratingAI]);
 
   useEffect(() => {
     console.log("Recruiter Role in useEffect:", recruiterRole);
@@ -612,7 +677,64 @@ export const PostJobForm = ({
                 </div>
               </div>
 
-              <FormField label="Description" error={errors?.description}>
+              <div className="space-y-1" id="ai-description-editor">
+                <div className="flex justify-between items-center gap-3">
+                  <label
+                    className={`text-sm font-semibold tracking-wide ${theme === "dark" ? "text-gray-200" : "text-gray-800"
+                      }`}
+                  >
+                    Description
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingAI}
+                    className={`relative overflow-hidden flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300
+                   ${isGeneratingAI
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-gradient-to-r from-gray-500 via-gray-500 to-gray-500 text-white hover:scale-105 hover:shadow-lg active:scale-95"
+                      }
+                   `}
+                  >
+                    {!isGeneratingAI && (
+                      <span className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity"></span>
+                    )}
+
+                    {isGeneratingAI ? (
+                      <>
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span>AI is thinking…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm">✨</span>
+                        <span>Generate with AI</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+
                 <Controller
                   name="description"
                   control={control}
@@ -624,7 +746,8 @@ export const PostJobForm = ({
                     />
                   )}
                 />
-              </FormField>
+                {errors?.description && <span className="text-sm text-red-500">{errors?.description.message}</span>}
+              </div>
 
               <CandidateForm
                 questions={questions}

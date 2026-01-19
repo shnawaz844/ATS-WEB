@@ -93,9 +93,9 @@ const JobSchema = new mongoose.Schema({
             default: 'active'
         }
     }],
-    company_id: { type: String, required: true }
+    company_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true }
 
-}, { timestamps: true } );
+}, { timestamps: true });
 
 const Job = mongoose.model('Job', JobSchema);
 
