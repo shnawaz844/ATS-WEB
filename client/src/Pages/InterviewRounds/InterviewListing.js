@@ -169,13 +169,13 @@ const InterviewListing = () => {
               className="backdrop-blur-xl bg-white dark:bg-white/5 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#9333ea]/50 dark:hover:border-[#9333ea]/50 hover:shadow-lg transition-all duration-200"
             >
               <div className="flex flex-col">
-                <div className="flex items-center flex-wrap gap-1">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Name:</h3>
-                  <p className="text-sm sm:text-base font-semibold text-[#9333ea] dark:text-[#a855f7]">{interview.roundName}</p>
-                </div>
                 <div className="flex items-center flex-wrap gap-1 mt-2">
                   <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Number:</h3>
                   <p className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{interview.roundNumber}</p>
+                </div>
+                <div className="flex items-center flex-wrap gap-1">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Name:</h3>
+                  <p className="text-sm sm:text-base font-semibold text-[#9333ea] dark:text-[#a855f7]">{interview.roundName}</p>
                 </div>
                 <button
                   onClick={() => handleOpenEditDialog(interview)}

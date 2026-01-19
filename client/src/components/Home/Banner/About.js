@@ -1,45 +1,68 @@
+import { useState, useEffect } from "react"
+import axios from "axios"
 import { MapPin, Clock, DollarSign, Users, Briefcase } from "lucide-react"
 
-const featuredJobs = [
-    {
-        id: 1,
-        title: "Senior Software Engineer",
-        company: "TechCorp",
-        location: "San Francisco, CA",
-        type: "Full-time",
-        salary: "$120k - $180k",
-        applicants: 45,
-        posted: "2 days ago",
-        skills: ["React", "Node.js", "TypeScript"],
-        logo: "🚀",
-    },
-    {
-        id: 2,
-        title: "Product Manager",
-        company: "InnovateLab",
-        location: "New York, NY",
-        type: "Full-time",
-        salary: "$100k - $150k",
-        applicants: 32,
-        posted: "1 day ago",
-        skills: ["Strategy", "Analytics", "Leadership"],
-        logo: "🔬",
-    },
-    {
-        id: 3,
-        title: "UX Designer",
-        company: "FinanceHub",
-        location: "Remote",
-        type: "Contract",
-        salary: "$80k - $120k",
-        applicants: 28,
-        posted: "3 days ago",
-        skills: ["Figma", "User Research", "Prototyping"],
-        logo: "💰",
-    },
-]
-
 export default function About() {
+    const [jobs, setJobs] = useState([])
+    const [loading, setLoading] = useState(true)
+    const companyNameFromStorage = localStorage.getItem("companyName") || "Tech Recruitment"
+    const companyId = localStorage.getItem("companyId")
+
+    useEffect(() => {
+        const fetchFeaturedJobs = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
+                    params: { limit: 3 },
+                    headers: { company_id: companyId }
+                })
+
+                const fetchedJobs = response.data.jobs || []
+
+                // Transform data for UI
+                const transformedJobs = fetchedJobs.map((job) => ({
+                    id: job._id,
+                    title: job.title,
+                    company: companyNameFromStorage,
+                    location: `${job.city}, ${job.state}`,
+                    type: job.type,
+                    salary: `₹${job.compensation}/Annum`,
+                    applicants: job.applicants?.length || 0,
+                    posted: formatRelativeTime(job.createdAt),
+                    skills: [job.type, job.scheduleType, job.hireType],
+                    logo: companyNameFromStorage.charAt(0).toUpperCase() || "�",
+                    featured: true
+                }))
+
+                setJobs(transformedJobs)
+            } catch (error) {
+                console.error("Error fetching featured jobs:", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchFeaturedJobs()
+    }, [companyId, companyNameFromStorage])
+
+    const formatRelativeTime = (dateString) => {
+        const now = new Date()
+        const postedDate = new Date(dateString)
+        const diffInMs = now - postedDate
+        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+        if (diffInDays === 0) return "Today"
+        if (diffInDays === 1) return "Yesterday"
+        return `${diffInDays} days ago`
+    }
+
+    if (loading) {
+        return (
+            <section className="py-20 flex items-center justify-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </section>
+        )
+    }
+
     return (
         <section className="py-20 relative overflow-hidden">
             {/* Background pattern */}
@@ -68,7 +91,7 @@ export default function About() {
 
                 {/* Jobs Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {featuredJobs.map((job) => (
+                    {jobs.map((job) => (
                         <div
                             key={job.id}
                             className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md h-full flex flex-col"
@@ -149,7 +172,7 @@ export default function About() {
 
                                 {/* Skills */}
                                 <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex-grow">
-                                    <p className="text-sm text-gray-600 mb-3">Required Skills</p>
+                                    <p className="text-sm text-gray-600 mb-3">Required Tags</p>
                                     <div className="flex flex-wrap gap-2">
                                         {job.skills.map((skill, index) => (
                                             <span
@@ -164,17 +187,19 @@ export default function About() {
 
                                 {/* Apply Button */}
                                 <div className="pt-4 mt-auto">
-                                    <button className="group w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                                        <span>Apply Now</span>
-                                        <svg
-                                            className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                    </button>
+                                    <a href={`/login`} className="w-full">
+                                        <button className="group w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                                            <span>Apply Now</span>
+                                            <svg
+                                                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </button>
+                                    </a>
                                 </div>
                             </div>
 
