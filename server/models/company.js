@@ -31,6 +31,10 @@ const CompanySchema = new mongoose.Schema({
     image: {
         type: String,
         default: true
+    },
+    aiFeaturesEnabled: {
+        type: Boolean,
+        default: false
     }
 },
     { timestamps: true }

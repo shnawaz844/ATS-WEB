@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { toast as toastNotify } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Search, User, Briefcase, X, ChevronDown } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
@@ -8,6 +10,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
 
 const AllInterviews = () => {
+  const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('interviews');
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,14 +43,42 @@ const AllInterviews = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const limit = 20;
+  const companyUserName = localStorage.getItem("companyUserName");
+  const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
+
+  // Fetch company settings to sync AI features
+  useEffect(() => {
+    const fetchCompanyDetails = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.aiFeaturesEnabled !== undefined) {
+            setAiFeaturesEnabled(data.aiFeaturesEnabled);
+            localStorage.setItem(`ai_features_${companyUserName}`, data.aiFeaturesEnabled);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching company details:", error);
+      }
+    };
+
+    if (companyUserName) {
+      fetchCompanyDetails();
+    }
+  }, [companyUserName]);
 
   // Fetch statuses from API
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`)
+    fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
+      headers: {
+        "company_id": companyId
+      }
+    })
       .then(response => response.json())
       .then(data => setStatuses(data.applicationStatuses))
       .catch(error => console.error("Error fetching statuses:", error));
-  }, []);
+  }, [companyId]);
 
 
   // Implement search debounce
@@ -388,6 +419,17 @@ const AllInterviews = () => {
             >
               Interviews
             </button>
+            {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
+                  ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
+                  : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
+                  }`}
+              >
+                AI Generated Interviews
+              </button>
+            )}
           </div>
         </div>
 
@@ -730,6 +772,125 @@ const AllInterviews = () => {
         }
 
       </div >
+
+      {/* AI Generated Interviews Section */}
+      {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
+        <div className="max-w-screen-2xl mb-10">
+          <div className="overflow-x-auto rounded-t-xl">
+            <table className={`min-w-full divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-20'}`}>
+              <thead>
+                <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}`}>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Job & Candidate</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Interviewer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Date & Time</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Rating</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {[
+                  {
+                    _id: "ai-int-1",
+                    applicationID: {
+                      candidateID: { userName: "AI Candidate: John Doe" },
+                      jobID: { title: "AI Generated: Senior Software Engineer" }
+                    },
+                    interviewerID: { userName: "AI Interviewer 1" },
+                    date: new Date().toISOString(),
+                    scheduledTime: "10:00:00",
+                    status: "Scheduled",
+                    starRating: 4,
+                    skills: ["React", "Node.js"]
+                  },
+                  {
+                    _id: "ai-int-2",
+                    applicationID: {
+                      candidateID: { userName: "AI Candidate: Jane Smith" },
+                      jobID: { title: "AI Generated: Product Manager" }
+                    },
+                    interviewerID: { userName: "AI Interviewer 2" },
+                    date: new Date(Date.now() + 86400000).toISOString(),
+                    scheduledTime: "14:30:00",
+                    status: "Completed",
+                    starRating: 5,
+                    skills: ["SQL", "Agile"]
+                  },
+                  {
+                    _id: "ai-int-3",
+                    applicationID: {
+                      candidateID: { userName: "AI Candidate: Mike Johnson" },
+                      jobID: { title: "AI Generated: UI/UX Designer" }
+                    },
+                    interviewerID: { userName: "AI Interviewer 3" },
+                    date: new Date(Date.now() + 172800000).toISOString(),
+                    scheduledTime: "11:00:00",
+                    status: "In Process",
+                    starRating: 0,
+                    skills: ["Figma", "Tailwind"]
+                  },
+                  {
+                    _id: "ai-int-4",
+                    applicationID: {
+                      candidateID: { userName: "AI Candidate: Sarah Brown" },
+                      jobID: { title: "AI Generated: DevOps Engineer" }
+                    },
+                    interviewerID: { userName: "AI Interviewer 1" },
+                    date: new Date(Date.now() + 259200000).toISOString(),
+                    scheduledTime: "16:00:00",
+                    status: "Scheduled",
+                    starRating: 3,
+                    skills: ["Docker", "Kubernetes"]
+                  }
+                ].map((feedback) => (
+                  <tr key={feedback._id} className={`group transition-colors duration-200 ${theme === 'dark' ? 'bg-purple-900/5 hover:bg-purple-900/10 border-b border-gray-800' : 'hover:bg-purple-50 bg-white'}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                          <User size={20} className="text-purple-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feedback.applicationID.candidateID.userName}</div>
+                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{feedback.applicationID.jobID.title}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feedback.interviewerID.userName}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{formatDate(feedback.date)}</div>
+                      <div className="text-xs text-gray-500">{formatTime(feedback.scheduledTime)}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800`}>
+                        {feedback.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {getRatingStars(feedback.starRating)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          console.log("Toast being called");
+                          toastNotify.info("AI Interview Details (Mocked)");
+                        }}
+                        className="text-purple-600 hover:text-purple-900"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* {filter ////} */}
       {!filteredInterviews?.length && !interviewLoading && (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

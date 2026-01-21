@@ -36,6 +36,7 @@ const CompanyListing = () => {
     phone: "",
     website: "",
     image: null,
+    aiFeaturesEnabled: false,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -192,6 +193,7 @@ const CompanyListing = () => {
       address: "",
       phone: "",
       website: "",
+      aiFeaturesEnabled: false,
     });
     setIsDialogOpen(true);
     toast.info("Ready to add a new company");
@@ -209,6 +211,7 @@ const CompanyListing = () => {
       phone: company.phone,
       website: company.website,
       image: company.image || null,
+      aiFeaturesEnabled: company.aiFeaturesEnabled || false,
     });
     setIsDialogOpen(true);
   };
@@ -219,8 +222,8 @@ const CompanyListing = () => {
 
   // Handle input changes in the form
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   // Submit handler for add/edit form
@@ -258,6 +261,9 @@ const CompanyListing = () => {
       });
 
       if (response.ok) {
+        // Persist AI features setting locally as a cache
+        localStorage.setItem(`ai_features_${formData.CompanyUserName}`, formData.aiFeaturesEnabled);
+
         if (!isEditing) setCurrentPage(1);
         fetchCompanies();
         closeDialog();
@@ -739,6 +745,27 @@ const CompanyListing = () => {
                             </div>
                           )}
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/50">
+                      <div className="flex items-center h-5">
+                        <input
+                          id="aiFeaturesEnabled"
+                          name="aiFeaturesEnabled"
+                          type="checkbox"
+                          checked={formData.aiFeaturesEnabled}
+                          onChange={handleChange}
+                          className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label htmlFor="aiFeaturesEnabled" className="text-sm font-semibold text-purple-900 dark:text-purple-100 cursor-pointer">
+                          Enable AI Features
+                        </label>
+                        <p className="text-xs text-purple-600 dark:text-purple-300">
+                          When enabled, this company will see AI-generated applications, jobs, and interviews.
+                        </p>
                       </div>
                     </div>
 
