@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { useTheme } from "../../context/ThemeContext";
 
@@ -42,9 +44,7 @@ export const Login = () => {
         localStorage.setItem("user", JSON.stringify(result.user));
         localStorage.setItem("email", result.email);
 
-        setSuccess("Login successful! Redirecting...");
-
-        console.log("thisaa ia runnnaaas login", result.user);
+        toast.success("Login successful! Redirecting...");
 
         if (result.user.role !== "super") {
           setTimeout(() => {
@@ -52,15 +52,14 @@ export const Login = () => {
           }, 1500);
         } else {
           setTimeout(() => {
-            console.log("thisaa ia runnnaaas login>>>");
             window.location.href = `/`;
           }, 1500);
         }
       } else {
-        setError(result.error || "Invalid credentials");
+        toast.error(result.error || "Invalid credentials");
       }
     } catch (err) {
-      setError("Connection error. Please try again.");
+      toast.error("Connection error. Please try again.");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -70,7 +69,7 @@ export const Login = () => {
   return (
     <div className={`min-h-screen w-full flex items-center justify-center p-4 transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-200'
       }`}>
-      <div className={`w-full max-w-md rounded-3xl p-8 shadow-lg border h-[96vh] transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
+      <div className={`w-full max-w-md rounded-3xl p-8 shadow-lg border transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
         }`}>
         {/* Logo */}
         <div className="text-center mb-8 ">
@@ -85,21 +84,10 @@ export const Login = () => {
           <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Sign in to your ATS account</p>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-        )}
+        {/* Notification Container handled outside form */}
+        {/* Status messages handled by ToastContainer */}
 
-        {/* Success Message */}
-        {success && (
-          <div className="mb-6 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-600 text-sm">{success}</p>
-          </div>
-        )}
-
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div>
             <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -168,14 +156,13 @@ export const Login = () => {
           <button
             type="submit"
             disabled={isLoading}
-            onClick={handleSubmit}
-            className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
           >
             {isLoading ? (
-              <>
+              <div className="flex items-center space-x-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 <span>Signing in...</span>
-              </>
+              </div>
             ) : (
               <span>Sign in</span>
             )}
@@ -197,8 +184,9 @@ export const Login = () => {
               Sign up
             </a>
           </div>
-        </div>
+        </form>
       </div>
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>
   );
 };

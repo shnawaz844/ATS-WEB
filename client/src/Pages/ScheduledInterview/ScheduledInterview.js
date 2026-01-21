@@ -1,17 +1,111 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Briefcase, ChevronLeft, ChevronRight, Filter, Search, X } from 'lucide-react';
+import { Briefcase, ChevronLeft, ChevronRight, Filter, Search, X, Clock } from 'lucide-react';
 import axios from 'axios';
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 
 import useScheduledInterview from '../../hooks/useScheduledInterview';
 import BackButtonMobile from '../../components/Mob-back-btn';
+import { useTheme } from '../../context/ThemeContext';
 
 export const ScheduledInterview = () => {
+    const { theme: currentTheme } = useTheme();
+    const [activeTab, setActiveTab] = useState('scheduled');
     const [searchTerm, setSearchTerm] = useState("");
     const [page, setPage] = useState(1);
     const limit = 10;
+    const companyUserName = localStorage.getItem("companyUserName");
+    const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
+
+    // Fetch company settings to sync AI features
+    useEffect(() => {
+        const fetchCompanyDetails = async () => {
+            try {
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.aiFeaturesEnabled !== undefined) {
+                        setAiFeaturesEnabled(data.aiFeaturesEnabled);
+                        localStorage.setItem(`ai_features_${companyUserName}`, data.aiFeaturesEnabled);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching company details:", error);
+            }
+        };
+
+        if (companyUserName) {
+            fetchCompanyDetails();
+        }
+    }, [companyUserName]);
+
+    const mockedAiInterviews = [
+        {
+            _id: 'ai-int-1',
+            date: new Date().toISOString(),
+            scheduledTime: '10:00 AM',
+            interviewerType: 'online',
+            status: 'Scheduled',
+            interviewerID: { userName: 'AI Assistant' },
+            applicationID: {
+                candidateID: { userName: 'John Doe (AI Simulation)' },
+                jobID: { title: 'Senior Software Engineer' },
+                resume: "mock-resume-path"
+            },
+            meetingLink: "https://meet.google.com/ai-mock-1",
+            feedbackTitle: "Excellent",
+            roundName: "Technical Round"
+        },
+        {
+            _id: 'ai-int-2',
+            date: new Date().toISOString(),
+            scheduledTime: '11:30 AM',
+            interviewerType: 'walkin',
+            status: 'In Progress',
+            interviewerID: { userName: 'AI Recruiter' },
+            applicationID: {
+                candidateID: { userName: 'Jane Smith (AI Simulation)' },
+                jobID: { title: 'UX Designer' },
+                resume: "mock-resume-path"
+            },
+            meetingLink: "",
+            feedbackTitle: "Good",
+            roundName: "HR Round"
+        },
+        {
+            _id: 'ai-int-3',
+            date: new Date(Date.now() + 86400000).toISOString(),
+            scheduledTime: '02:00 PM',
+            interviewerType: 'online',
+            status: 'Scheduled',
+            interviewerID: { userName: 'AI Evaluator' },
+            applicationID: {
+                candidateID: { userName: 'Mike Brown (AI Simulation)' },
+                jobID: { title: 'Product Manager' },
+                resume: "mock-resume-path"
+            },
+            meetingLink: "https://zoom.us/ai-mock-3",
+            feedbackTitle: "Above Average",
+            roundName: "Manager Round"
+        },
+        {
+            _id: 'ai-int-4',
+            date: new Date(Date.now() + 86400000).toISOString(),
+            scheduledTime: '04:15 PM',
+            interviewerType: 'walkin',
+            status: 'Completed',
+            interviewerID: { userName: 'AI System' },
+            applicationID: {
+                candidateID: { userName: 'Sarah Wilson (AI Simulation)' },
+                jobID: { title: 'Marketing Lead' },
+                resume: "mock-resume-path"
+            },
+            meetingLink: "",
+            feedbackTitle: "Very Good",
+            roundName: "Initial Screening"
+        }
+    ];
     const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
     const storedUser = localStorage.getItem("user");
     const interviewer = storedUser ? JSON.parse(storedUser) : null;
@@ -83,11 +177,15 @@ export const ScheduledInterview = () => {
 
     // Fetch statuses from the API
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`)
+        fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
+            headers: {
+                "company_id": companyId
+            }
+        })
             .then(response => response.json())
             .then(data => setStatuses(data.applicationStatuses))
             .catch(error => console.error("Error fetching statuses:", error));
-    }, []);
+    }, [companyId]);
 
     // Handle click outside modal to close it
     useEffect(() => {
@@ -469,107 +567,267 @@ export const ScheduledInterview = () => {
                 </div>
             </div>
 
-            {/* Search and Filter Section */}
-            <div className="bg-transparent rounded-xl pb-5">
-                {/* Expandable Filters */}
-                {showFilters && (
-                    <div>
-                        <div className="  grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2
+            {/* Tabs */}
+            <div className="rounded-xl shadow-sm mt-6 mb-4">
+                <div className="flex border-b rounded-t-xl">
+                    <button
+                        onClick={() => setActiveTab('scheduled')}
+                        className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'scheduled'
+                            ? `border-b-2 border-purple-500 text-xl text-purple-600 dark:text-white`
+                            : `hover:border-b-2 text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500`
+                            }`}
+                    >
+                        Scheduled Interviews
+                    </button>
+                    {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
+                        <button
+                            onClick={() => setActiveTab('ai')}
+                            className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
+                                ? `border-b-2 border-purple-500 text-xl text-purple-600 dark:text-white`
+                                : `hover:border-b-2 text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500`
+                                }`}
+                        >
+                            AI Scheduled Interviews
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {activeTab === 'scheduled' && (
+                <>
+                    {/* Search and Filter Section */}
+                    <div className="bg-transparent rounded-xl pb-5">
+                        {/* Expandable Filters */}
+                        {showFilters && (
+                            <div>
+                                <div className="  grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2
   gap-4 pt-1
   border-t border-gray-200 dark:border-gray-700
   w-full lg:w-[50vw] mx-auto
 ">
-                            {/* Status Filter */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => {
-                                        setFilterStatus(e.target.value);
-                                        setPage(1);
-                                    }}
-                                    className="w-[35vw] sm:w-full border border-gray-300 dark:border-gray-600 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
-                                >
-                                    <option value="">All Statuses</option>
-                                    {statuses.map((status) => (
-                                        <option key={status._id} value={status._id}>
-                                            {capitalizeFirstLetter(status.applicationStatus)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                    {/* Status Filter */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                                        <select
+                                            value={filterStatus}
+                                            onChange={(e) => {
+                                                setFilterStatus(e.target.value);
+                                                setPage(1);
+                                            }}
+                                            className="w-[35vw] sm:w-full border border-gray-300 dark:border-gray-600 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+                                        >
+                                            <option value="">All Statuses</option>
+                                            {statuses.map((status) => (
+                                                <option key={status._id} value={status._id}>
+                                                    {capitalizeFirstLetter(status.applicationStatus)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                            {/* Round Filter */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Round</label>
-                                <select
-                                    value={filterRound}
-                                    onChange={(e) => {
-                                        setFilterRound(e.target.value);
-                                        setPage(1);
-                                    }}
-                                    className="w-[35vw] sm:w-full border border-gray-300 dark:border-gray-600 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
-                                >
-                                    <option value="">All Rounds</option>
-                                    {interviewRounds.map((round) => (
-                                        <option key={round._id} value={round._id}>
-                                            {round.roundName || 'Unknown Round'}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                                    {/* Round Filter */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Round</label>
+                                        <select
+                                            value={filterRound}
+                                            onChange={(e) => {
+                                                setFilterRound(e.target.value);
+                                                setPage(1);
+                                            }}
+                                            className="w-[35vw] sm:w-full border border-gray-300 dark:border-gray-600 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+                                        >
+                                            <option value="">All Rounds</option>
+                                            {interviewRounds.map((round) => (
+                                                <option key={round._id} value={round._id}>
+                                                    {round.roundName || 'Unknown Round'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-                        </div>
+                                </div>
 
-                        {/* Reset Filters Button - Only shown when filters are active */}
-                        {hasActiveFilters && (
-                            <div className="mt-4 flex justify-end">
-                                <button
-                                    onClick={() => {
-                                        setSearchTerm("");
-                                        setFilterStatus("");
-                                        setFilterRound("");
-                                        setPage(1);
-                                    }}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
-                                >
-                                    <X className="h-4 w-4" />
-                                    Reset All Filters
-                                </button>
+                                {/* Reset Filters Button - Only shown when filters are active */}
+                                {hasActiveFilters && (
+                                    <div className="mt-4 flex justify-end">
+                                        <button
+                                            onClick={() => {
+                                                setSearchTerm("");
+                                                setFilterStatus("");
+                                                setFilterRound("");
+                                                setPage(1);
+                                            }}
+                                            className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
+                                        >
+                                            <X className="h-4 w-4" />
+                                            Reset All Filters
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-            ) : error ? (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Error! </strong>
-                    <span className="block sm:inline">{error.message || "Failed to load interviews"}</span>
-                </div>
-            ) : (isAdmin && !selectedInterviewerId) || assignedInterviews?.interviews?.length === 0 ? (
-                <div className="text-center animate-fade-in transition-all duration-500 py-16">
-                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3 tracking-tight leading-snug">
-                        🕒 No Interviews Found
-                    </h3>
-                    <p className="text-md text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                        {isAdmin && !selectedInterviewerId
-                            ? "Please select an interviewer to view their scheduled interviews."
-                            : "We're currently in the process of assigning interviewers."}
-                        <br className="hidden sm:block" />
-                        <span className="text-blue-500 font-medium">
-                            {isAdmin && !selectedInterviewerId
-                                ? "Choose an interviewer from the dropdown above."
-                                : "Please wait while your interview schedule is being prepared."}
-                        </span>
-                    </p>
-                </div>
-            ) : (
-                <div className="overflow-x-auto rounded-t-xl shadow backdrop-blur-xl bg-white/10 border border-white/20">
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <strong className="font-bold">Error! </strong>
+                            <span className="block sm:inline">{error.message || "Failed to load interviews"}</span>
+                        </div>
+                    ) : (isAdmin && !selectedInterviewerId) || assignedInterviews?.interviews?.length === 0 ? (
+                        <div className="text-center animate-fade-in transition-all duration-500 py-16">
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-3 tracking-tight leading-snug">
+                                🕒 No Interviews Found
+                            </h3>
+                            <p className="text-md text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                                {isAdmin && !selectedInterviewerId
+                                    ? "Please select an interviewer to view their scheduled interviews."
+                                    : "We're currently in the process of assigning interviewers."}
+                                <br className="hidden sm:block" />
+                                <span className="text-blue-500 font-medium">
+                                    {isAdmin && !selectedInterviewerId
+                                        ? "Choose an interviewer from the dropdown above."
+                                        : "Please wait while your interview schedule is being prepared."}
+                                </span>
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto rounded-t-xl shadow backdrop-blur-xl bg-white/10 border border-white/20">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-200 dark:bg-white/10">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Candidate</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Resume</th>
+                                        {isAdmin && (
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Interviewer</th>
+                                        )}
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Time</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Meet Link</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Feedback</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Action</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Round</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-200 bg-gray-100 dark:bg-[#1a1a1a] dark:divide-gray-700">
+                                    {assignedInterviews?.interviews?.map((interview) => (
+                                        <tr key={interview?._id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">
+                                                {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
+                                                {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                            </td>
+
+                                            <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
+                                                {interview?.applicationID?.resume ? (
+                                                    <button
+                                                        onClick={() => handleResumeView(interview.applicationID.resume)}
+                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 break-words"
+                                                    >
+                                                        Open Resume
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-gray-500 dark:text-gray-400">No Resume</span>
+                                                )}
+                                            </td>
+
+                                            {isAdmin && (
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A"}</td>
+                                            )}
+                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
+                                                {formatDate(interview.date)}
+                                            </td>
+
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{interview.scheduledTime}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
+                                                    {statuses?.length && statuses?.filter(status => status._id === interview?.status)[0]?.applicationStatus}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
+                                                {interview?.meetingLink ? (
+                                                    <a
+                                                        href={interview.meetingLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 underline break-words"
+                                                    >
+                                                        Join Meeting
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-gray-500 dark:text-gray-400">Walk In</span>
+                                                )}
+                                            </td>
+
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <button
+                                                    onClick={() => handleFeedbackClick(interview)}
+                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
+                                                >
+                                                    {interview?.feedbackTitle || "Add Feedback"}
+                                                </button>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                                <button
+                                                    onClick={() => handleEdit(interview)}
+                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
+                                                >
+                                                    Edit
+                                                </button>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                                {interviewRounds?.length && interviewRounds?.filter(round => round._id === interview?.roundID)[0]?.roundName || "N/A"}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {assignedInterviews?.totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
+                            <button
+                                onClick={handlePreviousPage}
+                                disabled={page === 1}
+                                className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === 1
+                                    ? 'bg-gray-400 dark:bg-gray-700 text-white dark:text-gray-500 cursor-not-allowed rounded-xl'
+                                    : 'bg-gray-700 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-white hover:bg-gray-400 dark:hover:bg-gray-700 rounded-xl'
+                                    }`}
+                            >
+                                <ChevronLeft className="mr-1 h-4 w-4" />
+                                Previous
+                            </button>
+                            <div className="flex items-center gap-1">
+                                <span className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded-full font-medium">{page}</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">of {assignedInterviews?.totalPages}</span>
+                            </div>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={page >= assignedInterviews?.totalPages}
+                                className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === assignedInterviews?.totalPages
+                                    ? 'bg-gray-400 dark:bg-gray-700 text-white dark:text-gray-500 cursor-not-allowed rounded-xl'
+                                    : 'bg-gray-700 dark:bg-gray-800 text-white hover:bg-gray-400 dark:hover:bg-gray-700 rounded-xl'
+                                    }`}
+                            >
+                                <ChevronRight className="ml-1 h-4 w-4" />
+                                Next
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* AI Generated Interviews Tab */}
+            {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
+                <div className="overflow-x-auto rounded-t-xl shadow backdrop-blur-xl bg-white/10 border border-white/20 mt-4">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead className="bg-gray-200 dark:bg-white/10">
                             <tr>
@@ -589,111 +847,73 @@ export const ScheduledInterview = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-gray-100 dark:bg-[#1a1a1a] dark:divide-gray-700">
-                            {assignedInterviews?.interviews?.map((interview) => (
-                                <tr key={interview?._id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            {mockedAiInterviews.map((interview) => (
+                                <tr key={interview._id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">
-                                        {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                        {interview.applicationID.jobID.title}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
-                                        {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                        {interview.applicationID.candidateID.userName}
                                     </td>
-
                                     <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
-                                        {interview?.applicationID?.resume ? (
-                                            <button
-                                                onClick={() => handleResumeView(interview.applicationID.resume)}
-                                                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 break-words"
-                                            >
-                                                Open Resume
-                                            </button>
-                                        ) : (
-                                            <span className="text-gray-500 dark:text-gray-400">No Resume</span>
-                                        )}
+                                        <button
+                                            onClick={() => toast.info("AI Resume View (Mocked)")}
+                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200"
+                                        >
+                                            Open Resume
+                                        </button>
                                     </td>
-
                                     {isAdmin && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            {interview.interviewerID.userName}
+                                        </td>
                                     )}
                                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
                                         {formatDate(interview.date)}
                                     </td>
-
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{interview.scheduledTime}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {interview.scheduledTime}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
-                                            {statuses?.length && statuses?.filter(status => status._id === interview?.status)[0]?.applicationStatus}
+                                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {interview.status}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
-                                        {interview?.meetingLink ? (
-                                            <a
-                                                href={interview.meetingLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 underline break-words"
+                                        {interview.meetingLink ? (
+                                            <button
+                                                onClick={() => toast.info(`AI Meeting: ${interview.meetingLink}`)}
+                                                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 underline"
                                             >
                                                 Join Meeting
-                                            </a>
+                                            </button>
                                         ) : (
                                             <span className="text-gray-500 dark:text-gray-400">Walk In</span>
                                         )}
                                     </td>
-
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         <button
-                                            onClick={() => handleFeedbackClick(interview)}
+                                            onClick={() => toast.info("AI Feedback (Mocked)")}
                                             className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
                                         >
-                                            {interview?.feedbackTitle || "Add Feedback"}
+                                            {interview.feedbackTitle || "Add Feedback"}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         <button
-                                            onClick={() => handleEdit(interview)}
+                                            onClick={() => toast.info("AI Edit (Mocked)")}
                                             className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
                                         >
                                             Edit
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {interviewRounds?.length && interviewRounds?.filter(round => round._id === interview?.roundID)[0]?.roundName || "N/A"}
+                                        {interview.roundName}
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>
-            )}
-
-            {/* Pagination */}
-            {assignedInterviews?.totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
-                    <button
-                        onClick={handlePreviousPage}
-                        disabled={page === 1}
-                        className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === 1
-                            ? 'bg-gray-400 dark:bg-gray-700 text-white dark:text-gray-500 cursor-not-allowed rounded-xl'
-                            : 'bg-gray-700 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-white hover:bg-gray-400 dark:hover:bg-gray-700 rounded-xl'
-                            }`}
-                    >
-                        <ChevronLeft className="mr-1 h-4 w-4" />
-                        Previous
-                    </button>
-                    <div className="flex items-center gap-1">
-                        <span className="px-3 py-1 bg-gray-300 dark:bg-gray-700 text-black dark:text-white rounded-full font-medium">{page}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">of {assignedInterviews?.totalPages}</span>
-                    </div>
-                    <button
-                        onClick={handleNextPage}
-                        disabled={page >= assignedInterviews?.totalPages}
-                        className={`flex items-center px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${page === assignedInterviews?.totalPages
-                            ? 'bg-gray-400 dark:bg-gray-700 text-white dark:text-gray-500 cursor-not-allowed rounded-xl'
-                            : 'bg-gray-700 dark:bg-gray-800 text-white hover:bg-gray-400 dark:hover:bg-gray-700 rounded-xl'
-                            }`}
-                    >
-                        <ChevronRight className="ml-1 h-4 w-4" />
-                        Next
-                    </button>
                 </div>
             )}
 
@@ -1164,10 +1384,60 @@ export const ScheduledInterview = () => {
                     </div>
                 </div>
             )}
+            {/* {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
+                <div className="mt-12 mb-10">
+                    <div className={`mb-6 h-auto flex items-center rounded-xl p-4 transition-colors duration-300 ${currentTheme === 'dark' ? 'border border-purple-500/30 bg-purple-900/10' : 'bg-purple-50 shadow-sm border border-purple-100'}`}>
+                        <h2 className="text-xl md:text-3xl font-bold text-purple-700 dark:text-purple-400 flex items-center">
+                            <div className="p-3 mx-2 bg-purple-500/10 rounded-full">
+                                <Briefcase className="h-5 w-5 md:h-6 md:w-6" />
+                            </div>
+                            AI Scheduled Interviews
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {mockedAiInterviews.map((interview) => (
+                            <div
+                                key={interview._id}
+                                className={`p-6 rounded-xl border group transition-all duration-300 ${currentTheme === 'dark'
+                                    ? 'bg-purple-900/10 border-purple-800/50 hover:border-purple-500/50'
+                                    : 'bg-white border-purple-100 hover:border-purple-300 shadow-sm hover:shadow-md'
+                                    }`}
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-purple-700 dark:text-purple-400">
+                                            {interview.applicationID.jobID.title}
+                                        </h3>
+                                        <p className="text-sm mt-1 text-gray-500 dark:text-gray-400">
+                                            Candidate: {interview.applicationID.candidateID.userName}
+                                        </p>
+                                    </div>
+                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${currentTheme === 'dark' ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
+                                        AI Mock
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                        <Clock className="w-4 h-4 mr-2" />
+                                        {interview.scheduledTime}
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                        <Briefcase className="w-4 h-4 mr-2" />
+                                        {interview.interviewerType}
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 text-purple-600 dark:text-purple-400 font-medium">
+                                        Interviewer: {interview.interviewerID.userName}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )} */}
             <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         </div>
     );
 };
 
 export default ScheduledInterview;
-
