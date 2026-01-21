@@ -13,28 +13,27 @@ const getApplicationStatuses = async (req, res) => {
     // Build a query for searching application statuses
     let query = {};
 
-    if(company_id){
-      query.company_id = company_id;  
+    if (company_id) {
+      query.company_id = company_id;
     }
-    
+
     if (search) {
       // Check if search is a number (for applicationStep)
       const isNumeric = !isNaN(parseInt(search));
-      
-      if (isNumeric) {
-        // If search is a number, include applicationStep search
-        query = {
+
+      const searchQuery = isNumeric
+        ? {
           $or: [
             { applicationStep: parseInt(search) },
             { applicationStatus: { $regex: search, $options: "i" } }
           ]
-        };
-      } else {
-        // If search is not a number, only search in string fields
-        query = {
+        }
+        : {
           applicationStatus: { $regex: search, $options: "i" }
         };
-      }
+
+      // Merge searchQuery into existing query (preserving company_id)
+      query = { ...query, ...searchQuery };
     }
 
     // Count total documents that match the query
