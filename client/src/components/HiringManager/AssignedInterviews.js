@@ -409,7 +409,7 @@ const AssignedInterviews = () => {
                                     : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                                     }`}
                             >
-                                AI Generated Applications
+                                AI Generated Interviews
                             </button>
                         )}
                     </div>
@@ -418,9 +418,6 @@ const AssignedInterviews = () => {
                 {/* Manage Interviews View */}
                 {activeTab === 'manage' && (
                     <>
-
-
-
                         {/* Today's Interviews Section */}
                         {filteredInterviews?.some(interview => isToday(interview.date)) && (
                             <div className="mb-8 relative">
@@ -655,7 +652,7 @@ const AssignedInterviews = () => {
             </div>
 
             {
-                activeTab === 'manage' && (
+                (activeTab === 'manage' || activeTab === 'ai') && (
                     <>
 
                         {/* Interview Details Modal */}
@@ -873,46 +870,220 @@ const AssignedInterviews = () => {
 
             {
                 (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                    <div className="mt-6 mb-10 animate-fade-in">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {mockedAiInterviews.map((interview) => (
-                                <div
-                                    key={interview._id}
-                                    className={`p-6 rounded-xl border group transition-all duration-300 ${theme === 'dark'
-                                        ? 'bg-purple-900/10 border-purple-800/50 hover:border-purple-500/50'
-                                        : 'bg-white border-purple-100 hover:border-purple-300 shadow-sm hover:shadow-md'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-purple-700 dark:text-purple-400">
-                                                {interview.applicationID.jobID.title}
-                                            </h3>
-                                            <p className="text-sm mt-1 text-gray-500 dark:text-gray-400">
-                                                Candidate: {interview.applicationID.candidateID.userName}
-                                            </p>
-                                        </div>
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${theme === 'dark' ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800'}`}>
-                                            AI Mock
-                                        </span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                            <Clock className="w-4 h-4 mr-2" />
-                                            {interview.scheduledTime}
-                                        </div>
-                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                            <Briefcase className="w-4 h-4 mr-2" />
-                                            {interview.interviewerType}
-                                        </div>
-                                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 text-purple-600 dark:text-purple-400 font-medium">
-                                            Interviewer: {interview.interviewerID.userName}
-                                        </div>
+                    <>
+                        {/* Today's AI Generated Interviews Section */}
+                        {mockedAiInterviews?.some(interview => isToday(interview.date)) && (
+                            <div className="mb-8 relative">
+                                {/* Background decorative elements */}
+                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-100 rounded-full opacity-20 blur-xl"></div>
+                                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20 blur-xl"></div>
+
+                                {/* Header section with title and controls */}
+                                <div className="relative z-10 flex flex-col sm:flex-row justify-start items-start sm:items-center mb-6 gap-4">
+                                    <div className={`shadow-sm px-5 py-3 rounded-2xl ${theme === 'dark' ? 'bg-gray-900/50 backdrop-blur-sm' : ''}`}>
+                                        <h2 className={`text-2xl font-bold  bg-clip-text ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                                            Today's AI Interviews
+                                        </h2>
+                                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-white'}`}>
+                                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                        </p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+
+                                {/* Cards container */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {mockedAiInterviews
+                                        .filter(interview => isToday(interview.date))
+                                        .map((interview) => {
+                                            // Determine status colors
+                                            const statusColors = {
+                                                "Completed": "bg-emerald-500 text-emerald-800 bg-emerald-50",
+                                                "Cancelled": "bg-red-500 text-red-800 bg-red-50",
+                                                "In Progress": "bg-amber-500 text-amber-800 bg-amber-50",
+                                                "Scheduled": "bg-blue-500 text-blue-800 bg-blue-50"
+                                            };
+
+                                            const status = interview.status;
+                                            const colorString = statusColors[status] || "bg-gray-500 text-gray-800 bg-gray-50";
+                                            const [bgColor, textColor, bgLight] = colorString.split(" ");
+
+                                            // Get candidate initial
+                                            const initial = interview.applicationID?.candidateID?.userName?.[0] || "?";
+
+                                            return (
+                                                <div
+                                                    key={interview._id}
+                                                    onClick={() => handleInterviewClick(interview)}
+                                                    className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border ${theme === 'dark'
+                                                        ? 'bg-gray-800 border-gray-700'
+                                                        : 'bg-[#b8e1e1] border-gray-100'
+                                                        }`}
+                                                >
+                                                    <div className="p-4">
+                                                        {/* Header with job title and status */}
+                                                        <div className="flex justify-between items-center mb-3">
+                                                            <h3 className={`text-lg font-semibold line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                                                                {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                            </h3>
+                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${textColor} ${bgLight}`}>
+                                                                {capitalizeFirstLetter(status)}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Main content */}
+                                                        <div className="space-y-3">
+                                                            {/* Candidate info */}
+                                                            <div className="flex items-center gap-2.5">
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bgLight}`}>
+                                                                    <span className={`${textColor} text-sm font-medium`}>
+                                                                        {capitalizeFirstLetter(initial)}
+                                                                    </span>
+                                                                </div>
+                                                                <div>
+                                                                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                                        Applicant Name :   {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
+                                                                    </p>
+                                                                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                        Interview Type :    {capitalizeFirstLetter(interview.interviewerType) || "N/A"} Interview
+                                                                    </p>
+                                                                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                        Interviewer :   {capitalizeFirstLetter(interview.interviewerID.userName) || "N/A"}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Time info */}
+                                                            <div className="flex items-center gap-2 text-sm">
+                                                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                </svg>
+                                                                <span className="text-gray-700">Today at {interview.scheduledTime}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <div className={`flex justify-end items-center px-4 py-3 mt-2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                                                        <button className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                                                            Details
+                                                            <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Status indicator line */}
+                                                    <div className={`h-1 w-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}></div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+
+                                {/* Empty state */}
+                                {mockedAiInterviews?.filter(interview => isToday(interview.date)).length === 0 && (
+                                    <div className="bg-white rounded-2xl shadow p-8 text-center">
+                                        <div className="w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg className="w-10 h-10 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">AI Schedule is Clear Today</h3>
+                                        <p className="text-gray-500 mb-6 max-w-md mx-auto">No AI generated interviews are scheduled for today. These are simulated interviews for demonstration purposes.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* All AI Generated Interviews */}
+                        <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>All AI Generated Interviews</h2>
+                        {mockedAiInterviews?.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                                <div className="bg-gray-100 p-5 rounded-full mb-4">
+                                    <Briefcase className="h-12 w-12 text-gray-400" />
+                                </div>
+                                <div className="text-center animate-fade-in transition-all duration-500">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-3 tracking-tight leading-snug">
+                                        No AI Interviews Found
+                                    </h3>
+                                    <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
+                                        No AI generated interviews available at the moment.
+                                        <br className="hidden sm:block" />
+                                        <span className="text-purple-500 font-medium">AI interviews</span> are simulated for demonstration purposes.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {mockedAiInterviews
+                                    .filter(interview => !isToday(interview.date))
+                                    .map((interview) => (
+                                        <div
+                                            key={interview._id}
+                                            onClick={() => handleInterviewClick(interview)}
+                                            className={`p-6 rounded-xl border cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group ${theme === 'dark'
+                                                ? 'bg-white/10 border-gray-700 hover:border-purple-500/50'
+                                                : 'bg-white border-gray-100 hover:border-indigo-50'
+                                                }`}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white group-hover:text-purple-500' : 'text-gray-900 group-hover:text-purple-500'
+                                                        }`}>
+                                                        {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                    </h3>
+                                                    <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                        Applicant Name :  {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
+                                                    </p>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(interview.status)}`}>
+                                                    {capitalizeFirstLetter(interview.status)}
+                                                </span>
+                                            </div>
+
+                                            <div className="space-y-3 mt-4">
+                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                    </svg>
+                                                    Interview Type :   {capitalizeFirstLetter(interview.interviewerType) || "N/A"}
+                                                </div>
+
+                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    Scheduled Date :   {formatDate(interview.date)}
+                                                </div>
+
+                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Scheduled Time :   {interview.scheduledTime}
+                                                </div>
+                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Interviewer :   {interview.interviewerID.userName}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-6 flex justify-end">
+                                                <button className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 group-hover:text-purple-600'
+                                                    }`}>
+                                                    View Details
+                                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+
+                    </>
                 )
             }
         </div >
