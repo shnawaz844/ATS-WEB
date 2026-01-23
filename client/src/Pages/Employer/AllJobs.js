@@ -443,17 +443,6 @@ export const AllJobs = () => {
 
                     {activeTab === 'jobs' && (
                         <>
-                            {/* Filter Toggle Button (Mobile) */}
-                            {/* <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
-                        <button
-                            onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm"
-                        >
-                            <span className="font-medium text-gray-700">Filters</span>
-                            <Filter className="h-5 w-5 text-gray-500" />
-                        </button>
-                    </div> */}
-
                             {/* Filters Section */}
                             <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>
                                 <div className={isFilterOpen ? 'block' : 'hidden'}>
@@ -800,121 +789,349 @@ export const AllJobs = () => {
 
                     {/* AI Generated Jobs Section */}
                     {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                        <div className="mt-4 mb-10 px-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[
-                                    {
-                                        _id: "ai-job-1",
-                                        title: "AI Generated: Frontend Developer (React)",
-                                        type: "Full-Time",
-                                        locationType: "Remote",
-                                        scheduleType: "Flexible",
-                                        compensation: "15,00,000 - 20,00,000",
-                                        city: "Bangalore",
-                                        state: "Karnataka",
-                                        country: "India",
-                                        createdAt: new Date().toISOString(),
-                                        status: "Active",
-                                        titleCode: "AI-FE-001"
-                                    },
-                                    {
-                                        _id: "ai-job-2",
-                                        title: "AI Generated: Backend Developer (Node.js)",
-                                        type: "Full-Time",
-                                        locationType: "Hybrid",
-                                        scheduleType: "Flexible",
-                                        compensation: "18,00,000 - 25,00,000",
-                                        city: "Gurguram",
-                                        state: "Haryana",
-                                        country: "India",
-                                        createdAt: new Date().toISOString(),
-                                        status: "Active",
-                                        titleCode: "AI-BE-001"
-                                    },
-                                    {
-                                        _id: "ai-job-3",
-                                        title: "AI Generated: UI/UX Designer (Figma)",
-                                        type: "Part-Time",
-                                        locationType: "Remote",
-                                        scheduleType: "Flexible",
-                                        compensation: "10,00,000 - 15,00,000",
-                                        city: "Mumbai",
-                                        state: "Maharashtra",
-                                        country: "India",
-                                        createdAt: new Date().toISOString(),
-                                        status: "Active",
-                                        titleCode: "AI-UI-001"
-                                    },
-                                    {
-                                        _id: "ai-job-4",
-                                        title: "AI Generated: DevOps Engineer (AWS)",
-                                        type: "Full-Time",
-                                        locationType: "On-Site",
-                                        scheduleType: "Day Shift",
-                                        compensation: "20,00,000 - 30,00,000",
-                                        city: "Hyderabad",
-                                        state: "Telangana",
-                                        country: "India",
-                                        createdAt: new Date().toISOString(),
-                                        status: "Active",
-                                        titleCode: "AI-DO-001"
-                                    }
-                                ].map((job) => (
-                                    <div
-                                        key={job._id}
-                                        className={`rounded-xl shadow-lg overflow-hidden border transition-all duration-300 group relative ${theme === 'dark'
-                                            ? 'bg-purple-900/5 border-purple-500/20 hover:bg-purple-900/10'
-                                            : 'bg-white border-purple-100 hover:border-purple-300'
-                                            }`}
-                                    >
-                                        <div className="flex row-auto right-3 z-10 p-3 justify-end">
-                                            <span className={`inline-flex items-center px-3 rounded-full text-xs font-semibold shadow-sm border bg-green-50 text-green-700 border-green-200`}>
-                                                <div className="w-2 h-2 rounded-full mr-2 bg-green-500"></div>
-                                                Active
-                                            </span>
-                                        </div>
+                        <>
+                            {/* Filters Section */}
+                            <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>
+                                <div className={isFilterOpen ? 'block' : 'hidden'}>
+                                    <div className={`max-w-7xl mx-auto p-6 rounded-2xl shadow-lg border-0  ${theme === 'dark' ? 'bg-white/10 to-gray-900 border-gray-700' : 'from-gray-300 to-gray-100'}`}>
+                                        <div className="flex justify-center">
+                                            <div className="flex flex-wrap justify-center gap-4 items-end max-w-5xl w-full">
 
-                                        <div className="p-6 pt-2">
-                                            <h3 className={`text-xl font-bold mb-4 font-DM leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-purple-600'}`}>
-                                                {job.title}
-                                            </h3>
-                                            <div className="flex flex-wrap gap-2 mb-4">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
-                                                    {job.type}
-                                                </span>
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                                    {job.locationType}
-                                                </span>
-                                            </div>
+                                                {/* Job Type Dropdown */}
+                                                <div className="flex-1 min-w-48">
+                                                    <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                        <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
+                                                        <span>Job Type</span>
+                                                    </div>
+                                                    <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                        <Select
+                                                            options={jobTypeOptions}
+                                                            value={jobType}
+                                                            onChange={setJobType}
+                                                            placeholder="Any type"
+                                                            isClearable
+                                                            menuPortalTarget={document.body}
+                                                            styles={{
+                                                                ...customSelectStyles,
+                                                                control: (provided, state) => ({
+                                                                    ...provided,
+                                                                    border: 'none',
+                                                                    borderRadius: '16px',
+                                                                    background: 'transparent',
+                                                                    boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                                    '&:hover': {
+                                                                        border: 'none'
+                                                                    }
+                                                                }),
+                                                                placeholder: (provided) => ({
+                                                                    ...provided,
+                                                                    color: '#94a3b8'
+                                                                }),
+                                                                // Add menu styles here too
+                                                                menu: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                }),
+                                                                menuPortal: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                })
+                                                            }}
+                                                            className="text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
 
-                                            <div className="space-y-3">
-                                                <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm font-medium">Compensation: {job.compensation}</span>
-                                                </div>
-                                                <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm">{job.city}, {job.state}</span>
-                                                </div>
-                                                <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
-                                                    <span className="text-sm">Job Code: <span className="font-semibold bg-purple-100 text-purple-800 px-1 rounded">{job.titleCode}</span></span>
-                                                </div>
-                                            </div>
+                                                {/* Location Type Dropdown */}
+                                                <div className="flex-1 min-w-48">
+                                                    <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                        <MapPin className="mr-2 h-4 w-4 text-teal-500" />
+                                                        <span>Location</span>
+                                                    </div>
+                                                    <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                        <Select
+                                                            options={locationTypeOptions}
+                                                            value={locationType}
+                                                            onChange={setLocationType}
+                                                            placeholder="Any location"
+                                                            isClearable
+                                                            menuPortalTarget={document.body}
+                                                            styles={{
+                                                                ...customSelectStyles,
+                                                                control: (provided, state) => ({
+                                                                    ...provided,
+                                                                    border: 'none',
+                                                                    borderRadius: '16px',
+                                                                    background: 'transparent',
+                                                                    boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                                    '&:hover': {
+                                                                        border: 'none'
+                                                                    }
+                                                                }),
+                                                                placeholder: (provided) => ({
+                                                                    ...provided,
+                                                                    color: '#94a3b8'
+                                                                }),
 
-                                            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
-                                                <button
-                                                    onClick={() => toastNotify.info("AI Job Details (Mocked)")}
-                                                    className="text-purple-600 font-medium text-sm hover:underline"
-                                                >
-                                                    View Details
-                                                </button>
+                                                                menu: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                }),
+                                                                menuPortal: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                })
+                                                            }}
+                                                            className="text-sm"
+                                                        />
+
+                                                    </div>
+                                                </div>
+
+                                                {/* Schedule Type Dropdown */}
+                                                <div className="flex-1 min-w-48">
+                                                    <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                        <Clock className="mr-2 h-4 w-4 text-purple-500" />
+                                                        <span>Schedule</span>
+                                                    </div>
+                                                    <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                        <Select
+                                                            options={scheduleTypeOptions}
+                                                            value={scheduleType}
+                                                            onChange={setScheduleType}
+                                                            placeholder="Any schedule"
+                                                            isClearable
+                                                            menuPortalTarget={document.body}
+                                                            styles={{
+                                                                ...customSelectStyles,
+                                                                control: (provided, state) => ({
+                                                                    ...provided,
+                                                                    border: 'none',
+                                                                    borderRadius: '16px',
+                                                                    background: 'transparent',
+                                                                    boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
+                                                                    '&:hover': {
+                                                                        border: 'none'
+                                                                    }
+                                                                }),
+                                                                placeholder: (provided) => ({
+                                                                    ...provided,
+                                                                    color: '#94a3b8'
+                                                                }),
+
+                                                                menu: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                }),
+                                                                menuPortal: (provided) => ({
+                                                                    ...provided,
+                                                                    zIndex: 9999,
+                                                                })
+                                                            }}
+                                                            className="text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Reset Button */}
+                                                <div className="flex-shrink-0 min-w-32">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleResetFilters}
+                                                        className="group flex items-center justify-center w-full px-1 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-2xl hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                                    >
+                                                        Reset
+                                                        <RefreshCw className="h-4 ml-2 w-4 group-hover:rotate-180 transition-transform duration-300" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                </div>
                             </div>
-                        </div>
+
+                            {/* Results Count */}
+                            <div className="px-6 py-3 border-gray-100 flex justify-between items-center">
+                                <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {allJobsList.length > 0 ? (
+                                        <>Showing <span className="font-medium">{allJobsList.length}</span> of <span className="font-medium">{allJobs.totalCount || 0}</span> jobs</>
+                                    ) : (
+                                        'No jobs found'
+                                    )}
+                                </span>
+                            </div>
+
+                            {/* Jobs Card Section */}
+                            <div className="overflow-x-auto rounded-t-xl">
+                                {isLoading && currentPage === 1 && (
+                                    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+                                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                                    </div>
+                                )}
+
+                                {allJobsList.length > 0 ? (
+                                    <InfiniteScroll
+                                        dataLength={allJobsList.length}
+                                        next={fetchMoreJobs}
+                                        hasMore={hasMore}
+                                        loader={<InfiniteScrollLoader />}
+                                        endMessage={<EndMessage />}
+                                        scrollThreshold={0.8}
+                                        style={{ overflow: 'visible' }}
+                                    >
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                                            {allJobsList.map((job) => (
+                                                <div
+                                                    key={job._id}
+                                                    className={`rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group relative ${theme === 'dark'
+                                                        ? 'bg-white/10 border-gray-700 hover:bg-gray-750'
+                                                        : 'bg-white  hover:border-gray-400'
+                                                        }`}
+                                                    onClick={() => navigate(`/${companyUserName}/job-detail/${job._id}`)}
+                                                >
+                                                    {/* Enhanced Status badge positioned at top right */}
+                                                    <div className="flex row-auto right-3 z-10 p-3 justify-end">
+                                                        {/* Copy Job Code Button */}
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigator.clipboard.writeText(job.titleCode || "N/A");
+                                                                toastNotify.success('Job code copied to clipboard!');
+                                                            }}
+                                                            className="flex items-center text-amber-600 group-hover:text-amber-500 font-medium transition-colors duration-200 text-sm hover:bg-amber-50 group-hover:hover:bg-amber-900/20 px-2 py-1 rounded-md"
+                                                        >
+                                                            <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                            Copy Code
+                                                        </button>
+                                                        <span className={`inline-flex items-center px-3  rounded-full text-xs font-semibold shadow-sm border transition-all duration-200 ${job.status === 'Active'
+                                                            ? 'bg-green-50 text-green-700 border-green-200 group-hover:bg-green-100 group-hover:text-green-800' :
+                                                            job.status === 'Closed'
+                                                                ? 'bg-red-50 text-red-700 border-red-200 group-hover:bg-red-100 group-hover:text-red-800' :
+                                                                'bg-purple-50 text-purple-700 border-purple-200 group-hover:bg-purple-100 group-hover:text-purple-800'
+                                                            }`}>
+                                                            <div className={`w-2 h-2 rounded-full mr-2 ${job.status === 'Active' ? 'bg-green-500' :
+                                                                job.status === 'Closed' ? 'bg-red-500' : 'bg-purple-500'
+                                                                }`}></div>
+                                                            {statusMap[job.status]}
+                                                        </span>
+
+                                                        <button
+                                                            onClick={(e) => handleShareJob(e, job)}
+                                                            className="flex items-center text-purple-600 group-hover:text-purple-500 font-medium transition-colors duration-200 text-sm hover:bg-purple-50 group-hover:hover:bg-purple-900/20 px-2 py-1 rounded-md"
+                                                        >
+                                                            <Share2 className="h-4 w-4 mr-1" />
+                                                            Share
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="p-6 pt-2"> {/* Added extra top padding to accommodate badge */}
+                                                        <div className="flex justify-between items-start">
+                                                            <div className="flex-1 pr-4"> {/* Added right padding to prevent text overlap with badge */}
+                                                                <h3 className={`text-xl font-bold mb-4 font-DM leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-[#9333ea]'}`}>
+                                                                    {capitalizeFirstLetter(job.title)}
+                                                                </h3>
+                                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                                                        {job.type || "Full-Time"}
+                                                                    </span>
+                                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                                        {job.locationType || "On-Site"}
+                                                                    </span>
+                                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                                                        {job.scheduleType || "Full day"}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-3">
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm font-medium">
+                                                                    Compensation: {formatIndianRupee(job.compensation)}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm">
+                                                                    {job.city}, {job.state}, {job.country}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm">
+                                                                    Posted: {new Date(job.createdAt).toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric'
+                                                                    })}
+                                                                </span>
+                                                            </div>
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <Calendar1 className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm">
+                                                                    Job Code:{" "}
+                                                                    <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
+                                                                        {job.titleCode || "N/A"}
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    navigate(`/${companyUserName}/post-job`, { state: { job } });
+                                                                }}
+                                                                className="flex items-center text-blue-600 group-hover:text-blue-700 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 group-hover:hover:bg-blue-900/20 px-2 py-1 rounded-md"
+                                                            >
+                                                                <Edit className="h-4 w-4 mr-1" />
+                                                                View & Edit
+                                                            </button>
+
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteJob(job._id);
+                                                                }}
+                                                                disabled={isDeleting}
+                                                                className="flex items-center text-red-600 group-hover:text-red-500 font-medium transition-colors duration-200 text-sm hover:bg-red-50 group-hover:hover:bg-red-900/20 px-2 py-1 rounded-md disabled:opacity-50"
+                                                            >
+                                                                <Trash2 className="h-4 w-4 mr-1" />
+                                                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </InfiniteScroll>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                                        <div className="bg-gray-100 p-6 rounded-full mb-6">
+                                            <Briefcase className="h-16 w-16 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
+                                        <p className="text-gray-500 max-w-md mb-8 text-base">
+                                            Try adjusting your search filters or post a new job to get started.
+                                        </p>
+                                        <Link
+                                            to={`/${companyUserName}/post-job`}
+                                            className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-xl font-medium hover:bg-gray-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                                        >
+                                            <Plus className="mr-2 h-5 w-5" />
+                                            Post New Job
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+
+                        </>
                     )}
                 </div>
             </div>

@@ -775,7 +775,20 @@ const AllInterviews = () => {
 
       {/* AI Generated Interviews Section */}
       {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-        <div className="max-w-screen-2xl mb-10">
+        <InfiniteScroll
+          dataLength={filteredInterviews?.length}
+          next={fetchMoreData}
+          hasMore={hasMore}
+          loader={<div className="text-center py-4">Loading more interviews...</div>}
+          endMessage={
+            filteredInterviews?.length > 0 && (
+              <p className="text-center py-4 text-gray-500">
+                You've seen all interviews
+              </p>
+            )
+          }
+        >
+
           <div className="overflow-x-auto rounded-t-xl">
             <table className={`min-w-full divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-20'}`}>
               <thead>
@@ -788,107 +801,99 @@ const AllInterviews = () => {
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {[
-                  {
-                    _id: "ai-int-1",
-                    applicationID: {
-                      candidateID: { userName: "AI Candidate: John Doe" },
-                      jobID: { title: "AI Generated: Senior Software Engineer" }
-                    },
-                    interviewerID: { userName: "AI Interviewer 1" },
-                    date: new Date().toISOString(),
-                    scheduledTime: "10:00:00",
-                    status: "Scheduled",
-                    starRating: 4,
-                    skills: ["React", "Node.js"]
-                  },
-                  {
-                    _id: "ai-int-2",
-                    applicationID: {
-                      candidateID: { userName: "AI Candidate: Jane Smith" },
-                      jobID: { title: "AI Generated: Product Manager" }
-                    },
-                    interviewerID: { userName: "AI Interviewer 2" },
-                    date: new Date(Date.now() + 86400000).toISOString(),
-                    scheduledTime: "14:30:00",
-                    status: "Completed",
-                    starRating: 5,
-                    skills: ["SQL", "Agile"]
-                  },
-                  {
-                    _id: "ai-int-3",
-                    applicationID: {
-                      candidateID: { userName: "AI Candidate: Mike Johnson" },
-                      jobID: { title: "AI Generated: UI/UX Designer" }
-                    },
-                    interviewerID: { userName: "AI Interviewer 3" },
-                    date: new Date(Date.now() + 172800000).toISOString(),
-                    scheduledTime: "11:00:00",
-                    status: "In Process",
-                    starRating: 0,
-                    skills: ["Figma", "Tailwind"]
-                  },
-                  {
-                    _id: "ai-int-4",
-                    applicationID: {
-                      candidateID: { userName: "AI Candidate: Sarah Brown" },
-                      jobID: { title: "AI Generated: DevOps Engineer" }
-                    },
-                    interviewerID: { userName: "AI Interviewer 1" },
-                    date: new Date(Date.now() + 259200000).toISOString(),
-                    scheduledTime: "16:00:00",
-                    status: "Scheduled",
-                    starRating: 3,
-                    skills: ["Docker", "Kubernetes"]
-                  }
-                ].map((feedback) => (
-                  <tr key={feedback._id} className={`group transition-colors duration-200 ${theme === 'dark' ? 'bg-purple-900/5 hover:bg-purple-900/10 border-b border-gray-800' : 'hover:bg-purple-50 bg-white'}`}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-start">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                          <User size={20} className="text-purple-600" />
+
+              {filteredInterviews?.length > 0 && (
+                filteredInterviews?.map((feedback) => (
+                  <tbody key={feedback._id}>
+                    <tr className={`group transition-colors duration-200 ${theme === 'dark' ? 'bg-white/10 hover:bg-gray-800 border-b border-gray-800' : 'hover:bg-gray-700 bg-gray-100'}`}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-start">
+                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <User size={20} className="text-indigo-600" />
+                          </div>
+                          <div className="ml-4">
+                            <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                              {capitalizeFirstLetter(feedback?.applicationID?.candidateID?.userName) || "N/A"}
+                            </div>
+                            <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                              {capitalizeFirstLetter(feedback.applicationID?.jobID?.title) || "N/A"}
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {feedback.skills?.map((skill, index) => (
+                                <span key={index} className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                  {skill}
+                                </span>
+                              )) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span>}
+                            </div>
+                          </div>
                         </div>
-                        <div className="ml-4">
-                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feedback.applicationID.candidateID.userName}</div>
-                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{feedback.applicationID.jobID.title}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{capitalizeFirstLetter(feedback?.interviewerID?.userName) || "N/A"}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {feedback.date ? formatDate(feedback.date) : "No date"}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feedback.interviewerID.userName}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{formatDate(feedback.date)}</div>
-                      <div className="text-xs text-gray-500">{formatTime(feedback.scheduledTime)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800`}>
-                        {feedback.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getRatingStars(feedback.starRating)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => {
-                          console.log("Toast being called");
-                          toastNotify.info("AI Interview Details (Mocked)");
-                        }}
-                        className="text-purple-600 hover:text-purple-900"
-                      >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                        <div className="text-xs text-gray-500 group-hover:text-white">
+                          {feedback.scheduledTime ? formatTime(feedback.scheduledTime) : "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={feedback.status || ""}
+                          onChange={(e) => handleStatusChange(feedback._id, e.target.value)}
+                          className={`px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${getStatusColor(feedback.status)}`}
+                        >
+                          <option value="">Select status</option>
+                          {statuses?.map((status) => (
+                            <option key={status} value={status._id}>
+                              {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {getRatingStars(feedback.starRating || 0)}
+                          {feedback.starRating ? (
+                            <span className="ml-2 text-sm text-gray-600 group-hover:text-white">
+                              ({feedback.starRating} star)
+                            </span>
+                          ) : (
+                            <span className="ml-2 text-sm text-gray-400 group-hover:text-white">
+                              No rating
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => {
+                            setDetailedInterview(feedback);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className={`group-hover:text-white mr-3 ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
+                        >
+                          View
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDetailedInterview(feedback);
+                            handleFeedbackClick(feedback);
+                          }}
+                          className={`group-hover:text-white ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
+                        >
+                          Feedback
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                ))
+              )}
             </table>
           </div>
-        </div>
+        </InfiniteScroll>
       )}
 
       {/* {filter ////} */}

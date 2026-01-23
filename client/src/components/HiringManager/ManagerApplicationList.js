@@ -654,12 +654,22 @@ const ApplicationList = () => {
                     )}
 
                     {/* AI Generated Applications View */}
+                    {/* Results Count */}
+                    <div className="px-6 border-gray-100 flex justify-between items-center">
+                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {allJobs?.length > 0 ? (
+                                <>Showing <span className="font-medium">{allJobs?.length}</span> of <span className="font-medium">{jobData.totalJobs || 0}</span> jobs</>
+                            ) : (
+                                'No jobs found'
+                            )}
+                        </span>
+                    </div>
                     {activeTab === 'ai' && (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
                         <div className="mt-6 animate-fade-in">
                             <div className="overflow-x-auto rounded-t-xl shadow-lg border border-gray-200 dark:border-gray-700">
                                 <table className="w-full divide-y divide-gray-200">
                                     <thead>
-                                        <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-purple-100'} text-left`}>
+                                        <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'} text-left`}>
                                             <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Job Title</th>
                                             <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Location</th>
                                             <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Type</th>
@@ -668,39 +678,48 @@ const ApplicationList = () => {
                                             <th className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-purple-200'}`}>
-                                        {mockedAiApplications.map((job) => (
-                                            <tr key={job.jobID} className={`group transition-colors duration-150 ${theme === 'dark' ? 'hover:bg-purple-900/20 bg-[#1a1a1a]' : 'hover:bg-purple-50 bg-white'}`}>
+                                    <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                                        {allJobs.map((job) => (
+                                            <tr key={job.jobID} className={`group transition-colors duration-150 ${theme === 'dark' ? 'hover:bg-gray-800 bg-[#1a1a1a]' : 'hover:bg-gray-700 bg-gray-100'
+                                                }`}>
                                                 <td className="px-6 py-5 whitespace-nowrap">
-                                                    <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-purple-900'}`}>{job.title}</div>
-                                                    <div className="text-xs mt-1">
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                            {job.hireType}
+                                                    <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>{capitalizeFirstLetter(job.title)}</div>
+                                                    <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500 group-hover:text-white'}`}>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
+                                                            {job.hireType || "New"}
+                                                        </span>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            {job.locationType || "On-Site"}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap">
-                                                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                                        <MapPin className="h-4 w-4 mr-1" />
-                                                        {job.city}
+                                                <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-gray-300' : 'group-hover:text-white'}`}>
+                                                    <div className="flex items-start">
+                                                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 mr-1 flex-shrink-0" />
+                                                        <div>
+                                                            <div className={`text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.city || 'N/A'}</div>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap">
-                                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-800'}`}>
-                                                        {job.type}
-                                                    </span>
+                                                <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
+                                                    <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.type || 'N/A'}</div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                    {job.scheduleType}
+                                                <td className={`px-6 py-5 whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
+                                                    <div className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900 group-hover:text-white'}`}>{job.scheduleType || 'N/A'}</div>
                                                 </td>
                                                 <td className="px-6 py-5 whitespace-nowrap text-center">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(job.applicationCount)}`}>
                                                         {job.applicationCount}
-                                                    </span>
+                                                    </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-sm">
-                                                    <button className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
-                                                        Review AI Analysis
+                                                <td className={`px-6 py-5 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-white' : 'group-hover:text-white'}`}>
+                                                    <button
+                                                        onClick={() => navigate(`/${companyUserName}/job-detail/${job.jobID}`)}
+                                                        className={`flex items-center font-medium transition-colors duration-200 ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 group-hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <Eye className="h-4 w-4 mr-1" />
+                                                        View
                                                     </button>
                                                 </td>
                                             </tr>
