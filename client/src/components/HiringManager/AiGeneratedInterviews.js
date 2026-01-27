@@ -6,7 +6,6 @@ import useAssignedInterview from "../../hooks/useAssignedInterview";
 import { useTheme } from "../../context/ThemeContext";
 import { Briefcase, Search, Clock } from "lucide-react";
 import BackButtonMobile from "../Mob-back-btn";
-import AiGeneratedInterviews from "./AiGeneratedInterviews";
 
 const AssignedInterviews = () => {
     const { theme } = useTheme();
@@ -291,81 +290,6 @@ const AssignedInterviews = () => {
             }`}>
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
-                {/* Header Section */}
-                <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
-                    }`}>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
-                        <div>
-                            <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                                <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
-                                    <Briefcase className="h-5 w-5 md:h-6 md:w-6 text-gray-900 dark:text-white" />
-                                </div>
-                                Assigned Interviews
-                            </h2>
-                        </div>
-
-                        {/* Search and Filters */}
-                        <div className='flex items-center gap-3 ml-auto'>
-                            {/* Search Bar */}
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Search className="h-4 w-4 text-gray-400" />
-                                </div>
-                                <input
-                                    type="text"
-                                    placeholder="Search by job, candidate"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className={`w-48 pl-10 pr-4 py-2 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-sm ${theme === 'dark'
-                                        ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
-                                        : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
-                                />
-                            </div>
-                            <div className="relative">
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className={`appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
-                                >
-                                    <option value="all">All Statuses</option>
-                                    {statuses?.map(status => (
-                                        <option key={status._id} value={status._id}>
-                                            {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="rounded-xl shadow-sm mb-6">
-                    <div className="flex border-b rounded-t-xl">
-                        <button
-                            onClick={() => setActiveTab('manage')}
-                            className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'manage'
-                                ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
-                                : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                                }`}
-                        >
-                            Assigned Interviews
-                        </button>
-
-                        {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
-                            <button
-                                onClick={() => setActiveTab('ai')}
-                                className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
-                                    ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
-                                    : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                                    }`}
-                            >
-                                AI Generated Interviews
-                            </button>
-                        )}
-                    </div>
-                </div>
-
                 {/* Manage Interviews View */}
                 {activeTab === 'manage' && (
                     <>
@@ -776,11 +700,6 @@ const AssignedInterviews = () => {
                                 </div>
                             </div>
                         )}
-                        {
-                            (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                                <AiGeneratedInterviews />
-                            )
-                        }
 
                         {filteredInterviews && filteredInterviews?.length > 0 && (
                             <div className="px-6 py-4 border-t border-gray-100 mt-4">
