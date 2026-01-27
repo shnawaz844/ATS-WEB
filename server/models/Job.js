@@ -101,7 +101,7 @@ const JobSchema = new mongoose.Schema(
       ref: "Company",
       required: true,
     },
-    interview_id: { type: String, required: true },
+    interview_id: { type: String, required: false },
     interviewMode: {
       type: String,
       enum: ['AI', 'Manual'],

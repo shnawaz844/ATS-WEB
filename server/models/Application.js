@@ -23,7 +23,7 @@ const ApplicationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    contactInfo:{
+    contactInfo: {
         type: String,
         required: true,
     },
@@ -31,19 +31,19 @@ const ApplicationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    experience:{
+    experience: {
         type: String,
         required: true,
     },
-    interview_id:{
+    interview_id: {
         type: String,
-        required: true,
+        required: false,
     },
-    questions:{
+    questions: {
         type: Array,
         required: false,
     },
-    answers:{
+    answers: {
         type: Array,
         required: false,
     },
@@ -52,7 +52,7 @@ const ApplicationSchema = new mongoose.Schema({
         required: true
     }
 },
-    { timestamps: true } 
+    { timestamps: true }
 );
 
 const Application = mongoose.model('Application', ApplicationSchema);
