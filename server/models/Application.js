@@ -35,6 +35,10 @@ const ApplicationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    interview_id:{
+        type: String,
+        required: true,
+    },
     questions:{
         type: Array,
         required: false,

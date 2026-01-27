@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const InterviewSchema = new mongoose.Schema(
     {
         applicationID: { type: mongoose.Schema.Types.ObjectId, ref: "Application", required: true },
-        interviewerID: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        interviewerID: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
         date: { type: String, required: true },
         scheduledTime: { type: String, required: true },
         interviewerType: { type: String, required: true },
         meetingLink: { type: String },
-        status: { type: String },
+        status: { type: String, required: false },
         roundID: { type: mongoose.Schema.Types.ObjectId, ref: "Interview", required: true },
         reasonRescheduled: {
             type: String, required: function () {
