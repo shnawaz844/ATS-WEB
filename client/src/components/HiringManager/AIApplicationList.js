@@ -7,11 +7,10 @@ import {
     ChevronRight, Eye, Filter
 } from 'lucide-react';
 import BackButtonMobile from '../Mob-back-btn';
-import AIApplicationList from './AIApplicationList';
 
 import { useTheme } from '../../context/ThemeContext';
 
-const ApplicationList = () => {
+const AIApplicationList = () => {
     const { theme } = useTheme();
     const [formInputs, setFormInputs] = useState({
         title: '',
@@ -177,94 +176,9 @@ const ApplicationList = () => {
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 <div>
-                    {/* Header Section */}
-                    <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
-                        }`}>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
-                            <div>
-                                <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                                    <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
-                                        <Briefcase className="h-5 w-5 md:h-6 md:w-6 text-gray-900 dark:text-white" />
-                                    </div>
-                                    Manage Applications
-                                </h2>
-                            </div>
-
-                            {/* Search and Filters */}
-                            <div className='flex items-center gap-3 ml-auto'>
-                                {/* Search Bar */}
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="h-4 w-4 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={formInputs.title}
-                                        onChange={handleFilterChange}
-                                        placeholder="Search job"
-                                        className={`w-48 pl-10 pr-4 py-2 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-sm ${theme === 'dark'
-                                            ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
-                                            : 'bg-white border-gray-300 text-gray-900'
-                                            }`}
-                                    />
-                                </div>
-                                <button
-                                    className={`inline-flex border items-center px-4 py-2 rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm ${theme === 'dark'
-                                        ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700'
-                                        : 'bg-gray-300 border-gray-300 text-black hover:bg-gray-700 hover:text-white hover:border-gray-200'
-                                        }`}
-                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                >
-                                    {isFilterOpen ? "Hide Filters" : "Show Filters"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-xl shadow-sm mb-6">
-                        <div className="flex border-b rounded-t-xl">
-                            <button
-                                onClick={() => setActiveTab('manage')}
-                                className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'manage'
-                                    ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
-                                    : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                                    }`}
-                            >
-                                Manage Applications
-                            </button>
-                            {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
-                                <button
-                                    onClick={() => setActiveTab('ai')}
-                                    className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
-                                        ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
-                                        : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                                        }`}
-                                >
-                                    AI Generated Applications
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
                     {/* Manage Applications View */}
                     {activeTab === 'manage' && (
                         <div>
-                            {/* Search and Filters Header */}
-
-
-
-
-                            {/* Filter Toggle Button (Mobile) */}
-                            {/* <div className="md:hidden px-6 py-3 bg-gray-50 border-b border-gray-100">
-                        <button
-                            onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm"
-                        >
-                            <span className="font-medium text-gray-700">Filters</span>
-                            <Filter className="h-5 w-5 text-gray-500" />
-                        </button>
-                    </div> */}
-
                             {/* Filters Section */}
                             <div className={`transition-all duration-300 ${isFilterOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0 overflow-hidden md:max-h-screen md:opacity-100'}`}>
                                 <div className={isFilterOpen ? 'block' : 'hidden'}>
@@ -616,7 +530,9 @@ const ApplicationList = () => {
                     {/* AI Generated Applications View */}
 
                     {activeTab === 'ai' && (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
-                        <AIApplicationList />
+                        <div className="p-8 text-center text-gray-500">
+                            AI Specific View - Content can be added here.
+                        </div>
                     )}
                 </div>
             </div>
@@ -624,4 +540,4 @@ const ApplicationList = () => {
     );
 };
 
-export default ApplicationList;
+export default AIApplicationList;

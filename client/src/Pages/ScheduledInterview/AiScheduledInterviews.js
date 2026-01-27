@@ -8,7 +8,6 @@ import { toast, ToastContainer } from "react-toastify";
 import useScheduledInterview from '../../hooks/useScheduledInterview';
 import BackButtonMobile from '../../components/Mob-back-btn';
 import { useTheme } from '../../context/ThemeContext';
-import AiScheduledInterviews from './AiScheduledInterviews';
 
 export const ScheduledInterview = () => {
     const { theme: currentTheme } = useTheme();
@@ -491,108 +490,10 @@ export const ScheduledInterview = () => {
     };
 
     return (
-        <div className="px-8 py-10 w-full min-h-screen bg-white dark:bg-black transition-colors duration-300"
+        <div className="px-8 py-1 w-full min-h-screen bg-white dark:bg-black transition-colors duration-300"
         >
             <BackButtonMobile />
-            <div className='mb-6 h-auto min-h-[80px] md:h-[15vh] flex items-center rounded-xl p-3 sm:p-4 backdrop-blur-xl dark:bg-black/10  bg-gray-200 border border-white/20 shadow-md'>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-3 sm:gap-4">
-                    {/* Title Section */}
-                    <div className="flex items-center w-full md:w-auto">
-                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                            <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
 
-                                <Briefcase className=" h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
-                            </div>
-                            {isAdmin ? "All Scheduled Interviews" : "My Scheduled Interviews"}
-                        </h1>
-                    </div>
-
-                    {/* Filter/Search Section */}
-                    <div className="w-full md:w-auto bg-transparent rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        {/* Admin Filter Section */}
-                        {isAdmin && (
-                            <div className="w-36 sm:w-auto bg-transparent rounded-xl flex items-center justify-center ">
-                                <div className="w-full sm:min-w-[200px]">
-                                    <select
-                                        value={selectedInterviewerId}
-                                        onChange={(e) => handleInterviewerFilterChange(e.target.value)}
-                                        className="w-full border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm py-2 px-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:border-gray-400 transition-colors h-[40px] sm:h-auto"
-                                    >
-                                        <option value="admin">All Scheduled Interviews</option>
-                                        {interviewers.map((interviewer) => (
-                                            <option key={interviewer._id} value={interviewer._id}>
-                                                {capitalizeFirstLetter(interviewer.userName || interviewer.name)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Search Bar */}
-                        <div className="w-full sm:w-[30vw]">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setPage(1);
-                                    }}
-                                    placeholder="Search by candidate name, job title, or round..."
-                                    className="w-full pl-9 sm:pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-[40px] sm:h-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Enhanced Filter Button (Mobile Optimized) */}
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2.5 sm:py-2 rounded-xl transition-colors ${showFilters || hasActiveFilters
-                                ? 'bg-gray-700 text-white border border-blue-300'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                }`}
-                        >
-                            <Filter className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="hidden sm:inline text-sm whitespace-nowrap">
-                                Filters
-                            </span>
-                            {hasActiveFilters && (
-                                <span className="bg-blue-500 text-white text-xs rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 min-w-[18px] h-[18px] sm:min-w-[20px] sm:h-[20px] flex items-center justify-center flex-shrink-0">
-                                    {[searchTerm, filterStatus, filterRound].filter(Boolean).length}
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="rounded-xl shadow-sm mt-6 mb-4">
-                <div className="flex border-b rounded-t-xl">
-                    <button
-                        onClick={() => setActiveTab('scheduled')}
-                        className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'scheduled'
-                            ? `border-b-2 border-purple-500 text-xl text-purple-600 dark:text-white`
-                            : `hover:border-b-2 text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500`
-                            }`}
-                    >
-                        Scheduled Interviews
-                    </button>
-                    {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
-                        <button
-                            onClick={() => setActiveTab('ai')}
-                            className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
-                                ? `border-b-2 border-purple-500 text-xl text-purple-600 dark:text-white`
-                                : `hover:border-b-2 text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500`
-                                }`}
-                        >
-                            AI Scheduled Interviews
-                        </button>
-                    )}
-                </div>
-            </div>
 
             {/* Search and Filter Section */}
             <div className="bg-transparent rounded-xl pb-5">
@@ -790,21 +691,6 @@ export const ScheduledInterview = () => {
                                 </tbody>
                             </table>
                         </div>
-                    )}
-
-                    {/* AI Generated Interviews Tab */}
-                    {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                        <AiScheduledInterviews
-                            assignedInterviews={assignedInterviews}
-                            isAdmin={isAdmin}
-                            capitalizeFirstLetter={capitalizeFirstLetter}
-                            formatDate={formatDate}
-                            handleResumeView={handleResumeView}
-                            handleFeedbackClick={handleFeedbackClick}
-                            handleEdit={handleEdit}
-                            statuses={statuses}
-                            interviewRounds={interviewRounds}
-                        />
                     )}
 
                     {/* Pagination */}

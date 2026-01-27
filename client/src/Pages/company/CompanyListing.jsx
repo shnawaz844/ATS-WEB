@@ -486,7 +486,7 @@ const CompanyListing = () => {
               onClick={closeDialog}
             />
             <div className="fixed inset-0 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl transform transition-all duration-300 border border-gray-200">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl transform transition-all duration-300 border border-gray-200 dark:border-gray-700">
                 {/* Header */}
                 <div className="relative bg-gray-700 px-6 py-4 flex">
                   <h3 className="text-xl font-semibold text-white">
@@ -506,7 +506,7 @@ const CompanyListing = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Company Name <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -515,12 +515,12 @@ const CompanyListing = () => {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter company name"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Address <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -529,12 +529,12 @@ const CompanyListing = () => {
                             value={formData.address}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter company address"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Email Address{" "}
                             <span className="text-red-500">*</span>
                           </label>
@@ -544,14 +544,14 @@ const CompanyListing = () => {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter email address"
                           />
                         </div>
                       </div>
                       <div className="space-y-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Slug <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
@@ -561,13 +561,13 @@ const CompanyListing = () => {
                               value={formData.CompanyUserName}
                               onChange={handleChange}
                               required
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                               placeholder="Enter unique company name"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Phone Number <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -576,12 +576,12 @@ const CompanyListing = () => {
                             value={formData.phone}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter phone number"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Website URL <span className="text-red-500">*</span>
                           </label>
                           <input
@@ -590,18 +590,18 @@ const CompanyListing = () => {
                             value={formData.website}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter website URL"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Company Logo
                           </label>
                           <div className="mt-1">
                             <label
                               htmlFor="image-upload"
-                              className={`cursor-pointer flex flex-col items-center justify-center w-full border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200 overflow-hidden ${formData.image ? "h-auto min-h-32" : "h-32"
+                              className={`cursor-pointer flex flex-col items-center justify-center w-full border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 overflow-hidden ${formData.image ? "h-auto min-h-32" : "h-32"
                                 }`}
                             >
                               {formData.image ? (
@@ -664,13 +664,13 @@ const CompanyListing = () => {
                                 // No image selected
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                   <Plus className="w-8 h-8 text-gray-400 mb-2" />
-                                  <p className="text-sm text-gray-500">
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
                                     <span className="font-semibold">
                                       Click to upload
                                     </span>{" "}
                                     or drag and drop
                                   </p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
                                     PNG, JPG, GIF (MAX. 5MB)
                                   </p>
                                 </div>
@@ -770,7 +770,7 @@ const CompanyListing = () => {
                     </div>
 
                     {/* Footer with buttons */}
-                    <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-gray-200">
+                    <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-gray-200 dark:border-gray-700">
                       <button
                         type="button"
                         onClick={closeDialog}
@@ -795,9 +795,9 @@ const CompanyListing = () => {
         {/* Delete Confirmation Dialog */}
         {deleteConfirmDialog.isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl border border-transparent dark:border-gray-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Confirm Deletion
                 </h3>
                 <button
@@ -808,7 +808,7 @@ const CompanyListing = () => {
                   <X size={20} />
                 </button>
               </div>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
                 Are you sure you want to delete the company "
                 <span className="font-semibold">
                   {deleteConfirmDialog.company?.CompanyUserName}
@@ -820,7 +820,7 @@ const CompanyListing = () => {
                   type="button"
                   onClick={closeDeleteDialog}
                   disabled={deleteConfirmDialog.isDeleting}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -828,8 +828,7 @@ const CompanyListing = () => {
                   type="button"
                   onClick={handleDeleteCompany}
                   disabled={deleteConfirmDialog.isDeleting}
-                  className="px-4 py-2 text-black bg--100
-                   hover:bg-gray-200 rounded-xl transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {deleteConfirmDialog.isDeleting ? (
                     <>

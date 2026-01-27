@@ -8,6 +8,7 @@ import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
+import AiGeneratedInterviewsTable from './AiGeneratedInterviewsTable';
 
 const AllInterviews = () => {
   const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
@@ -556,6 +557,12 @@ const AllInterviews = () => {
               </div>
             </InfiniteScroll>
           )}
+
+          {/* AI Generated Interviews Section */}
+          {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
+            <AiGeneratedInterviewsTable />
+          )}
+
         </div>
 
         {/* interview Detail Modal */}
@@ -585,8 +592,6 @@ const AllInterviews = () => {
 
                   {/* Position */}
 
-                  {/* Position */}
-
                   <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                     <h3 className={`text-xs font-medium uppercase tracking-wider mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Position</h3>
                     <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{detailedInterview?.applicationID?.jobID?.title}</p>
@@ -594,14 +599,10 @@ const AllInterviews = () => {
 
                   {/* Interviewer */}
 
-                  {/* Interviewer */}
-
                   <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                     <h3 className={`text-xs font-medium uppercase tracking-wider mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Interviewer</h3>
                     <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{capitalizeFirstLetter(detailedInterview?.interviewerID?.userName)}</p>
                   </div>
-
-                  {/* Status */}
 
                   {/* Status */}
 
@@ -613,8 +614,6 @@ const AllInterviews = () => {
                       </span>
                     </div>
                   </div>
-
-                  {/* Date & Time */}
 
                   {/* Date & Time */}
 
@@ -773,128 +772,6 @@ const AllInterviews = () => {
 
       </div >
 
-      {/* AI Generated Interviews Section */}
-      {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-        <InfiniteScroll
-          dataLength={filteredInterviews?.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={<div className="text-center py-4">Loading more interviews...</div>}
-          endMessage={
-            filteredInterviews?.length > 0 && (
-              <p className="text-center py-4 text-gray-500">
-                You've seen all interviews
-              </p>
-            )
-          }
-        >
-
-          <div className="overflow-x-auto rounded-t-xl">
-            <table className={`min-w-full divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-20'}`}>
-              <thead>
-                <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}`}>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Job & Candidate</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Interviewer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Date & Time</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Rating</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-
-              {filteredInterviews?.length > 0 && (
-                filteredInterviews?.map((feedback) => (
-                  <tbody key={feedback._id}>
-                    <tr className={`group transition-colors duration-200 ${theme === 'dark' ? 'bg-white/10 hover:bg-gray-800 border-b border-gray-800' : 'hover:bg-gray-700 bg-gray-100'}`}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-start">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                            <User size={20} className="text-indigo-600" />
-                          </div>
-                          <div className="ml-4">
-                            <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                              {capitalizeFirstLetter(feedback?.applicationID?.candidateID?.userName) || "N/A"}
-                            </div>
-                            <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                              {capitalizeFirstLetter(feedback.applicationID?.jobID?.title) || "N/A"}
-                            </div>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {feedback.skills?.map((skill, index) => (
-                                <span key={index} className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                  {skill}
-                                </span>
-                              )) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span>}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{capitalizeFirstLetter(feedback?.interviewerID?.userName) || "N/A"}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {feedback.date ? formatDate(feedback.date) : "No date"}
-                        </div>
-                        <div className="text-xs text-gray-500 group-hover:text-white">
-                          {feedback.scheduledTime ? formatTime(feedback.scheduledTime) : "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <select
-                          value={feedback.status || ""}
-                          onChange={(e) => handleStatusChange(feedback._id, e.target.value)}
-                          className={`px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${getStatusColor(feedback.status)}`}
-                        >
-                          <option value="">Select status</option>
-                          {statuses?.map((status) => (
-                            <option key={status} value={status._id}>
-                              {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getRatingStars(feedback.starRating || 0)}
-                          {feedback.starRating ? (
-                            <span className="ml-2 text-sm text-gray-600 group-hover:text-white">
-                              ({feedback.starRating} star)
-                            </span>
-                          ) : (
-                            <span className="ml-2 text-sm text-gray-400 group-hover:text-white">
-                              No rating
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => {
-                            setDetailedInterview(feedback);
-                            setIsDetailModalOpen(true);
-                          }}
-                          className={`group-hover:text-white mr-3 ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
-                        >
-                          View
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDetailedInterview(feedback);
-                            handleFeedbackClick(feedback);
-                          }}
-                          className={`group-hover:text-white ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
-                        >
-                          Feedback
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                ))
-              )}
-            </table>
-          </div>
-        </InfiniteScroll>
-      )}
 
       {/* {filter ////} */}
       {!filteredInterviews?.length && !interviewLoading && (
