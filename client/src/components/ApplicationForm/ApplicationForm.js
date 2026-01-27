@@ -192,8 +192,10 @@ export const ApplicationForm = ({
     formData.append("companyUserName", companyUserName);
     formData.append("company_id", companyId);
     formData.append("interviewMode", job.interviewMode);
-    if (job.interviewMode === "AI"){
+    if (job.interview_id) {
       formData.append("interview_id", job.interview_id);
+    }
+    if (job.interviewType) {
       formData.append("interviewType", job.interviewType);
     }
 
@@ -449,8 +451,8 @@ export const ApplicationForm = ({
           type="submit"
           disabled={isSubmitting || (isRecruiterManager && !candidateID)}
           className={`w-full flex items-center justify-center py-3 px-4 rounded-xl text-white font-medium transition duration-200 ${isSubmitting || (isRecruiterManager && !candidateID)
-              ? "bg-[#9333ea] dark:from-slate-700 dark:to-slate-900 cursor-not-allowed"
-              : "bg-[#9333ea] dark:bg-slate-600 hover:bg-gray-400 dark:hover:bg-slate-500 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
+            ? "bg-[#9333ea] dark:from-slate-700 dark:to-slate-900 cursor-not-allowed"
+            : "bg-[#9333ea] dark:bg-slate-600 hover:bg-gray-400 dark:hover:bg-slate-500 hover:text-black transform hover:-translate-y-1 shadow-md hover:shadow-lg"
             }`}
         >
           {isSubmitting ? (
