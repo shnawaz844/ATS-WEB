@@ -337,6 +337,22 @@ export default function ImportApplication() {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
+    const formatExcelTime = (value) => {
+        if (value === null || value === undefined || value === "") return "";
+
+        // Handle case where value might be stringified number
+        let numValue = typeof value === 'number' ? value : parseFloat(value);
+
+        // Check if it's a valid Excel decimal time (usually between 0 and 1)
+        if (!isNaN(numValue) && numValue >= 0 && numValue <= 1 && (typeof value === 'number' || value.toString().includes('.'))) {
+            const totalMinutes = Math.round(numValue * 24 * 60);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+        return value.toString() || '';
+    };
+
     const fetchUserFiles = async () => {
         try {
             setLoading(true);
@@ -391,7 +407,7 @@ export default function ImportApplication() {
     // Rest of your existing functions remain the same...
     // (createJobsFromExcelData, fetchAndParseFile, handleFileSelect, uploadFileToServer, etc.)
 
-    const createJobsFromExcelData = async (fileData, fileUrl) => {
+    const createJobsFromExcelData = async (fileData, fileUrl, useAiDesc = false) => {
         if (creatingJobs) {
             console.log('Job creation already in progress');
             return;
@@ -575,8 +591,8 @@ export default function ImportApplication() {
                         locationType: row[locationTypeIndex] || 'On-Site',
                         type: row[typeIndex] || 'Full-Time',
                         scheduleType: row[scheduleTypeIndex] || 'Flexible',
-                        shiftStart: row[shiftStartIndex] || '09:00',
-                        shiftEnd: row[shiftEndIndex] || '17:00',
+                        shiftStart: formatExcelTime(row[shiftStartIndex]) || '09:00',
+                        shiftEnd: formatExcelTime(row[shiftEndIndex]) || '17:00',
                         hireType: row[hireTypeIndex] || 'New',
                         country: row[countryIndex] || 'India',
                         state: row[stateIndex] || '',
@@ -629,7 +645,9 @@ export default function ImportApplication() {
                     },
                     jobStatusMap: jobStatusMap,
                     hiringManagerMap: hiringManagerMap,
-                    recruiterMap: recruiterMap
+                    recruiterMap: recruiterMap,
+                    useAiDescription: useAiDesc,
+                    companyUserName: localStorage.getItem("companyUserName")
                 })
             });
 
@@ -896,6 +914,8 @@ export default function ImportApplication() {
 
     // User File Card Component
     const UserFileCard = React.memo(({ file }) => {
+        const [localAi, setLocalAi] = useState(false);
+
         const handleCreateJobs = async (e) => {
             if (e) {
                 e.preventDefault();
@@ -926,7 +946,7 @@ export default function ImportApplication() {
                     throw new Error('Parsed data is missing headers or data');
                 }
 
-                await createJobsFromExcelData(parsedFileData, file.fileUrl);
+                await createJobsFromExcelData(parsedFileData, file.fileUrl, localAi);
 
             } catch (error) {
                 console.error('Error in handleCreateJobs:', error);
@@ -956,9 +976,12 @@ export default function ImportApplication() {
         return (
             <div className={`rounded-xl shadow-md border p-4 hover:shadow-lg transition-all transform hover:-translate-y-1 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                 <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <FileSpreadsheet className="text-green-600" size={24} />
-                        <h3 className={`font-semibold truncate max-w-[150px] sm:max-w-none ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                    <div className="flex items-center gap-2 overflow-hidden min-w-0">
+                        <FileSpreadsheet className="text-green-600 flex-shrink-0" size={24} />
+                        <h3
+                            className={`font-semibold truncate ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}
+                            title={file.fileName || "Job File"}
+                        >
                             {file.fileName || "Job File"}
                         </h3>
                     </div>
@@ -1038,6 +1061,19 @@ export default function ImportApplication() {
                             </>
                         )}
                     </button>
+
+                    <div className="flex items-center gap-2 px-1 py-1">
+                        <input
+                            type="checkbox"
+                            id={`useAi-${file.id}`}
+                            checked={localAi}
+                            onChange={(e) => setLocalAi(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-[#9333ea] focus:ring-[#9333ea]"
+                        />
+                        <label htmlFor={`useAi-${file.id}`} className="text-xs font-medium text-gray-700 dark:text-gray-200 cursor-pointer">
+                            Generate descriptions using AI ✨
+                        </label>
+                    </div>
                 </div>
             </div>
         );
@@ -1049,7 +1085,10 @@ export default function ImportApplication() {
                 <div className="flex items-center gap-2 overflow-hidden">
                     <FileSpreadsheet className="text-green-600 flex-shrink-0" size={24} />
                     <div className="overflow-hidden">
-                        <h3 className={`font-semibold truncate max-w-[120px] sm:max-w-none ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`} title={file.name}>
+                        <h3
+                            className={`font-semibold truncate ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}
+                            title={file.name}
+                        >
                             {file.name}
                         </h3>
                         <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{formatFileSize(file.size)}</p>

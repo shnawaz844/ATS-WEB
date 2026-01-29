@@ -16,6 +16,8 @@ const capitalizeFirstLetter = (string) => {
 
 const FormField = ({ label, error, children }) => {
   const { theme } = useTheme();
+  const errorMessage = typeof error === 'object' ? error?.message : error;
+
   return (
     <div className="space-y-1">
       <label
@@ -24,7 +26,7 @@ const FormField = ({ label, error, children }) => {
         {label}
       </label>
       {children}
-      {error && <span className="text-sm text-red-500">{error}</span>}
+      {errorMessage && <span className="text-sm text-red-500">{errorMessage}</span>}
     </div>
   );
 };
@@ -71,6 +73,20 @@ const FormInput = ({
       )}
     </FormField>
   );
+};
+
+const formatExcelTime = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+
+  let numValue = typeof value === "number" ? value : parseFloat(value);
+
+  if (!isNaN(numValue) && numValue >= 0 && numValue <= 1 && (typeof value === "number" || value.toString().includes("."))) {
+    const totalMinutes = Math.round(numValue * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  }
+  return value.toString() || "";
 };
 
 const LocationPicker = ({
@@ -184,7 +200,7 @@ const ShiftPicker = ({
     <FormField label="Shift Start" error={errors?.shiftStart}>
       <TimePicker
         onChange={setShiftStart}
-        value={shiftStart}
+        value={formatExcelTime(shiftStart)}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -193,7 +209,7 @@ const ShiftPicker = ({
     <FormField label="Shift End" error={errors?.shiftEnd}>
       <TimePicker
         onChange={setShiftEnd}
-        value={shiftEnd}
+        value={formatExcelTime(shiftEnd)}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -356,6 +372,9 @@ export const PostJobForm = ({
 
     try {
       const companyUserName = localStorage.getItem("companyUserName");
+      const compensation = watch("compensation");
+      const experience = watch("experienceRequired");
+
       const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/ai/generate-description`,
         {
@@ -363,7 +382,12 @@ export const PostJobForm = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ jobTitle, companyUserName }),
+          body: JSON.stringify({
+            jobTitle,
+            companyUserName,
+            compensation,
+            experience
+          }),
         },
       );
 
@@ -504,11 +528,11 @@ export const PostJobForm = ({
 
   const statusOptions = Array.isArray(jobStatuses)
     ? jobStatuses
-        .sort((a, b) => parseInt(a.jobStep) - parseInt(b.jobStep))
-        .map((status) => ({
-          value: status._id,
-          label: status.jobStatus,
-        }))
+      .sort((a, b) => parseInt(a.jobStep) - parseInt(b.jobStep))
+      .map((status) => ({
+        value: status._id,
+        label: status.jobStatus,
+      }))
     : [];
 
   // Enhanced onSubmit to handle title code
@@ -795,9 +819,8 @@ export const PostJobForm = ({
               <div className="space-y-1" id="ai-description-editor">
                 <div className="flex justify-between items-center gap-3">
                   <label
-                    className={`text-sm font-semibold tracking-wide ${
-                      theme === "dark" ? "text-gray-200" : "text-gray-800"
-                    }`}
+                    className={`text-sm font-semibold tracking-wide ${theme === "dark" ? "text-gray-200" : "text-gray-800"
+                      }`}
                   >
                     Description
                   </label>
@@ -807,11 +830,10 @@ export const PostJobForm = ({
                     onClick={handleGenerateDescription}
                     disabled={isGeneratingAI}
                     className={`relative overflow-hidden flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300
-                   ${
-                     isGeneratingAI
-                       ? "bg-gray-400 text-white cursor-not-allowed"
-                       : "bg-gradient-to-r from-gray-500 via-gray-500 to-gray-500 text-white hover:scale-105 hover:shadow-lg active:scale-95"
-                   }
+                   ${isGeneratingAI
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-gradient-to-r from-gray-500 via-gray-500 to-gray-500 text-white hover:scale-105 hover:shadow-lg active:scale-95"
+                      }
                    `}
                   >
                     {!isGeneratingAI && (

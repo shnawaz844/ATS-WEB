@@ -12,6 +12,22 @@ export const PostJob = () => {
   const navigate = useNavigate();
   const jobToEdit = location.state?.job;
   const companyUserName = localStorage.getItem("companyUserName");
+
+  const formatExcelTime = (value) => {
+    if (value === null || value === undefined || value === "") return "";
+
+    let numValue = typeof value === "number" ? value : parseFloat(value);
+
+    // Check if it's a valid Excel decimal time (usually between 0 and 1)
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 1 && (typeof value === "number" || value.toString().includes("."))) {
+      const totalMinutes = Math.round(numValue * 24 * 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    }
+    return value.toString() || "";
+  };
+
   console.log("jobToEdit", jobToEdit);
   // We store questions in state
   const [questions, setQuestions] = useState(
@@ -37,9 +53,11 @@ export const PostJob = () => {
 
   // Shift time states
   const [shiftStart, setShiftStart] = useState(
-    jobToEdit?.shiftStart || "09:00",
+    formatExcelTime(jobToEdit?.shiftStart) || "09:00",
   );
-  const [shiftEnd, setShiftEnd] = useState(jobToEdit?.shiftEnd || "17:00");
+  const [shiftEnd, setShiftEnd] = useState(
+    formatExcelTime(jobToEdit?.shiftEnd) || "17:00",
+  );
 
   // Fetch the recruiter role from localStorage
   const user = JSON.parse(localStorage.getItem("user")); // Parse user object from localStorage
@@ -141,8 +159,8 @@ export const PostJob = () => {
         }
       });
 
-      if (jobToEdit.shiftStart) setShiftStart(jobToEdit.shiftStart);
-      if (jobToEdit.shiftEnd) setShiftEnd(jobToEdit.shiftEnd);
+      if (jobToEdit.shiftStart) setShiftStart(formatExcelTime(jobToEdit.shiftStart));
+      if (jobToEdit.shiftEnd) setShiftEnd(formatExcelTime(jobToEdit.shiftEnd));
 
       if (jobToEdit.description) setValue("description", jobToEdit.description);
 
