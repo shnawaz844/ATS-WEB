@@ -471,7 +471,7 @@ export default function ImportApplication() {
                 h.includes('recruiter_manager') ||
                 h.includes('recruiter')
             );
-
+            // errors
             const jobsToCreate = [];
             const errors = [];
 
