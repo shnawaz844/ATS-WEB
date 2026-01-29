@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { toast as toastNotify } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Search, User, Briefcase, X, ChevronDown } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
+import AiGeneratedInterviewsTable from './AiGeneratedInterviewsTable';
 
 const AllInterviews = () => {
+  const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('interviews');
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,14 +44,42 @@ const AllInterviews = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const limit = 20;
+  const companyUserName = localStorage.getItem("companyUserName");
+  const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
+
+  // Fetch company settings to sync AI features
+  useEffect(() => {
+    const fetchCompanyDetails = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.aiFeaturesEnabled !== undefined) {
+            setAiFeaturesEnabled(data.aiFeaturesEnabled);
+            localStorage.setItem(`ai_features_${companyUserName}`, data.aiFeaturesEnabled);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching company details:", error);
+      }
+    };
+
+    if (companyUserName) {
+      fetchCompanyDetails();
+    }
+  }, [companyUserName]);
 
   // Fetch statuses from API
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`)
+    fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
+      headers: {
+        "company_id": companyId
+      }
+    })
       .then(response => response.json())
       .then(data => setStatuses(data.applicationStatuses))
       .catch(error => console.error("Error fetching statuses:", error));
-  }, []);
+  }, [companyId]);
 
 
   // Implement search debounce
@@ -388,6 +420,17 @@ const AllInterviews = () => {
             >
               Interviews
             </button>
+            {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
+              <button
+                onClick={() => setActiveTab('ai')}
+                className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
+                  ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
+                  : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
+                  }`}
+              >
+                AI Generated Interviews
+              </button>
+            )}
           </div>
         </div>
 
@@ -514,6 +557,12 @@ const AllInterviews = () => {
               </div>
             </InfiniteScroll>
           )}
+
+          {/* AI Generated Interviews Section */}
+          {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
+            <AiGeneratedInterviewsTable />
+          )}
+
         </div>
 
         {/* interview Detail Modal */}
@@ -543,8 +592,6 @@ const AllInterviews = () => {
 
                   {/* Position */}
 
-                  {/* Position */}
-
                   <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                     <h3 className={`text-xs font-medium uppercase tracking-wider mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Position</h3>
                     <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{detailedInterview?.applicationID?.jobID?.title}</p>
@@ -552,14 +599,10 @@ const AllInterviews = () => {
 
                   {/* Interviewer */}
 
-                  {/* Interviewer */}
-
                   <div className={`rounded-xl p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>
                     <h3 className={`text-xs font-medium uppercase tracking-wider mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>Interviewer</h3>
                     <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{capitalizeFirstLetter(detailedInterview?.interviewerID?.userName)}</p>
                   </div>
-
-                  {/* Status */}
 
                   {/* Status */}
 
@@ -571,8 +614,6 @@ const AllInterviews = () => {
                       </span>
                     </div>
                   </div>
-
-                  {/* Date & Time */}
 
                   {/* Date & Time */}
 
@@ -730,6 +771,8 @@ const AllInterviews = () => {
         }
 
       </div >
+
+
       {/* {filter ////} */}
       {!filteredInterviews?.length && !interviewLoading && (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">

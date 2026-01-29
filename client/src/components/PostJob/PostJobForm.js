@@ -1,53 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { Controller } from 'react-hook-form';
-import { Country, State, City } from 'country-state-city';
-import TimePicker from 'react-time-picker';
-import ReactQuill from 'react-quill';
-import CandidateForm from './CandidateForm';
-import 'react-quill/dist/quill.snow.css';
-import 'react-time-picker/dist/TimePicker.css';
-import 'react-clock/dist/Clock.css';
-import BackButtonMobile from '../Mob-back-btn';
-import { useTheme } from '../../context/ThemeContext';
-
-const FORM_OPTIONS = {
-  location: [
-    { value: 'Remote', label: 'Remote' },
-    { value: 'On-site', label: 'On-site' },
-    { value: 'Hybrid', label: 'Hybrid' }
-  ],
-  employment: [
-    { value: 'Full-Time', label: 'Full-Time' },
-    { value: 'Part-Time', label: 'Part-Time' },
-    { value: 'Contract', label: 'Contract' }
-  ],
-  schedule: [
-    { value: 'Flexible', label: 'Flexible' },
-    { value: 'Morning Shift', label: 'Morning Shift' },
-    { value: 'Day Shift', label: 'Day Shift' },
-    { value: 'Night Shift', label: 'Night Shift' }
-  ],
-  hire: [
-    { value: 'New', label: 'New' },
-    { value: 'Replacement', label: 'Replacement' }
-  ],
-};
+import React, { useEffect, useState } from "react";
+import { Controller } from "react-hook-form";
+import { Country, State, City } from "country-state-city";
+import TimePicker from "react-time-picker";
+import ReactQuill from "react-quill";
+import CandidateForm from "./CandidateForm";
+import "react-quill/dist/quill.snow.css";
+import "react-time-picker/dist/TimePicker.css";
+import "react-clock/dist/Clock.css";
+import BackButtonMobile from "../Mob-back-btn";
+import { useTheme } from "../../context/ThemeContext";
 
 const capitalizeFirstLetter = (string) => {
   return string?.charAt(0).toUpperCase() + string?.slice(1);
 };
 
-const FormField = ({
-  label,
-  error,
-  children
-}) => {
+const FormField = ({ label, error, children }) => {
   const { theme } = useTheme();
+  const errorMessage = typeof error === 'object' ? error?.message : error;
+
   return (
     <div className="space-y-1">
-      <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+      <label
+        className={`block text-sm font-medium ${theme === "dark" ? "text-gray-300" : "text-gray-700"}`}
+      >
+        {label}
+      </label>
       {children}
-      {error && <span className="text-sm text-red-500">{error}</span>}
+      {errorMessage && <span className="text-sm text-red-500">{errorMessage}</span>}
     </div>
   );
 };
@@ -56,7 +35,7 @@ const FormInput = ({
   label,
   register,
   name,
-  type = 'text',
+  type = "text",
   error,
   placeholder,
   options,
@@ -64,19 +43,23 @@ const FormInput = ({
 }) => {
   const { theme } = useTheme();
   const inputClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors 
-    ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`;
+    ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"}`;
 
   return (
     <FormField label={label} error={error}>
-      {type === 'select' ? (
-        <select
-          {...register(name)}
-          className={inputClasses}
-          {...props}
-        >
-          <option value="" disabled className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Select {label.toLowerCase()}</option>
+      {type === "select" ? (
+        <select {...register(name)} className={inputClasses} {...props}>
+          <option
+            value=""
+            disabled
+            className={theme === "dark" ? "text-gray-400" : "text-gray-500"}
+          >
+            Select {label.toLowerCase()}
+          </option>
           {options?.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
+            <option key={value} value={value}>
+              {label}
+            </option>
           ))}
         </select>
       ) : (
@@ -92,6 +75,20 @@ const FormInput = ({
   );
 };
 
+const formatExcelTime = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+
+  let numValue = typeof value === "number" ? value : parseFloat(value);
+
+  if (!isNaN(numValue) && numValue >= 0 && numValue <= 1 && (typeof value === "number" || value.toString().includes("."))) {
+    const totalMinutes = Math.round(numValue * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  }
+  return value.toString() || "";
+};
+
 const LocationPicker = ({
   selectedCountry,
   setSelectedCountry,
@@ -100,25 +97,32 @@ const LocationPicker = ({
   selectedCity,
   setSelectedCity,
   errors,
-  jobToEdit
+  jobToEdit,
 }) => {
   const countries = Country.getAllCountries();
 
   // Get the current country code (either from jobToEdit or selectedCountry)
-  const currentCountryCode = countries.find(c => c.name === jobToEdit?.country)?.isoCode || selectedCountry;
+  const currentCountryCode =
+    countries.find((c) => c.name === jobToEdit?.country)?.isoCode ||
+    selectedCountry;
 
   // Get states based on current country
-  const states = currentCountryCode ? State.getStatesOfCountry(currentCountryCode) : [];
+  const states = currentCountryCode
+    ? State.getStatesOfCountry(currentCountryCode)
+    : [];
 
   // Get the current state code (either from jobToEdit or selectedState)
-  const currentStateCode = states.find(s => s.name === jobToEdit?.state)?.isoCode || selectedState;
+  const currentStateCode =
+    states.find((s) => s.name === jobToEdit?.state)?.isoCode || selectedState;
 
   // Get cities based on current country and state
-  const cities = currentStateCode ? City.getCitiesOfState(currentCountryCode, currentStateCode) : [];
+  const cities = currentStateCode
+    ? City.getCitiesOfState(currentCountryCode, currentStateCode)
+    : [];
 
   const { theme } = useTheme();
   const selectClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors 
-    ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`;
+    ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`;
 
   const handleCityChange = (e) => {
     const cityName = e.target.value;
@@ -133,13 +137,13 @@ const LocationPicker = ({
           value={currentCountryCode}
           onChange={(e) => {
             setSelectedCountry(e.target.value);
-            setSelectedState('');
-            setSelectedCity('');
+            setSelectedState("");
+            setSelectedCity("");
           }}
           className={selectClasses}
         >
           <option value="">Select Country</option>
-          {countries.map(country => (
+          {countries.map((country) => (
             <option key={country.isoCode} value={country.isoCode}>
               {country.name}
             </option>
@@ -152,13 +156,13 @@ const LocationPicker = ({
           value={currentStateCode}
           onChange={(e) => {
             setSelectedState(e.target.value);
-            setSelectedCity('');
+            setSelectedCity("");
           }}
           className={selectClasses}
           disabled={!currentCountryCode}
         >
           <option value="">Select State</option>
-          {states.map(state => (
+          {states.map((state) => (
             <option key={state.isoCode} value={state.isoCode}>
               {state.name}
             </option>
@@ -174,7 +178,7 @@ const LocationPicker = ({
           disabled={!currentStateCode}
         >
           <option value="">Select City</option>
-          {cities.map(city => (
+          {cities.map((city) => (
             <option key={city.name} value={city.name}>
               {city.name}
             </option>
@@ -190,13 +194,13 @@ const ShiftPicker = ({
   setShiftStart,
   shiftEnd,
   setShiftEnd,
-  errors
+  errors,
 }) => (
   <div className="grid grid-cols-2 gap-4">
     <FormField label="Shift Start" error={errors?.shiftStart}>
       <TimePicker
         onChange={setShiftStart}
-        value={shiftStart}
+        value={formatExcelTime(shiftStart)}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -205,7 +209,7 @@ const ShiftPicker = ({
     <FormField label="Shift End" error={errors?.shiftEnd}>
       <TimePicker
         onChange={setShiftEnd}
-        value={shiftEnd}
+        value={formatExcelTime(shiftEnd)}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -216,40 +220,47 @@ const ShiftPicker = ({
 
 // Title Code Preview Component
 const TitleCodePreview = ({ title, existingJobs }) => {
-  const [previewCode, setPreviewCode] = useState('');
+  const [previewCode, setPreviewCode] = useState("");
 
   useEffect(() => {
     if (title && title.length > 0) {
       // Generate preview without making API call
       const generatePreview = () => {
         const cleanTitle = title
-          .replace(/[^a-zA-Z0-9\s]/g, '')
-          .replace(/\s+/g, ' ')
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .replace(/\s+/g, " ")
           .trim();
 
-        const words = cleanTitle.split(' ');
-        let titleAbbr = '';
+        const words = cleanTitle.split(" ");
+        let titleAbbr = "";
 
         if (words.length === 1) {
           titleAbbr = words[0].substring(0, 4).toUpperCase();
         } else if (words.length === 2) {
-          titleAbbr = words.map(word => word.substring(0, 2)).join('').toUpperCase();
+          titleAbbr = words
+            .map((word) => word.substring(0, 2))
+            .join("")
+            .toUpperCase();
         } else {
-          titleAbbr = words.slice(0, 3).map(word => word.charAt(0)).join('').toUpperCase();
+          titleAbbr = words
+            .slice(0, 3)
+            .map((word) => word.charAt(0))
+            .join("")
+            .toUpperCase();
         }
 
         const now = new Date();
-        const timestamp = `${now.getFullYear().toString().slice(-2)}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
+        const timestamp = `${now.getFullYear().toString().slice(-2)}${(now.getMonth() + 1).toString().padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}`;
 
         // Estimate sequence (this will be calculated accurately on backend)
-        const estimatedSequence = '001';
+        const estimatedSequence = "001";
 
         setPreviewCode(`${titleAbbr}-${estimatedSequence}-${timestamp}`);
       };
 
       generatePreview();
     } else {
-      setPreviewCode('');
+      setPreviewCode("");
     }
   }, [title, existingJobs]);
 
@@ -293,24 +304,63 @@ export const PostJobForm = ({
   recruiterRole,
   hiringManagersList,
   jobStatus,
-  setJobStatus
+  setJobStatus,
+  interviewMode,
+  setInterviewMode,
+  interviewRounds,
 }) => {
   const { theme } = useTheme();
   const [isHead, setIsHead] = React.useState(false);
   const [recruitersList, setRecruitersList] = useState([]);
   const [existingJobs, setExistingJobs] = useState([]);
-  const [titleCode, setTitleCode] = useState(jobToEdit?.titleCode || '');
+  const [titleCode, setTitleCode] = useState(jobToEdit?.titleCode || "");
   const companyId = JSON.parse(localStorage.getItem("user")).company_id;
   const [jobStatuses, setJobStatuses] = useState([]);
   const [loadingStatuses, setLoadingStatuses] = useState(false);
   const [statusError, setStatusError] = useState(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
+  const FORM_OPTIONS = {
+    location: [
+      { value: "Remote", label: "Remote" },
+      { value: "On-site", label: "On-site" },
+      { value: "Hybrid", label: "Hybrid" },
+    ],
+    employment: [
+      { value: "Full-Time", label: "Full-Time" },
+      { value: "Part-Time", label: "Part-Time" },
+      { value: "Contract", label: "Contract" },
+    ],
+    schedule: [
+      { value: "Flexible", label: "Flexible" },
+      { value: "Morning Shift", label: "Morning Shift" },
+      { value: "Day Shift", label: "Day Shift" },
+      { value: "Night Shift", label: "Night Shift" },
+    ],
+    hire: [
+      { value: "New", label: "New" },
+      { value: "Replacement", label: "Replacement" },
+    ],
+    interviewDurations: [
+      { value: "5 mins", label: "5 mins" },
+      { value: "10 mins", label: "10 mins" },
+      { value: "15 mins", label: "15 mins" },
+      { value: "20 mins", label: "20 mins" },
+      { value: "25 mins", label: "25 mins" },
+      { value: "30 mins", label: "30 mins" },
+    ],
+    interviewTypes:
+      interviewRounds?.map((round) => ({
+        value: round._id,
+        label: round.roundName,
+      })) || [],
+  };
+
   const handleGenerateDescription = async () => {
     const jobTitle = watch("title");
     if (!jobTitle) {
       alert("Please enter a clean job title first"); // Using alert as toast is not imported here, or I should check if toast is waiting parent? PostJob has toast. PostJobForm doesn't seem to import toast.
-      // Wait, PostJobForm doesn't import toast. I'll just use native alert or console for now, or assume toast is available if I import it. 
+      // Wait, PostJobForm doesn't import toast. I'll just use native alert or console for now, or assume toast is available if I import it.
       // Let's check imports. PostJobForm imports React, Controller, etc. No toast.
       // I'll stick to alert or just simple UI feedback.
       return;
@@ -322,13 +372,24 @@ export const PostJobForm = ({
 
     try {
       const companyUserName = localStorage.getItem("companyUserName");
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/ai/generate-description`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const compensation = watch("compensation");
+      const experience = watch("experienceRequired");
+
+      const response = await fetch(
+        `${process.env.REACT_APP_BASE_URL}/ai/generate-description`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            jobTitle,
+            companyUserName,
+            compensation,
+            experience
+          }),
         },
-        body: JSON.stringify({ jobTitle, companyUserName }),
-      });
+      );
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -349,7 +410,6 @@ export const PostJobForm = ({
         // Update form value incrementally
         setValue("description", cumulativeText);
       }
-
     } catch (error) {
       console.error("Error generating description:", error);
       alert(`Error generating description: ${error.message}`);
@@ -362,9 +422,14 @@ export const PostJobForm = ({
 
   useEffect(() => {
     if (isGeneratingAI) {
-      const editor = document.querySelector('#ai-description-editor .ql-editor');
+      const editor = document.querySelector(
+        "#ai-description-editor .ql-editor",
+      );
       if (editor && editor.lastElementChild) {
-        editor.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        editor.lastElementChild.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
       }
     }
   }, [descriptionValue, isGeneratingAI]);
@@ -382,17 +447,20 @@ export const PostJobForm = ({
   useEffect(() => {
     const fetchExistingJobs = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
-          headers: {
-            'company_id': companyId
-          }
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`,
+          {
+            headers: {
+              company_id: companyId,
+            },
+          },
+        );
         const data = await response.json();
         if (data.success) {
           setExistingJobs(data.jobs);
         }
       } catch (error) {
-        console.error('Error fetching existing jobs:', error);
+        console.error("Error fetching existing jobs:", error);
       }
     };
 
@@ -402,15 +470,18 @@ export const PostJobForm = ({
   useEffect(() => {
     const fetchRecruiters = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`, {
-          headers: {
-            'company_id': companyId
-          }
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`,
+          {
+            headers: {
+              company_id: companyId,
+            },
+          },
+        );
         const data = await response.json();
         setRecruitersList(data);
       } catch (error) {
-        console.error('Error fetching recruiters:', error);
+        console.error("Error fetching recruiters:", error);
       }
     };
 
@@ -422,26 +493,29 @@ export const PostJobForm = ({
       setLoadingStatuses(true);
       setStatusError(null);
       try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
-          headers: {
-            'company_id': companyId
-          }
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`,
+          {
+            headers: {
+              company_id: companyId,
+            },
+          },
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch job statuses');
+          throw new Error("Failed to fetch job statuses");
         }
 
         const data = await response.json();
-        console.log('Job Statuses API Response:', data);
+        console.log("Job Statuses API Response:", data);
 
         if (data.jobStatuses && Array.isArray(data.jobStatuses)) {
           setJobStatuses(data.jobStatuses);
         } else {
-          throw new Error('Invalid data format received');
+          throw new Error("Invalid data format received");
         }
       } catch (error) {
-        console.error('Error fetching job statuses:', error);
+        console.error("Error fetching job statuses:", error);
         setStatusError(error.message);
         setJobStatuses([]);
       } finally {
@@ -455,9 +529,9 @@ export const PostJobForm = ({
   const statusOptions = Array.isArray(jobStatuses)
     ? jobStatuses
       .sort((a, b) => parseInt(a.jobStep) - parseInt(b.jobStep))
-      .map(status => ({
+      .map((status) => ({
         value: status._id,
-        label: status.jobStatus
+        label: status.jobStatus,
       }))
     : [];
 
@@ -472,25 +546,42 @@ export const PostJobForm = ({
       // Call the original onSubmit function
       await onSubmit(data);
     } catch (error) {
-      console.error('Error in form submission:', error);
+      console.error("Error in form submission:", error);
     }
   };
 
   return (
-    <div className={`min-h-screen py-12 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
+    <div
+      className={`min-h-screen py-12 ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}
+    >
       <BackButtonMobile />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {jobToEdit ? 'Edit Job Posting' : 'Create New Job Posting'}
+          <h1
+            className={`text-3xl font-bold text-center mb-8 ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+          >
+            {jobToEdit ? "Edit Job Posting" : "Create New Job Posting"}
           </h1>
 
-          <div className={`rounded-2xl shadow-xl overflow-hidden ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
-            <form onSubmit={handleSubmit(enhancedOnSubmit)} className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+          <div
+            className={`rounded-2xl shadow-xl overflow-hidden ${theme === "dark" ? "bg-gray-800 border border-gray-700" : "bg-white"}`}
+          >
+            <form
+              onSubmit={handleSubmit(enhancedOnSubmit)}
+              className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8"
+            >
               <div className="space-y-4 sm:space-y-6">
-                <div className={`border-b pb-3 sm:pb-4 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <h2 className={`text-lg sm:text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Job Details</h2>
-                  <p className={`mt-1 text-xs sm:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <div
+                  className={`border-b pb-3 sm:pb-4 ${theme === "dark" ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <h2
+                    className={`text-lg sm:text-xl font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"}`}
+                  >
+                    Job Details
+                  </h2>
+                  <p
+                    className={`mt-1 text-xs sm:text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
+                  >
                     Fill in the basic information about the position.
                   </p>
                 </div>
@@ -515,10 +606,12 @@ export const PostJobForm = ({
                       <input
                         type="text"
                         value={jobToEdit.titleCode}
-                        className={`w-full px-4 py-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-400' : 'bg-gray-100 border-gray-300 text-gray-500'}`}
+                        className={`w-full px-4 py-2 border rounded-lg ${theme === "dark" ? "bg-gray-700 border-gray-600 text-gray-400" : "bg-gray-100 border-gray-300 text-gray-500"}`}
                         disabled
                       />
-                      <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <p
+                        className={`text-xs mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}
+                      >
                         Title code cannot be changed for existing jobs
                       </p>
                     </FormField>
@@ -594,14 +687,17 @@ export const PostJobForm = ({
                   />
 
                   {/* Fixed Status Field */}
-                  <FormField label="Status" error={errors?.status || statusError}>
+                  <FormField
+                    label="Status"
+                    error={errors?.status || statusError}
+                  >
                     <select
                       value={jobStatus}
                       {...register("status", {
-                        required: "Status is required"
+                        required: "Status is required",
                       })}
                       onChange={(e) => setJobStatus(e.target.value)}
-                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                       disabled={loadingStatuses}
                     >
                       <option value="">Select Status</option>
@@ -625,7 +721,7 @@ export const PostJobForm = ({
                       <select
                         value={jobToEdit?.recruiterId}
                         {...register("recruiterId")}
-                        className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                        className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                       >
                         <option value="">Select Recruiter</option>
                         {recruitersList && recruitersList.length > 0 ? (
@@ -641,13 +737,16 @@ export const PostJobForm = ({
                     </FormField>
                   )}
 
-                  <FormField label="Hiring Manager" error={errors?.hiringManagerId}>
+                  <FormField
+                    label="Hiring Manager"
+                    error={errors?.hiringManagerId}
+                  >
                     <select
                       value={jobToEdit?.hiringManagerId}
                       {...register("hiringManagerId", {
-                        required: "Hiring Manager is required"
+                        required: "Hiring Manager is required",
                       })}
-                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                     >
                       <option value="">Select Hiring Manager</option>
                       {hiringManagersList && hiringManagersList.length > 0 ? (
@@ -661,6 +760,46 @@ export const PostJobForm = ({
                       )}
                     </select>
                   </FormField>
+
+                  <FormField
+                    label="Interview Mode"
+                    error={errors?.interviewMode}
+                  >
+                    <select
+                      value={interviewMode}
+                      {...register("interviewMode", {
+                        required: "Interview Mode is required",
+                      })}
+                      onChange={(e) => setInterviewMode(e.target.value)}
+                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
+                    >
+                      <option value="">Select Interview Mode</option>
+                      <option value="AI">AI Interview</option>
+                      <option value="Manual">Manual Interview</option>
+                    </select>
+                  </FormField>
+
+                  {interviewMode === "AI" && (
+                    <>
+                      <FormInput
+                        label="AI Interview Duration"
+                        register={register}
+                        name="interviewDuration"
+                        type="select"
+                        options={FORM_OPTIONS.interviewDurations}
+                        error={errors?.interviewDuration}
+                      />
+
+                      <FormInput
+                        label="AI Interview Type"
+                        register={register}
+                        name="interviewType"
+                        type="select"
+                        options={FORM_OPTIONS.interviewTypes}
+                        error={errors?.interviewType}
+                      />
+                    </>
+                  )}
 
                   <div className="col-span-1 md:col-span-2">
                     <LocationPicker
@@ -734,7 +873,6 @@ export const PostJobForm = ({
                   </button>
                 </div>
 
-
                 <Controller
                   name="description"
                   control={control}
@@ -742,11 +880,15 @@ export const PostJobForm = ({
                     <ReactQuill
                       {...field}
                       theme="snow"
-                      className={`${theme === 'dark' ? 'dark-quill' : 'light-quill'} border rounded text-sm sm:text-base`}
+                      className={`${theme === "dark" ? "dark-quill" : "light-quill"} border rounded text-sm sm:text-base`}
                     />
                   )}
                 />
-                {errors?.description && <span className="text-sm text-red-500">{errors?.description.message}</span>}
+                {errors?.description && (
+                  <span className="text-sm text-red-500">
+                    {errors?.description.message}
+                  </span>
+                )}
               </div>
 
               <CandidateForm
@@ -761,7 +903,7 @@ export const PostJobForm = ({
                   type="submit"
                   className="px-6 sm:px-8 py-2 sm:py-3 bg-[#9333ea] text-white font-medium hover:bg-[#9333ea] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#9333ea] focus:ring-offset-2 transition-colors text-sm sm:text-base"
                 >
-                  {jobToEdit ? 'Update Job Post' : 'Create Job Post'}
+                  {jobToEdit ? "Update Job Post" : "Create Job Post"}
                 </button>
               </div>
             </form>
