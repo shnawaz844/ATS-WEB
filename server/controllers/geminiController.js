@@ -4,7 +4,7 @@ export const generateJobDescription = async (req, res) => {
     try {
         const { jobTitle, companyUserName, compensation, experience } = req.body;
         const capitalizedCompany = companyUserName ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1) : "[Company Name]";
-
+        // getGeminiModel
         if (!jobTitle) {
             return res.status(400).json({ success: false, message: "Job title is required" });
         }
