@@ -1,22 +1,39 @@
-import { getGeminiModel } from "../utils/aiHelper.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from "dotenv";
 
-export const generateJobDescription = async (req, res) => {
+dotenv.config();
+
+/**
+ * Generates a professional job description using Gemini AI
+ * @param {string} jobTitle - The title of the job
+ * @param {string} companyUserName - The name of the company
+ * @param {string} compensation - Optional compensation info
+ * @param {string} experience - Optional experience info
+ * @returns {Promise<string>} The generated job description
+ */
+export const generateDescriptionText = async (jobTitle, companyUserName, compensation = "", experience = "") => {
     try {
-        const { jobTitle, companyUserName, compensation, experience } = req.body;
-        const capitalizedCompany = companyUserName ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1) : "[Company Name]";
-
         if (!jobTitle) {
-            return res.status(400).json({ success: false, message: "Job title is required" });
+            throw new Error("Job title is required");
         }
 
-        const model = getGeminiModel();
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error("Gemini API key not configured");
+        }
+
+        const capitalizedCompany = companyUserName
+            ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1)
+            : "[Company Name]";
+
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const prompt = `Write a professional and engaging job description for the role of "${jobTitle}" using the following specific format and emojis. Use HTML tags (<h3>, <p>, <ul>, <li>, <strong>) for detailed formatting.
 
         Format Structure:
         
         <h3>🚀 About the Company</h3>
-        <p>Write an exciting and professional description about ${capitalizedCompany}, highlighting its mission and impact.</p>
+        <p>Write a brief, exciting placeholder description about a forward-thinking company.</p>
         <br></br>
         <h3>👨💻 Role Overview</h3>
         <p>Write a compelling summary of the role. ${experience ? `The ideal candidate should have approximately <strong>${experience} years</strong> of experience.` : ""}</p>
@@ -47,36 +64,30 @@ export const generateJobDescription = async (req, res) => {
             <li>Flexible working environment (Hybrid / On-site)</li>
         </ul>
 
-        <hr>
-        <strong>CRITICAL INSTRUCTIONS:</strong>
-        1. <strong>Language:</strong> The entire output MUST be strictly in professional English. Do NOT include any words from other languages (like Russian, Spanish, etc.).
-        2. <strong>Experience Requirement:</strong> You MUST strictly use the value "${experience}" for required experience. Do NOT mention any other experience ranges (like "1-3 years" or "preferred experience") in any section.
-        3. <strong>Compensation:</strong> If compensation is specified as "${compensation}", use only this value. Do not suggest other salary ranges.
-        4. <strong>Consistency:</strong> Ensure that the "Role Overview" and "Required Skills & Qualifications" sections are perfectly consistent with the "${experience}" requirement you were provided.
-        5. <strong>Formatting:</strong> Always use the requested HTML tags.
-
         Ensure the tone is professional yet energetic. 
         IMPORTANT: Whenever you mention the company name "${capitalizedCompany}" in any section (especially in "About the Company"), you must wrap it in <strong style="background-color: yellow; padding: 2px 4px; border-radius: 4px;">...</strong> to highlight it.
         Do not wrap the output in markdown code blocks.`;
 
         const result = await model.generateContentStream(prompt);
-
-        // Set headers for streaming
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        res.setHeader('Transfer-Encoding', 'chunked');
-
+        let fullText = "";
         for await (const chunk of result.stream) {
             const chunkText = chunk.text();
-            res.write(chunkText);
+            fullText += chunkText;
         }
-
-        res.end();
+        return fullText;
     } catch (error) {
-        console.error("Error generating job description:", error);
-        if (!res.headersSent) {
-            res.status(500).json({ success: false, message: "Failed to generate description", error: error.message });
-        } else {
-            res.end();
-        }
+        console.error("Error in generateDescriptionText:", error);
+        throw error;
     }
+};
+
+/**
+ * Returns a model instance for streaming
+ */
+export const getGeminiModel = () => {
+    if (!process.env.GEMINI_API_KEY) {
+        throw new Error("Gemini API key not configured");
+    }
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 };
