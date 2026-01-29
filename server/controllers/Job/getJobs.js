@@ -11,7 +11,7 @@ const getJobs = async (req, res) => {
         let filter = {};
 
         // Apply filters only if values exist
-        // if ( title ) filter.title = { $regex: title, $options: 'i' };
+        // if ( title ) filter.title = { $regex: title, $options: 'i' };;
         if (locationType) filter.locationType = { $regex: locationType, $options: 'i' };
         if (city) filter.city = { $regex: city, $options: 'i' };
         if (type) filter.type = { $regex: type, $options: 'i' };
