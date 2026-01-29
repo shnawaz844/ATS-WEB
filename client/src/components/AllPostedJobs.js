@@ -161,7 +161,7 @@ const AllPostedJobs = () => {
     if (locationType) params.locationType = locationType.value;
     if (scheduleType) params.scheduleType = scheduleType.value;
 
-    // Add status filter to only show Open and Filled job
+    // Add status filter to only show Open and Filled job.
     params.status = "Open,Filled";
 
     const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
