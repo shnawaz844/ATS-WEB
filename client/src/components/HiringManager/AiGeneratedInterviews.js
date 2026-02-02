@@ -365,13 +365,13 @@ const AssignedInterviews = () => {
                                                                 </div>
                                                                 <div>
                                                                     <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
-                                                                        Applicant Name :   {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
+                                                                        Applicant Name :   {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
                                                                     </p>
                                                                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                                                         Interview Type :    {capitalizeFirstLetter(interview.interviewerType) || "N/A"} Interview
                                                                     </p>
                                                                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                        Interviewer :   {capitalizeFirstLetter(interview.interviewerID.userName) || "N/A"}
+                                                                        Interviewer :   {capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A"}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -471,7 +471,7 @@ const AssignedInterviews = () => {
                                                         {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
                                                     </h3>
                                                     <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                        Applicant Name :  {capitalizeFirstLetter(interview.applicationID?.candidateID?.userName) || "N/A"}
+                                                        Applicant Name :  {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
                                                     </p>
                                                 </div>
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(interview.status)}`}>
@@ -504,7 +504,7 @@ const AssignedInterviews = () => {
                                                     <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    Interviewer :   {interview.interviewerID.userName}
+                                                    Interviewer :   {interview?.interviewerID?.userName || "N/A"}
                                                 </div>
                                             </div>
 
@@ -654,13 +654,13 @@ const AssignedInterviews = () => {
                                         <div>
                                             <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                                 {editForm.interviewerID
-                                                    ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm.interviewerID._id)?.userName || "Not Found"}`
+                                                    ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm?.interviewerID?._id)?.userName || "Not Found"}`
                                                     : "Assign Interviewer"}
                                             </label>
                                             <select
                                                 className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                                     }`}
-                                                value={editForm.interviewerID._id || ""}
+                                                value={editForm?.interviewerID?._id || ""}
                                                 onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
                                                 required
                                             >
