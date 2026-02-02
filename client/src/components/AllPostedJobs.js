@@ -85,7 +85,7 @@ const AllPostedJobs = () => {
 
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
           headers: {
-            company_id: companyId
+            "company-id": companyId
           }
         });
 
@@ -125,7 +125,7 @@ const AllPostedJobs = () => {
           `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses?${params}`,
           {
             headers: {
-              company_id: companyId,
+              "company-id": companyId
             },
           }
         );
@@ -166,17 +166,22 @@ const AllPostedJobs = () => {
 
     const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
       params, headers: {
-        company_id: companyId
+        "company-id": companyId
       }
     });
     return response.data;
   };
 
-  const { data, isError } = useQuery({
+  const { data, isError, isLoading } = useQuery({
     queryKey: ["jobs", page, limit, debouncedSearch, jobType, locationType, scheduleType, companyId],
     queryFn: fetchJobs,
     keepPreviousData: true,
+    enabled: !!companyId, // Only fetch when companyId is available
   });
+
+  console.log("Jobs data:", data);
+  console.log("statusMap:", statusMap);
+  console.log("companyId:", companyId);
 
   if (isError) return <div>Error fetching jobs</div>;
   const selectStyles = {
@@ -335,18 +340,16 @@ const AllPostedJobs = () => {
           {/* Jobs List or No Jobs Found Message */}
           {data?.jobs && data.jobs.length > 0 ? (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {data.jobs
-                .filter((job) => statusMap[job.status] === "Open" || statusMap[job.status] === "Filled")
-                .map((job) => (
-                  <Card
-                    key={job._id}
-                    job={job}
-                    jobStatusLabel={statusMap[job.status]} // pass status text
-                    onViewDetails={() => setSelectedJob(job)}
-                    companyUserName={companyUserName}
-                    theme={theme}
-                  />
-                ))}
+              {data.jobs.map((job) => (
+                <Card
+                  key={job._id}
+                  job={job}
+                  jobStatusLabel={statusMap[job.status]} // pass status text
+                  onViewDetails={() => setSelectedJob(job)}
+                  companyUserName={companyUserName}
+                  theme={theme}
+                />
+              ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
