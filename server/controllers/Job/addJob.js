@@ -39,7 +39,7 @@ const addJob = async (req, res) => {
       console.log("🔥 Calling AI generate-questions API...");
 
       const aiResponse = await fetch(
-        "http://localhost:4000/api/generate-questions",
+        `${process.env.ASTRANYX_AI}/api/generate-questions`,
         {
           method: "POST",
           headers: {
