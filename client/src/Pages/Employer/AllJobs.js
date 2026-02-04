@@ -711,7 +711,7 @@ export const AllJobs = () => {
                                                             <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                                 <MapPin className="h-4 w-4 mr-3 flex-shrink-0" />
                                                                 <span className="text-sm">
-                                                                    {job.city}, {job.state}, {job.country}
+                                                                    {[job.city, job.state, job.country].filter(Boolean).join(", ")}
                                                                 </span>
                                                             </div>
 

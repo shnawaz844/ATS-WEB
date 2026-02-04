@@ -138,6 +138,7 @@ const LocationPicker = ({
     <div className="space-y-4">
       <FormField label="Country" error={errors?.country}>
         <select
+          {...register("country", { required: "Country is required" })}
           value={currentCountryCode}
           onChange={(e) => {
             setSelectedCountry(e.target.value);
@@ -146,7 +147,6 @@ const LocationPicker = ({
             setValue("country", e.target.value, { shouldValidate: true });
           }}
           className={selectClasses}
-          {...register("country", { required: "Country is required" })}
         >
           <option value="">Select Country</option>
           {countries.map((country) => (
@@ -161,6 +161,7 @@ const LocationPicker = ({
         <>
           <FormField label="State" error={errors?.state}>
             <select
+              {...register("state", { required: "State is required" })}
               value={currentStateCode}
               onChange={(e) => {
                 setSelectedState(e.target.value);
@@ -169,7 +170,6 @@ const LocationPicker = ({
               }}
               className={selectClasses}
               disabled={!currentCountryCode}
-              {...register("state", { required: "State is required" })}
             >
               <option value="">Select State</option>
               {states.map((state) => (
@@ -182,6 +182,7 @@ const LocationPicker = ({
 
           <FormField label="City" error={errors?.city}>
             <select
+              {...register("city", { required: "City is required" })}
               value={jobToEdit?.city || selectedCity}
               onChange={(e) => {
                 handleCityChange(e);
@@ -189,7 +190,6 @@ const LocationPicker = ({
               }}
               className={selectClasses}
               disabled={!currentStateCode}
-              {...register("city", { required: "City is required" })}
             >
               <option value="">Select City</option>
               {cities.map((city) => (

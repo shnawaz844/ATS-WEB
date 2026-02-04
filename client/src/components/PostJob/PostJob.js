@@ -6,6 +6,7 @@ import { usePostJob, useUpdateJob } from "../../hooks/useJob";
 import { useLocation, useNavigate } from "react-router-dom";
 import PostJobForm from "./PostJobForm";
 import axios from "axios";
+import { Country, State } from "country-state-city";
 
 export const PostJob = () => {
   const location = useLocation();
@@ -195,14 +196,21 @@ export const PostJob = () => {
         };
       }
     }
+    // Convert Country and State codes to names
+    const countryObj = Country.getCountryByCode(selectedCountry);
+    const countryName = countryObj ? countryObj.name : selectedCountry;
+
+    const stateObj = State.getStateByCodeAndCountry(selectedState, selectedCountry);
+    const stateName = stateObj ? stateObj.name : selectedState;
+
     // Format the data to include shiftStart, shiftEnd, and separate location fields
     const formattedData = {
       ...data,
       shiftStart,
       shiftEnd,
       // status: "Screening",
-      country: selectedCountry,
-      state: selectedState,
+      country: countryName,
+      state: stateName,
       city: selectedCity,
       compensation: String(data.compensation),
       experienceRequired: String(data.experienceRequired),
