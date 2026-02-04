@@ -29,11 +29,15 @@ const JobSchema = new mongoose.Schema(
     },
     shiftStart: {
       type: String,
-      required: true,
+      required: function () {
+        return this.scheduleType !== "Flexible";
+      },
     },
     shiftEnd: {
       type: String,
-      required: true,
+      required: function () {
+        return this.scheduleType !== "Flexible";
+      },
     },
     hireType: {
       type: String,
@@ -45,11 +49,15 @@ const JobSchema = new mongoose.Schema(
     },
     state: {
       type: String,
-      required: true,
+      required: function () {
+        return this.locationType !== "Remote";
+      },
     },
     city: {
       type: String,
-      required: true,
+      required: function () {
+        return this.locationType !== "Remote";
+      },
     },
     description: {
       type: String,
