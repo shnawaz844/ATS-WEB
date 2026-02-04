@@ -46,6 +46,16 @@ import ImportApplication from './Pages/Application/tabs/ImportApplication';
 import ImportCandidateApplication from './Pages/Application/tabs/ImportCandidateApplication';
 import ScrollToTop from './components/ScrollToTop';
 
+import About from './Pages/General/About';
+import Contact from './Pages/General/Contact';
+import PrivacyPolicy from './Pages/General/PrivacyPolicy';
+import TermsOfService from './Pages/General/TermsOfService';
+import Blog from './Pages/General/Blog';
+import Documentation from './Pages/General/Documentation';
+import Support from './Pages/General/Support';
+import Guides from './Pages/General/Guides';
+import Jobs from './Pages/General/Jobs';
+
 // Layout component to ensure Navbar and Footer appear on all pages
 const Layout = () => {
   const { theme } = useTheme(); // Moved inside the Layout component
@@ -67,6 +77,9 @@ function App() {
   const BASE_URL = process.env.REACT_APP_BASE_URL;
   const { theme } = useTheme();
 
+  // Pages that should be accessible without being treated as a company slug
+  const ignoredSlugs = ['about', 'contact', 'privacy', 'terms', 'blog', 'documentation', 'support', 'guides', 'jobs', 'login', 'signup', 'all-users', 'all-companies', 'profile', '404'];
+
 
   const slug = location.pathname.split('/')[1];
   const companyUserNameFromStorage = localStorage.getItem('companyUserName');
@@ -74,24 +87,42 @@ function App() {
   const user = localStorage.getItem('user');
 
   // Clear company details from localStorage when slug is not available
+  // Clear company details from localStorage when slug is not available
   useLayoutEffect(() => {
-    if (!slug) {
-      if (user) {
-        navigate(`/${companyIdFromStorage}`);
-        return;
+    // If we are on a general page (no slug or ignored slug), do not enforce company checks strictly?
+    // Actually, if we are on /about, slug is 'about'. We should skip clearing logic if it conflicts?
+    // Current logic: if (!slug) ...
+    // If we are at /, slug is undefined.
+
+    if (!slug || ignoredSlugs.includes(slug)) {
+      // If it is an ignored slug, we might still want to clear company data if we navigated AWAY from a company?
+      // But if we are just viewing a public page, maybe we keep the session?
+      // Let's stick to existing behavior but respect ignored slugs.
+      // Actually, existing behavior clears if !slug.
+      if (!slug) {
+        if (user) {
+          navigate(`/${companyIdFromStorage}`);
+          return;
+        }
+        localStorage.removeItem("companyUserName");
+        localStorage.removeItem("companyId");
+        console.log("Cleared companyUserName from localStorage");
       }
-      localStorage.removeItem("companyUserName");
-      localStorage.removeItem("companyId");
-      console.log("Cleared companyUserName from localStorage");
     }
   }, [slug]);
 
 
   useEffect(() => {
+    if (ignoredSlugs.includes(slug)) {
+      return;
+    }
+
     // If user is not logged in (companyUserName is not in localStorage)
     if (!companyUserNameFromStorage) {
       console.log('User not logged in. Redirecting to login...');
-      navigate(`/${slug}`); // Redirect to login page with the companyUserName
+      // Only redirect if it's not a known public route? But we handled ignoredSlugs above.
+      // So if slug is "some-company", and we are not logged in, we go to /some-company (login).
+      navigate(`/${slug}`);
       return;
     }
 
@@ -108,7 +139,8 @@ function App() {
 
     setCompanyError(false);
 
-    // Fetch company details from API using companyUserName
+    // If we already have the companyId and Name matching, do we need to fetch again?
+    // Existing logic fetches.
     axios
       .get(`${BASE_URL}/companies/companies/${slug}`)
 
@@ -140,6 +172,29 @@ function App() {
         <Route element={<Layout />}>
           {/* Home */}
           <Route path="/" element={<Banner />} />
+
+          {/* General Pages - Global */}
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/documentation" element={<Documentation />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/guides" element={<Guides />} />
+          <Route path="/jobs" element={<Jobs />} />
+
+          {/* General Pages - Company Context */}
+          <Route path="/:companyUserName/about" element={<About />} />
+          <Route path="/:companyUserName/contact" element={<Contact />} />
+          <Route path="/:companyUserName/privacy" element={<PrivacyPolicy />} />
+          <Route path="/:companyUserName/terms" element={<TermsOfService />} />
+          <Route path="/:companyUserName/blog" element={<Blog />} />
+          <Route path="/:companyUserName/documentation" element={<Documentation />} />
+          <Route path="/:companyUserName/support" element={<Support />} />
+          <Route path="/:companyUserName/guides" element={<Guides />} />
+          <Route path="/:companyUserName/jobs" element={<Jobs />} />
+
           <Route path="/:companyUserName" element={<Home />} />
 
           {/* Authentication */}

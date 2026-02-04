@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { X } from 'lucide-react';
+import { X, Eye, EyeOff } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const UserDialog = ({
@@ -15,6 +15,7 @@ const UserDialog = ({
     const { theme } = useTheme();
     const userRole = JSON.parse(localStorage.getItem('user')).role;
     const [errors, setErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
 
 
     // Function to validate the form fields
@@ -124,15 +125,24 @@ const UserDialog = ({
                                     <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                         Password
                                     </label>
-                                    <input
-                                        type="password"
-                                        name="user_pass"
-                                        autoComplete='new-password'
-                                        value={formData.password || ''}
-                                        onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
-                                        required
-                                        className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            name="user_pass"
+                                            autoComplete='new-password'
+                                            value={formData.password || ''}
+                                            onChange={(e) => handleFormChange({ target: { name: 'password', value: e.target.value } })}
+                                            required
+                                            className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
+                                        >
+                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        </button>
+                                    </div>
                                     {errors.password && (
                                         <p className="text-red-500 text-sm mt-1">{errors.password}</p>
                                     )}

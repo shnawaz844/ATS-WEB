@@ -35,6 +35,7 @@ const FormInput = ({
   label,
   register,
   name,
+  rules,
   type = "text",
   error,
   placeholder,
@@ -48,7 +49,7 @@ const FormInput = ({
   return (
     <FormField label={label} error={error}>
       {type === "select" ? (
-        <select {...register(name)} className={inputClasses} {...props}>
+        <select {...register(name, rules)} className={inputClasses} {...props}>
           <option
             value=""
             disabled
@@ -65,7 +66,7 @@ const FormInput = ({
       ) : (
         <input
           type={type}
-          {...register(name)}
+          {...register(name, rules)}
           className={inputClasses}
           placeholder={placeholder}
           {...props}
@@ -98,6 +99,7 @@ const LocationPicker = ({
   setSelectedCity,
   errors,
   jobToEdit,
+  locationType,
 }) => {
   const countries = Country.getAllCountries();
 
@@ -151,40 +153,44 @@ const LocationPicker = ({
         </select>
       </FormField>
 
-      <FormField label="State" error={errors?.state}>
-        <select
-          value={currentStateCode}
-          onChange={(e) => {
-            setSelectedState(e.target.value);
-            setSelectedCity("");
-          }}
-          className={selectClasses}
-          disabled={!currentCountryCode}
-        >
-          <option value="">Select State</option>
-          {states.map((state) => (
-            <option key={state.isoCode} value={state.isoCode}>
-              {state.name}
-            </option>
-          ))}
-        </select>
-      </FormField>
+      {locationType !== "Remote" && (
+        <>
+          <FormField label="State" error={errors?.state}>
+            <select
+              value={currentStateCode}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setSelectedCity("");
+              }}
+              className={selectClasses}
+              disabled={!currentCountryCode}
+            >
+              <option value="">Select State</option>
+              {states.map((state) => (
+                <option key={state.isoCode} value={state.isoCode}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
 
-      <FormField label="City" error={errors?.city}>
-        <select
-          value={jobToEdit?.city || selectedCity}
-          onChange={handleCityChange}
-          className={selectClasses}
-          disabled={!currentStateCode}
-        >
-          <option value="">Select City</option>
-          {cities.map((city) => (
-            <option key={city.name} value={city.name}>
-              {city.name}
-            </option>
-          ))}
-        </select>
-      </FormField>
+          <FormField label="City" error={errors?.city}>
+            <select
+              value={jobToEdit?.city || selectedCity}
+              onChange={handleCityChange}
+              className={selectClasses}
+              disabled={!currentStateCode}
+            >
+              <option value="">Select City</option>
+              {cities.map((city) => (
+                <option key={city.name} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        </>
+      )}
     </div>
   );
 };
@@ -550,6 +556,46 @@ export const PostJobForm = ({
     }
   };
 
+  const onError = (errors) => {
+    const errorFields = Object.keys(errors);
+    if (errorFields.length > 0) {
+      // Order of fields to check for prioritized scrolling
+      const fieldOrder = [
+        "title",
+        "locationType",
+        "state", // If we add validation later
+        "city",
+        "type", // Employment Type
+        "scheduleType",
+        "shiftStart",
+        "shiftEnd",
+        "hireType",
+        "compensation",
+        "experienceRequired",
+        "requiredResources",
+        "status",
+        "recruiterId",
+        "hiringManagerId",
+        "interviewMode",
+        "interviewDuration",
+        "interviewType",
+        "description"
+      ];
+
+      const firstErrorField = fieldOrder.find(field => errors[field]);
+      const targetField = firstErrorField || errorFields[0];
+
+      if (targetField === "description") {
+        const element = document.getElementById("ai-description-editor");
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        const element = document.querySelector(`[name="${targetField}"]`);
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus();
+      }
+    }
+  };
+
   return (
     <div
       className={`min-h-screen py-12 ${theme === "dark" ? "bg-black" : "bg-gray-50"}`}
@@ -567,7 +613,7 @@ export const PostJobForm = ({
             className={`rounded-2xl shadow-xl overflow-hidden ${theme === "dark" ? "bg-gray-800 border border-gray-700" : "bg-white"}`}
           >
             <form
-              onSubmit={handleSubmit(enhancedOnSubmit)}
+              onSubmit={handleSubmit(enhancedOnSubmit, onError)}
               className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8"
             >
               <div className="space-y-4 sm:space-y-6">
@@ -644,13 +690,15 @@ export const PostJobForm = ({
                     error={errors?.scheduleType}
                   />
 
-                  <ShiftPicker
-                    shiftStart={shiftStart}
-                    setShiftStart={setShiftStart}
-                    shiftEnd={shiftEnd}
-                    setShiftEnd={setShiftEnd}
-                    errors={errors}
-                  />
+                  {watch("scheduleType") !== "Flexible" && (
+                    <ShiftPicker
+                      shiftStart={shiftStart}
+                      setShiftStart={setShiftStart}
+                      shiftEnd={shiftEnd}
+                      setShiftEnd={setShiftEnd}
+                      errors={errors}
+                    />
+                  )}
 
                   <FormInput
                     label="Hire Type"
@@ -673,6 +721,7 @@ export const PostJobForm = ({
                     label="Experience Required (years)"
                     register={register}
                     name="experienceRequired"
+                    rules={{ required: "Experience is required" }}
                     error={errors?.experienceRequired}
                     placeholder="Ex: 3"
                   />
@@ -682,6 +731,7 @@ export const PostJobForm = ({
                     register={register}
                     name="requiredResources"
                     type="number"
+                    rules={{ required: "Required Resources is required" }}
                     error={errors?.requiredResources}
                     placeholder="Ex: 5"
                   />
@@ -811,6 +861,7 @@ export const PostJobForm = ({
                       setSelectedCity={setSelectedCity}
                       errors={errors}
                       jobToEdit={jobToEdit}
+                      locationType={watch("locationType")}
                     />
                   </div>
                 </div>

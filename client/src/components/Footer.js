@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react"
 import { useTheme } from "../context/ThemeContext"
+import { Link, useParams } from "react-router-dom"
 
 const navigation = {
     main: [
@@ -36,40 +37,51 @@ const navigation = {
 
 export function Footer() {
     const { theme } = useTheme();
+    const { companyUserName } = useParams();
+
+    // Helper to format links based on current context
+    // If companyUserName exists and the link is meant to be contextual, prepend it.
+    // Assuming all footer links should act relative to the company if provided.
+    // Exception: Home ('/') might need to go to /companyUserName instead of root /
+    const getLink = (path) => {
+        if (!companyUserName) return path;
+
+        // Handle Home specifically if needed, or just standard replacement
+        if (path === '/') return `/${companyUserName}`;
+
+        // Ensure we don't double slash or mess up
+        return `/${companyUserName}${path}`;
+    };
 
     return (
         <footer className={`py-12 border-t transition-colors duration-300 ${theme === "dark"
-                ? "bg-black border-white/10 text-gray-300"
-                : "bg-gray-50 border-gray-200 text-gray-600"
+            ? "bg-black border-white/10 text-gray-300"
+            : "bg-gray-50 border-gray-200 text-gray-600"
             }`}>
             <div className="max-w-screen-xl mx-auto px-6 py-16 lg:px-8">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
                     {/* Brand Section */}
                     <div className="md:col-span-1">
-                        <a href="/" className="flex items-center gap-3 mb-6">
+                        <Link to={getLink("/")} className="flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
                                 <span className="text-white font-bold text-lg">N</span>
                             </div>
                             <span className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                                 Niyukty
                             </span>
-                        </a>
+                        </Link>
                         <p className={`mb-6 max-w-md ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                             Revolutionizing recruitment with AI-powered solutions. Connect the right talent with the right
                             opportunities through intelligent matching and automated processes.
                         </p>
                         <div className="space-y-3">
-                            {/* <div className="flex items-center gap-2 text-slate-400">
-                                <Mail className="h-4 w-4" />
-                                <span>contact@niyukty.com</span>
-                            </div> */}
                             <div className={`flex items-center gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <Phone className="h-4 w-4" />
-                                <span>+91 8810600135</span>
+                                <span className="text-sm">+91 8810600135</span>
                             </div>
                             <div className={`flex items-center gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <MapPin className="h-4 w-4" />
-                                <span>F2 Fintech Pvt Ltd, A-25, M-1 Arv Park, A-Block, Sector 63, Noida</span>
+                                <span className="text-sm">F2 Fintech Pvt Ltd, A-25, M-1 Arv Park, A-Block, Sector 63, Noida</span>
                             </div>
                         </div>
                     </div>
@@ -80,10 +92,10 @@ export function Footer() {
                         <ul className="space-y-2">
                             {navigation.main.slice(0, 4).map((item) => (
                                 <li key={item.name}>
-                                    <a href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    <Link to={getLink(item.href)} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                         }`}>
                                         {item.name}
-                                    </a>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -95,10 +107,10 @@ export function Footer() {
                         <ul className="space-y-2">
                             {navigation.main.slice(4).map((item) => (
                                 <li key={item.name}>
-                                    <a href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                    <Link to={getLink(item.href)} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                         }`}>
                                         {item.name}
-                                    </a>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -109,28 +121,28 @@ export function Footer() {
                         <h4 className={`font-semibold text-lg mb-4 ${theme === "dark" ? "text-gray-100" : "text-gray-900"}`}>Resources</h4>
                         <ul className="space-y-2">
                             <li>
-                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                <Link to={getLink("/blog")} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                     }`}>
                                     Blog
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                <Link to={getLink("/documentation")} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                     }`}>
                                     Documentation
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                <Link to={getLink("/support")} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                     }`}>
                                     Support
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
+                                <Link to={getLink("/guides")} className={`transition-colors text-sm ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-600 hover:text-purple-600"
                                     }`}>
                                     Guides
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>

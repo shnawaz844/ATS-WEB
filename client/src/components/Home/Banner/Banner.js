@@ -13,7 +13,7 @@ const Banner = () => {
       <HeroSectionAts />
       <Companies />
       <WhyAts />
-      <About />
+      {/* <About /> */}
       <NewsCarousel />
       <DiveIn />
     </div>
