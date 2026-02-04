@@ -29,7 +29,7 @@ export default function ReadytoDiv() {
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                         >
-                            Start Free Trial
+                            Get Start
                         </button>
 
                         <a
