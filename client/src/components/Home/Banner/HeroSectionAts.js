@@ -35,7 +35,7 @@ export default function Hero() {
 
                     {/* CTA Buttons */}
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="/dashboard">
+                        <a href="/">
                             <button className="group relative inline-flex items-center justify-center px-8 py-3.5 font-medium rounded-full bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5">
                                 <span >Get Started</span>
                                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -43,7 +43,7 @@ export default function Hero() {
                             </button>
                         </a>
 
-                        <a href="/jobs">
+                        <a href="/">
                             <button className="inline-flex items-center justify-center px-8 py-3.5 font-medium rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900/50 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white transition-all duration-300 backdrop-blur-sm">
                                 Browse Jobs
                             </button>

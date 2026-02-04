@@ -102,42 +102,20 @@ export default function NewsCarousel() {
                     </p>
                 </div>
 
-                <div className="w-full overflow-hidden">
-                    {/* First row */}
-                    {!isMobile && (
-                        <div
-                            className="flex gap-6"
-                            ref={firstRowRef}
-                            onMouseEnter={() => handleMouseEnter(firstRowRef)}
-                            onMouseLeave={() => handleMouseLeave(firstRowRef)}
-                        >
-                            {duplicatedFirstHalf.map((company, index) => (
-                                <div
-                                    key={`first-${company.name}-${index}`}
-                                    className="flex-none relative"
-                                >
-                                    <div
-                                        className="border border-white/50 dark:border-gray-800 hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white/60 dark:bg-white/5 backdrop-blur-md p-6 text-center h-44 w-44 rounded-[50%] shadow-md"
-                                    >
-                                        <div className="text-4xl mb-3">{company.logo}</div>
-                                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{company.name}</h3>
-                                        <p className="text-sm text-gray-700 dark:text-gray-400">{company.industry}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            </div>
 
-                    {/* Second row */}
+            <div className="w-full overflow-hidden relative z-10 mb-12">
+                {/* First row */}
+                {!isMobile && (
                     <div
-                        className="flex gap-6 mt-6"
-                        ref={secondRowRef}
-                        onMouseEnter={() => handleMouseEnter(secondRowRef)}
-                        onMouseLeave={() => handleMouseLeave(secondRowRef)}
+                        className="flex gap-6"
+                        ref={firstRowRef}
+                        onMouseEnter={() => handleMouseEnter(firstRowRef)}
+                        onMouseLeave={() => handleMouseLeave(firstRowRef)}
                     >
-                        {duplicatedSecondHalf.map((company, index) => (
+                        {duplicatedFirstHalf.map((company, index) => (
                             <div
-                                key={`second-${company.name}-${index}`}
+                                key={`first-${company.name}-${index}`}
                                 className="flex-none relative"
                             >
                                 <div
@@ -145,12 +123,38 @@ export default function NewsCarousel() {
                                 >
                                     <div className="text-4xl mb-3">{company.logo}</div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{company.name}</h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{company.industry}</p>
+                                    <p className="text-sm text-gray-700 dark:text-gray-400">{company.industry}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
+                )}
+
+                {/* Second row */}
+                <div
+                    className="flex gap-6 mt-6"
+                    ref={secondRowRef}
+                    onMouseEnter={() => handleMouseEnter(secondRowRef)}
+                    onMouseLeave={() => handleMouseLeave(secondRowRef)}
+                >
+                    {duplicatedSecondHalf.map((company, index) => (
+                        <div
+                            key={`second-${company.name}-${index}`}
+                            className="flex-none relative"
+                        >
+                            <div
+                                className="border border-white/50 dark:border-gray-800 hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white/60 dark:bg-white/5 backdrop-blur-md p-6 text-center h-44 w-44 rounded-[50%] shadow-md"
+                            >
+                                <div className="text-4xl mb-3">{company.logo}</div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{company.name}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{company.industry}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
+            </div>
+
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
 
                 <div className="mt-12 text-center">
                     <p className="text-gray-600 dark:text-gray-400">

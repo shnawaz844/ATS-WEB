@@ -44,7 +44,7 @@ export const generateJobDescription = async (req, res) => {
             <li>Competitive salary package ${compensation ? `(<strong>${compensation}</strong>)` : ""} 💰</li>
             <li>Friendly and supportive work culture 🤝</li>
             <li>Career growth and learning opportunities 📈</li>
-            <li>Flexible working environment (Hybrid / On-site)</li>
+            <li>Flexible working environment</li>
         </ul>
 
         <hr>

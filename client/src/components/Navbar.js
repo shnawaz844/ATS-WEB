@@ -430,7 +430,7 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  {location.pathname !== "/" ? (
+                  {location.pathname !== "/" && (
                     <>
                       <Link
                         to={companyUserName ? `/${companyUserName}/login` : "/login"}
@@ -451,16 +451,6 @@ export const Navbar = () => {
                         Sign Up
                       </Link>
                     </>
-                  ) : (
-                    <Link
-                      to={companyUserName ? `/${companyUserName}/login` : "/login"}
-                      className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
-                        ? "text-white bg-gray-800 border border-gray-700 hover:bg-gray-700 focus:ring-gray-700"
-                        : "text-purple-600 bg-white border border-purple-200 hover:bg-purple-50 focus:ring-purple-500"
-                        }`}
-                    >
-                      Login
-                    </Link>
                   )}
                 </div>
 
