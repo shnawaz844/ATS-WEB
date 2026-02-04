@@ -100,6 +100,8 @@ const LocationPicker = ({
   errors,
   jobToEdit,
   locationType,
+  register,
+  setValue,
 }) => {
   const countries = Country.getAllCountries();
 
@@ -141,8 +143,10 @@ const LocationPicker = ({
             setSelectedCountry(e.target.value);
             setSelectedState("");
             setSelectedCity("");
+            setValue("country", e.target.value, { shouldValidate: true });
           }}
           className={selectClasses}
+          {...register("country", { required: "Country is required" })}
         >
           <option value="">Select Country</option>
           {countries.map((country) => (
@@ -161,9 +165,11 @@ const LocationPicker = ({
               onChange={(e) => {
                 setSelectedState(e.target.value);
                 setSelectedCity("");
+                setValue("state", e.target.value, { shouldValidate: true });
               }}
               className={selectClasses}
               disabled={!currentCountryCode}
+              {...register("state", { required: "State is required" })}
             >
               <option value="">Select State</option>
               {states.map((state) => (
@@ -177,9 +183,13 @@ const LocationPicker = ({
           <FormField label="City" error={errors?.city}>
             <select
               value={jobToEdit?.city || selectedCity}
-              onChange={handleCityChange}
+              onChange={(e) => {
+                handleCityChange(e);
+                setValue("city", e.target.value, { shouldValidate: true });
+              }}
               className={selectClasses}
               disabled={!currentStateCode}
+              {...register("city", { required: "City is required" })}
             >
               <option value="">Select City</option>
               {cities.map((city) => (
@@ -638,6 +648,7 @@ export const PostJobForm = ({
                       label={capitalizeFirstLetter("Title")}
                       register={register}
                       name="title"
+                      rules={{ required: "Title is required" }}
                       error={errors?.title}
                       placeholder="Ex: Software Engineer"
                     />
@@ -669,6 +680,7 @@ export const PostJobForm = ({
                     name="locationType"
                     type="select"
                     options={FORM_OPTIONS.location}
+                    rules={{ required: "Location Type is required" }}
                     error={errors?.locationType}
                   />
 
@@ -678,6 +690,7 @@ export const PostJobForm = ({
                     name="type"
                     type="select"
                     options={FORM_OPTIONS.employment}
+                    rules={{ required: "Employment Type is required" }}
                     error={errors?.type}
                   />
 
@@ -687,6 +700,7 @@ export const PostJobForm = ({
                     name="scheduleType"
                     type="select"
                     options={FORM_OPTIONS.schedule}
+                    rules={{ required: "Schedule Type is required" }}
                     error={errors?.scheduleType}
                   />
 
@@ -706,6 +720,7 @@ export const PostJobForm = ({
                     name="hireType"
                     type="select"
                     options={FORM_OPTIONS.hire}
+                    rules={{ required: "Hire Type is required" }}
                     error={errors?.hireType}
                   />
 
@@ -713,6 +728,7 @@ export const PostJobForm = ({
                     label="Compensation"
                     register={register}
                     name="compensation"
+                    rules={{ required: "Compensation is required" }}
                     error={errors?.compensation}
                     placeholder="Ex: 50000"
                   />
@@ -770,7 +786,7 @@ export const PostJobForm = ({
                     <FormField label="Recruiter" error={errors?.recruiterId}>
                       <select
                         value={jobToEdit?.recruiterId}
-                        {...register("recruiterId")}
+                        {...register("recruiterId", { required: "Recruiter is required" })}
                         className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                       >
                         <option value="">Select Recruiter</option>
@@ -837,6 +853,7 @@ export const PostJobForm = ({
                         name="interviewDuration"
                         type="select"
                         options={FORM_OPTIONS.interviewDurations}
+                        rules={{ required: "Interview Duration is required" }}
                         error={errors?.interviewDuration}
                       />
 
@@ -846,6 +863,7 @@ export const PostJobForm = ({
                         name="interviewType"
                         type="select"
                         options={FORM_OPTIONS.interviewTypes}
+                        rules={{ required: "Interview Type is required" }}
                         error={errors?.interviewType}
                       />
                     </>
@@ -862,6 +880,8 @@ export const PostJobForm = ({
                       errors={errors}
                       jobToEdit={jobToEdit}
                       locationType={watch("locationType")}
+                      register={register}
+                      setValue={setValue}
                     />
                   </div>
                 </div>
@@ -927,6 +947,7 @@ export const PostJobForm = ({
                 <Controller
                   name="description"
                   control={control}
+                  rules={{ required: "Description is required" }}
                   render={({ field }) => (
                     <ReactQuill
                       {...field}
