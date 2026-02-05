@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 import Stats from "../../components/Stats";
 import BarChart from "../../components/BarChart";
-import LineChart from "../../components/LineChart";
 import DoughnutChart from "../../components/DoughnutChart";
 import OpenPositionsModal from "../../components/OpenPositionsModal";
 import FilledPositionsModal from "../../components/FilledPositionsModal";
 
 export default function Dashboard() {
+    const { theme } = useTheme();
     const [applications, setApplications] = useState([]);
     const [jobs, setJobs] = useState([]);
     const [jobStatuses, setJobStatuses] = useState([]);
@@ -551,11 +552,11 @@ export default function Dashboard() {
     const safeApplicationStatuses = Array.isArray(applicationStatuses) ? applicationStatuses : [];
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-gray-50'}`}>
             <div className="max-w-7xl mx-auto">
                 <div className="dashboard-header mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900"> Admin Dashboard</h1>
-                    <p className="text-gray-600 mt-2">
+                    <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> Admin Dashboard</h1>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-2`}>
                         {new Date().toLocaleDateString('en-US', {
                             weekday: 'long',
                             year: 'numeric',
@@ -564,22 +565,22 @@ export default function Dashboard() {
                         })}
                     </p>
                     {error && (
-                        <div className="mt-4 p-6 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        <div className={`mt-4 p-6 ${theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200'} rounded-lg border`}>
                             ⚠️ Error fetching applications: {error}
                         </div>
                     )}
                     {jobsError && (
-                        <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200'} rounded-lg border`}>
                             ⚠️ Error fetching jobs: {jobsError}
                         </div>
                     )}
                     {statusesError && (
-                        <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200'} rounded-lg border`}>
                             ⚠️ Error fetching job statuses: {statusesError}
                         </div>
                     )}
                     {appStatusesError && (
-                        <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                        <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200'} rounded-lg border`}>
                             ⚠️ Error fetching application statuses: {appStatusesError}
                         </div>
                     )}
@@ -601,14 +602,14 @@ export default function Dashboard() {
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                     {/* Applications per Job Chart */}
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow lg:col-span-1 flex flex-col">
+                    <div className={`${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-100'} p-8 rounded-2xl shadow-sm border hover:shadow-md transition-shadow lg:col-span-1 flex flex-col`}>
                         <div className="chart-header flex justify-between items-center mb-6">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Applications per Job</h2>
-                                <p className="text-sm text-gray-500 mt-1">Distribution of candidates across positions</p>
+                                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Applications per Job</h2>
+                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Distribution of candidates across positions</p>
                             </div>
-                            <div className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                                <span className="text-blue-700 text-xs font-bold uppercase tracking-wider">Total: {applications.length}</span>
+                            <div className={`${theme === 'dark' ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-100'} px-3 py-1 rounded-full border`}>
+                                <span className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-700'} text-xs font-bold uppercase tracking-wider`}>Total: {applications.length}</span>
                             </div>
                         </div>
                         <div className="flex-1 h-[350px]">
@@ -617,15 +618,15 @@ export default function Dashboard() {
                     </div>
 
                     {/* Applications by Status Chart */}
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow lg:col-span-1 flex flex-col">
+                    <div className={`${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-100'} p-8 rounded-2xl shadow-sm border hover:shadow-md transition-shadow lg:col-span-1 flex flex-col`}>
                         <div className="chart-header flex justify-between items-center mb-6">
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">Application Pipeline</h2>
-                                <p className="text-sm text-gray-500 mt-1">Current status of all active candidates</p>
+                                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Application Pipeline</h2>
+                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} mt-1`}>Current status of all active candidates</p>
                             </div>
                             <button
                                 onClick={handleTotalApplicationsClick}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-semibold transition-colors flex items-center bg-blue-50 px-3 py-2 rounded-xl"
+                                className={`${theme === 'dark' ? 'text-blue-400 bg-blue-900/30' : 'text-blue-600 bg-blue-50'} hover:text-blue-800 text-sm font-semibold transition-colors flex items-center px-3 py-2 rounded-xl`}
                             >
                                 View All →
                             </button>
@@ -639,7 +640,7 @@ export default function Dashboard() {
 
                         {/* Status Summary / Legend Below Chart */}
                         {applicationsByStatus.length > 0 && (
-                            <div className="mt-8 pt-6 border-t border-gray-100">
+                            <div className={`mt-8 pt-6 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     {applicationsByStatus.slice(0, 6).map((item, index) => {
                                         const getColor = (status) => {
@@ -663,9 +664,9 @@ export default function Dashboard() {
                                                         className="w-2 h-2 rounded-full shrink-0"
                                                         style={{ backgroundColor: getColor(item.status) }}
                                                     ></div>
-                                                    <span className="text-sm font-medium text-gray-700 truncate">{item.status}</span>
+                                                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} truncate`}>{item.status}</span>
                                                 </div>
-                                                <span className="text-xs text-gray-500 ml-4 mt-0.5">{item.count} candidates</span>
+                                                <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} ml-4 mt-0.5`}>{item.count} candidates</span>
                                             </div>
                                         );
                                     })}
@@ -676,70 +677,70 @@ export default function Dashboard() {
                 </div>
 
                 {/* Jobs Section - Limited to 5 jobs */}
-                <div className="bg-white p-8 rounded-xl shadow-md mb-8">
+                <div className={`${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} p-8 rounded-xl shadow-md mb-8 border`}>
                     <div className="chart-header flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-800">Recent Jobs</h2>
-                        <span className="text-gray-500">Showing {Math.min(5, safeJobs.length)} of {totalJobs} jobs</span>
+                        <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Recent Jobs</h2>
+                        <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-50'}`}>Showing {Math.min(5, safeJobs.length)} of {totalJobs} jobs</span>
                     </div>
 
                     {/* Jobs List Table - Limited to 5 jobs */}
-                    <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+                    <div className={`overflow-x-auto ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} rounded-lg border`}>
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                            <thead className={`${theme === 'dark' ? 'bg-[#1c1c1c]' : 'bg-gray-50'}`}>
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                                    <th className={`px-6 py-4 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider border-b ${theme === 'dark' ? 'border-gray-800' : ''}`}>
                                         Job Title
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                                    <th className={`px-6 py-4 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider border-b ${theme === 'dark' ? 'border-gray-800' : ''}`}>
                                         Employment Type
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                                    <th className={`px-6 py-4 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider border-b ${theme === 'dark' ? 'border-gray-800' : ''}`}>
                                         Location
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                                    <th className={`px-6 py-4 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider border-b ${theme === 'dark' ? 'border-gray-800' : ''}`}>
                                         Current Status
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                                    <th className={`px-6 py-4 text-left text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider border-b ${theme === 'dark' ? 'border-gray-800' : ''}`}>
                                         Date Created
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className={`${theme === 'dark' ? 'bg-[#121212] divide-y divide-gray-800' : 'bg-white divide-y divide-gray-200'}`}>
                                 {safeJobs.slice(0, 5).map((job, index) => {
                                     const statusName = getStatusNameById(job.status);
 
                                     return (
-                                        <tr key={job._id || job.id || index} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                                        <tr key={job._id || job.id || index} className={`${theme === 'dark' ? 'hover:bg-[#1c1c1c]' : 'hover:bg-gray-50'} transition-colors`}>
+                                            <td className={`px-6 py-4 text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
                                                 <div className="flex items-center">
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
                                                     {job.title || 'No Title'}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
-                                                <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-md">
+                                            <td className={`px-6 py-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                <span className={`inline-flex px-2 py-1 text-xs font-medium ${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'} rounded-md`}>
                                                     {job.type || 'N/A'}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
+                                            <td className={`px-6 py-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 <div className="flex flex-col">
                                                     <span className="font-medium">{job.city || 'Not specified'}</span>
                                                     {job.locationType && (
-                                                        <span className="text-xs text-gray-400 mt-1">({job.locationType})</span>
+                                                        <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-xs mt-1`}>({job.locationType})</span>
                                                     )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border
-                          ${/open|active|available|hiring|live|published/i.test(statusName)
-                                                        ? 'bg-green-50 text-green-700 border-green-200' :
+                                                    ${/open|active|available|hiring|live|published/i.test(statusName)
+                                                        ? (theme === 'dark' ? 'bg-green-900/20 text-green-400 border-green-800' : 'bg-green-50 text-green-700 border-green-200') :
                                                         /closed|filled|completed|inactive|expired|draft/i.test(statusName)
-                                                            ? 'bg-red-50 text-red-700 border-red-200' :
-                                                            'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                                                            ? (theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200') :
+                                                            (theme === 'dark' ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200')}`}>
                                                     {statusName}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
+                                            <td className={`px-6 py-4 text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                                                 {job.createdAt ? new Date(job.createdAt).toLocaleDateString('en-US', {
                                                     year: 'numeric',
                                                     month: 'short',
@@ -758,16 +759,16 @@ export default function Dashboard() {
                         <div className="mt-6 text-center">
                             <button
                                 onClick={() => navigate(`/${companyUserName}/all-jobs`)}
-                                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium shadow-sm"
+                                className={`inline-flex items-center px-6 py-3 ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-xl transition-colors duration-200 font-medium shadow-sm`}
                             >
                                 View All {totalJobs} Jobs
                             </button>
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                        <div className={`text-center py-12 ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} rounded-lg border`}>
                             <div className="text-gray-400 text-3xl mb-4">📋</div>
-                            <p className="text-gray-500 text-lg font-medium">No jobs found</p>
-                            <p className="text-gray-400 text-sm mt-2">
+                            <p className={`text-lg font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>No jobs found</p>
+                            <p className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-sm mt-2`}>
                                 {jobsLoading ? 'Loading jobs...' : 'Check if your API is returning data correctly'}
                             </p>
                         </div>
@@ -779,7 +780,7 @@ export default function Dashboard() {
                         <button
                             onClick={fetchMoreData}
                             disabled={loading}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className={`px-6 py-3 ${theme === 'dark' ? 'bg-blue-700 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium`}
                         >
                             {loading ? 'Loading...' : 'Load More Applications'}
                         </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { useTheme } from '../context/ThemeContext';
 import {
     Chart as ChartJS,
     ArcElement,
@@ -10,6 +11,7 @@ import {
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function DoughnutChart({ data = [], title, applicationStatuses = [] }) {
+    const { theme } = useTheme();
     /**
      * Enhanced color mapping that handles various status names
      */
@@ -44,8 +46,8 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
         return (
             <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center">
                 <div className="text-4xl mb-2">⭕</div>
-                <p className="font-medium text-gray-500">No status distribution yet</p>
-                <p className="text-xs text-gray-400">Application statuses will be visualized here.</p>
+                <p className={`font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No status distribution yet</p>
+                <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Application statuses will be visualized here.</p>
             </div>
         );
     }
@@ -74,7 +76,7 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
                 display: false, // We use a custom legend in the dashboard
             },
             tooltip: {
-                backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                backgroundColor: theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(17, 24, 39, 0.95)',
                 padding: 12,
                 cornerRadius: 10,
                 displayColors: true,
@@ -108,7 +110,7 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
             const fontSize1 = (height / 180).toFixed(2);
             ctx.font = `500 ${fontSize1}em Inter, system-ui, sans-serif`;
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#6B7280'; // gray-500
+            ctx.fillStyle = theme === 'dark' ? '#9CA3AF' : '#6B7280'; // gray-400 : gray-500
 
             const text1 = "Total";
             const textX1 = Math.round((width - ctx.measureText(text1).width) / 2);
@@ -119,7 +121,7 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
             // Draw Count
             const fontSize2 = (height / 120).toFixed(2);
             ctx.font = `700 ${fontSize2}em Inter, system-ui, sans-serif`;
-            ctx.fillStyle = '#111827'; // gray-900
+            ctx.fillStyle = theme === 'dark' ? '#FFFFFF' : '#111827'; // white : gray-900
 
             const text2 = totalApplications.toString();
             const textX2 = Math.round((width - ctx.measureText(text2).width) / 2);
@@ -133,7 +135,7 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
     return (
         <div className="relative h-full w-full flex flex-col items-center">
             {title && (
-                <h3 className="text-lg font-semibold text-gray-800 mb-6 text-center w-full">
+                <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} mb-6 text-center w-full`}>
                     {title}
                 </h3>
             )}
