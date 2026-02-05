@@ -11,6 +11,20 @@ const Modal = ({ getStatusColor, isOpen, onClose, app, getStatusName }) => {
         return string?.charAt(0)?.toUpperCase() + string?.slice(1) || '';
     };
 
+    const isMeetingActive = (dateStr, timeStr) => {
+        if (!dateStr || !timeStr) return false;
+        try {
+            const interviewDate = new Date(dateStr);
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            interviewDate.setHours(hours, minutes, 0, 0);
+            const now = new Date();
+            const fiveMinutesBefore = new Date(interviewDate.getTime() - 5 * 60 * 1000);
+            return now >= fiveMinutesBefore;
+        } catch (e) {
+            return false;
+        }
+    };
+
     // Safe JSON parsing for questions and answers
     const parseQuestionsAndAnswers = () => {
         try {
@@ -144,6 +158,62 @@ const Modal = ({ getStatusColor, isOpen, onClose, app, getStatusName }) => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Interview Details Section */}
+                            {app.interview && (
+                                <div className={`rounded-xl p-6 border ${theme === 'dark' ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-100'}`}>
+                                    <h3 className={`text-lg font-semibold mb-4 flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-800'}`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                        Interview Details
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                                            <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Schedule</p>
+                                            <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                                                {new Date(app.interview.date).toLocaleDateString()} at {app.interview.scheduledTime}
+                                            </p>
+                                        </div>
+                                        <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                                            <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Type</p>
+                                            <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{capitalizeFirstLetter(app.interview.interviewerType)}</p>
+                                        </div>
+                                        {app.interview.interviewerType === 'online' && app.interview.meetingLink && (
+                                            <div className={`rounded-xl p-4 shadow-sm md:col-span-2 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Meeting Link</p>
+                                                    {isMeetingActive(app.interview.date, app.interview.scheduledTime) && (
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700`}>
+                                                            Active Now
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {isMeetingActive(app.interview.date, app.interview.scheduledTime) ? (
+                                                    <a
+                                                        href={app.interview.meetingLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center text-blue-500 hover:text-blue-600 font-bold break-all"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                        {app.interview.meetingLink}
+                                                    </a>
+                                                ) : (
+                                                    <div className="inline-flex items-center text-gray-400 font-medium break-all cursor-not-allowed">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                        </svg>
+                                                        Meeting link is locked (Will activate 5 mins before)
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Application Questions */}
                             {questions.length > 0 && (

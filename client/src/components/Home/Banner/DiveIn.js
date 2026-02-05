@@ -36,7 +36,7 @@ export default function ReadytoDiv() {
                             href="#learn-more"
                             className="px-8 py-3.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
-                            Learn More
+                            Connect on call
                         </a>
                     </div>
 

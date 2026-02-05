@@ -4,7 +4,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useTheme } from '../context/ThemeContext';
 
-const JobDescriptionModal = ({ job, isOpen, onClose }) => {
+const JobDescriptionModal = ({ job, isOpen, onClose, isApplied }) => {
     const { theme } = useTheme();
     const companyUserName = localStorage.getItem("companyUserName");
     const capitalizeFirstLetter = (string) => {
@@ -106,16 +106,25 @@ const JobDescriptionModal = ({ job, isOpen, onClose }) => {
                         <span className={`font-medium text-lg ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{job.experienceRequired} Years</span>
                         <span>Experience Required</span>
                     </div>
-                    <a
-                        href={`/${companyUserName}/current-job/${job._id}`}
-                        className="px-6 py-2 sm:px-8 sm:py-3 bg-gray-700 text-white rounded-xl 
-            hover:bg-gray-400 hover:text-black 
-            transition-all duration-300 
-            shadow-md hover:shadow-lg 
-            transform hover:-translate-y-1 w-full sm:w-auto text-center"
-                    >
-                        Apply Now
-                    </a>
+                    {isApplied ? (
+                        <button
+                            disabled
+                            className="px-6 py-2 sm:px-8 sm:py-3 bg-gray-400 text-white rounded-xl cursor-not-allowed shadow-md w-full sm:w-auto text-center"
+                        >
+                            Applied
+                        </button>
+                    ) : (
+                        <a
+                            href={`/${companyUserName}/current-job/${job._id}`}
+                            className="px-6 py-2 sm:px-8 sm:py-3 bg-gray-700 text-white rounded-xl 
+                                hover:bg-gray-400 hover:text-black 
+                                transition-all duration-300 
+                                shadow-md hover:shadow-lg 
+                                transform hover:-translate-y-1 w-full sm:w-auto text-center"
+                        >
+                            Apply Now
+                        </a>
+                    )}
                 </div>
             </div>
         </div>

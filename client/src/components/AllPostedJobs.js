@@ -52,6 +52,7 @@ const AllPostedJobs = () => {
   const [applicationStatuses, setApplicationStatuses] = useState([]);
   const [applicationStatusMap, setApplicationStatusMap] = useState({});
   const [loadingAppStatuses, setLoadingAppStatuses] = useState(false);
+  const [appliedJobIds, setAppliedJobIds] = useState(new Set());
 
   console.log("companyId", companyId)
 
@@ -152,6 +153,26 @@ const AllPostedJobs = () => {
       fetchApplicationStatuses();
     }
   }, [companyDetails]);
+
+  useEffect(() => {
+    const fetchCandidateApplications = async () => {
+      try {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        if (!user?._id) return;
+
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/application/candidate/${user._id}`);
+        if (response.data && Array.isArray(response.data.applications)) {
+          const ids = new Set(response.data.applications.map(app => app.jobID?._id || app.jobID));
+          setAppliedJobIds(ids);
+        }
+      } catch (error) {
+        console.error("Error fetching candidate applications:", error);
+      }
+    };
+    fetchCandidateApplications();
+  }, []);
 
   const fetchJobs = async ({ queryKey }) => {
     const [_, page, limit, debouncedSearch, jobType, locationType, scheduleType] = queryKey;
@@ -348,6 +369,7 @@ const AllPostedJobs = () => {
                   onViewDetails={() => setSelectedJob(job)}
                   companyUserName={companyUserName}
                   theme={theme}
+                  isApplied={appliedJobIds.has(job._id)}
                 />
               ))}
             </div>
@@ -409,7 +431,12 @@ const AllPostedJobs = () => {
 
           {/* Job Description Modal */}
           {selectedJob && (
-            <JobDescriptionModal job={selectedJob} isOpen={!!selectedJob} onClose={() => setSelectedJob(null)} />
+            <JobDescriptionModal
+              job={selectedJob}
+              isOpen={!!selectedJob}
+              onClose={() => setSelectedJob(null)}
+              isApplied={appliedJobIds.has(selectedJob._id)}
+            />
           )}
         </div>
       </div>
@@ -418,7 +445,7 @@ const AllPostedJobs = () => {
   );
 };
 
-const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme }) => {
+const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme, isApplied }) => {
 
   const capitalizeFirstLetter = (string) => {
     return string?.charAt(0).toUpperCase() + string?.slice(1);
@@ -467,7 +494,11 @@ const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme }) =>
         </p>
         <p className={`text-sm pt-2 ${theme === "dark" ? "text-gray-400" : "text-gray-700"
           }`}>
-          {job.city}, {job.state} | {job.locationType}
+          {[job.city, job.state, job.country].filter(Boolean).join(", ")}
+        </p>
+        <p className={`text-sm pt-2 ${theme === "dark" ? "text-gray-400" : "text-gray-700"
+          }`}>
+          {job.locationType}
         </p>
         <p className={`text-sm pt-2 font-medium ${theme === "dark" ? "text-green-400" : "text-gray-600"
           }`}>
@@ -498,11 +529,20 @@ const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme }) =>
             >
               View Details
             </button>
-            <Link to={`/${companyUserName}/current-job/${job._id}`}>
-              <button className="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors text-sm sm:text-base w-full sm:w-auto">
-                Apply Now
+            {isApplied ? (
+              <button
+                disabled
+                className="bg-gray-400 text-white px-4 py-2 rounded-full cursor-not-allowed text-sm sm:text-base w-full sm:w-auto"
+              >
+                Applied
               </button>
-            </Link>
+            ) : (
+              <Link to={`/${companyUserName}/current-job/${job._id}`}>
+                <button className="bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors text-sm sm:text-base w-full sm:w-auto">
+                  Apply Now
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

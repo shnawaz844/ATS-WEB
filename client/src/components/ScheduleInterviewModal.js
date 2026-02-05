@@ -25,6 +25,8 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
         applicationStatusId: "",
         status: ""
     });
+    const [formErrors, setFormErrors] = useState({});
+
 
     // Parameters for fetching assigned interviews
     const [page] = useState(1);
@@ -201,28 +203,46 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
 
     // Validate form before submission
     const validateForm = () => {
+        const errors = {};
         if (!editForm.date) {
-            toast.error('Please select interview date');
-            return false;
+            errors.date = 'Interview date is required';
         }
         if (!editForm.time) {
-            toast.error('Please select interview time');
-            return false;
+            errors.time = 'Interview time is required';
+        } else {
+            // Time validation for current day
+            const today = new Date().toISOString().split('T')[0];
+            if (editForm.date === today) {
+                const now = new Date();
+                const currentHour = now.getHours().toString().padStart(2, '0');
+                const currentMinute = now.getMinutes().toString().padStart(2, '0');
+                const currentTime = `${currentHour}:${currentMinute}`;
+
+                if (editForm.time < currentTime) {
+                    errors.time = 'Time cannot be in the past';
+                }
+            }
         }
         if (!editForm.interviewType) {
-            toast.error('Please select interview type');
-            return false;
+            errors.interviewType = 'Interview type is required';
         }
         if (editForm.interviewType === 'online' && !editForm.meetingLink) {
-            toast.error('Please provide meeting link for online interview');
-            return false;
+            errors.meetingLink = 'Meeting link is required for online interviews';
         }
         if (!editForm.interviewerId) {
-            toast.error('Please select an interviewer');
-            return false;
+            errors.interviewerId = 'Interviewer is required';
         }
-        return true;
+        if (!editForm.status) {
+            errors.status = 'Status is required';
+        }
+        if (!editForm.roundName) {
+            errors.roundName = 'Interview round is required';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
     };
+
 
     const updateApplicationStatus = async (applicationID, applicationStatusId, companyId) => {
         try {
@@ -475,8 +495,11 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     </label>
                                     <select
                                         value={editForm.status || detailedApplication?.applicationStatusId}
-                                        onChange={e => setEditForm({ ...editForm, status: e.target.value })}
-                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                        onChange={e => {
+                                            setEditForm({ ...editForm, status: e.target.value });
+                                            if (formErrors.status) setFormErrors({ ...formErrors, status: "" });
+                                        }}
+                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.status ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
                                         required
                                     >
                                         <option value="">Select Status</option>
@@ -486,6 +509,8 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.status && <p className="text-red-500 text-xs mt-1">{formErrors.status}</p>}
+
                                 </div>
 
                                 <div>
@@ -494,8 +519,11 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     </label>
                                     <select
                                         value={editForm.roundName}
-                                        onChange={e => setEditForm({ ...editForm, roundName: e.target.value })}
-                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                        onChange={e => {
+                                            setEditForm({ ...editForm, roundName: e.target.value });
+                                            if (formErrors.roundName) setFormErrors({ ...formErrors, roundName: "" });
+                                        }}
+                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.roundName ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
                                         required
                                     >
                                         <option value="">Select Interview Round</option>
@@ -505,6 +533,8 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.roundName && <p className="text-red-500 text-xs mt-1">{formErrors.roundName}</p>}
+
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -513,21 +543,46 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     <input
                                         type="date"
                                         value={editForm.date}
-                                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                                        onChange={(e) => {
+                                            const selectedDate = e.target.value;
+                                            const today = new Date().toISOString().split('T')[0];
+                                            let newTime = editForm.time;
+                                            let newErrors = { ...formErrors, date: "" };
+
+                                            if (selectedDate === today && editForm.time) {
+                                                const now = new Date();
+                                                const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                                                if (editForm.time < currentTime) {
+                                                    newTime = "";
+                                                    newErrors.time = "Previous time was invalid for today";
+                                                }
+                                            }
+                                            setEditForm({ ...editForm, date: selectedDate, time: newTime });
+                                            setFormErrors(newErrors);
+                                        }}
+                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.date ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
                                         min={new Date().toISOString().split('T')[0]}
                                         required
                                     />
+                                    {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
                                 </div>
                                 <div>
                                     <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Time</label>
                                     <input
                                         type="time"
                                         value={editForm.time}
-                                        onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                                        onChange={(e) => {
+                                            setEditForm({ ...editForm, time: e.target.value });
+                                            if (formErrors.time) setFormErrors({ ...formErrors, time: "" });
+                                        }}
+                                        min={editForm.date === new Date().toISOString().split('T')[0] ? (() => {
+                                            const now = new Date();
+                                            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                                        })() : ""}
+                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.time ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
                                         required
                                     />
+                                    {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
                                 </div>
                             </div>
 
@@ -536,8 +591,11 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Type</label>
                                     <select
                                         value={editForm.interviewType}
-                                        onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                        onChange={(e) => {
+                                            setEditForm({ ...editForm, interviewType: e.target.value });
+                                            if (formErrors.interviewType) setFormErrors({ ...formErrors, interviewType: "" });
+                                        }}
+                                        className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500 ${formErrors.interviewType ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
                                         required
                                     >
                                         <option value="">Select Interview Type</option>
@@ -547,14 +605,18 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.interviewType && <p className="text-red-500 text-xs mt-1">{formErrors.interviewType}</p>}
                                 </div>
 
                                 <div>
                                     <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Assign Interviewer</label>
                                     <select
-                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.interviewerId ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
                                         value={editForm.interviewerId}
-                                        onChange={(e) => setEditForm({ ...editForm, interviewerId: e.target.value })}
+                                        onChange={(e) => {
+                                            setEditForm({ ...editForm, interviewerId: e.target.value });
+                                            if (formErrors.interviewerId) setFormErrors({ ...formErrors, interviewerId: "" });
+                                        }}
                                         required
                                     >
                                         <option value="">Select Interviewer</option>
@@ -564,7 +626,9 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                             </option>
                                         ))}
                                     </select>
+                                    {formErrors.interviewerId && <p className="text-red-500 text-xs mt-1">{formErrors.interviewerId}</p>}
                                 </div>
+
                             </div>
 
                             {editForm.interviewType === 'online' && (
@@ -573,11 +637,16 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     <input
                                         type="url"
                                         value={editForm.meetingLink}
-                                        onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                                        onChange={(e) => {
+                                            setEditForm({ ...editForm, meetingLink: e.target.value });
+                                            if (formErrors.meetingLink) setFormErrors({ ...formErrors, meetingLink: "" });
+                                        }}
+                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.meetingLink ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
                                         placeholder="https://meet.google.com/..."
                                         required
                                     />
+                                    {formErrors.meetingLink && <p className="text-red-500 text-xs mt-1">{formErrors.meetingLink}</p>}
+
                                 </div>
                             )}
                         </div>

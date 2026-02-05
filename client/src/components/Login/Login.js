@@ -13,13 +13,17 @@ export const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const companyId = localStorage.getItem("companyId");
   const companyUserName = localStorage.getItem("companyUserName");
 
   useEffect(() => {
-    if (companyId) {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
     }
-  }, [companyId]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +50,12 @@ export const Login = () => {
 
         toast.success("Login successful! Redirecting...");
 
+        if (rememberMe) {
+          localStorage.setItem("rememberedEmail", email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
+
         if (result.user.role !== "super") {
           setTimeout(() => {
             window.location.href = `/${companyUserName}`;
@@ -57,6 +67,37 @@ export const Login = () => {
         }
       } else {
         toast.error(result.error || "Invalid credentials");
+      }
+    } catch (err) {
+      toast.error("Connection error. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.info("Please enter your email first to reset password");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "company_id": companyId ?? "super",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success("Password reset email sent! Please check your inbox.");
+      } else {
+        toast.error(result.error || "Failed to send reset email");
       }
     } catch (err) {
       toast.error("Connection error. Please try again.");
@@ -140,12 +181,15 @@ export const Login = () => {
             <label className="flex items-center">
               <input
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className={`ml-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Remember me</span>
             </label>
             <button
               type="button"
+              onClick={handleForgotPassword}
               className="text-blue-600 hover:text-blue-500 font-medium"
             >
               Forgot password?
