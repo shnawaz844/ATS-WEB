@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, register } from "../controllers/Auth/Auth.js";
+import { forgotPassword, login, logout, register, resetPassword } from "../controllers/Auth/Auth.js";
 import { authenticate } from "../middleware/VerifyToken.js";
 import User from "../models/User.js";
 
@@ -8,6 +8,8 @@ const router = express.Router();
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/register", register);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 router.get("/validuser", authenticate, async (req, res) => {
   try {

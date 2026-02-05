@@ -1,6 +1,5 @@
-// controllers/applicationController.js
-
 import Application from '../../models/Application.js';
+import InterviewSchedule from '../../models/Applicationlist.js';
 
 const getCandidateAppDetail = async (req, res) => {
     try {
@@ -26,15 +25,19 @@ const getCandidateAppDetail = async (req, res) => {
         const skip = (page - 1) * limit;
 
         // Retrieve applications with pagination & population
-        const applications = await Application.findOne(filter)
-            .sort( { createdAt: -1 } )
+        const application = await Application.findOne(filter)
+            .sort({ createdAt: -1 })
             .populate('candidateID')
             .populate('jobID')
-            .skip(skip)
-            .limit(limit);
+            .lean();
+
+        if (application) {
+            const latestInterview = await InterviewSchedule.findOne({ applicationID: application._id }).sort({ createdAt: -1 }).lean();
+            application.interview = latestInterview;
+        }
 
         return res.status(200).json({
-            applications,
+            applications: application,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
             totalApplications: total

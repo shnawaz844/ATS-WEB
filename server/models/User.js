@@ -35,7 +35,9 @@ const UserSchema = new mongoose.Schema({
     company_id: {
         type: String,
         required: true
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 },
     { timestamps: true }
 );
