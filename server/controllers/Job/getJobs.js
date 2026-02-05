@@ -1,10 +1,10 @@
-import mongoose from "mongoose" ;
+import mongoose from "mongoose";
 import Job from '../../models/Job.js';
 
 const getJobs = async (req, res) => {
     try {
         let { page = 1, limit = 12, search, title, locationType, type, scheduleType, hireType, city, status } = req.query;
-        let company_id = req.headers["company-id"];
+        let company_id = req.headers["company_id"];
         // Convert page & limit to numbers safely
         const pageNumber = parseInt(page, 10) || 1;
         const limitNumber = Math.max(parseInt(limit, 10) || 12, 1);
@@ -22,11 +22,11 @@ const getJobs = async (req, res) => {
             filter.title = { $regex: search.trim(), $options: 'i' };
         };
         if (title) filter.title = { $regex: title, $options: 'i' };
-        if ( company_id ) {
-            const companyFilters = [ { company_id: company_id } ];
+        if (company_id) {
+            const companyFilters = [{ company_id: company_id }];
 
-            if ( mongoose.Types.ObjectId.isValid( company_id ) ) {
-                companyFilters.push( { company_id: new mongoose.Types.ObjectId( company_id ) } );
+            if (mongoose.Types.ObjectId.isValid(company_id)) {
+                companyFilters.push({ company_id: new mongoose.Types.ObjectId(company_id) });
             }
 
             filter.$or = companyFilters;
