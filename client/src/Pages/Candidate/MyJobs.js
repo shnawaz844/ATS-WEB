@@ -332,9 +332,9 @@ const MyJobs = () => {
                                                                     Join Meeting
                                                                 </a>
                                                             ) : (
-                                                                <div className="text-sm flex items-center text-gray-400 font-medium mt-1 cursor-not-allowed">
+                                                                <div className="text-sm flex items-center text-gray-400 font-medium mt-1 cursor-default">
                                                                     <Video className="h-3.5 w-3.5 mr-2" />
-                                                                    Join Meeting (Locked)
+                                                                    Join Meeting (Locked) - Will activate 5 mins before
                                                                 </div>
                                                             )
                                                         )}
