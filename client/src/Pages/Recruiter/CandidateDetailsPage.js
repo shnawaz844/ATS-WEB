@@ -6,7 +6,7 @@ import ApplicationTabs from './tabs/ApplicationTabs';
 import { ChevronLeft } from 'lucide-react'
 
 const CandidateDetailsPage = () => {
-    const { candidateId, jobId } = useParams(); 
+    const { candidateId, jobId } = useParams();
     const [activeTab, setActiveTab] = useState('resume');
     const [applicationData, setApplicationData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ const CandidateDetailsPage = () => {
     useEffect(() => {
         const fetchApplicationDetails = async () => {
             try {
-                const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/candidate-details/${candidateId}/${jobId}`);
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/application/candidate-details/${candidateId}/${jobId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Failed to fetch application data');
@@ -51,16 +51,15 @@ const CandidateDetailsPage = () => {
     }
 
     return (
-        
-        <div className="px-8 py-10 w-full min-h-screen"
-            style={ { background: 'linear-gradient(90deg, rgba(189, 189, 189, 1) 0%, rgba(189, 189, 189, 1) 7%, rgba(255, 255, 255, 1) 100%)' } }
+
+        <div className="px-8 py-10 w-full min-h-screen transition-colors duration-300 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
         >
             <button
-                className="flex items-center text-gray-700 hover:text-blue-800 transition-colors mb-5"
+                className="flex items-center text-gray-700 dark:text-gray-300 hover:text-blue-800 dark:hover:text-blue-400 transition-colors mb-5"
                 onClick={() => window.history.back()}
             >
                 <ChevronLeft size={18} />
-                <span className="ml-1 text-gray-700">Back</span>
+                <span className="ml-1">Back</span>
             </button>
             <h1 className="text-3xl font-bold mb-4">Candidate Details</h1>
             <CandidateInfo applicationData={applicationData} />

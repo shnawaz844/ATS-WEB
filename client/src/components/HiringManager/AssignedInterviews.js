@@ -4,7 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
 import { useTheme } from "../../context/ThemeContext";
-import { Briefcase, Search, Clock } from "lucide-react";
+import { Briefcase, Search, Clock, Trash2 } from "lucide-react";
 import BackButtonMobile from "../Mob-back-btn";
 import AiGeneratedInterviews from "./AiGeneratedInterviews";
 
@@ -43,8 +43,10 @@ const AssignedInterviews = () => {
     }, [companyUserName]);
 
 
-    // Fetch company_id from localStorage
-    const companyId = JSON.parse(localStorage.getItem("user")).company_id;
+    // Fetch company_id and role from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    const companyId = user.company_id;
+    const userRole = user.role;
     const {
         assignedInterviews,
         error,
@@ -219,6 +221,40 @@ const AssignedInterviews = () => {
             console.error("Error updating interview:", error);
             toast.dismiss(loadingToast);
             toast.error(error.message || "Error updating interview. Please try again.");
+        }
+    };
+
+    // Handle deleting an interview
+    const handleDeleteInterview = async (id, e) => {
+        if (e) e.stopPropagation(); // Prevent card click event
+
+        if (!window.confirm("Are you sure you want to delete this interview assignment? This action cannot be undone.")) {
+            return;
+        }
+
+        const loadingToast = toast.loading("Deleting interview...");
+
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/delete-interview/${id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to delete interview");
+            }
+
+            await refetchAssignedInterviews();
+            toast.dismiss(loadingToast);
+            toast.success("Interview deleted successfully!");
+            if (isEditModalOpen) setIsEditModalOpen(false);
+        } catch (error) {
+            console.error("Error deleting interview:", error);
+            toast.dismiss(loadingToast);
+            toast.error(error.message || "Error deleting interview. Please try again.");
         }
     };
 
@@ -428,6 +464,15 @@ const AssignedInterviews = () => {
                                                                     ? statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.charAt(0).toUpperCase() + statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.slice(1)
                                                                     : capitalizeFirstLetter(status)}
                                                             </span>
+                                                            {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                                <button
+                                                                    onClick={(e) => handleDeleteInterview(interview._id, e)}
+                                                                    className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors"
+                                                                    title="Delete Interview Assignment"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </button>
+                                                            )}
                                                         </div>
 
                                                         {/* Main content */}
@@ -550,9 +595,20 @@ const AssignedInterviews = () => {
                                                         Applicant Name :  {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
                                                     </p>
                                                 </div>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(interview.status)}`}>
-                                                    {statuses?.length && statuses?.filter(status => status._id === interview.status)[0]?.applicationStatus}
-                                                </span>
+                                                <div className="flex items-center">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(interview.status)}`}>
+                                                        {statuses?.length && statuses?.filter(status => status._id === interview.status)[0]?.applicationStatus}
+                                                    </span>
+                                                    {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                        <button
+                                                            onClick={(e) => handleDeleteInterview(interview._id, e)}
+                                                            className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors ml-2"
+                                                            title="Delete Interview Assignment"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="space-y-3 mt-4">
@@ -597,7 +653,6 @@ const AssignedInterviews = () => {
                                     ))}
                             </div>
                         )}
-
                     </>
                 )}
             </div>
@@ -771,6 +826,15 @@ const AssignedInterviews = () => {
                                             >
                                                 Update Interview
                                             </button>
+                                            {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                <button
+                                                    onClick={(e) => handleDeleteInterview(detailedInterview._id, e)}
+                                                    className="px-4 py-2.5 bg-red-600 rounded-xl text-white hover:text-white font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                    Delete
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

@@ -12,6 +12,7 @@ import { PostJob } from './components/PostJob/PostJob';
 import AllJobs from './Pages/Employer/AllJobs';
 import { Login } from './components/Login/Login';
 import { Register } from './components/Login/Register';
+import ResetPassword from './components/Login/ResetPassword';
 import RecruiterDashboard from './Pages/Recruiter/RecruiterDashboard';
 import { CoordinatorDashboard } from './Pages/Coordinator/CoordinatorDashboard';
 import { JobDetails } from './components/Home/JobDetails';
@@ -78,7 +79,7 @@ function App() {
   const { theme } = useTheme();
 
   // Pages that should be accessible without being treated as a company slug
-  const ignoredSlugs = ['about', 'contact', 'privacy', 'terms', 'blog', 'documentation', 'support', 'guides', 'jobs', 'login', 'signup', 'all-users', 'all-companies', 'profile', '404'];
+  const ignoredSlugs = ['about', 'contact', 'privacy', 'terms', 'blog', 'documentation', 'support', 'guides', 'jobs', 'login', 'signup', 'reset-password', 'all-users', 'all-companies', 'profile', '404'];
 
 
   const slug = location.pathname.split('/')[1];
@@ -200,6 +201,7 @@ function App() {
           {/* Authentication */}
           <Route path="/:companyUserName/login" element={<Login />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/:companyUserName/signup" element={<Register />} />
           {/* <Route path="/:companyUserName?/signup" element={ <Register /> } /> */}
