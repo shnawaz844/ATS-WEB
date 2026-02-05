@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 import { Edit } from "lucide-react";
 
 export default function FilledPositionsModal({
@@ -10,6 +11,7 @@ export default function FilledPositionsModal({
     companyUserName,
 }) {
     const navigate = useNavigate();
+    const { theme } = useTheme();
 
     if (!isOpen) return null;
 
@@ -29,14 +31,14 @@ export default function FilledPositionsModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 rounded-xl">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-[#121212] border border-gray-800' : 'bg-white'} rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto`}>
                 {/* Header */}
-                <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Filled Positions</h2>
+                <div className={`p-6 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} flex justify-between items-center`}>
+                    <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Filled Positions</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className={`${theme === 'dark' ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'} transition-colors`}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -65,20 +67,18 @@ export default function FilledPositionsModal({
                                 return (
                                     <div
                                         key={job._id || job.id || index}
-                                        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                                        className={`${theme === 'dark' ? 'bg-[#1c1c1c] border-gray-800' : 'bg-white border-gray-200'} border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow`}
                                     >
                                         {/* Job Title and Status */}
                                         <div className="flex justify-between items-start mb-4">
-                                            <h3 className="text-xl font-semibold text-gray-900">
+                                            <h3 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                                 {job.title || "No Title"}
                                             </h3>
                                             <span
                                                 className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border
                         ${/closed|filled|completed/i.test(statusName)
-                                                        ? "bg-red-50 text-red-700 border-red-200"
-                                                        : /inactive|expired|draft/i.test(statusName)
-                                                            ? "bg-gray-50 text-gray-700 border-gray-200"
-                                                            : "bg-gray-50 text-gray-700 border-gray-200"
+                                                        ? (theme === 'dark' ? 'bg-red-900/20 text-red-400 border-red-800' : 'bg-red-50 text-red-700 border-red-200')
+                                                        : (theme === 'dark' ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200')
                                                     }`}
                                             >
                                                 {statusName}
@@ -88,24 +88,24 @@ export default function FilledPositionsModal({
                                         {/* Job Details */}
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             {job.type && (
-                                                <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+                                                <span className={`inline-flex items-center px-3 py-1 text-sm font-medium ${theme === 'dark' ? 'bg-blue-900/20 text-blue-400 border-blue-800' : 'bg-blue-50 text-blue-700 border-blue-200'} rounded-full border`}>
                                                     {job.type}
                                                 </span>
                                             )}
                                             {job.locationType && (
-                                                <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-green-50 text-green-700 rounded-full border border-green-200">
+                                                <span className={`inline-flex items-center px-3 py-1 text-sm font-medium ${theme === 'dark' ? 'bg-green-900/20 text-green-400 border-green-800' : 'bg-green-50 text-green-700 border-green-200'} rounded-full border`}>
                                                     {job.locationType}
                                                 </span>
                                             )}
                                             {(job.workType || job.schedule) && (
-                                                <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-purple-50 text-purple-700 rounded-full border border-purple-200">
+                                                <span className={`inline-flex items-center px-3 py-1 text-sm font-medium ${theme === 'dark' ? 'bg-purple-900/20 text-purple-400 border-purple-800' : 'bg-purple-50 text-purple-700 border-purple-200'} rounded-full border`}>
                                                     {job.workType || job.schedule || "Schedule"}
                                                 </span>
                                             )}
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                                        <div className={`flex justify-between items-center mt-4 pt-4 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-100'}`}>
                                             <div className="flex space-x-3">
                                                 <button
                                                     onClick={(e) => {
@@ -116,21 +116,21 @@ export default function FilledPositionsModal({
                                                             state: { job },
                                                         });
                                                     }}
-                                                    className="flex items-center text-white bg-slate-600 font-medium transition-colors duration-200 text-sm hover:bg-blue-50 px-2 py-1 rounded-xl"
+                                                    className={`flex items-center ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-600 hover:bg-blue-50'} text-white font-medium transition-colors duration-200 text-sm px-2 py-1 rounded-xl`}
                                                 >
                                                     <Edit className="h-4 w-4 mr-1" />
                                                     View & Edit
                                                 </button>
-                                                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl hover:bg-red-100 transition-colors">
+                                                <button className={`inline-flex items-center px-4 py-2 text-sm font-medium ${theme === 'dark' ? 'text-red-400 bg-red-900/20 border-red-800 hover:bg-red-900/40' : 'text-red-600 bg-red-50 border-red-200 hover:bg-red-100'} border rounded-xl transition-colors`}>
                                                     Delete
                                                 </button>
                                             </div>
 
                                             <div className="flex space-x-3">
-                                                <button className="flex items-center text-green-600 hover:text-green-800 text-sm font-medium">
+                                                <button className={`flex items-center ${theme === 'dark' ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-800'} text-sm font-medium`}>
                                                     Open
                                                 </button>
-                                                <button className="flex items-center text-purple-600 hover:text-purple-800 text-sm font-medium">
+                                                <button className={`flex items-center ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-800'} text-sm font-medium`}>
                                                     Share
                                                 </button>
                                             </div>
@@ -142,10 +142,10 @@ export default function FilledPositionsModal({
                     ) : (
                         <div className="text-center py-12">
                             <div className="text-gray-400 text-5xl mb-4">✅</div>
-                            <p className="text-gray-500 text-lg font-medium">
+                            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'} text-lg font-medium`}>
                                 No filled positions found
                             </p>
-                            <p className="text-gray-400 text-sm mt-2">
+                            <p className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-sm mt-2`}>
                                 All positions are currently open or in other statuses
                             </p>
                         </div>
@@ -153,10 +153,10 @@ export default function FilledPositionsModal({
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-gray-200 flex justify-end">
+                <div className={`p-6 border-t ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} flex justify-end`}>
                     <button
                         onClick={onClose}
-                        className="px-6 py-2  text-white rounded-xl bg-slate-600 transition-colors"
+                        className={`px-6 py-2 text-white rounded-xl ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-600 hover:bg-slate-700'} transition-colors`}
                     >
                         Close
                     </button>

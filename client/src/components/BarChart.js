@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
+import { useTheme } from '../context/ThemeContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,13 +21,14 @@ ChartJS.register(
 );
 
 export default function BarChart({ data = [] }) {
+  const { theme } = useTheme();
   // Handle empty or undefined data
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white rounded-lg p-4 text-center text-gray-500 flex flex-col items-center justify-center h-full min-h-[300px]">
+      <div className={`${theme === 'dark' ? 'bg-[#121212] border border-gray-800 text-gray-400' : 'bg-white text-gray-500'} rounded-lg p-4 text-center flex flex-col items-center justify-center h-full min-h-[300px]`}>
         <div className="text-4xl mb-2">📊</div>
         <p className="font-medium">No application data yet</p>
-        <p className="text-xs text-gray-400">Applications will appear here once candidates apply.</p>
+        <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Applications will appear here once candidates apply.</p>
       </div>
     );
   }
@@ -46,7 +48,7 @@ export default function BarChart({ data = [] }) {
           if (!chartArea) return null;
 
           const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-          gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)'); // blue-500
+          gradient.addColorStop(0, theme === 'dark' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(59, 130, 246, 0.8)'); // blue-500
           gradient.addColorStop(1, 'rgba(37, 99, 235, 1)');   // blue-600
           return gradient;
         },
@@ -66,7 +68,7 @@ export default function BarChart({ data = [] }) {
         display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.95)',
+        backgroundColor: theme === 'dark' ? 'rgba(31, 41, 55, 0.95)' : 'rgba(17, 24, 39, 0.95)',
         titleFont: {
           size: 13,
           weight: 'bold',
@@ -96,13 +98,13 @@ export default function BarChart({ data = [] }) {
           font: {
             size: 11,
           },
-          color: '#6B7280', // gray-500
+          color: theme === 'dark' ? '#9CA3AF' : '#6B7280', // gray-400 : gray-500
         },
       },
       y: {
         beginAtZero: true,
         grid: {
-          color: '#F3F4F6', // gray-100
+          color: theme === 'dark' ? '#1F2937' : '#F3F4F6', // gray-800 : gray-100
           drawBorder: false,
         },
         ticks: {
@@ -110,7 +112,7 @@ export default function BarChart({ data = [] }) {
           font: {
             size: 11,
           },
-          color: '#6B7280',
+          color: theme === 'dark' ? '#9CA3AF' : '#6B7280',
         },
       },
     },
