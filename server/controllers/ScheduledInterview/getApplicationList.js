@@ -65,7 +65,11 @@ export const getInterviews = async (req, res) => {
                 path: 'interviewerID',
                 select: 'email name interviewer userName',
             })
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .populate({
+                path: 'roundID',
+                select: 'roundName'
+            });
 
         // Get all interviews that match the base filter
         let allInterviews = await interviewsQuery.exec();
