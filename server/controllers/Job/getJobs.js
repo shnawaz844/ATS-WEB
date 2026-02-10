@@ -4,7 +4,7 @@ import Job from '../../models/Job.js';
 const getJobs = async (req, res) => {
     try {
         let { page = 1, limit = 12, search, title, locationType, type, scheduleType, hireType, city, status } = req.query;
-        let company_id = req.headers["company_id"];
+        let company_id = req.headers["company-id"]?.trim();
         // Convert page & limit to numbers safely
         const pageNumber = parseInt(page, 10) || 1;
         const limitNumber = Math.max(parseInt(limit, 10) || 12, 1);

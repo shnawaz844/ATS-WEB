@@ -29,6 +29,7 @@ import ApplicationListing from "./Pages/Application/ApplicationListing";
 import Dashboard from './Pages/Dashboard';
 import Profile from './Pages/Profile/Profile';
 import ScheduledInterview from './Pages/ScheduledInterview/ScheduledInterview';
+import InterviewerDashboard from './Pages/Interviewer/InterviewerDashboard';
 import HiringManagerDashboard from './components/HiringManager/HiringManagerDashboard';
 import ManagerApplicationList from './components/HiringManager/ManagerApplicationList';
 import AssignedInterviews from './components/HiringManager/AssignedInterviews';
@@ -254,6 +255,7 @@ function App() {
 
           {/* Role-specific Dashboards */}
           <Route path="/:companyUserName/recruiter-dashboard" element={<RecruiterDashboard />} />
+          <Route path="/:companyUserName/interviewer-dashboard" element={<InterviewerDashboard />} />
           <Route path="/:companyUserName/coordinator/review" element={<CoordinatorDashboard />} />
           <Route path="/:companyUserName/hiring_manager" element={<HiringManagerDashboard />} />
 

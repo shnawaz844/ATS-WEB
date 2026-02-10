@@ -783,7 +783,7 @@ export const ScheduledInterview = () => {
                                                 </button>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {interviewRounds?.length && interviewRounds?.filter(round => round._id === interview?.roundID)[0]?.roundName || "N/A"}
+                                                {interview?.roundID?.roundName || (interviewRounds?.length && interviewRounds?.find(round => round._id === interview?.roundID)?.roundName) || "N/A"}
                                             </td>
                                         </tr>
                                     ))}
@@ -1211,7 +1211,7 @@ export const ScheduledInterview = () => {
                                     <div className="bg-white dark:bg-gray-700 p-2 sm:p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600">
                                         <p className="text-gray-500 dark:text-gray-400 text-xs uppercase font-medium">Round</p>
                                         <p className="font-medium text-gray-800 dark:text-white mt-1">
-                                            {interviewRounds?.length && interviewRounds?.filter(round => round._id === detailedInterview?.roundID)[0]?.roundName || "N/A"}
+                                            {detailedInterview?.roundID?.roundName || (interviewRounds?.length && interviewRounds?.find(round => round._id === detailedInterview?.roundID)?.roundName) || "N/A"}
                                         </p>
                                     </div>
                                 </div>

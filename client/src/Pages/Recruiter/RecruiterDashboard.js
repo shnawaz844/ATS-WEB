@@ -555,7 +555,7 @@ export default function Dashboard() {
         <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-gray-50'}`}>
             <div className="max-w-7xl mx-auto">
                 <div className="dashboard-header mb-8">
-                    <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> Admin Dashboard</h1>
+                    <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}> Recruiter Dashboard</h1>
                     <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-2`}>
                         {new Date().toLocaleDateString('en-US', {
                             weekday: 'long',
