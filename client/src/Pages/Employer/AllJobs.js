@@ -313,6 +313,7 @@ export const AllJobs = () => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'company_id': companyId
                 }
             });
 
