@@ -1,5 +1,27 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useHiringManagerDashboardStats } from '../../hooks/useHiringManager';
+import {
+    Chart as ChartJS,
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title
+} from 'chart.js';
+import { Doughnut, Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title
+);
 
 // Icon Components
 const SearchIcon = () => (
@@ -27,31 +49,11 @@ const SettingsIcon = () => (
     </svg>
 );
 
-// Application Data
-const initialApplications = [
-    { id: 1, jobTitle: "Senior React Developer", jobField: "Development", applicantName: "John Smith", email: "john.smith@email.com", status: "Interview", experience: "5 years", appliedDate: "2025-01-15", skills: ["React", "Node.js", "TypeScript"], stage: "Technical Round" },
-    { id: 2, jobTitle: "UX Designer", jobField: "Design", applicantName: "Emily Brown", email: "emily.b@email.com", status: "Screening", experience: "3 years", appliedDate: "2025-01-18", skills: ["Figma", "UI/UX", "Wireframing"], stage: "Initial Screening" },
-    { id: 3, jobTitle: "Product Manager", jobField: "Management", applicantName: "Michael Chen", email: "m.chen@email.com", status: "Shortlisted", experience: "7 years", appliedDate: "2025-01-20", skills: ["Agile", "Product Strategy", "Team Leadership"], stage: "HR Round" },
-    { id: 4, jobTitle: "DevOps Engineer", jobField: "Operations", applicantName: "Sarah Wilson", email: "sarah.w@email.com", status: "Rejected", experience: "4 years", appliedDate: "2025-01-10", skills: ["AWS", "Docker", "Jenkins"], stage: "Technical Round" },
-    { id: 5, jobTitle: "Senior React Developer", jobField: "Development", applicantName: "David Lee", email: "david.lee@email.com", status: "Offered", experience: "6 years", appliedDate: "2025-01-12", skills: ["React", "Redux", "JavaScript"], stage: "Final Round" }
-];
-
 // Stats Component
-const Stats = () => {
+const Stats = ({ stats }) => {
     const { theme } = useTheme();
-    const totalApplications = initialApplications.length;
-    const activeApplications = initialApplications.filter(app =>
-        ["Interview", "Screening", "Shortlisted"].includes(app.status)).length;
-    const offerRate = (initialApplications.filter(app => app.status === "Offered").length / totalApplications * 100).toFixed(1);
-    const avgExperience = (initialApplications.reduce((acc, app) =>
-        acc + parseInt(app.experience), 0) / totalApplications).toFixed(1);
 
-    const stats = [
-        { title: 'Total Applications', value: totalApplications, change: '+12.5%', trend: 'up' },
-        { title: 'Active Applications', value: activeApplications, change: '+2.4%', trend: 'up' },
-        { title: 'Offer Rate', value: `${offerRate}%`, change: '+3.2%', trend: 'up' },
-        { title: 'Avg. Experience', value: `${avgExperience} years`, change: '+1.5%', trend: 'up' },
-    ];
+    if (!stats) return null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -73,70 +75,244 @@ const Stats = () => {
     );
 };
 
-// Recent Applications Table
+// Charts Component
+const DashboardCharts = ({ statusCounts, monthlyApplications }) => {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    // Donut Chart Data (Status Distribution)
+    const donutLabels = Object.keys(statusCounts || {});
+    const donutValues = Object.values(statusCounts || {});
+    const totalApplications = donutValues.reduce((a, b) => a + b, 0);
+
+    const donutColors = [
+        'rgba(147, 51, 234, 0.8)', // Purple
+        'rgba(59, 130, 246, 0.8)', // Blue
+        'rgba(16, 185, 129, 0.8)', // Green
+        'rgba(245, 158, 11, 0.8)', // Yellow
+        'rgba(239, 68, 68, 0.8)',  // Red
+        'rgba(107, 114, 128, 0.8)', // Gray
+    ];
+
+    const donutData = {
+        labels: donutLabels,
+        datasets: [
+            {
+                data: donutValues,
+                backgroundColor: donutColors,
+                borderColor: isDark ? 'rgba(0,0,0,0.2)' : '#ffffff',
+                borderWidth: 2,
+                cutout: '70%', // Make doughnut thinner
+            },
+        ],
+    };
+
+    // Bar Chart Data
+    const barLabels = monthlyApplications?.map(item => item.month) || [];
+    const barValues = monthlyApplications?.map(item => item.count) || [];
+
+    const barData = {
+        labels: barLabels,
+        datasets: [
+            {
+                label: 'Applications',
+                data: barValues,
+                backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                borderRadius: 4,
+                hoverBackgroundColor: 'rgba(147, 51, 234, 1)',
+            },
+        ],
+    };
+
+    const donutOptions = {
+        plugins: {
+            legend: {
+                display: false, // Hide default legend
+            },
+            tooltip: {
+                backgroundColor: isDark ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                titleColor: isDark ? '#fff' : '#111',
+                bodyColor: isDark ? '#fff' : '#111',
+                borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                borderWidth: 1,
+            }
+        },
+        maintainAspectRatio: false,
+    };
+
+    const barOptions = {
+        plugins: {
+            legend: {
+                display: false,
+            },
+            tooltip: {
+                backgroundColor: isDark ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                titleColor: isDark ? '#fff' : '#111',
+                bodyColor: isDark ? '#fff' : '#111',
+                borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                borderWidth: 1,
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: isDark ? 'rgba(75, 85, 99, 0.2)' : 'rgba(209, 213, 219, 0.2)',
+                },
+                ticks: {
+                    color: isDark ? '#9ca3af' : '#4b5563',
+                    stepSize: 1
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    color: isDark ? '#9ca3af' : '#4b5563',
+                }
+            }
+        },
+        maintainAspectRatio: false,
+    };
+
+    if (!statusCounts && !monthlyApplications) return null;
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Donut Chart with Custom Legend */}
+            <div className={`p-6 rounded-xl shadow-md border transition-all duration-300 ${isDark
+                ? 'bg-white/5 border-gray-600'
+                : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'}`}>
+                <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>Application Status</h3>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    {/* Chart Circle */}
+                    <div className="relative w-48 h-48">
+                        <Doughnut data={donutData} options={donutOptions} />
+                        {/* Center Text */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                {totalApplications}
+                            </span>
+                            <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                Total
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Custom Legend */}
+                    <div className="flex-1 w-full sm:w-auto">
+                        <div className="grid grid-cols-1 gap-3">
+                            {donutLabels.map((label, index) => (
+                                <div key={label} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100/5 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-3 h-3 rounded-full shadow-sm"
+                                            style={{ backgroundColor: donutColors[index % donutColors.length] }}
+                                        />
+                                        <span className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            {label}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                            {donutValues[index]}
+                                        </span>
+                                        <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                                            ({((donutValues[index] / totalApplications) * 100).toFixed(0)}%)
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bar Chart */}
+            <div className={`p-6 rounded-xl shadow-md border transition-all duration-300 ${isDark
+                ? 'bg-white/5 border-gray-600'
+                : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'}`}>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        Applications Trend
+                    </h3>
+                    <select className={`text-xs rounded-lg px-2 py-1 border ${isDark ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-600'}`}>
+                        <option>Last 6 Months</option>
+                    </select>
+                </div>
+                <div className="h-64 cursor-crosshair">
+                    <Bar data={barData} options={barOptions} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Recent Applications Component (Cards)
 const RecentApplications = ({ applications }) => {
     const { theme } = useTheme();
-    return (
-        <div className={`rounded-xl shadow-md border overflow-hidden transition-all duration-300 ${theme === 'dark'
-            ? 'bg-transparent border-gray-600'
-            : 'bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg'}`}>
-            <div className="p-6 border-b border-gray-200 dark:border-purple-600/30">
-                <h2 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Recent Applications</h2>
+
+    if (!applications || applications.length === 0) {
+        return (
+            <div className={`p-6 text-center rounded-xl border ${theme === 'dark' ? 'bg-white/5 border-gray-600 text-gray-400' : 'bg-white/80 border-purple-200 text-gray-500'}`}>
+                No recent applications found.
             </div>
-            <div className={`overflow-x-auto ${theme === 'dark' ? 'bg-black/20' : 'bg-white/40'}`}>
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className={theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}>
-                        <tr>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Applicant</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Position</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Status</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Stage</th>
-                            <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>Applied Date</th>
-                        </tr>
-                    </thead>
-                    <tbody className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                        {applications.map((app) => (
-                            <tr key={app.id} className={`transition-colors ${theme === 'dark' ? 'hover:bg-purple-900/10 bg-white/10' : 'hover:bg-purple-50/30'}`}>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{app.applicantName}</td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{app.jobTitle}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${app.status === 'Offered' ? theme === 'dark' ? 'bg-purple-900/30 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200' :
-                                        app.status === 'Interview' ? theme === 'dark' ? 'bg-blue-900/30 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200' :
-                                            app.status === 'Shortlisted' ? theme === 'dark' ? 'bg-green-900/30 text-green-300 border-green-700' : 'bg-green-100 text-green-800 border-green-200' :
-                                                app.status === 'Screening' ? theme === 'dark' ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700' : 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                                    theme === 'dark' ? 'bg-red-900/30 text-red-300 border-red-700' : 'bg-red-100 text-red-800 border-red-200'
-                                        }`}>
-                                        {app.status}
-                                    </span>
-                                </td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{app.stage}</td>
-                                <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{app.appliedDate}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Recent Applications</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {applications.map((app) => (
+                    <div key={app.id} className={`p-5 rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 ${theme === 'dark'
+                        ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700 hover:border-purple-500/30'
+                        : 'bg-white border-purple-50 hover:border-purple-200'
+                        }`}>
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1 mr-2">
+                                <h3 className={`font-bold text-lg truncate ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`} title={app.applicantName}>
+                                    {app.applicantName}
+                                </h3>
+                                <p className={`text-sm mt-1 truncate ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`} title={app.jobTitle}>
+                                    {app.jobTitle}
+                                </p>
+                            </div>
+                            <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold border ${app.status === 'Offered' ? (theme === 'dark' ? 'bg-purple-900/40 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-700 border-purple-200') :
+                                app.status === 'Interview' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-300 border-blue-700' : 'bg-blue-50 text-blue-700 border-blue-200') :
+                                    app.status === 'Shortlisted' ? (theme === 'dark' ? 'bg-green-900/40 text-green-300 border-green-700' : 'bg-green-50 text-green-700 border-green-200') :
+                                        (theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-100 text-gray-600 border-gray-200')
+                                }`}>
+                                {app.status}
+                            </span>
+                        </div>
+
+                        <div className={`mt-4 pt-4 border-t flex items-center justify-between text-xs font-medium ${theme === 'dark' ? 'border-gray-700 text-gray-500' : 'border-gray-100 text-gray-400'}`}>
+                            <span>Applied</span>
+                            <span>{new Date(app.appliedDate).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
 };
 
 // Summary Cards Component
-const SummaryCards = ({ applications }) => {
+const SummaryCards = ({ statusCounts }) => {
     const { theme } = useTheme();
-    const statusCounts = applications.reduce((acc, app) => {
-        acc[app.status] = (acc[app.status] || 0) + 1;
-        return acc;
-    }, {});
+
+    if (!statusCounts) return null;
 
     const getStatusStyle = (status) => {
         const isDark = theme === 'dark';
-        switch (status) {
-            case 'Offered': return isDark ? 'bg-purple-900/30 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200';
-            case 'Interview': return isDark ? 'bg-blue-900/30 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200';
-            case 'Shortlisted': return isDark ? 'bg-green-900/30 text-green-300 border-green-700' : 'bg-green-100 text-green-800 border-green-200';
-            case 'Screening': return isDark ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700' : 'bg-yellow-100 text-yellow-800 border-yellow-200';
-            default: return isDark ? 'bg-red-900/30 text-red-300 border-red-700' : 'bg-red-100 text-red-800 border-red-200';
-        }
+        if (status.includes('Offered') || status.includes('Hired')) return isDark ? 'bg-purple-900/30 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-800 border-purple-200';
+        if (status.includes('Interview')) return isDark ? 'bg-blue-900/30 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-800 border-blue-200';
+        if (status.includes('Shortlist')) return isDark ? 'bg-green-900/30 text-green-300 border-green-700' : 'bg-green-100 text-green-800 border-green-200';
+        if (status.includes('Screening')) return isDark ? 'bg-yellow-900/30 text-yellow-300 border-yellow-700' : 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return isDark ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-100 text-gray-800 border-gray-200';
     };
 
     return (
@@ -161,6 +337,31 @@ const SummaryCards = ({ applications }) => {
 export default function HiringDashboard() {
     const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
+    const { data: dashboardData, isLoading, error } = useHiringManagerDashboardStats();
+
+    const filteredRecentApps = dashboardData?.recentApplications?.filter(app =>
+        (app.applicantName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (app.jobTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (isLoading) {
+        return (
+            <div className={`min-h-screen p-6 flex items-center justify-center ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={`min-h-screen p-6 flex items-center justify-center ${theme === "dark" ? "bg-black text-white" : "bg-gray-50 text-gray-900"}`}>
+                <div className="text-center">
+                    <h2 className="text-xl font-bold text-red-500">Error loading dashboard</h2>
+                    <p className="mt-2 text-gray-500">{error.message}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === "dark"
@@ -197,7 +398,7 @@ export default function HiringDashboard() {
                                     ? 'bg-gray-800/50 border-gray-600 text-white placeholder-gray-400'
                                     : 'bg-white/50 border-white/50 text-gray-900 placeholder-gray-500 shadow-sm'
                                     }`}
-                                placeholder="Search applications..."
+                                placeholder="Search recent applications..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -218,13 +419,19 @@ export default function HiringDashboard() {
                 </div>
 
                 {/* Stats Section */}
-                <Stats />
+                <Stats stats={dashboardData?.stats} />
+
+                {/* Dashboard Charts */}
+                <DashboardCharts
+                    statusCounts={dashboardData?.statusCounts}
+                    monthlyApplications={dashboardData?.monthlyApplications}
+                />
 
                 {/* Summary Cards */}
-                <SummaryCards applications={initialApplications} />
+                <SummaryCards statusCounts={dashboardData?.statusCounts} />
 
                 {/* Recent Applications */}
-                <RecentApplications applications={initialApplications} />
+                <RecentApplications applications={filteredRecentApps} />
             </div>
         </div>
     );

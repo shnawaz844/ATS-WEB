@@ -73,13 +73,13 @@ const hiringManagerNavItems = [
 ];
 
 const interviewerNavItems = [
-  { label: "Home", path: "/", icon: <Home className="hidden lg:block w-5 h-5" /> },
+  { label: "Dashboard", path: "/interviewer-dashboard", icon: <Home className="hidden lg:block w-5 h-5" /> },
   { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
   { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
 ];
 
 const recruiterNavItems = [
-  { label: "Home", path: "/recruiter-dashboard", icon: <Home className="hidden lg:block w-5 h-5 " /> },
+  { label: "Dashboard", path: "/recruiter-dashboard", icon: <Home className="hidden lg:block w-5 h-5 " /> },
   { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="hidden lg:block w-5 h-5" /> },
   { label: "Applications", path: "/all-applications", icon: <FileText className="hidden lg:block w-5 h-5" /> },
   { label: "Interviews", path: "/all-interviews" },
@@ -275,8 +275,8 @@ export const Navbar = () => {
                   alt="ATS Logo"
                 />
                 <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text text-transparent ml-2 hidden sm:block">
-                  <span className="font-extrabold text-xl md:text-2xl">
-                    {companyUserName ? company.CompanyUserName : "ATS"}
+                  <span className="font-extrabold text-xl md:text-2xl capitalize">
+                    {companyUserName ? company?.CompanyUserName?.toLowerCase() : "ATS"}
                   </span>
                 </span>
               </NavLink>
