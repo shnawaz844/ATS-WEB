@@ -39,7 +39,7 @@ export default function Stats({
       const statusName = getStatusNameById(job.status);
       console.log(`Job "${job.title}" has status: "${statusName}"`);
 
-      if (/closed|filled|completed|inactive|expired|draft/i.test(statusName)) {
+      if (/closed|filled|completed|inactive|expired/i.test(statusName)) {
         filledPositions++;
       }
     });
