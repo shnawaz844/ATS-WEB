@@ -32,7 +32,7 @@ const fetchApplicationStatuses = async ({ filters = {}, page = 1, limit = 100 })
         `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses?${queryParams}`,
         {
             headers: {
-                'company_id': companyId
+                'Company_id': companyId
             }
         }
     );
@@ -357,6 +357,28 @@ const MyJobs = () => {
                                             className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-300 hover:text-black transition-colors text-sm shadow-md"
                                         >
                                             <EyeIcon className="h-4 w-4 mr-1" /> View
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (app && app._id) {
+                                                    setSelectedApp(app);
+                                                    setUpdatedApplication({
+                                                        candidateID: app.candidateID,
+                                                        jobID: app.jobID,
+                                                        contactInfo: app.contactInfo || '',
+                                                        experience: app.experience || '',
+                                                        questions: app.questions || [],
+                                                        answers: app.answers || []
+                                                    });
+                                                    setFile(null);
+                                                    setIsEditModalOpen(true);
+                                                } else {
+                                                    toast.error('Unable to load application details');
+                                                }
+                                            }}
+                                            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors text-sm shadow-md"
+                                        >
+                                            <FileText className="h-4 w-4 mr-1" /> Edit
                                         </button>
                                     </div>
                                 </div>

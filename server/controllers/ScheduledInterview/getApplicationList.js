@@ -25,6 +25,11 @@ export const getInterviews = async (req, res) => {
         // If company_id is provided in the headers, add it to the filter
         if (company_id) {
             filter.company_id = company_id;
+
+            const company = await mongoose.model('Company').findById(company_id);
+            if (company && company.onlyAiFeaturesEnabled) {
+                filter.interviewerType = 'AI';
+            }
         }
 
         // Add filter for interviewerEmail if provided

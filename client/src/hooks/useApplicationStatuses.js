@@ -6,7 +6,7 @@ const fetchApplicationStatuses = async ( { filters, page, limit } ) => {
     const res = await fetch( `${ process.env.REACT_APP_BASE_URL }/application/grouped-by-job?${ queryParams }`, {
         method: 'GET', // Specify the HTTP method (GET in this case)
         headers: {
-            'company_id': companyId, // Add company_id header
+            'Company_id': companyId, // Add company_id header
         }
     } );
     if ( !res.ok ) {
@@ -26,7 +26,7 @@ export const useApplicationStatuses = ( filters, page = 1, limit ) => {
             page,
             limit,
             headers: {
-                'company_id': companyId,  // Adding company_id to the headers
+                'Company_id': companyId,  // Adding company_id to the headers
             }
         } ),
         keepPreviousData: true, // Ensures previous data is displayed while new data is loading

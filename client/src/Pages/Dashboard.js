@@ -34,8 +34,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
+        const companyId = localStorage.getItem('companyId') || '';
         const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/application/all-application?page=${page}&limit=${limit}`
+          `${process.env.REACT_APP_BASE_URL}/application/all-application?page=${page}&limit=${limit}`,
+          {
+            headers: {
+              'company_id': companyId
+            }
+          }
         );
 
         if (!response.ok) {
@@ -73,7 +79,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const companyId = localStorage.getItem('company_id') || '';
+        const companyId = localStorage.getItem('companyId') || '';
         console.log('Fetching jobs with company_id:', companyId);
 
         // First, get total count of jobs
@@ -112,7 +118,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchJobStatuses = async () => {
       try {
-        const companyId = localStorage.getItem('company_id') || '';
+        const companyId = localStorage.getItem('companyId') || '';
         console.log('Fetching job statuses with company_id:', companyId);
 
         const response = await fetch(

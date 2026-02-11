@@ -37,7 +37,7 @@ const AiGeneratedInterviewsTable = () => {
 
     useEffect(() => {
         fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
-            headers: { "company_id": companyId }
+            headers: { "Company_id": companyId }
         })
             .then(response => response.json())
             .then(data => setStatuses(data.applicationStatuses))

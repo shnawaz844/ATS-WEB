@@ -79,7 +79,7 @@ export const Applications = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'company_id': companyId
+                        'Company_id': companyId
                     }
                 });
                 if (!response.ok) {

@@ -36,7 +36,7 @@ export const Login = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "company_id": companyId ?? "super",
+          "Company_id": companyId ?? "super",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -88,7 +88,7 @@ export const Login = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "company_id": companyId ?? "super",
+          "Company_id": companyId ?? "super",
         },
         body: JSON.stringify({ email }),
       });

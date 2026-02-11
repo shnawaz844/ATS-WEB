@@ -37,6 +37,7 @@ const CompanyListing = () => {
     website: "",
     image: null,
     aiFeaturesEnabled: false,
+    onlyAiFeaturesEnabled: false,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -194,6 +195,7 @@ const CompanyListing = () => {
       phone: "",
       website: "",
       aiFeaturesEnabled: false,
+      onlyAiFeaturesEnabled: false,
     });
     setIsDialogOpen(true);
     toast.info("Ready to add a new company");
@@ -212,6 +214,7 @@ const CompanyListing = () => {
       website: company.website,
       image: company.image || null,
       aiFeaturesEnabled: company.aiFeaturesEnabled || false,
+      onlyAiFeaturesEnabled: company.onlyAiFeaturesEnabled || false,
     });
     setIsDialogOpen(true);
   };
@@ -765,6 +768,27 @@ const CompanyListing = () => {
                         </label>
                         <p className="text-xs text-purple-600 dark:text-purple-300">
                           When enabled, this company will see AI-generated applications, jobs, and interviews.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/50">
+                      <div className="flex items-center h-5">
+                        <input
+                          id="onlyAiFeaturesEnabled"
+                          name="onlyAiFeaturesEnabled"
+                          type="checkbox"
+                          checked={formData.onlyAiFeaturesEnabled}
+                          onChange={handleChange}
+                          className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label htmlFor="onlyAiFeaturesEnabled" className="text-sm font-semibold text-purple-900 dark:text-purple-100 cursor-pointer">
+                          Restrict to AI Features
+                        </label>
+                        <p className="text-xs text-purple-600 dark:text-purple-300">
+                          When enabled, this company will ONLY see AI-generated applications, jobs, and interviews.
                         </p>
                       </div>
                     </div>

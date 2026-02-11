@@ -80,7 +80,7 @@ const AssignedInterviews = () => {
     useEffect(() => {
         fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
             headers: {
-                "company_id": companyId
+                "Company_id": companyId
             }
         })
             .then(response => response.json())
@@ -144,7 +144,7 @@ const AssignedInterviews = () => {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "company_id": companyId,
+                        "Company_id": companyId,
                     },
                 });
                 if (!response.ok) {
@@ -396,7 +396,7 @@ const AssignedInterviews = () => {
                                     : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                                     }`}
                             >
-                                AI Generated Interviews
+                                AI Selected Interviews
                             </button>
                         )}
                     </div>

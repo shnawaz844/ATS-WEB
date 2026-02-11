@@ -13,14 +13,14 @@ const getJobStatuses = async (req, res) => {
     // Build a query for searching job statuses
     let query = {};
 
-    if(company_id){
-      query.company_id = company_id;  
+    if (company_id) {
+      query.company_id = company_id;
     }
-    
+
     if (search) {
       // Check if search is a number (for jobStep)
       const isNumeric = !isNaN(parseInt(search));
-      
+
       if (isNumeric) {
         // If search is a number, include jobStep search
         query = {
@@ -38,7 +38,7 @@ const getJobStatuses = async (req, res) => {
     }
 
     // Count total documents that match the query
-      const totalCount = await JobStatus.countDocuments(query);
+    const totalCount = await JobStatus.countDocuments(query);
 
     // Find Job statuses with pagination and search
     const jobStatuses = await JobStatus.find(query)

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import JobStatus from "../../models/JobStatus.js";
 import Job from '../../models/Job.js';
 
 const getJobs = async (req, res) => {
@@ -12,7 +13,6 @@ const getJobs = async (req, res) => {
         let filter = {};
 
         // Apply filters only if values exist
-        // if ( title ) filter.title = { $regex: title, $options: 'i' };;
         if (locationType) filter.locationType = { $regex: locationType, $options: 'i' };
         if (city) filter.city = { $regex: city, $options: 'i' };
         if (type) filter.type = { $regex: type, $options: 'i' };
@@ -22,6 +22,7 @@ const getJobs = async (req, res) => {
             filter.title = { $regex: search.trim(), $options: 'i' };
         };
         if (title) filter.title = { $regex: title, $options: 'i' };
+
         if (company_id) {
             const companyFilters = [{ company_id: company_id }];
 
@@ -32,6 +33,26 @@ const getJobs = async (req, res) => {
             filter.$or = companyFilters;
         }
 
+        // Handle status filtering
+        if (status) {
+            const statusNames = status.split(',').map(s => s.trim());
+
+            // Find the corresponding JobStatus IDs for this company
+            const jobStatuses = await JobStatus.find({
+                jobStatus: { $in: statusNames },
+                company_id: company_id
+            });
+
+            if (jobStatuses.length > 0) {
+                const statusIds = jobStatuses.map(js => js._id.toString());
+                filter.status = { $in: statusIds };
+            } else {
+                // If no matching statuses found, return no jobs (or handle as appropriate)
+                // Since the frontend expects specific statuses, if they don't exist,
+                // it's safer to filter for something that won't match.
+                filter.status = new mongoose.Types.ObjectId();
+            }
+        }
 
         const totalCount = await Job.countDocuments(filter);
 

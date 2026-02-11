@@ -23,7 +23,7 @@ const fetchUsers = async ({ queryKey }) => {
 
   const res = await axios.get(url, {
     headers: {
-      'company_id': companyId  // Sending company_id in headers
+      'Company_id': companyId  // Sending company_id in headers
     }
   });
 
@@ -86,7 +86,7 @@ const deleteUser = async ( userId ) => {
     `${ process.env.REACT_APP_BASE_URL }/users/delete-user/${ userId }`,
     {
       headers: {
-        'company_id': JSON.parse( localStorage.getItem( "user" ) ).company_id
+        'Company_id': JSON.parse( localStorage.getItem( "user" ) ).company_id
       }
     }
   );

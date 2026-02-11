@@ -45,7 +45,8 @@ export const ApplicationForm = ({
   });
 
   // Fetch company_id from localStorage (or use the passed prop)
-  const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
+  // Fetch company_id from job first (if available), then localStorage
+  const companyId = job?.company_id || JSON.parse(localStorage.getItem("user") || "{}")?.company_id;
   const [emailStatus, setEmailStatus] = useState("");
   const [candidateID, setCandidateID] = useState(null); // Initialize as null
   const { mutate: addUser } = useAddUser();
@@ -182,7 +183,7 @@ export const ApplicationForm = ({
     formData.append("candidateName", loginData?.name || ""); // Add candidate name
     formData.append("jobID", job._id);
     formData.append("applicationStatusId", step1Status?._id || "");
-    formData.append("jobStatusId", jobStatus.length ? jobStatus[0]._id : "");
+    formData.append("jobStatusId", jobStatus.length ? jobStatus[0]._id : job.status);
     formData.append("resume", file);
     formData.append("contactInfo", data.contactInfo);
     formData.append("emailInfo", data.emailInfo);
@@ -190,13 +191,13 @@ export const ApplicationForm = ({
     formData.append("questions", JSON.stringify(job.applicationForm.question));
     formData.append("answers", JSON.stringify(data.answers));
     formData.append("companyUserName", companyUserName);
-    formData.append("company_id", companyId);
+    formData.append("company_id", job.company_id);
     formData.append("interviewMode", job.interviewMode);
     if (job.interview_id) {
       formData.append("interview_id", job.interview_id);
     }
     if (job.interviewType) {
-      formData.append("interviewType", job.interviewType);
+      formData.append("interviewType", typeof job.interviewType === 'object' ? job.interviewType.roundId : job.interviewType);
     }
 
     try {

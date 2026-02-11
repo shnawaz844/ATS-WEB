@@ -30,7 +30,7 @@ const fetchAssignedInterviews = async ( { queryKey } ) => {
     const response = await axios.get( `${ process.env.REACT_APP_BASE_URL }/applicationscheduledlist/scheduled-interviewer-app`, {
         params,
         headers: {
-            'company_id': companyId,
+            'Company_id': companyId,
         }
     } );
 

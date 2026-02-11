@@ -54,7 +54,7 @@ export const useJobs = ( filters, page = 1, limit = 6) => {
             page,
             limit,
             headers: {
-                'company_id': companyId,  // Ensure company_id is sent here
+                'Company_id': companyId,  // Ensure company_id is sent here
             }
         } ),
         keepPreviousData: true,

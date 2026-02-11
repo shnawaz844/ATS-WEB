@@ -176,7 +176,7 @@ const ApplicationsListTab = ({
                     `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`,
                     {
                         headers: {
-                            'company_id': storedUser.company_id,
+                            'Company_id': storedUser.company_id,
                         },
                     }
                 );

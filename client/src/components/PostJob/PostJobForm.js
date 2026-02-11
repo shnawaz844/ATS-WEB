@@ -397,6 +397,7 @@ export const PostJobForm = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            'Company_id': companyId,
           },
           body: JSON.stringify({
             jobTitle,

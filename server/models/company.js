@@ -35,6 +35,10 @@ const CompanySchema = new mongoose.Schema({
     aiFeaturesEnabled: {
         type: Boolean,
         default: false
+    },
+    onlyAiFeaturesEnabled: {
+        type: Boolean,
+        default: false
     }
 },
     { timestamps: true }

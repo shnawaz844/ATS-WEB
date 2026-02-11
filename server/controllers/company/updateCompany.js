@@ -78,7 +78,8 @@ const addCompany = async (req, res) => {
             name,
             phone,
             website,
-            image: imageUrl
+            image: imageUrl,
+            onlyAiFeaturesEnabled: req.body.onlyAiFeaturesEnabled === 'true' || req.body.onlyAiFeaturesEnabled === true
         });
 
         await newCompany.save();
@@ -142,7 +143,8 @@ const updateCompany = async (req, res) => {
             name,
             phone,
             website,
-            aiFeaturesEnabled: aiFeaturesEnabled === 'true' || aiFeaturesEnabled === true
+            aiFeaturesEnabled: aiFeaturesEnabled === 'true' || aiFeaturesEnabled === true,
+            onlyAiFeaturesEnabled: req.body.onlyAiFeaturesEnabled === 'true' || req.body.onlyAiFeaturesEnabled === true
         };
 
         // Handle image upload
