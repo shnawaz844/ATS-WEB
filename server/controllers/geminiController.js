@@ -3,6 +3,7 @@ import { getGeminiModel } from "../utils/aiHelper.js";
 export const generateJobDescription = async (req, res) => {
     try {
         const { jobTitle, companyUserName, compensation, experience } = req.body;
+        const company_id = req.headers["company_id"]?.trim();
         const capitalizedCompany = companyUserName ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1) : "[Company Name]";
         // getGeminiModel
         if (!jobTitle) {
