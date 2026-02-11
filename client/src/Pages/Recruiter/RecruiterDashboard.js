@@ -304,7 +304,7 @@ export default function Dashboard() {
                 if (/open|active|available|hiring|live|published/i.test(statusName)) {
                     openPositions++;
                     openJobsList.push(job);
-                } else if (/closed|filled|completed|inactive|expired|draft/i.test(statusName)) {
+                } else if (/closed|filled|completed|inactive|expired/i.test(statusName)) {
                     filledPositions++;
                     filledJobsList.push(job);
                 }
