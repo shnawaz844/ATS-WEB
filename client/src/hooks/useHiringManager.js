@@ -13,7 +13,7 @@ const fetchDashboardStats = async () => {
     const { data } = await axios.get(`${process.env.REACT_APP_BASE_URL}/hiringmanager/dashboard-stats`, {
         headers: {
             'Authorization': token,
-            'company_id': companyId
+            'Company_id': companyId
         }
     });
     return data;

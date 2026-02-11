@@ -22,7 +22,7 @@ const fetchScheduledInterviews = async ( { queryKey } ) => {
         `${ process.env.REACT_APP_BASE_URL }${ apiUrl }`,
         {
             headers: {
-                "company_id": companyId,
+                "Company_id": companyId,
             },
         }
     );

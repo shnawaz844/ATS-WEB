@@ -11,7 +11,7 @@ const fetchJobStatuses = async ( { filters, page, limit } ) => {
         `${ process.env.REACT_APP_BASE_URL }/job-statuses/all-job-statuses?${ queryParams }`,
         {
             headers: {
-                'company_id': companyId // Sending company_id in headers
+                'Company_id': companyId // Sending company_id in headers
             }
         }
     );
@@ -38,7 +38,7 @@ const addJob = async ( formData ) => {
         `${ process.env.REACT_APP_BASE_URL }/job-statuses/add-job-status`,
         formData, {
         headers: {
-            'company_id': companyId // Send company_id in headers
+            'Company_id': companyId // Send company_id in headers
         }
     }
     );

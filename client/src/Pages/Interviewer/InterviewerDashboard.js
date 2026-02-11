@@ -49,8 +49,7 @@ const InterviewerDashboard = () => {
             try {
                 const user = JSON.parse(localStorage.getItem('user'));
                 const interviewerID = user?._id || user?.id;
-                // Fixed: Use 'companyId' to match App.js storage key, fallback to 'company_id' if needed
-                const companyId = localStorage.getItem('companyId') || localStorage.getItem('company_id');
+                const companyId = localStorage.getItem('companyId') || '';
 
                 if (!interviewerID) {
                     throw new Error("Interviewer ID not found. Please log in again.");
@@ -108,7 +107,7 @@ const InterviewerDashboard = () => {
             try {
                 const user = JSON.parse(localStorage.getItem('user'));
                 const interviewerID = user?._id || user?.id;
-                const companyId = localStorage.getItem('companyId') || localStorage.getItem('company_id');
+                const companyId = localStorage.getItem('companyId') || '';
 
                 if (!interviewerID) return;
 

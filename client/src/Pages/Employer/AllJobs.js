@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
-import AiJobsTable from './AiJobsTable';
+
 
 export const AllJobs = () => {
     const { theme } = useTheme();
@@ -40,29 +40,7 @@ export const AllJobs = () => {
 
     const companyId = JSON.parse(localStorage.getItem("user")).company_id;
     const companyUserName = localStorage.getItem("companyUserName");
-    const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
 
-    // Fetch company settings to sync AI features
-    useEffect(() => {
-        const fetchCompanyDetails = async () => {
-            try {
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.aiFeaturesEnabled !== undefined) {
-                        setAiFeaturesEnabled(data.aiFeaturesEnabled);
-                        localStorage.setItem(`ai_features_${companyUserName}`, data.aiFeaturesEnabled);
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching company details:", error);
-            }
-        };
-
-        if (companyUserName) {
-            fetchCompanyDetails();
-        }
-    }, [companyUserName]);
 
     const capitalizeFirstLetter = (string) => {
         return string?.charAt(0).toUpperCase() + string?.slice(1);
@@ -75,7 +53,7 @@ export const AllJobs = () => {
             try {
                 const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
                     headers: {
-                        'company_id': companyId
+                        'Company_id': companyId
                     }
                 });
 
@@ -313,7 +291,7 @@ export const AllJobs = () => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'company_id': companyId
+                    'Company_id': companyId
                 }
             });
 
@@ -429,17 +407,7 @@ export const AllJobs = () => {
                             >
                                 Job Board
                             </button>
-                            {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
-                                <button
-                                    onClick={() => setActiveTab('ai')}
-                                    className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
-                                        ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
-                                        : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
-                                        }`}
-                                >
-                                    AI Generated Jobs
-                                </button>
-                            )}
+
                         </div>
                     </div>
 
@@ -789,10 +757,7 @@ export const AllJobs = () => {
                         </>
                     )}
 
-                    {/* AI Generated Jobs Section */}
-                    {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                        <AiJobsTable />
-                    )}
+
                 </div>
             </div>
         </div >

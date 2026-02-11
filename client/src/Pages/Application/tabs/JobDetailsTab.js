@@ -43,7 +43,7 @@ const JobDetailsTab = ({ job }) => {
       try {
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`, {
           headers: {
-            'company_id': companyId  // Pass company_id in headers
+            'Company_id': companyId  // Pass company_id in headers
           }
         });
         const data = await response.json();

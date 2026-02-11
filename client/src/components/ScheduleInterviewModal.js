@@ -155,7 +155,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
-                            'company_id': companyId
+                            'Company_id': companyId
                         }
                     });
                     if (!response.ok) {
@@ -257,7 +257,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(companyId && { 'company_id': companyId }),
+                    ...(companyId && { 'Company_id': companyId }),
                 },
                 body: JSON.stringify({
                     applicationStatusId: applicationStatusId
@@ -309,7 +309,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "company_id": companyId,
+                    "Company_id": companyId,
                 },
                 body: JSON.stringify(payload),
             });

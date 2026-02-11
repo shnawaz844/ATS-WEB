@@ -86,7 +86,7 @@ const AllPostedJobs = () => {
 
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
           headers: {
-            "company_id": companyId
+            "Company_id": companyId
           }
         });
 
@@ -126,7 +126,7 @@ const AllPostedJobs = () => {
           `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses?${params}`,
           {
             headers: {
-              "company_id": companyId
+              "Company_id": companyId
             },
           }
         );
@@ -187,7 +187,7 @@ const AllPostedJobs = () => {
 
     const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
       params, headers: {
-        "company_id": companyId
+        "Company_id": companyId
       }
     });
     return response.data;

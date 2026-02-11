@@ -180,7 +180,7 @@ export const ScheduledInterview = () => {
     useEffect(() => {
         fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
             headers: {
-                "company_id": companyId
+                "Company_id": companyId
             }
         })
             .then(response => response.json())
@@ -209,7 +209,7 @@ export const ScheduledInterview = () => {
                     method: 'GET',
                     headers: {
                         "Content-Type": "application/json",
-                        "company_id": companyId // Adding company_id to the request headers
+                        "Company_id": companyId // Adding company_id to the request headers
                     }
                 });
                 if (!response.ok) {
@@ -317,7 +317,7 @@ export const ScheduledInterview = () => {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
-                        "company_id": companyId,  // Add company_id here
+                        "Company_id": companyId,  // Add company_id here
                     },
                     body: JSON.stringify({
                         date: editForm.date,
@@ -417,7 +417,7 @@ export const ScheduledInterview = () => {
                 method: isUpdate ? "PUT" : "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "company_id": companyId,
+                    "Company_id": companyId,
                 },
                 body: JSON.stringify(formData),
             });

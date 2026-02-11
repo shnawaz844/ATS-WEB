@@ -18,7 +18,7 @@ const fetchInterviewDetails = async ({ queryKey }) => {
     `${ process.env.REACT_APP_BASE_URL }/interviews/all-interviews?page=${page}&limit=${limit}&search=${search}`,
      {
       headers: {
-        'company_id': companyId // Sending company_id in headers
+        'Company_id': companyId // Sending company_id in headers
       }
     }
   );

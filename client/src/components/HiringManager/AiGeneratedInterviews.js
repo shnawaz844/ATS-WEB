@@ -77,7 +77,7 @@ const AssignedInterviews = () => {
     useEffect(() => {
         fetch(`${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`, {
             headers: {
-                "company_id": companyId
+                "Company_id": companyId
             }
         })
             .then(response => response.json())
@@ -141,7 +141,7 @@ const AssignedInterviews = () => {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "company_id": companyId,
+                        "Company_id": companyId,
                     },
                 });
                 if (!response.ok) {

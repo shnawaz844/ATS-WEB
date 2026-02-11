@@ -48,7 +48,7 @@ export const JobDetails = () => {
   // 3. We also fetch the application statuses (and can pass them to the form)
   const {
     data: applicationStatusesData,
-  } = useApplicationStatuses({});
+  } = useApplicationStatuses({ company_id: job?.company_id });
 
   console.log("this is statuses", applicationStatusesData);
 

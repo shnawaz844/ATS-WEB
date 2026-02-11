@@ -11,7 +11,7 @@ const useManagerApplications = ( hiringManagerId, page = 1, limit = 10, search =
                     `${ process.env.REACT_APP_BASE_URL }/application/get-application-hm/${ hiringManagerId }?${ queryParams }`,
                     {
                         headers: {
-                            'company_id': companyId, // Ensure company_id is sent here
+                            'Company_id': companyId, // Ensure company_id is sent here
                         },
                     }
                 );

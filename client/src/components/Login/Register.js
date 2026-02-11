@@ -80,7 +80,7 @@ export const Register = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "company_id": companyId  // Add company_id to headers
+          "Company_id": companyId  // Add company_id to headers
         },
         body: JSON.stringify(payload),
       });

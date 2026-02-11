@@ -116,7 +116,7 @@ export default function ImportApplication() {
             try {
                 const response = await fetch(`${process.env.REACT_APP_BASE_URL}/hiringmanager/all-hiring-manager`, {
                     headers: {
-                        'company_id': user.companyId
+                        'Company_id': user.companyId
                     }
                 });
 
@@ -197,7 +197,7 @@ export default function ImportApplication() {
             try {
                 const response = await fetch(`${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`, {
                     headers: {
-                        'company_id': user.companyId
+                        'Company_id': user.companyId
                     }
                 });
 
@@ -280,7 +280,7 @@ export default function ImportApplication() {
 
                 const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
                     headers: {
-                        'company_id': companyId
+                        'Company_id': companyId
                     }
                 });
 

@@ -57,7 +57,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchApplicationStatuses = async () => {
             try {
-                const companyId = localStorage.getItem('company_id') || '';
+                const companyId = localStorage.getItem('companyId') || '';
 
                 const response = await fetch(
                     `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses?page=1&limit=100`,
@@ -94,7 +94,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchInterviews = async () => {
             try {
-                const companyId = localStorage.getItem('company_id') || '';
+                const companyId = localStorage.getItem('companyId') || '';
 
                 const response = await fetch(
                     `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/scheduled-interviewer-app?page=1&limit=1000`,
@@ -133,7 +133,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const companyId = localStorage.getItem('company_id') || '';
+                const companyId = localStorage.getItem('companyId') || '';
 
                 const response = await fetch(
                     `${process.env.REACT_APP_BASE_URL}/application/all-application?page=${page}&limit=${limit}`,
@@ -180,7 +180,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const companyId = localStorage.getItem('company_id') || '';
+                const companyId = localStorage.getItem('companyId') || '';
                 console.log('Fetching jobs with company_id:', companyId);
 
                 const countResponse = await fetch(
@@ -216,7 +216,7 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchJobStatuses = async () => {
             try {
-                const companyId = localStorage.getItem('company_id') || '';
+                const companyId = localStorage.getItem('companyId') || '';
                 console.log('Fetching job statuses with company_id:', companyId);
 
                 const response = await fetch(

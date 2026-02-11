@@ -15,7 +15,7 @@ const OverviewTab = ({ job, applications }) => {
 
                 const res = await fetch(
                     `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`,
-                    { headers: { 'company_id': companyId } }
+                    { headers: { 'Company_id': companyId } }
                 );
                 if (!res.ok) throw new Error('Failed to fetch statuses');
 
