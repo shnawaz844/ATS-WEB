@@ -72,10 +72,23 @@ const getAllApplicationsGroupedByJob = async (req, res) => {
         for (const job of filteredJobs) {
             const jobIdStr = job._id.toString();
             if (jobApplicationCounts[jobIdStr]) {
+                // Compute location based on locationType
+                let location = '';
+                if (job.locationType === 'Remote') {
+                    // For remote jobs, show country
+                    location = job.country || 'Remote';
+                } else {
+                    // For On-Site/Hybrid, show city and state
+                    const parts = [];
+                    if (job.city) parts.push(job.city);
+                    if (job.state) parts.push(job.state);
+                    location = parts.length > 0 ? parts.join(', ') : (job.country || 'N/A');
+                }
+
                 resultData.push({
                     jobID: job._id,
                     title: job.title,
-                    city: job.city,
+                    city: location, // Use computed location instead of just city
                     locationType: job.locationType,
                     type: job.type,
                     scheduleType: job.scheduleType,

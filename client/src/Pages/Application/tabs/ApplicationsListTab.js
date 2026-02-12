@@ -261,7 +261,7 @@ const ApplicationsListTab = ({
         );
 
     return (
-        <div className="flex flex-col md:flex-row gap-6 items-center justify-center">
+        <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
             {/* Mobile Layout */}
             {isMobile && (
                 <>

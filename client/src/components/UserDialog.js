@@ -10,7 +10,8 @@ const UserDialog = ({
     handleFormChange,
     handleFormSubmit,
     loggedInUser,
-    companies
+    companies,
+    serverErrors = {}
 }) => {
     const { theme } = useTheme();
     const userRole = JSON.parse(localStorage.getItem('user')).role;
@@ -111,11 +112,12 @@ const UserDialog = ({
                                     name="email"
                                     value={formData.email}
                                     onChange={handleFormChange}
-                                    required
                                     className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
-                                {errors.email && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                                {(errors.email || serverErrors.email) && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.email || serverErrors.email}
+                                    </p>
                                 )}
                             </div>
 
@@ -293,6 +295,7 @@ UserDialog.propTypes = {
     handleCloseDialog: PropTypes.func.isRequired,
     loggedInUser: PropTypes.object.isRequired,
     companies: PropTypes.array,
+    serverErrors: PropTypes.object,
 };
 
 export default UserDialog;

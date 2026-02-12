@@ -10,18 +10,18 @@ import { useTheme } from '../../context/ThemeContext';
 const ApplicationJobDetail = () => {
     const { theme } = useTheme();
     const { id } = useParams();
-    const [ job, setJob ] = useState( null );
-    const companyUserName = localStorage.getItem( "companyUserName" );
-    const [ page, setPage ] = useState( '1' );
-    const [ limit, setLimit ] = useState( '20' );
-    const [ search, setSearch ] = useState( '' );
-    const [ monthFilter, setMonthFilter ] = useState( '' );
-    const [ yearFilter, setYearFilter ] = useState( );
-    const [ applications, setApplications ] = useState( [] );
-    const [ loading, setLoading ] = useState( true );
-    
-    const [ error, setError ] = useState( '' );
-    const [ activeTab, setActiveTab ] = useState( 'applications' );
+    const [job, setJob] = useState(null);
+    const companyUserName = localStorage.getItem("companyUserName");
+    const [page, setPage] = useState('1');
+    const [limit, setLimit] = useState('20');
+    const [search, setSearch] = useState('');
+    const [monthFilter, setMonthFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState();
+    const [applications, setApplications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const [error, setError] = useState('');
+    const [activeTab, setActiveTab] = useState('applications');
     const navigate = useNavigate();
     // NEW: state for job-statuses
     const [jobStatuses, setJobStatuses] = useState([]);
@@ -175,18 +175,20 @@ const ApplicationJobDetail = () => {
     return (
         <div className={`px-8 py-10 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
             }`}>
-            <button
-                className={`flex items-center transition-colors ml-10 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-500'
-                    }`}
-                onClick={() => window.history.back()}
-            >
-                <ChevronLeft size={18} />
-                <span className="ml-1">Back</span>
-            </button>
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Section */}
-                <div className={`rounded-xl shadow-sm p-6 mb-6 transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border border-gray-700' : 'bg-gray-200 shadow-md border border-gray-200'
+                <div className={`rounded-xl shadow-sm p-4 mb-6 transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border border-gray-700' : 'bg-gray-200 shadow-md border border-gray-200'
                     }`}>
+                    {/* Back Button */}
+                    <button
+                        className={`flex items-center transition-colors mb-2 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-500'
+                            }`}
+                        onClick={() => window.history.back()}
+                    >
+                        <ChevronLeft size={18} />
+                        <span className="ml-1">Back</span>
+                    </button>
+
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
 
                         {/* Left Side: Title + Tags */}
@@ -307,8 +309,8 @@ const ApplicationJobDetail = () => {
                         {activeTab === 'details' && <JobDetailsTab job={job} setJob={setJob} />}
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

@@ -546,7 +546,7 @@ const AssignedInterviews = () => {
                         )}
 
                         {/* All Other Interviews */}
-                        <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>All Assigned Interviews</h2>
+                        {/* <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>All Assigned Interviews</h2> */}
                         {isLoading ? (
                             <div className="flex justify-center items-center h-64">
                                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

@@ -37,7 +37,7 @@ const getInterviews = async (req, res) => {
 
     // Find interviews with pagination and search
     const interviews = await Interview.find(query)
-      .sort({ createdAt: -1 })
+      // .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 

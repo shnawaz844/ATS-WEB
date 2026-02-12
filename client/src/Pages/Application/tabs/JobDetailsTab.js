@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
+import { Country, State, City } from 'country-state-city';
 
 const JobDetailsTab = ({ job }) => {
   const { theme } = useTheme();
@@ -18,14 +19,31 @@ const JobDetailsTab = ({ job }) => {
   const formatIndianRupee = (num) => {
     if (!num) return "0";
 
-    // Convert to string and remove any non-digit characters
-    const numStr = num.toString().replace(/[^\d]/g, "");
+    // Check if it's a range (contains hyphen or dash)
+    const numStr = num.toString();
+    if (numStr.includes('-')) {
+      const parts = numStr.split('-').map(part => part.trim());
+      if (parts.length === 2) {
+        const formattedMin = formatSingleNumber(parts[0]);
+        const formattedMax = formatSingleNumber(parts[1]);
+        return `₹${formattedMin} - ₹${formattedMax}`;
+      }
+    }
+
+    // Single number
+    return `₹${formatSingleNumber(numStr)}`;
+  };
+
+  // Helper function to format a single number
+  const formatSingleNumber = (numStr) => {
+    // Remove any non-digit characters
+    const cleanNum = numStr.replace(/[^\d]/g, "");
 
     // Handle the case if it's just 0
-    if (parseInt(numStr) === 0) return "0";
+    if (parseInt(cleanNum) === 0) return "0";
 
-    let lastThree = numStr.substring(numStr.length - 3);
-    let otherNumbers = numStr.substring(0, numStr.length - 3);
+    let lastThree = cleanNum.substring(cleanNum.length - 3);
+    let otherNumbers = cleanNum.substring(0, cleanNum.length - 3);
 
     if (otherNumbers !== '') {
       // Add commas after every two digits in the other numbers part
@@ -137,6 +155,17 @@ const JobDetailsTab = ({ job }) => {
     hiringManagerId,
   } = job;
 
+  // Convert ISO codes to display names
+  const countries = Country.getAllCountries();
+  const countryData = countries.find(c => c.isoCode === country);
+  const displayCountry = countryData ? countryData.name : country;
+
+  const states = countryData ? State.getStatesOfCountry(countryData.isoCode) : [];
+  const stateData = states.find(s => s.isoCode === state);
+  const displayState = stateData ? stateData.name : state;
+
+  const displayCity = city;
+
   const displayStatus = statusMap[status] || status || 'N/A';
   const recruiter = recruitersList.find(u => u._id === recruiterId)
   const hiringManager = hiringManagers.find(u => u._id === hiringManagerId)
@@ -155,7 +184,7 @@ const JobDetailsTab = ({ job }) => {
   };
 
   return (
-    <div className="max-w-4xl w-full px-4 sm:px-6 mx-auto flex flex-col items-center">
+    <div className="max-w-7xl w-full px-4 sm:px-6 mx-auto flex flex-col items-center">
       {/* Header Section */}
       <div className={`w-full mb-6 sm:mb-8 border-b pb-4 sm:pb-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
@@ -163,7 +192,6 @@ const JobDetailsTab = ({ job }) => {
             <h1 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               {capitalizeFirstLetter(title) || 'N/A'}
             </h1>
-            <p className={`mt-1 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-black'}`}>Job ID: {jobID || 'N/A'}</p>
           </div>
           <span className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap ${getStatusStyle(displayStatus)}`}>
             {displayStatus || 'N/A'}
@@ -220,16 +248,24 @@ const JobDetailsTab = ({ job }) => {
               </div>
               <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Country</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{country || 'N/A'}</p>
+                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{displayCountry || 'N/A'}</p>
               </div>
-              <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>State</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{state || 'N/A'}</p>
-              </div>
-              <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>City</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{city || 'N/A'}</p>
-              </div>
+              {locationType !== 'Remote' && (
+                <>
+                  {displayState && (
+                    <div>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>State</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{displayState}</p>
+                    </div>
+                  )}
+                  {displayCity && (
+                    <div>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>City</p>
+                      <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{displayCity}</p>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </section>
 
@@ -268,7 +304,9 @@ const JobDetailsTab = ({ job }) => {
               </div>
               <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Compensation</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{formatIndianRupee(compensation) || 'N/A'}</p>
+                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                  {compensation ? `${formatIndianRupee(compensation)} yearly` : 'N/A'}
+                </p>
               </div>
             </div>
           </section>
