@@ -20,6 +20,7 @@ const UserListing = () => {
     role: '',
     head: false,
   });
+  const [serverErrors, setServerErrors] = useState({});
 
   const loggedInUser = JSON.parse(localStorage.getItem("user")) // Replace with your auth logic
 
@@ -61,6 +62,7 @@ const UserListing = () => {
       head: false,
       company_id: loggedInUser.role === "admin" ? loggedInUser.company_id : '',
     });
+    setServerErrors({});
     setIsDialogOpen(true);
   };
 
@@ -77,6 +79,7 @@ const UserListing = () => {
       head: user.head || false,
       company_id: user.company_id || ''
     });
+    setServerErrors({});
     setIsDialogOpen(true);
   };
 
@@ -89,6 +92,10 @@ const UserListing = () => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: value,
+    }));
+    setServerErrors((prev) => ({
+      ...prev,
+      [e.target.name]: null,
     }));
   };
 
@@ -152,6 +159,9 @@ const UserListing = () => {
         },
         onError: (error) => {
           console.error('Failed to add user:', error);
+          if (error.response && error.response.data && error.response.data.error) {
+            setServerErrors({ email: error.response.data.error });
+          }
         },
       });
     } else {
@@ -168,6 +178,9 @@ const UserListing = () => {
           },
           onError: (error) => {
             console.error('Failed to update user:', error);
+            if (error.response && error.response.data && error.response.data.error) {
+              setServerErrors({ email: error.response.data.error });
+            }
           },
         }
       );
@@ -366,6 +379,7 @@ const UserListing = () => {
           isOpen={isDialogOpen}
           loggedInUser={loggedInUser}
           companies={companies}
+          serverErrors={serverErrors}
         />
       )}
     </div>

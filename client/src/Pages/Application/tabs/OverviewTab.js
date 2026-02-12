@@ -57,12 +57,11 @@ const OverviewTab = ({ job, applications }) => {
     ];
 
     return (
-        <div className="min-h-screen bg-transparent p-6">
+        <div className="min-h-screen bg-transparent p-1">
             <div className="max-w-7xl mx-auto flex flex-col justify-center items-center">
 
                 {/* Combined Header and Stats Section */}
-                {/* Combined Header and Stats Section */}
-                <div className={`rounded-2xl shadow-xl border overflow-hidden mb-6 p-5 sm:p-6 lg:p-8 max-w-screen-lg w-80 sm:w-full transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-white border-gray-200 shadow-md'
+                <div className={`rounded-2xl shadow-xl border overflow-hidden mb-6 p-5 sm:p-6 lg:p-8 w-full transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-white border-gray-200 shadow-md'
                     }`}>
                     <div className="flex flex-col lg:flex-row h-auto lg:h-[32vh] min-h-[280px]">
                         {/* Header Section - 30% width on large screens */}
@@ -167,7 +166,7 @@ const OverviewTab = ({ job, applications }) => {
 
 
                 {/* Status Breakdown Section */}
-                <div className={`rounded-2xl shadow-xl p-8 border max-w-screen-lg w-80 sm:w-full transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-gray-100 shadow-mdborder-gray-200'
+                <div className={`rounded-2xl shadow-xl p-8 border w-full transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-gray-100 shadow-mdborder-gray-200'
                     }`}>
                     <div className="mb-8">
                         <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-700'}`}>

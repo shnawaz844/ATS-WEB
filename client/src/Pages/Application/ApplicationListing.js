@@ -81,8 +81,8 @@ const ApplicationListing = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     if (dialogMode === "add") {
-      formData.company_id = companyId;
-      addApplicationStatus(formData, {
+      const submissionData = { ...formData, company_id: companyId };
+      addApplicationStatus(submissionData, {
         onSuccess: handleCloseDialog,
         onError: (error) => console.error("Failed to add application:", error),
       });

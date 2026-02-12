@@ -28,7 +28,7 @@ const ApplicationDialog = ({
       >
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
           <h2 className="text-[1.5rem] font-semibold text-gray-800 dark:text-white">
-            {dialogMode === 'add' ? 'Add New Application' : 'Edit User Details'}
+            {dialogMode === 'add' ? 'Add New Application' : 'Edit Application Status'}
           </h2>
         </div>
 

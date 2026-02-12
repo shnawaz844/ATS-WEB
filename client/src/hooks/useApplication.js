@@ -34,10 +34,10 @@ export const useApplicationStatuses = (filters, page, limit) => {
  * 2. ADD APPLICATION
  */
 const addApplication = async (formData) => {
-  // Use company_id from formData if it's there, otherwise from localStorage
-  const companyId = formData.get('company_id') || JSON.parse(localStorage.getItem("user") || "{}").company_id;
+  // formData is a plain object here
+  const companyId = formData.company_id || JSON.parse(localStorage.getItem("user") || "{}").company_id;
   await axios.post(
-    `${process.env.REACT_APP_BASE_URL}/application/add-application`,
+    `${process.env.REACT_APP_BASE_URL}/application-statuses/add-application-status`,
     formData, {
     headers: {
       'Company_id': companyId // Send company_id in headers
@@ -52,7 +52,7 @@ export const useAddApplication = () => {
   return useMutation({
     mutationFn: addApplication,
     onSuccess: () => {
-      queryClient.invalidateQueries(["applications"]);
+      queryClient.invalidateQueries(["applicationStatuses"]);
     },
   });
 };

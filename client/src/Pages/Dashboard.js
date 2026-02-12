@@ -26,6 +26,13 @@ export default function Dashboard() {
     interviewsScheduled: 0,
     offersExtended: 0
   });
+  const [performanceData, setPerformanceData] = useState({
+    hiringManagers: [],
+    recruiters: [],
+    interviewers: []
+  });
+  const [performanceLoading, setPerformanceLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('hiringManagers');
   const limit = 50;
   const navigate = useNavigate();
   const companyUserName = localStorage.getItem("companyUserName");
@@ -153,6 +160,36 @@ export default function Dashboard() {
     };
 
     fetchJobStatuses();
+  }, []);
+
+  // Fetch role-based performance data
+  useEffect(() => {
+    const fetchPerformanceStats = async () => {
+      try {
+        const companyId = localStorage.getItem('companyId') || '';
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/dashboard/admin-performance-stats`,
+          {
+            headers: {
+              'company_id': companyId
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setPerformanceData(data);
+      } catch (err) {
+        console.error('Error fetching performance stats:', err);
+      } finally {
+        setPerformanceLoading(false);
+      }
+    };
+
+    fetchPerformanceStats();
   }, []);
 
   // Helper function to get status name from status ID
@@ -315,7 +352,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="dashboard-header mb-8">
           <h1 className={`text-3xl font-bold transition-colors duration-300 ${theme === "dark" ? "text-gray-200" : "text-gray-900"
-            }`}>ATS Admin Dashboard</h1>
+            }`}>Admin Dashboard</h1>
           <p className={`mt-2 transition-colors duration-300 ${theme === "dark" ? "text-gray-300" : "text-gray-800"
             }`}>
             {new Date().toLocaleDateString('en-US', {
@@ -377,6 +414,148 @@ export default function Dashboard() {
             <div className="h-80">
               <LineChart data={dailyApplicationsData} />
             </div>
+          </div>
+        </div>
+
+        {/* Team Performance Section */}
+        <div className={`p-8 rounded-xl shadow-md mb-8 border transition-all duration-300 ${theme === "dark"
+          ? "bg-transparent border-purple-600"
+          : "bg-white/80 backdrop-blur-sm border-purple-200 shadow-lg"
+          }`}>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+              <h2 className={`text-2xl font-bold transition-colors duration-300 ${theme === "dark" ? "text-gray-100" : "text-gray-900"
+                }`}>Team Performance</h2>
+              <p className={`text-sm mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}>Monitor role-wise hiring productivity and engagement</p>
+            </div>
+            <div className={`inline-flex p-1 rounded-lg ${theme === "dark" ? "bg-gray-800" : "bg-purple-50"}`}>
+              <button
+                onClick={() => setActiveTab('hiringManagers')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'hiringManagers'
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : theme === "dark" ? "text-gray-400 hover:text-gray-200" : "text-purple-600 hover:bg-purple-100"
+                  }`}
+              >
+                Hiring Managers
+              </button>
+              <button
+                onClick={() => setActiveTab('recruiters')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'recruiters'
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : theme === "dark" ? "text-gray-400 hover:text-gray-200" : "text-purple-600 hover:bg-purple-100"
+                  }`}
+              >
+                Recruiters
+              </button>
+              <button
+                onClick={() => setActiveTab('interviewers')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'interviewers'
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : theme === "dark" ? "text-gray-400 hover:text-gray-200" : "text-purple-600 hover:bg-purple-100"
+                  }`}
+              >
+                Interviewers
+              </button>
+            </div>
+          </div>
+
+          <div className={`overflow-x-auto rounded-xl border transition-all duration-200 ${theme === "dark"
+            ? "border-gray-800 bg-black/40"
+            : "border-gray-100 bg-white"
+            }`}>
+            {performanceLoading ? (
+              <div className="py-20 flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+                <p className={theme === "dark" ? "text-gray-400" : "text-gray-500"}>Gathering team metrics...</p>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className={`${theme === "dark" ? "bg-gray-800/50" : "bg-gray-50/50"}`}>
+                    <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Name</th>
+                    <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Email</th>
+                    {activeTab !== 'interviewers' ? (
+                      <>
+                        <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Active Jobs</th>
+                        <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Applications</th>
+                      </>
+                    ) : (
+                      <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Interviews Conducted</th>
+                    )}
+                    <th className={`px-6 py-4 text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Efficiency</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${theme === "dark" ? "divide-gray-800" : "divide-gray-100"}`}>
+                  {performanceData[activeTab]?.length > 0 ? (
+                    performanceData[activeTab].map((person, idx) => (
+                      <tr key={person.id || idx} className={`transition-colors duration-150 ${theme === "dark" ? "hover:bg-white/5" : "hover:bg-purple-50/30"}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 text-xs font-bold ${theme === "dark" ? "bg-purple-900/50 text-purple-300" : "bg-purple-100 text-purple-700"}`}>
+                              {person.name?.charAt(0) || '?'}
+                            </div>
+                            <span className={`font-medium ${theme === "dark" ? "text-gray-200" : "text-gray-900"}`}>{person.name}</span>
+                          </div>
+                        </td>
+                        <td className={`px-6 py-4 text-sm ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>{person.email}</td>
+                        {activeTab !== 'interviewers' ? (
+                          <>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${person.jobsCount > 0
+                                ? theme === "dark" ? "bg-blue-900/30 text-blue-300 border border-blue-800" : "bg-blue-100 text-blue-700"
+                                : theme === "dark" ? "bg-gray-800 text-gray-500" : "bg-gray-50 text-gray-400"
+                                }`}>
+                                {person.jobsCount} Jobs
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <span className={`text-sm font-bold ${theme === "dark" ? "text-gray-200" : "text-gray-900"}`}>{person.applicationsCount}</span>
+                                <div className="w-24 h-1.5 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
+                                  <div
+                                    className="h-full bg-purple-500 rounded-full"
+                                    style={{ width: `${Math.min(100, (person.applicationsCount / 50) * 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </td>
+                          </>
+                        ) : (
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex px-4 py-1 rounded-full text-xs font-bold ${person.interviewsCount > 0
+                              ? theme === "dark" ? "bg-green-900/30 text-green-300 border border-green-800" : "bg-green-100 text-green-700"
+                              : theme === "dark" ? "bg-gray-800 text-gray-500" : "bg-gray-50 text-gray-400"
+                              }`}>
+                              {person.interviewsCount} Interviews
+                            </span>
+                          </td>
+                        )}
+                        <td className="px-6 py-4">
+                          <div className={`flex items-center gap-2`}>
+                            <div className="flex-1 h-2 bg-gray-200 rounded-full max-w-[60px] overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${person.efficiency >= 8 ? "bg-green-500" : person.efficiency >= 5 ? "bg-yellow-500" : "bg-red-500"}`}
+                                style={{ width: `${(person.efficiency / 10) * 100}%` }}
+                              ></div>
+                            </div>
+                            <span className={`text-xs font-bold ${person.efficiency >= 8 ? "text-green-500" : person.efficiency >= 5 ? "text-yellow-500" : "text-red-500"}`}>
+                              {person.efficiency}/10
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className={`px-6 py-12 text-center text-sm ${theme === "dark" ? "text-gray-500" : "text-gray-400"}`}>
+                        No performance data available for this role
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
