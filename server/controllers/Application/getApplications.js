@@ -16,7 +16,29 @@ const getApplications = async (req, res) => {
             filter.$or = companyFilters;
         }
 
-        const applications = await Application.find(filter);
+        let applications = await Application.find(filter).lean();
+
+        // Manually fetch job titles if populate fails or for more resilience
+        const jobIds = [...new Set(applications.map(app => app.jobID))];
+        const jobs = await mongoose.model('Job').find({
+            $or: [
+                { _id: { $in: jobIds.filter(id => mongoose.Types.ObjectId.isValid(id)) } },
+                { jobID: { $in: jobIds.map(id => id.toString()) } }
+            ]
+        }).select('title jobID _id').lean();
+
+        const jobLookup = {};
+        jobs.forEach(job => {
+            jobLookup[job._id.toString()] = job.title;
+            jobLookup[job.jobID] = job.title;
+        });
+
+        applications = applications.map(app => ({
+            ...app,
+            jobTitle: app.jobTitle || jobLookup[app.jobID?.toString()] || 'Unknown Job',
+            jobID: jobs.find(j => j._id.toString() === app.jobID?.toString() || j.jobID === app.jobID?.toString()) || app.jobID
+        }));
+
         res.status(200).json(applications);
 
     } catch (error) {

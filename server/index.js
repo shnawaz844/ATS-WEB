@@ -20,6 +20,7 @@ import companyRoutes from "./routes/companyRoutes.js"
 import applicationlistRoutes from './routes/applicationlistRoutes.js'
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import geminiRoutes from "./routes/geminiRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 
 const app = express();
@@ -51,6 +52,7 @@ app.use("/companies", companyRoutes),
 app.use("/interviewerfeedback", feedbackRoutes);
 app.use("/upload", fileUploadRoute);
 app.use("/ai", geminiRoutes);
+app.use("/dashboard", dashboardRoutes);
 
 // app.use("/interview-result", resultRoutes)
 

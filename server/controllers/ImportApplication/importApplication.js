@@ -821,6 +821,11 @@ export const createJobsFromFile = async (req, res) => {
                             jobData.experienceRequired
                         );
                         console.log(`✅ AI description generated for: ${jobTitle}`);
+
+                        // Add delay between requests to avoid rate limiting (1 second)
+                        if (i < data.length - 1) { // Don't delay after the last job
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
                     } catch (aiError) {
                         console.error(`Error generating AI description for ${jobTitle}:`, aiError);
                         // Fallback to default description if AI fails
