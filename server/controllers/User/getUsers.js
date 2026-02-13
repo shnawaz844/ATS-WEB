@@ -20,13 +20,13 @@ const getUsers = async (req, res) => {
     if (role) {
       query.role = role;
     }
-    if(company_id){
+    if (company_id) {
       query.company_id = company_id
     }
 
     const totalCount = await User.countDocuments(query);
     const users = await User.find({ ...query })
-      .sort({ createdAt: -1 })
+      .sort({ role: 1, createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 

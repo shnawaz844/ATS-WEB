@@ -71,6 +71,9 @@ const AssignedInterviews = () => {
         interviewerID: "",
         company_id: "",
     });
+    const [isRoundsModalOpen, setIsRoundsModalOpen] = useState(false);
+    const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+
     console.log("editForm>>>>>>>", editForm);
 
     // New state to store the fetched statuses
@@ -91,6 +94,41 @@ const AssignedInterviews = () => {
     // Filter interviews based on search and status filter
     const filteredInterviews = assignedInterviews?.interviews
     const totalPages = assignedInterviews?.totalPages;
+
+    // Group interviews by applicationID
+    const groupedInterviews = assignedInterviews?.interviews ? Object.values(assignedInterviews.interviews.reduce((acc, interview) => {
+        const appId = interview.applicationID?._id;
+        if (!appId) return acc;
+        if (!acc[appId]) {
+            acc[appId] = {
+                applicationID: interview.applicationID,
+                rounds: []
+            };
+        }
+        acc[appId].rounds.push(interview);
+        return acc;
+    }, {})).map(group => {
+        // Sort rounds by date and time
+        const sortedRounds = [...group.rounds].sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            if (dateA - dateB !== 0) return dateA - dateB;
+            return (a.scheduledTime || "").localeCompare(b.scheduledTime || "");
+        });
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Find the next upcoming round (today or future)
+        // If multiple today, sort by time and pick the first one
+        const upcomingRound = sortedRounds.find(r => {
+            const rDate = new Date(r.date);
+            rDate.setHours(0, 0, 0, 0);
+            return rDate >= today;
+        }) || sortedRounds[sortedRounds.length - 1];
+
+        return { ...group, rounds: sortedRounds, upcomingRound };
+    }) : [];
 
     const modalRef = useRef();
     const interviewTypes = ["online", "walkin"];
@@ -275,6 +313,13 @@ const AssignedInterviews = () => {
         setIsEditModalOpen(true);
     };
 
+    // Handle "See All Rounds" click
+    const handleSeeAllRounds = (applicationId, e) => {
+        if (e) e.stopPropagation();
+        setSelectedApplicationId(applicationId);
+        setIsRoundsModalOpen(true);
+    };
+
     // Format date for better display
     const formatDate = (dateString) => {
         if (!dateString) return "Not scheduled";
@@ -318,9 +363,41 @@ const AssignedInterviews = () => {
         return today.getTime() === interviewDate.getTime();
     };
 
+    // Check if meeting link should be active (5 mins before)
+    const isMeetingLinkActive = (dateString, timeString) => {
+        if (!dateString || !timeString) return false;
+        const now = new Date();
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const interviewDate = new Date(dateString);
+        interviewDate.setHours(hours, minutes, 0, 0);
+        const activeTime = new Date(interviewDate.getTime() - 5 * 60 * 1000);
+        return now >= activeTime;
+    };
+
     console.log("interviewers", interviewers)
     console.log("assignedInterviews:", assignedInterviews);
     console.log("editform", editForm)
+
+    // Check interview status (Upcoming vs Done)
+    const getInterviewRoundStatus = (dateString, timeString) => {
+        if (!dateString || !timeString) return { label: "UPCOMING ROUND", isDone: false };
+        const now = new Date();
+        const interviewDate = new Date(dateString);
+        const [hours, minutes] = timeString.split(':').map(Number);
+        interviewDate.setHours(hours, minutes, 0, 0);
+
+        if (now > interviewDate) {
+            return {
+                label: "INTERVIEW DONE",
+                isDone: true
+            };
+        }
+        return {
+            label: "UPCOMING ROUND",
+            isDone: false
+        };
+    };
+
 
     return (
         <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
@@ -406,11 +483,11 @@ const AssignedInterviews = () => {
                 {activeTab === 'manage' && (
                     <>
                         {/* Today's Interviews Section */}
-                        {filteredInterviews?.some(interview => isToday(interview.date)) && (
+                        {groupedInterviews?.some(group => group.rounds.some(interview => isToday(interview.date))) && (
                             <div className="mb-8 relative">
                                 {/* Background decorative elements */}
-                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full opacity-20 blur-xl"></div>
-                                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20 blur-xl"></div>
+                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full opacity-20 blur-xl pointer-events-none"></div>
+                                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-100 rounded-full opacity-20 blur-xl pointer-events-none"></div>
 
                                 {/* Header section with title and controls */}
                                 <div className="relative z-10 flex flex-col sm:flex-row justify-start items-start sm:items-center mb-6 gap-4">
@@ -426,9 +503,10 @@ const AssignedInterviews = () => {
 
                                 {/* Cards container */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {filteredInterviews
-                                        .filter(interview => isToday(interview.date))
-                                        .map((interview) => {
+                                    {groupedInterviews
+                                        .filter(group => group.rounds.some(interview => isToday(interview.date)))
+                                        .map((group) => {
+                                            const interview = group.rounds[0]; // Use first round for common info
                                             // Determine status colors
                                             const statusColors = {
                                                 "Completed": "bg-emerald-500 text-emerald-800 bg-emerald-50",
@@ -438,7 +516,7 @@ const AssignedInterviews = () => {
                                             };
 
                                             const status = interview.status;
-                                            const colorString = statusColors[status] || "bg-gray-500 text-gray-800 bg-gray-50"; // Add fallback here
+                                            const colorString = statusColors[status] || "bg-gray-500 text-gray-800 bg-gray-50";
                                             const [bgColor, textColor, bgLight] = colorString.split(" ");
 
                                             // Get candidate initial
@@ -446,79 +524,119 @@ const AssignedInterviews = () => {
 
                                             return (
                                                 <div
-                                                    key={interview._id}
-                                                    onClick={() => handleInterviewClick(interview)}
-                                                    className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border ${theme === 'dark'
+                                                    key={group.applicationID._id}
+                                                    className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border ${theme === 'dark'
                                                         ? 'bg-gray-800 border-gray-700'
-                                                        : 'bg-[#b8e1e1] border-gray-100'
+                                                        : 'bg-[#f0f9f9] border-gray-100'
                                                         }`}
                                                 >
                                                     <div className="p-4">
-                                                        {/* Header with job title and status */}
-                                                        <div className="flex justify-between items-center mb-3">
-                                                            <h3 className={`text-lg font-semibold line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-                                                                {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
-                                                            </h3>
-                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${textColor} ${bgLight}`}>
-                                                                {statuses?.length && statuses.find(statusItem => statusItem._id === interview.status)?.applicationStatus
-                                                                    ? statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.charAt(0).toUpperCase() + statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.slice(1)
-                                                                    : capitalizeFirstLetter(status)}
+                                                        {/* Header with job title and round count */}
+                                                        <div className="flex justify-between items-start mb-3">
+                                                            <div>
+                                                                <h3 className={`text-lg font-semibold line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                                                                    {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                                </h3>
+                                                                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                                    {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                                                </p>
+                                                            </div>
+                                                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600`}>
+                                                                {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
                                                             </span>
-                                                            {(userRole === 'admin' || userRole === 'hiring_manager') && (
-                                                                <button
-                                                                    onClick={(e) => handleDeleteInterview(interview._id, e)}
-                                                                    className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors"
-                                                                    title="Delete Interview Assignment"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </button>
-                                                            )}
                                                         </div>
 
-                                                        {/* Main content */}
-                                                        <div className="space-y-3">
-                                                            {/* Candidate info */}
-                                                            <div className="flex items-center gap-2.5">
-                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${bgLight}`}>
-                                                                    <span className={`${textColor} text-sm font-medium`}>
-                                                                        {capitalizeFirstLetter(initial)}
-                                                                    </span>
-                                                                </div>
-                                                                <div>
-                                                                    <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
-                                                                        Applicant Name :   {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
-                                                                    </p>
-                                                                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                        Interview Type :    {capitalizeFirstLetter(interview.interviewerType) || "N/A"} Interview
-                                                                    </p>
-                                                                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                        Interviewer :   {capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A"}
-                                                                    </p>
-                                                                </div>
+                                                        {/* Upcoming Round inside card */}
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center gap-2">
+                                                                {(() => {
+                                                                    const { label, isDone } = getInterviewRoundStatus(group.upcomingRound?.date, group.upcomingRound?.scheduledTime);
+                                                                    return (
+                                                                        <>
+                                                                            <div className={`h-2 w-2 rounded-full ${isDone ? (theme === 'dark' ? 'bg-green-400' : 'bg-green-600 shadow-[0_0_8px_rgba(34,197,94,0.5)]') : (theme === 'dark' ? 'bg-purple-400 animate-pulse' : 'bg-purple-600 shadow-[0_0_8px_rgba(147,51,234,0.5)] animate-pulse')}`}></div>
+                                                                            <span className={`text-[10px] font-extrabold uppercase tracking-widest ${isDone ? (theme === 'dark' ? 'text-green-400' : 'text-green-600') : (theme === 'dark' ? 'text-purple-400' : 'text-purple-600')}`}>
+                                                                                {label}
+                                                                            </span>
+                                                                        </>
+                                                                    );
+                                                                })()}
                                                             </div>
+                                                            {(() => {
+                                                                const round = group.upcomingRound;
+                                                                if (!round) return null;
+                                                                const appStatus = statuses?.find(s => s._id === round.status)?.applicationStatus || round.status;
+                                                                return (
+                                                                    <div key={round._id} className={`p-3 rounded-lg border relative group/round bg-white/50 border-purple-200 shadow-sm transition-all hover:bg-white/80`}>
+                                                                        <div className="flex justify-between items-center mb-2">
+                                                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                                                                                {capitalizeFirstLetter(appStatus)}
+                                                                            </span>
+                                                                            <div className="flex gap-1">
+                                                                                <button onClick={() => handleInterviewClick(round)} className="p-1 rounded hover:bg-gray-200 text-gray-600">
+                                                                                    <Search className="h-3 w-3" />
+                                                                                </button>
+                                                                                {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                                                    <button onClick={(e) => handleDeleteInterview(round._id, e)} className="p-1 rounded hover:bg-red-50 text-red-500">
+                                                                                        <Trash2 className="h-3 w-3" />
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 text-[11px] text-gray-600 mb-1">
+                                                                            <Clock className="h-3 w-3" />
+                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at {round.scheduledTime}</span>
+                                                                        </div>
+                                                                        <div className="text-[11px] text-gray-500 mb-2">
+                                                                            Interviewer: {round?.interviewerID?.userName || "N/A"}
+                                                                        </div>
 
-                                                            {/* Time info */}
-                                                            <div className="flex items-center gap-2 text-sm">
-                                                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                                </svg>
-                                                                <span className="text-gray-700">Today at {interview.scheduledTime}</span>
-                                                            </div>
+                                                                        {/* Meeting Link for Online Interviews */}
+                                                                        {round.interviewerType === 'online' && round.meetingLink && (
+                                                                            <div className="mt-2 pt-2 border-t border-purple-100">
+                                                                                {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                                                    <a
+                                                                                        href={round.meetingLink}
+                                                                                        target="_blank"
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                                    >
+                                                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                                        </svg>
+                                                                                        Join Meeting Now
+                                                                                    </a>
+                                                                                ) : (
+                                                                                    <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-medium">
+                                                                                        <Clock className="w-3 h-3" />
+                                                                                        Link will be active 5 mins before
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
 
                                                     {/* Footer */}
-                                                    <div className={`flex justify-end items-center px-4 py-3 mt-2 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
-                                                        <button className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                                                    <div className={`relative z-10 flex justify-between items-center px-4 py-3 mt-2 gap-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                                                        <button
+                                                            onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
+                                                            className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
+                                                        >
+                                                            See All Rounds
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleInterviewClick(interview)}
+                                                            className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                                                        >
                                                             Details
                                                             <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                                                             </svg>
                                                         </button>
                                                     </div>
-
-                                                    {/* Status indicator line */}
-                                                    <div className={`h-1 w-full ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}></div>
                                                 </div>
                                             );
                                         })}
@@ -574,321 +692,483 @@ const AssignedInterviews = () => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredInterviews
-                                    .filter(interview => !isToday(interview.date))
-                                    .map((interview) => (
-                                        <div
-                                            key={interview._id}
-                                            className={`p-6 rounded-xl border cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group ${theme === 'dark'
-                                                ? 'bg-white/10 border-gray-700 hover:border-purple-500/50'
-                                                : 'bg-white border-gray-100 hover:border-indigo-50'
-                                                }`}
-                                            onClick={() => handleInterviewClick(interview)}
-                                        >
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white group-hover:text-purple-500' : 'text-gray-900 group-hover:text-purple-500'
-                                                        }`}>
-                                                        {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
-                                                    </h3>
-                                                    <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                        Applicant Name :  {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
-                                                    </p>
+                                {groupedInterviews
+                                    .filter(group => !group.rounds.some(interview => isToday(interview.date)))
+                                    .map((group) => {
+                                        const interview = group.rounds[0];
+                                        const round = group.upcomingRound;
+                                        if (!round) return null;
+                                        const appStatus = statuses?.find(s => s._id === round.status)?.applicationStatus || round.status;
+
+                                        return (
+                                            <div
+                                                key={group.applicationID._id}
+                                                className={`p-6 rounded-xl border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group ${theme === 'dark'
+                                                    ? 'bg-white/10 border-gray-700 hover:border-purple-500/50'
+                                                    : 'bg-white border-gray-100 hover:border-indigo-50'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white group-hover:text-purple-500' : 'text-gray-900 group-hover:text-purple-500'}`}>
+                                                            {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                        </h3>
+                                                        <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                            Applicant Name : {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(interview.status)}`}>
-                                                        {statuses?.length && statuses?.filter(status => status._id === interview.status)[0]?.applicationStatus}
-                                                    </span>
-                                                    {(userRole === 'admin' || userRole === 'hiring_manager') && (
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            {(() => {
+                                                                const { label, isDone } = getInterviewRoundStatus(round?.date, round?.scheduledTime);
+                                                                return (
+                                                                    <>
+                                                                        <div className={`h-2 w-2 rounded-full ${isDone ? (theme === 'dark' ? 'bg-green-400' : 'bg-green-600 shadow-[0_0_8px_rgba(34,197,94,0.5)]') : (theme === 'dark' ? 'bg-purple-400 animate-pulse' : 'bg-purple-600 shadow-[0_0_8px_rgba(147,51,234,0.5)] animate-pulse')}`}></div>
+                                                                        <span className={`text-[10px] font-extrabold uppercase tracking-widest ${isDone ? (theme === 'dark' ? 'text-green-400' : 'text-green-600') : (theme === 'dark' ? 'text-purple-400' : 'text-purple-600')}`}>
+                                                                            {label}
+                                                                        </span>
+                                                                    </>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600`}>
+                                                            {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className={`p-4 rounded-xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50/50 border-gray-100'} hover:shadow-sm`}>
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                                                                {capitalizeFirstLetter(appStatus)}
+                                                            </span>
+                                                            <div className="flex gap-2">
+                                                                <button onClick={() => handleInterviewClick(round)} className="p-1 rounded hover:bg-gray-200 text-gray-500">
+                                                                    <Search className="h-4 w-4" />
+                                                                </button>
+                                                                {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                                    <button onClick={(e) => handleDeleteInterview(round._id, e)} className="p-1 rounded hover:bg-red-50 text-red-400">
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                                <Clock className="h-3.5 w-3.5" />
+                                                                <span>{formatDate(round.date)} at {round.scheduledTime}</span>
+                                                            </div>
+                                                            <div className="text-xs text-gray-400">
+                                                                Type: {capitalizeFirstLetter(round.interviewerType)} Interview
+                                                            </div>
+
+                                                            {/* Meeting Link for Online Interviews */}
+                                                            {round.interviewerType === 'online' && round.meetingLink && (
+                                                                <div className="mt-2 pt-2 border-t border-purple-50">
+                                                                    {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                                        <a
+                                                                            href={round.meetingLink}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="inline-flex items-center gap-2 text-xs font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                        >
+                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                            </svg>
+                                                                            Join Meeting Now
+                                                                        </a>
+                                                                    ) : (
+                                                                        <div className="flex items-center gap-2 text-[10px] text-amber-600 font-medium bg-amber-50/50 p-1.5 rounded-lg">
+                                                                            <Clock className="w-3.5 h-3.5" />
+                                                                            Link will be active 5 mins before
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-2 flex justify-between gap-4">
                                                         <button
-                                                            onClick={(e) => handleDeleteInterview(interview._id, e)}
-                                                            className="p-1.5 rounded-full text-red-500 hover:bg-red-50 transition-colors ml-2"
-                                                            title="Delete Interview Assignment"
+                                                            onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
+                                                            className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-500'} hover:underline`}
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            See All Rounds
                                                         </button>
-                                                    )}
+                                                        <button
+                                                            onClick={() => handleInterviewClick(interview)}
+                                                            className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-500'} hover:underline`}
+                                                        >
+                                                            View Details
+                                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-
-                                            <div className="space-y-3 mt-4">
-                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                                    </svg>
-                                                    Interview Type :   {capitalizeFirstLetter(interview.interviewerType) || "N/A"}
-                                                </div>
-
-                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    Scheduled Date :   {formatDate(interview.date)}
-                                                </div>
-
-                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    Scheduled Time :   {interview.scheduledTime}
-                                                </div>
-                                                <div className={`flex items-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    Interviewer :   {interview?.interviewerID?.userName || "N/A"}
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-6 flex justify-end">
-                                                <button className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 group-hover:text-purple-600'
-                                                    }`}>
-                                                    View Details
-                                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                             </div>
-                        )}
+                        )
+                        }
                     </>
                 )}
-            </div>
 
-            {
-                (activeTab === 'manage' || activeTab === 'ai') && (
-                    <>
+                {
+                    (activeTab === 'manage' || activeTab === 'ai') && (
+                        <>
 
-                        {/* Interview Details Modal */}
-                        {isEditModalOpen && (
-                            <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                            {/* Interview Details Modal */}
+                            {isEditModalOpen && (
+                                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
 
-                                <div
-                                    ref={modalRef}
-                                    className={`rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-100'
-                                        }`}
-                                >
-                                    {/* Modal Header */}
-                                    <div className={`sticky top-0 z-10 border rounded-t-xl px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-md'
-                                        }`}>
-                                        <h2 className="text-xl font-bold dark:text-white text-gray-800">Update Interview Details</h2>
-                                        <button
-                                            onClick={() => setIsEditModalOpen(false)}
-                                            className="text-red-500 hover:text-black focus:outline-none p-1 rounded-full hover:bg-gray-300"
-                                            aria-label="Close"
-                                        >
-                                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div className={`p-5 rounded-xl m-6 mt-4 mb-6 border ${theme === 'dark' ? 'bg-white/10 border-gray-600' : 'bg-gray-200 border-gray-200 shadow-md'
-                                        }`}>
-                                        <h3 className={`font-semibold text-lg mb-3 flex items-center ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
-                                            <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                            </svg>
-                                            Application Details
-                                        </h3>
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div className="space-y-1">
-                                                <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>JOB TITLE</p>
-                                                <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A"}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>APPLICANT</p>
-                                                <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A"}</p>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>STATUS</p>
-                                                <span className={`font-medium ${getStatusColor(detailedInterview?.status)} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs`}>
-                                                    {statuses?.length && statuses.find(statusItem => statusItem._id === detailedInterview?.status)?.applicationStatus
-                                                        ? capitalizeFirstLetter(statuses.find(statusItem => statusItem._id === detailedInterview?.status).applicationStatus)
-                                                        : capitalizeFirstLetter(detailedInterview?.status) || "N/A"}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="px-6 pb-6 space-y-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div>
-                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={editForm.date}
-                                                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                                                    className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                        }`}
-                                                    min={new Date().toISOString()?.split('T')[0]}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Time</label>
-                                                <input
-                                                    type="time"
-                                                    value={editForm.time}
-                                                    onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
-                                                    className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                        }`}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Type</label>
-                                            <select
-                                                value={editForm.interviewType}
-                                                onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
-                                                className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                    }`}
-                                            >
-                                                <option value="">Select Interview Type</option>
-                                                {interviewTypes?.map((type) => (
-                                                    <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        {editForm.interviewType === 'online' && (
-                                            <div>
-                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
-                                                <input
-                                                    type="url"
-                                                    value={editForm.meetingLink}
-                                                    onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                                    className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
-                                                        }`}
-                                                    placeholder="https://meet.google.com/..."
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div>
-                                            <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Update Status</label>
-                                            <select
-                                                value={editForm.status}
-                                                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                                                className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                    }`}
-                                            >
-                                                {statuses?.map((status) => (
-                                                    <option key={status._id} value={status._id}>
-                                                        {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                {editForm.interviewerID
-                                                    ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm?.interviewerID?._id)?.userName || "Not Found"}`
-                                                    : "Assign Interviewer"}
-                                            </label>
-                                            <select
-                                                className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                    }`}
-                                                value={editForm?.interviewerID?._id || ""}
-                                                onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
-                                                required
-                                            >
-                                                <option value="">Select Interviewer</option>
-                                                {interviewers?.map((interviewer) => (
-                                                    <option key={interviewer._id} value={interviewer._id}>{interviewer.userName}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Notes (Optional)</label>
-                                            <textarea
-                                                className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
-                                                    }`}
-                                                rows="3"
-                                                placeholder="Add any additional notes about this interview..."
-                                            ></textarea>
-                                        </div>
-
-                                        {/* Buttons - No Logic Changes */}
-                                        <div className="flex justify-end space-x-3 pt-4 ">
+                                    <div
+                                        ref={modalRef}
+                                        className={`rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-100'
+                                            }`}
+                                    >
+                                        {/* Modal Header */}
+                                        <div className={`sticky top-0 z-10 border rounded-t-xl px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-md'
+                                            }`}>
+                                            <h2 className="text-xl font-bold dark:text-white text-gray-800">Update Interview Details</h2>
                                             <button
                                                 onClick={() => setIsEditModalOpen(false)}
-                                                className=" dark:text-white text-gray-800 px-4 py-2.5 border border-gray-300 rounded-xl font-medium  dark:hover:bg-purple-800 transition-colors"
+                                                className="text-red-500 hover:text-black focus:outline-none p-1 rounded-full hover:bg-gray-300"
+                                                aria-label="Close"
                                             >
-                                                Cancel
+                                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
                                             </button>
-                                            <button
-                                                onClick={handleUpdateInterview}
-                                                className="px-4 py-2.5 bg-[#9333ea] rounded-xl text-white hover:text-white  font-medium hover:bg-purple-800 transition-colors"
-                                            >
-                                                Update Interview
-                                            </button>
-                                            {(userRole === 'admin' || userRole === 'hiring_manager') && (
-                                                <button
-                                                    onClick={(e) => handleDeleteInterview(detailedInterview._id, e)}
-                                                    className="px-4 py-2.5 bg-red-600 rounded-xl text-white hover:text-white font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                                        </div>
+
+                                        <div className={`p-5 rounded-xl m-6 mt-4 mb-6 border ${theme === 'dark' ? 'bg-white/10 border-gray-600' : 'bg-gray-200 border-gray-200 shadow-md'
+                                            }`}>
+                                            <h3 className={`font-semibold text-lg mb-3 flex items-center ${theme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}>
+                                                <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                                Application Details
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div className="space-y-1">
+                                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>JOB TITLE</p>
+                                                    <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.jobID?.title) || "N/A"}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>APPLICANT</p>
+                                                    <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{capitalizeFirstLetter(detailedInterview?.applicationID?.candidateID?.userName) || "N/A"}</p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>STATUS</p>
+                                                    <span className={`font-medium ${getStatusColor(detailedInterview?.status)} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs`}>
+                                                        {statuses?.length && statuses.find(statusItem => statusItem._id === detailedInterview?.status)?.applicationStatus
+                                                            ? capitalizeFirstLetter(statuses.find(statusItem => statusItem._id === detailedInterview?.status).applicationStatus)
+                                                            : capitalizeFirstLetter(detailedInterview?.status) || "N/A"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="px-6 pb-6 space-y-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div>
+                                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Date</label>
+                                                    <input
+                                                        type="date"
+                                                        value={editForm.date}
+                                                        onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                                                        className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                            }`}
+                                                        min={new Date().toISOString()?.split('T')[0]}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Time</label>
+                                                    <input
+                                                        type="time"
+                                                        value={editForm.time}
+                                                        onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+                                                        className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                            }`}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Type</label>
+                                                <select
+                                                    value={editForm.interviewType}
+                                                    onChange={(e) => setEditForm({ ...editForm, interviewType: e.target.value })}
+                                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                        }`}
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
-                                                    Delete
-                                                </button>
+                                                    <option value="">Select Interview Type</option>
+                                                    {interviewTypes?.map((type) => (
+                                                        <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {editForm.interviewType === 'online' && (
+                                                <div>
+                                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
+                                                    {isMeetingLinkActive(editForm.date, editForm.time) ? (
+                                                        <a
+                                                            href={editForm.meetingLink}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline p-2 bg-purple-50 rounded-lg w-full"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                            Join Meeting Now
+                                                        </a>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 text-sm text-amber-600 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+                                                            <Clock className="w-5 h-5 flex-shrink-0" />
+                                                            <span>Link will be active 5 mins before interview</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
+
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Update Status</label>
+                                                <select
+                                                    value={editForm.status}
+                                                    onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                        }`}
+                                                >
+                                                    {statuses?.map((status) => (
+                                                        <option key={status._id} value={status._id}>
+                                                            {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                    {editForm.interviewerID
+                                                        ? `Assigned Interviewer: ${interviewers.find(i => i._id === editForm?.interviewerID?._id)?.userName || "Not Found"}`
+                                                        : "Assign Interviewer"}
+                                                </label>
+                                                <select
+                                                    className={`sm:w-full w-32 border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                        }`}
+                                                    value={editForm?.interviewerID?._id || ""}
+                                                    onChange={(e) => setEditForm({ ...editForm, interviewerID: e.target.value })}
+                                                    required
+                                                >
+                                                    <option value="">Select Interviewer</option>
+                                                    {interviewers?.map((interviewer) => (
+                                                        <option key={interviewer._id} value={interviewer._id}>{interviewer.userName}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Notes (Optional)</label>
+                                                <textarea
+                                                    className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                                        }`}
+                                                    rows="3"
+                                                    placeholder="Add any additional notes about this interview..."
+                                                ></textarea>
+                                            </div>
+
+                                            {/* Modal Footer */}
+                                            <div className={`sticky bottom-0 z-10 border-t px-6 py-4 flex justify-end gap-3 mt-auto ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                                                <button
+                                                    onClick={() => setIsEditModalOpen(false)}
+                                                    className={`px-6 py-2 rounded-xl font-medium transition-all ${theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleUpdateInterview}
+                                                    className="px-8 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg hover:shadow-purple-500/20 transition-all hover:-translate-y-0.5"
+                                                >
+                                                    Update Details
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                        {
-                            (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
-                                <AiGeneratedInterviews />
-                            )
-                        }
+                            )}
 
-                        {filteredInterviews && filteredInterviews?.length > 0 && (
-                            <div className="px-6 py-4 border-t border-gray-100 mt-4">
-                                <div className="flex items-center justify-between">
-                                    <button
-                                        onClick={handlePreviousPage}
-                                        disabled={page === 1}
-                                        className={`px-4 py-2 rounded-xl text-white ${page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black"}`}
-                                    >
-                                        Previous
-                                    </button>
-                                    <div className="hidden sm:flex items-center space-x-1">
-                                        {[...Array(totalPages)].map((_, i) => (
-                                            <button
-                                                key={i}
-                                                onClick={() => setPage(i + 1)}
-                                                className={`px-3.5 py-2 text-sm rounded-md ${page === i + 1
-                                                    ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
-                                                    : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
-                                                    }`}
-                                            >
-                                                {i + 1}
-                                            </button>
-                                        ))}
+                            {/* See All Rounds Modal */}
+                            {isRoundsModalOpen && selectedApplicationId && (
+                                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                                    <div className={`rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+                                        {/* Modal Header per screenshot */}
+                                        <div className="p-8 pb-4 flex items-start gap-5">
+                                            {(() => {
+                                                const rounds = assignedInterviews?.interviews?.filter(i => i.applicationID?._id === selectedApplicationId) || [];
+                                                const first = rounds[0];
+                                                const initial = first?.applicationID?.candidateID?.userName?.[0] || "?";
+                                                return (
+                                                    <>
+                                                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                                            {capitalizeFirstLetter(initial)}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                                {capitalizeFirstLetter(first?.applicationID?.jobID?.title) || "N/A"}
+                                                            </h2>
+                                                            <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                {capitalizeFirstLetter(first?.applicationID?.candidateID?.userName) || "N/A"}
+                                                            </p>
+                                                        </div>
+                                                        <button onClick={() => setIsRoundsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+
+                                        {/* Subheader */}
+                                        <div className="px-8 mb-4 flex justify-between items-center">
+                                            <h3 className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Scheduled Rounds</h3>
+                                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                                                {assignedInterviews?.interviews?.filter(i => i.applicationID?._id === selectedApplicationId).length} Rounds
+                                            </span>
+                                        </div>
+
+                                        {/* Scrollable Rounds List */}
+                                        <div className="px-8 pb-8 overflow-y-auto space-y-4">
+                                            {assignedInterviews?.interviews
+                                                ?.filter(i => i.applicationID?._id === selectedApplicationId)
+                                                .map((round) => {
+                                                    const appStatus = statuses?.find(s => s._id === round.status)?.applicationStatus || round.status;
+                                                    return (
+                                                        <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
+                                                            <div className="flex justify-between items-start mb-4">
+                                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                                                                    {capitalizeFirstLetter(appStatus)}
+                                                                </span>
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => handleInterviewClick(round)}
+                                                                        className={`p-2 rounded-lg border transition-all ${theme === 'dark' ? 'border-gray-700 text-purple-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-indigo-600 hover:shadow-md'}`}
+                                                                    >
+                                                                        <Search className="h-4 w-4" />
+                                                                    </button>
+                                                                    {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                                        <button
+                                                                            onClick={(e) => handleDeleteInterview(round._id, e)}
+                                                                            className={`p-2 rounded-lg border transition-all ${theme === 'dark' ? 'border-gray-700 text-red-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-red-500 hover:shadow-md'}`}
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4" />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center gap-3">
+                                                                    <Clock className="h-4 w-4 text-gray-400" />
+                                                                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                                        {formatDate(round.date)} at {round.scheduledTime}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>T</div>
+                                                                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{capitalizeFirstLetter(round.interviewerType)} Interview</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
+                                                                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {round?.interviewerID?.userName || "N/A"}</span>
+                                                                </div>
+
+                                                                {/* Meeting Link for Online Interviews */}
+                                                                {round.interviewerType === 'online' && round.meetingLink && (
+                                                                    <div className="mt-3 pt-3 border-t border-purple-100/50">
+                                                                        {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                                            <a
+                                                                                href={round.meetingLink}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                            >
+                                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                                </svg>
+                                                                                Join Meeting Now
+                                                                            </a>
+                                                                        ) : (
+                                                                            <div className="flex items-center gap-2 text-[11px] text-amber-600 font-medium">
+                                                                                <Clock className="w-4 h-4" />
+                                                                                Link will be active 5 mins before
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
                                     </div>
-
-                                    <span className="sm:hidden text-sm text-gray-600">
-                                        Page {page} of {totalPages}
-                                    </span>
-                                    <button
-                                        onClick={handleNextPage}
-                                        disabled={page >= totalPages}
-                                        className={`px-4 py-2 rounded-xl text-white ${page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black"}`}
-                                    >
-                                        Next
-                                    </button>
                                 </div>
-                            </div>
-                        )}
-                    </>
-                )
-            }
+                            )}
+                            {
+                                (aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && activeTab === 'ai' && (
+                                    <AiGeneratedInterviews />
+                                )
+                            }
 
+                            {filteredInterviews && filteredInterviews?.length > 0 && (
+                                <div className="px-6 py-4 border-t border-gray-100 mt-4">
+                                    <div className="flex items-center justify-between">
+                                        <button
+                                            onClick={handlePreviousPage}
+                                            disabled={page === 1}
+                                            className={`px-4 py-2 rounded-xl text-white ${page === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black"}`}
+                                        >
+                                            Previous
+                                        </button>
+                                        <div className="hidden sm:flex items-center space-x-1">
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setPage(i + 1)}
+                                                    className={`px-3.5 py-2 text-sm rounded-md ${page === i + 1
+                                                        ? 'bg-gray-700 text-white cursor-not-allowed rounded-xl'
+                                                        : 'bg-gray-300 border border-gray-300 text-white hover:bg-gray-400 rounded-xl'
+                                                        }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </div>
 
+                                        <span className="sm:hidden text-sm text-gray-600">
+                                            Page {page} of {totalPages}
+                                        </span>
+                                        <button
+                                            onClick={handleNextPage}
+                                            disabled={page >= totalPages}
+                                            className={`px-4 py-2 rounded-xl text-white ${page >= totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-gray-700 hover:bg-gray-400 hover:text-black"}`}
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )
+                }
+
+            </div>
         </div >
     );
 };

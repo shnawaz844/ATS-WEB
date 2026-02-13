@@ -77,7 +77,13 @@ const JobDescriptionModal = ({ job, isOpen, onClose, isApplied }) => {
                         { icon: MapPinned, label: 'Country', value: job.country },
                         { icon: MapPinned, label: 'State', value: job.state },
                         { icon: Navigation, label: 'City', value: job.city }
-                    ].map(({ icon: Icon, label, value }, index) => (
+                    ].filter(item => {
+                        // If job is remote, don't show state and city
+                        if (job.locationType?.toLowerCase() === 'remote' && (item.label === 'State' || item.label === 'City')) {
+                            return false;
+                        }
+                        return true;
+                    }).map(({ icon: Icon, label, value }, index) => (
                         <div key={index} className={`flex items-start space-x-3 p-2 sm:p-3 rounded-xl transition-colors ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-indigo-100/50'}`}>
                             <Icon className={`w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
                             <div>
