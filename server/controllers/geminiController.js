@@ -1,4 +1,4 @@
-import { generateDescriptionText } from "../utils/aiHelper.js";
+import { generateDescriptionStream } from "../utils/aiHelper.js";
 
 export const generateJobDescription = async (req, res) => {
     try {
@@ -9,19 +9,33 @@ export const generateJobDescription = async (req, res) => {
             return res.status(400).json({ success: false, message: "Job title is required" });
         }
 
-        // Use the retry-enabled function from aiHelper
-        const description = await generateDescriptionText(
+        // Use the streaming-enabled function from aiHelper
+        const stream = await generateDescriptionStream(
             jobTitle,
-            companyUserName || "[Company Name]",
+            companyUserName || "",
             compensation || "",
             experience || ""
         );
 
-        // Send the complete description
-        res.status(200).json({
-            success: true,
-            description: description
-        });
+        // Set appropriate headers for streaming
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        let isFirstChunk = true;
+        for await (const chunk of stream) {
+            let chunkText = chunk.text();
+
+            // Post-processing to strip markdown code block artifacts if AI ignores prompt instructions
+            if (isFirstChunk) {
+                chunkText = chunkText.replace(/^[\s\n]*```(?:html)?[\s\n]*/i, '');
+                isFirstChunk = false;
+            }
+            // Also sanitize the end if it contains the closing marks
+            chunkText = chunkText.replace(/```[\s\n]*$/g, '');
+
+            res.write(chunkText);
+        }
+        res.end();
     } catch (error) {
         console.error("Error generating job description:", error);
 

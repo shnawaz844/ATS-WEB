@@ -5,9 +5,9 @@ const addUser = async (req, res) => {
         const { userName, email, password, gender, address, role, company_id } = req.body;
         console.log("company_id", company_id);
         // Check if email already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email, company_id });
         if (existingUser) {
-            return res.status(409).json({ message: "Email already registered." });
+            return res.status(400).json({ error: "User already exists with this email" });
         }
 
         // Validate role field against allowed enum values

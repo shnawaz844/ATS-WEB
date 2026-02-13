@@ -45,31 +45,13 @@ const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 2000) => {
     }
 };
 
-export const generateDescriptionText = async (jobTitle, companyUserName, compensation = "", experience = "") => {
-    try {
-        if (!jobTitle) {
-            throw new Error("Job title is required");
-        }
-
-        if (!process.env.GEMINI_API_KEY) {
-            throw new Error("Gemini API key not configured");
-        }
-
-        const capitalizedCompany = companyUserName
-            ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1)
-            : "[Company Name]";
-
-        // Wrap the AI generation in retry logic
-        return await retryWithBackoff(async () => {
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-            const prompt = `Write a professional and engaging job description for the role of "${jobTitle}" using the following specific format and emojis. Use HTML tags (<h3>, <p>, <ul>, <li>, <strong>) for detailed formatting.
+const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
+    return `Write a professional and engaging job description for the role of "${jobTitle}" using the following specific format and emojis. Use HTML tags (<h3>, <p>, <ul>, <li>, <strong>) for detailed formatting.
 
             Format Structure:
             
             <h3>🚀 About the Company</h3>
-            <p>Write a brief, exciting placeholder description about a forward-thinking company.</p>
+            <p>Write an exciting description about ${capitalizedCompany || "our company"}.</p>
             <br></br>
             <h3>👨💻 Role Overview</h3>
             <p>Write a compelling summary of the role. ${experience ? `The ideal candidate should have approximately <strong>${experience} years</strong> of experience.` : ""}</p>
@@ -97,57 +79,52 @@ export const generateDescriptionText = async (jobTitle, companyUserName, compens
                 <li>Competitive salary package ${compensation ? `(<strong>${compensation}</strong>)` : ""} 💰</li>
                 <li>Friendly and supportive work culture 🤝</li>
                 <li>Career growth and learning opportunities 📈</li>
-                <li>Flexible working environment (Hybrid / On-site)</li>
+                <li>Flexible working environment</li>
             </ul>
 
             Ensure the tone is professional yet energetic. 
-            IMPORTANT: Whenever you mention the company name "${capitalizedCompany}" in any section (especially in "About the Company"), you must wrap it in <strong style="background-color: yellow; padding: 2px 4px; border-radius: 4px;">...</strong> to highlight it.
-            Do not wrap the output in markdown code blocks.`;
+            ${capitalizedCompany ? `IMPORTANT: Whenever you mention the company name "${capitalizedCompany}" in any section (especially in "About the Company"), you must wrap it in <strong style="background-color: yellow; color: #000000; padding: 2px 4px; border-radius: 4px;">...</strong> to highlight it. The 'color: #000000' is essential for readability in dark mode.` : ""}
+            
+            CRITICAL: Provide ONLY the raw HTML body. 
+            - DO NOT wrap the output in markdown code blocks like \`\`\`html ... \`\`\`.
+            - DO NOT include "html" or any language identifiers at the start.
+            - Start the output directly with the first <h3> tag.
+            Failure to follow this will break the UI formatting.`;
+};
 
+export const generateDescriptionStream = async (jobTitle, companyUserName, compensation = "", experience = "") => {
+    try {
+        if (!jobTitle) throw new Error("Job title is required");
+        if (!process.env.GEMINI_API_KEY) throw new Error("Gemini API key not configured");
+
+        const capitalizedCompany = companyUserName
+            ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1)
+            : "";
+
+        return await retryWithBackoff(async () => {
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation);
             const result = await model.generateContentStream(prompt);
-            let fullText = "";
-            for await (const chunk of result.stream) {
-                const chunkText = chunk.text();
-                fullText += chunkText;
-            }
-            return fullText;
-        }, 3, 2000); // 3 retries with 2 second base delay
+            return result.stream;
+        }, 3, 2000);
+    } catch (error) {
+        console.error("Error in generateDescriptionStream:", error);
+        throw error;
+    }
+};
+
+export const generateDescriptionText = async (jobTitle, companyUserName, compensation = "", experience = "") => {
+    try {
+        const stream = await generateDescriptionStream(jobTitle, companyUserName, compensation, experience);
+        let fullText = "";
+        for await (const chunk of stream) {
+            fullText += chunk.text();
+        }
+        return fullText;
     } catch (error) {
         console.error("Error in generateDescriptionText:", error);
-
-        // Return a fallback description if AI generation fails completely
-        const fallbackDescription = `
-            <h3>🚀 About the Company</h3>
-            <p>Join our dynamic team and contribute to exciting projects.</p>
-            <br></br>
-            <h3>👨💻 Role Overview</h3>
-            <p>We are looking for a talented ${jobTitle} to join our team. ${experience ? `The ideal candidate should have approximately <strong>${experience} years</strong> of experience.` : ""}</p>
-            <br></br>
-            <h3>🛠️ Key Responsibilities</h3>
-            <ul>
-                <li>Collaborate with cross-functional teams</li>
-                <li>Deliver high-quality work on time</li>
-                <li>Contribute to team success</li>
-            </ul>
-            <br></br>
-            <h3>🎯 Required Skills & Qualifications</h3>
-            <ul>
-                ${experience ? `<li>Minimum of <strong>${experience} years</strong> of relevant experience.</li>` : ""}
-                <li>Strong communication skills</li>
-                <li>Team player with problem-solving abilities</li>
-            </ul>
-            <br></br>
-            <h3>🌟 What We Offer</h3>
-            <ul>
-                <li>Competitive salary package ${compensation ? `(<strong>${compensation}</strong>)` : ""} 💰</li>
-                <li>Friendly and supportive work culture 🤝</li>
-                <li>Career growth and learning opportunities 📈</li>
-                <li>Flexible working environment (Hybrid / On-site)</li>
-            </ul>
-        `;
-
-        console.warn("⚠️ Using fallback description due to AI generation failure");
-        return fallbackDescription;
+        throw error;
     }
 };
 

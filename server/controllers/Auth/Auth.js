@@ -22,7 +22,7 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'company_id is required' });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email, company_id });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
@@ -89,7 +89,10 @@ const logout = (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const company_id = req.headers["company_id"];
+
+    const payload = company_id === "super" ? { email, role: "super" } : { email, company_id };
+    const user = await User.findOne(payload);
 
     if (!user) {
       return res.status(404).json({ error: "User with this email does not exist" });
