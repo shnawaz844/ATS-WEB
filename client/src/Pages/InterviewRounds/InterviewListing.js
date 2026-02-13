@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useInterviews, useAddInterview, useUpdateInterview } from "../../hooks/useInterviewRounds";
 import InterViewDialog from "../../components/InterViewDialog";
-import { AlertCircle, Briefcase, ChevronLeft, ChevronRight, Edit, Search } from "lucide-react";
+import { AlertCircle, Briefcase, ChevronLeft, ChevronRight, Edit, Search, FileText } from "lucide-react";
 
 import { useTheme } from "../../context/ThemeContext";
 
@@ -80,13 +80,12 @@ const InterviewListing = () => {
     if (dialogMode === "add") {
       addInterview(formData, {
         onSuccess: () => {
-          alert("Interview added successfully");
           handleCloseDialog();
           // Trigger re-fetch of interviews here
           setCurrentPage(1);  // Optionally reset to the first page
         },
-        onError: () => {
-          alert("Failed to add interview");
+        onError: (error) => {
+          console.error("Failed to add interview:", error);
         },
       });
     } else {
@@ -95,11 +94,10 @@ const InterviewListing = () => {
         { interviewId: selectedInterview._id, formData },
         {
           onSuccess: () => {
-            alert("Interview updated successfully");
             handleCloseDialog();
           },
-          onError: () => {
-            alert("Failed to update Interview");
+          onError: (error) => {
+            console.error("Failed to update Interview:", error);
           },
         }
       );
@@ -146,89 +144,102 @@ const InterviewListing = () => {
           </div>
         </div>
 
-        {/* Interview List */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 px-2 sm:px-0">
-          {isLoading && (
-            <div className="col-span-full h-64 flex items-center justify-center">
-              <div className="w-8 h-8 border-4 border-[#9333ea] border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
+        {isLoading && (
+          <div className="h-64 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-[#9333ea] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
 
-          {isError && (
-            <div className="col-span-full h-64 flex items-center justify-center px-4">
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center gap-3 max-w-md w-full border border-red-200 dark:border-red-800">
-                <AlertCircle className="text-red-500 dark:text-red-400 h-5 w-5" />
-                <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">Error: {error.message}</p>
+        {isError && (
+          <div className="h-64 flex items-center justify-center px-4">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex items-center gap-3 max-w-md w-full border border-red-200 dark:border-red-800">
+              <AlertCircle className="text-red-500 dark:text-red-400 h-5 w-5" />
+              <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">Error: {error.message}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Content */}
+        {!isLoading && !isError && (
+          <>
+            {interviews.length === 0 ? (
+              <div className="h-64 flex flex-col items-center justify-center text-gray-500 px-4 text-center">
+                <FileText className="h-12 w-12 mb-4 text-gray-400 dark:text-gray-600" />
+                <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">There are no Interview status et yet. Try adding a new one.</p>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 px-2 sm:px-0">
+                {interviews.map((interview) => (
+                  <div
+                    key={interview._id}
+                    className="backdrop-blur-xl bg-white dark:bg-white/5 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#9333ea]/50 dark:hover:border-[#9333ea]/50 hover:shadow-lg transition-all duration-200"
+                  >
+                    <div className="flex flex-col">
+                      <div className="flex items-center flex-wrap gap-1 mt-2">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Number:</h3>
+                        <p className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{interview.roundNumber}</p>
+                      </div>
+                      <div className="flex items-center flex-wrap gap-1">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Name:</h3>
+                        <p className="text-sm sm:text-base font-semibold text-[#9333ea] dark:text-[#a855f7]">{interview.roundName}</p>
+                      </div>
+                      <button
+                        onClick={() => handleOpenEditDialog(interview)}
+                        className="self-end p-1 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-full transition-colors mt-2"
+                        aria-label="Edit"
+                      >
+                        <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                      </button>
+                    </div>
 
-          {interviews.map((interview) => (
-            <div
-              key={interview._id}
-              className="backdrop-blur-xl bg-white dark:bg-white/5 p-4 sm:p-5 rounded-xl border border-gray-200 dark:border-white/10 hover:border-[#9333ea]/50 dark:hover:border-[#9333ea]/50 hover:shadow-lg transition-all duration-200"
-            >
-              <div className="flex flex-col">
-                <div className="flex items-center flex-wrap gap-1 mt-2">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Number:</h3>
-                  <p className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400">{interview.roundNumber}</p>
-                </div>
-                <div className="flex items-center flex-wrap gap-1">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">Round Name:</h3>
-                  <p className="text-sm sm:text-base font-semibold text-[#9333ea] dark:text-[#a855f7]">{interview.roundName}</p>
-                </div>
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>ID: {interview._id.substring(0, 8)}...</span>
+                        <span>Updated: {new Date(interview.updatedAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {interviews.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-2 gap-4 sm:gap-0 px-2 sm:px-0">
                 <button
-                  onClick={() => handleOpenEditDialog(interview)}
-                  className="self-end p-1 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-full transition-colors mt-2"
-                  aria-label="Edit"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === 1
+                    ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
+                    }`}
                 >
-                  <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Previous
+                </button>
+
+                <div className="flex items-center gap-1">
+                  <span className="px-3 py-1 rounded-full font-medium text-xs sm:text-sm bg-gray-200 dark:bg-gray-700 text-black dark:text-white">
+                    {currentPage}
+                  </span>
+                  <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">of {totalPages}</span>
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === totalPages
+                    ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
+                    : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
+                    }`}
+                >
+                  Next
+                  <ChevronRight className="ml-1 h-4 w-4" />
                 </button>
               </div>
-
-              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span>ID: {interview._id.substring(0, 8)}...</span>
-                  <span>Updated: {new Date(interview.updatedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6 mt-2 gap-4 sm:gap-0 px-2 sm:px-0">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === 1
-              ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
-              : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
-              }`}
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Previous
-          </button>
-
-          <div className="flex items-center gap-1">
-            <span className="px-3 py-1 rounded-full font-medium text-xs sm:text-sm bg-gray-200 dark:bg-gray-700 text-black dark:text-white">
-              {currentPage}
-            </span>
-            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">of {totalPages}</span>
-          </div>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className={`flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors duration-200 w-full sm:w-auto justify-center ${currentPage === totalPages
-              ? 'bg-gray-300 dark:bg-gray-800 text-gray-500 dark:text-gray-600 border-gray-200 dark:border-gray-700 cursor-not-allowed rounded-xl'
-              : 'bg-gray-700 dark:bg-gray-800 text-white border-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 rounded-xl'
-              }`}
-          >
-            Next
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </button>
-        </div>
+            )}
+          </>
+        )}
 
         {/* Dialog Box */}
         {isDialogOpen && (

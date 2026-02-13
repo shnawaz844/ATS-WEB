@@ -126,14 +126,7 @@ export default function FilledPositionsModal({
                                                 </button>
                                             </div>
 
-                                            <div className="flex space-x-3">
-                                                <button className={`flex items-center ${theme === 'dark' ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-800'} text-sm font-medium`}>
-                                                    Open
-                                                </button>
-                                                <button className={`flex items-center ${theme === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-800'} text-sm font-medium`}>
-                                                    Share
-                                                </button>
-                                            </div>
+
                                         </div>
                                     </div>
                                 );

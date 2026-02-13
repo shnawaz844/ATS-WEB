@@ -185,8 +185,8 @@ const UserDialog = ({
 
                             {/* Company Dropdown (visible for super users) */}
                             {loggedInUser.role === 'super' && (
-                                <div className="mb-4">
-                                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <div>
+                                    <label htmlFor="company" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                         Company
                                     </label>
                                     <select
@@ -194,7 +194,7 @@ const UserDialog = ({
                                         name="company_id"
                                         value={formData.company_id || ''}
                                         onChange={handleFormChange}
-                                        className="mt-1 block w-full rounded-md shadow-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-[#9333ea] focus:border-[#9333ea]"
+                                        className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     >
                                         <option value="">Select a company</option>
                                         {companies?.map((company) => (
@@ -208,18 +208,28 @@ const UserDialog = ({
 
                             {/* Role Field */}
                             {loggedInUser.role === 'super' ? (
-                                <>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                        Role
+                                    </label>
+                                    <div className="w-full px-4 py-2 border rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                                        Admin
+                                    </div>
                                     <input type="hidden" name="role" value={formData.role = "admin"} />
-                                    <p className="mb-4 text-gray-700 dark:text-gray-300">Role: Admin</p>
-                                </>
+                                </div>
                             ) : loggedInUser.role === 'recruiter_manager' ? (
-                                <>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                        Role
+                                    </label>
+                                    <div className="w-full px-4 py-2 border rounded-md border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                                        Candidate
+                                    </div>
                                     <input type="hidden" name="role" value={formData.role = "candidate"} />
-                                    <p className="mb-4 text-gray-700 dark:text-gray-300">Role: Candidate</p>
-                                </>
+                                </div>
                             ) : (
-                                <div className="mb-4">
-                                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <div>
+                                    <label htmlFor="role" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                                         Role
                                     </label>
                                     <select
@@ -227,7 +237,7 @@ const UserDialog = ({
                                         name="role"
                                         value={formData.role}
                                         onChange={handleFormChange}
-                                        className="mt-1 block sm:w-full w-32 rounded-md shadow-sm border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-[#9333ea] focus:border-[#9333ea]"
+                                        className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#9333ea] focus:border-[#9333ea] outline-none transition-colors border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                     >
                                         <option value="admin">Admin</option>
                                         <option value="recruiter_manager">Recruiter Manager</option>
