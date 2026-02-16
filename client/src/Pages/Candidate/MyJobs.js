@@ -20,7 +20,8 @@ import {
     Mail,
     FolderDown,
     BookText,
-    Video
+    Video,
+    Search
 } from 'lucide-react';
 import BackButtonMobile from '../../components/Mob-back-btn';
 import { useTheme } from '../../context/ThemeContext';
@@ -59,6 +60,20 @@ const MyJobs = () => {
     const [applicationStatuses, setApplicationStatuses] = useState([]);
     const [loadingStatuses, setLoadingStatuses] = useState(true);
 
+    // Interview specific state
+    const [isRoundsModalOpen, setIsRoundsModalOpen] = useState(false);
+    const [selectedApplicationRounds, setSelectedApplicationRounds] = useState([]);
+    const [selectedApplicationForRounds, setSelectedApplicationForRounds] = useState(null);
+    const [loadingRounds, setLoadingRounds] = useState(false);
+    const [interviewers, setInterviewers] = useState([]);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Update current time every second for the countdown
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     // 1️⃣ Build lookup map: _id -> applicationStatus
     const statusMap = useMemo(() => {
         return applicationStatuses.reduce((map, s) => {
@@ -77,6 +92,7 @@ const MyJobs = () => {
                 `${process.env.REACT_APP_BASE_URL}/application/candidate/${loginData._id}?page=${currentPage}&limit=${limit}`
             );
             const data = await res.json();
+            console.log("Fetched Applications:", data.applications);
             setApplications(data.applications);
             setTotalPages(data.totalPages);
         } catch (error) {
@@ -86,14 +102,36 @@ const MyJobs = () => {
         }
     };
 
+    const fetchInterviewers = async () => {
+        try {
+            const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/users/interviewers`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Company_id": companyId,
+                },
+            });
+            const data = await response.json();
+            setInterviewers(data);
+        } catch (error) {
+            console.error("Error fetching interviewers:", error);
+        }
+    };
+
+    // Helper to get interviewer name from ID or object
+    const getInterviewerName = (idOrObj) => {
+        if (!idOrObj) return "N/A";
+        // If it's already an object with userName
+        if (typeof idOrObj === 'object' && idOrObj.userName) return idOrObj.userName;
+
+        // If it's an ID string, look it up in the interviewers list
+        const interviewer = interviewers.find(i => i._id === idOrObj);
+        return interviewer ? interviewer.userName : "N/A";
+    };
+
     const getStatusColor = (status) => {
-        // Theme-aware status colors could be handled here if needed, 
-        // but these are specific status colors. I'll leave them as is or adjust brightness for dark mode if requested.
-        // For now, these colors (bg-blue-100, etc.) are light.
-        // I will make them slightly darker for dark mode if possible, but they are semantic.
-        // Let's stick to these for now or use opacities.
-        // Actually, for dark mode consistency, I should use darker backgrounds or text.
-        // But let's check if I can just use existing ones for now.
+
         switch (status) {
             case 'New Submission':
                 return theme === 'dark' ? 'bg-blue-900/30 text-blue-300 border border-blue-800' : 'bg-blue-100 text-blue-800';
@@ -145,6 +183,166 @@ const MyJobs = () => {
         setFile(selectedFile);
     };
 
+    // --- Interview Helpers (Ported/Adapted) ---
+
+    // Format date for better display
+    const formatDate = (dateString) => {
+        if (!dateString) return "Not scheduled";
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return dateString;
+        }
+    };
+
+    // Check if interview date is today
+    const isToday = (dateString) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const interviewDate = new Date(dateString);
+        interviewDate.setHours(0, 0, 0, 0);
+
+        return today.getTime() === interviewDate.getTime();
+    };
+
+    // Check interview status (Upcoming vs Done)
+    const getInterviewRoundStatus = (dateString, timeString, interview) => {
+        // 1. Explicit manual statuses take priority
+        if (interview?.interviewProgressStatus === "Completed") {
+            return { label: "INTERVIEW DONE", isDone: true, color: "green" };
+        }
+        if (interview?.interviewProgressStatus === "Missed") {
+            return { label: "INTERVIEW MISSED", isDone: true, color: "red" };
+        }
+
+        if (!dateString || !timeString) return { label: "UPCOMING INTERVIEW", isDone: false, color: "purple" };
+        const interviewDate = new Date(dateString);
+        const [hours, minutes] = timeString.split(':').map(Number);
+        interviewDate.setHours(hours, minutes, 0, 0);
+
+        const now = currentTime; // Use stable currentTime from state
+        const joinDeadline = new Date(interviewDate.getTime() + 15 * 60 * 1000); // 15 mins (Link Expiration)
+        const joinActiveStart = new Date(interviewDate.getTime() - 5 * 60 * 1000); // 5 mins before
+
+        // 2. Post-Expiration Logic (After 15 mins)
+        if (now > joinDeadline) {
+            if (interview?.interviewProgressStatus === "In Progress") {
+                return { label: "INTERVIEW DONE", isDone: true, color: "green" };
+            }
+            return { label: "INTERVIEW MISSED", isDone: true, color: "red" };
+        }
+
+        if (currentTime > joinDeadline) {
+            // After 15 mins, if not joined, it's Missed. If joined, it's In Progress.
+            if (interview?.interviewProgressStatus === "In Progress") {
+                return { label: "IN PROGRESS", isDone: false, color: "blue" };
+            }
+            return { label: "INTERVIEW MISSED", isDone: true, color: "red" };
+        }
+
+        // 3. Current active states
+        if (interview?.interviewProgressStatus === "In Progress") {
+            return { label: "IN PROGRESS", isDone: false, color: "blue" };
+        }
+
+        return {
+            label: "UPCOMING INTERVIEW",
+            isDone: false,
+            color: "purple"
+        };
+    };
+
+    const handleJoinMeeting = async (interviewId, meetingLink) => {
+        window.open(meetingLink, '_blank', 'noopener,noreferrer');
+
+        try {
+            await fetch(`${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/update-interview/${interviewId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    interviewProgressStatus: "In Progress"
+                }),
+            });
+            fetchApplications();
+        } catch (error) {
+            console.error("Error updating interview status to In Progress:", error);
+        }
+    };
+
+    // Get specific status color for interview rounds
+    const getRoundStatusColor = (status) => {
+        const statusName = statusMap[status] || status;
+
+        switch (statusName?.toLowerCase()) {
+            case 'scheduled':
+            case 'in progress': // Added 'in progress'
+                return theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800';
+            case 'completed':
+            case 'interview complete':
+                return theme === 'dark' ? 'bg-green-900/30 text-green-300' : 'bg-green-100 text-green-800';
+            case 'cancelled':
+                return theme === 'dark' ? 'bg-red-900/30 text-red-300' : 'bg-red-100 text-red-800';
+            case 'missed':
+            case 'interview missed':
+                return theme === 'dark' ? 'bg-red-900/10 text-red-400 border border-red-800' : 'bg-red-50 text-red-600 border border-red-100';
+            case 'rescheduled':
+                return theme === 'dark' ? 'bg-yellow-900/30 text-yellow-300' : 'bg-yellow-100 text-yellow-800';
+            default:
+                return theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const fetchRoundsForApplication = async (applicationId) => {
+        setLoadingRounds(true);
+        try {
+            // For now, I'll simulate it with the single interview available.
+            const app = applications.find(a => a._id === applicationId);
+            if (app && app.interview) {
+                setSelectedApplicationRounds([app.interview]);
+            } else {
+                setSelectedApplicationRounds([]);
+            }
+
+        } catch (error) {
+            console.error("Error fetching rounds", error);
+        } finally {
+            setLoadingRounds(false);
+        }
+    };
+
+    const handleSeeAllRounds = (app) => {
+        setSelectedApplicationForRounds(app);
+
+        let interviewsToUse = [];
+        if (app.interviews && Array.isArray(app.interviews) && app.interviews.length > 0) {
+            interviewsToUse = app.interviews;
+        } else if (app.interview) {
+            interviewsToUse = [app.interview];
+        }
+
+        const sortedRounds = [...interviewsToUse].sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            const [hA, mA] = (a.scheduledTime || "00:00").split(':').map(Number);
+            const [hB, mB] = (b.scheduledTime || "00:00").split(':').map(Number);
+            dateA.setHours(hA || 0, mA || 0, 0, 0);
+            dateB.setHours(hB || 0, mB || 0, 0, 0);
+            return dateA.getTime() - dateB.getTime();
+        });
+        setSelectedApplicationRounds(sortedRounds);
+        setIsRoundsModalOpen(true);
+    };
+
+
+
     const handleSubmitEdit = async () => {
         try {
             const formData = new FormData();
@@ -187,6 +385,7 @@ const MyJobs = () => {
 
     useEffect(() => {
         fetchApplications();
+        fetchInterviewers();
     }, [loginData, currentPage]);
 
     // Fetch all application statuses
@@ -219,10 +418,71 @@ const MyJobs = () => {
             interviewDate.setHours(hours, minutes, 0, 0);
             const now = new Date();
             const fiveMinutesBefore = new Date(interviewDate.getTime() - 5 * 60 * 1000);
-            return now >= fiveMinutesBefore;
+            const fifteenMinutesAfter = new Date(interviewDate.getTime() + 15 * 60 * 1000);
+            return now >= fiveMinutesBefore && now <= fifteenMinutesAfter;
         } catch (e) {
             return false;
         }
+    };
+
+    const isMeetingExpired = (dateStr, timeStr) => {
+        if (!dateStr || !timeStr) return false;
+        try {
+            const interviewDate = new Date(dateStr);
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            interviewDate.setHours(hours, minutes, 0, 0);
+            const now = new Date();
+            return now > new Date(interviewDate.getTime() + 15 * 60 * 1000);
+        } catch (e) {
+            return false;
+        }
+    };
+
+    // Helper to calculate time left for interview
+    const getTimeLeft = (dateString, timeString) => {
+        if (!dateString || !timeString) return null;
+        try {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            const interviewDate = new Date(dateString);
+            interviewDate.setHours(hours, minutes, 0, 0);
+
+            const diff = interviewDate - currentTime;
+            if (diff <= 0) return null;
+
+            const totalSeconds = Math.floor(diff / 1000);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+
+            if (h > 0) return `${h}h ${m}m ${s}s`;
+            return `${m}m ${s}s`;
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const getUpcomingInterview = (interviews) => {
+        if (!interviews || interviews.length === 0) return null;
+
+        const getCompareValue = (r) => {
+            const d = new Date(r.date);
+            const [h, m] = (r.scheduledTime || "00:00").split(':').map(Number);
+            d.setHours(h || 0, m || 0, 0, 0);
+            return d.getTime();
+        };
+
+        const sortedRounds = [...interviews].sort((a, b) => getCompareValue(a) - getCompareValue(b));
+
+        const todayRounds = sortedRounds.filter(r => isToday(r.date));
+        if (todayRounds.length > 0) {
+            // Priority to today's upcoming round, or latest today if all done
+            return todayRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone)
+                || todayRounds[todayRounds.length - 1];
+        }
+
+        // Falling back to future upcoming or latest past
+        const upcoming = sortedRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone);
+        return upcoming || sortedRounds[sortedRounds.length - 1] || sortedRounds[0];
     };
 
 
@@ -303,47 +563,114 @@ const MyJobs = () => {
                                                 </p>
                                             )}
 
-                                            {/* Interview Details */}
-                                            {app.interview && (
-                                                <div className={`mt-4 p-3 rounded-lg border ${theme === 'dark' ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-100'}`}>
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <h4 className={`text-xs font-bold uppercase ${theme === 'dark' ? 'text-purple-400' : 'text-purple-700'}`}>Interview Scheduled</h4>
-                                                        {app.interview.interviewerType === 'online' && isMeetingActive(app.interview.date, app.interview.scheduledTime) && (
-                                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700`}>
-                                                                Active Now
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            <CalendarDays className="h-3.5 w-3.5 mr-2 text-purple-500" />
-                                                            {new Date(app.interview.date).toLocaleDateString()} at {app.interview.scheduledTime}
-                                                        </p>
-                                                        {app.interview.interviewerType === 'online' && app.interview.meetingLink && (
-                                                            isMeetingActive(app.interview.date, app.interview.scheduledTime) ? (
-                                                                <a
-                                                                    href={app.interview.meetingLink}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="text-sm flex items-center text-blue-500 hover:text-blue-600 font-bold mt-1"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    <Video className="h-3.5 w-3.5 mr-2" />
-                                                                    Join Meeting
-                                                                </a>
-                                                            ) : (
-                                                                <div className="text-sm flex items-center text-gray-400 font-medium mt-1 cursor-default">
-                                                                    <Video className="h-3.5 w-3.5 mr-2" />
-                                                                    Join Meeting (Locked) - Will activate 5 mins before
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
 
+                                            {/* Interview Details Card UI */}
+                                            {(() => {
+                                                let interviewsToUse = [];
+                                                if (app.interviews && Array.isArray(app.interviews) && app.interviews.length > 0) {
+                                                    interviewsToUse = app.interviews;
+                                                } else if (app.interview) {
+                                                    interviewsToUse = [app.interview];
+                                                }
+
+                                                if (interviewsToUse.length === 0) return null;
+
+                                                const interview = getUpcomingInterview(interviewsToUse);
+                                                if (!interview) return null;
+
+                                                const { label, isDone, color: roundStatusColor } = getInterviewRoundStatus(interview.date, interview.scheduledTime, interview);
+
+                                                return (
+                                                    <div className={`mt-3 p-3 rounded-lg border flex flex-col gap-2 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-gray-800/80 border-gray-700' : 'bg-gradient-to-r from-purple-50/50 to-white border-purple-100'}`}>
+                                                        {/* Header: Status & Type */}
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex gap-2">
+                                                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${getStatusName(interview.status).toLowerCase().includes('scheduled') || getStatusName(interview.status).toLowerCase().includes('upcoming') ? (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700') : (theme === 'dark' ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100 text-blue-700')}`}>
+                                                                    {getStatusName(interview.status)}
+                                                                </span>
+                                                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatusColor === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatusColor === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatusColor === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
+                                                                    {label}
+                                                                </span>
+                                                            </div>
+                                                            <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                • {capitalizeFirstLetter(interview.interviewerType)}
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleSeeAllRounds(app); }}
+                                                                className={`text-[10px] font-bold hover:underline ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}
+                                                            >
+                                                                See All
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Content Grid */}
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4">
+                                                            {/* Date & Time */}
+                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                <CalendarDays className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                                                                <span className={`font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                                                                    {formatDate(interview.date)}
+                                                                </span>
+                                                                <span className={`text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                    {interview.scheduledTime}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Interviewer */}
+                                                            <div className="flex items-center gap-1.5 text-xs max-w-full">
+                                                                <CircleUser className={`w-3.5 h-3.5 flex-shrink-0 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                                                                <span className={`truncate ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                                    {getInterviewerName(interview.interviewerID)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Action / Link */}
+                                                        {interview.interviewerType === 'online' && interview.meetingLink && (
+                                                            <div className="mt-1 flex justify-start">
+                                                                {isMeetingActive(interview.date, interview.scheduledTime) ? (
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); handleJoinMeeting(interview._id, interview.meetingLink); }}
+                                                                            className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold rounded-full transition-colors shadow-sm shadow-purple-200 w-fit"
+                                                                        >
+                                                                            <Video className="w-3 h-3" />
+                                                                            Join Meeting Now
+                                                                        </button>
+                                                                        {getTimeLeft(interview.date, interview.scheduledTime) && (
+                                                                            <div className={`text-[10px] font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                                                Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex flex-col gap-0.5">
+                                                                        {isMeetingExpired(interview.date, interview.scheduledTime) ? (
+                                                                            <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-red-900/20 text-red-500 border-red-900/50' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                                                                                <Clock className="w-3 h-3" />
+                                                                                Link expired
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-amber-900/20 text-amber-500 border-amber-900/50' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                                                                                <Clock className="w-3 h-3" />
+                                                                                Link active 5m before
+                                                                            </span>
+                                                                        )}
+                                                                        {getTimeLeft(interview.date, interview.scheduledTime) && (
+                                                                            <div className={`text-[10px] font-bold ml-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                                Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+
+                                    </div>
                                     <div className={`flex justify-between mt-5 pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
                                         <button
                                             onClick={() => {
@@ -385,7 +712,8 @@ const MyJobs = () => {
                             </div>
                         );
                     })}
-                </div >
+                </div>
+
             ) : (
                 <div className={`rounded-xl shadow-lg border p-12 text-center ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <div className="flex justify-center mb-4">
@@ -562,7 +890,137 @@ const MyJobs = () => {
 
                 )
             }
+
+            {/* See All Rounds Modal */}
+            {
+                isRoundsModalOpen && selectedApplicationForRounds && (
+                    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                        <div className={`rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+                            {/* Modal Header */}
+                            <div className="p-8 pb-4 flex items-start gap-5">
+                                {(() => {
+                                    const initial = selectedApplicationForRounds.candidateID?.userName?.[0] || "?";
+                                    return (
+                                        <>
+                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                                {capitalizeFirstLetter(initial)}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                    {capitalizeFirstLetter(selectedApplicationForRounds.jobID?.title) || "N/A"}
+                                                </h2>
+                                                <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    {capitalizeFirstLetter(selectedApplicationForRounds.candidateID?.userName) || "N/A"}
+                                                </p>
+                                            </div>
+                                            <button onClick={() => setIsRoundsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                                <X className="h-6 w-6" />
+                                            </button>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Subheader */}
+                            <div className="px-8 mb-4 flex justify-between items-center">
+                                <h3 className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Scheduled Rounds</h3>
+                                <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                                    {selectedApplicationRounds.length} Rounds
+                                </span>
+                            </div>
+
+                            {/* Scrollable Rounds List */}
+                            <div className="px-8 pb-8 overflow-y-auto space-y-4">
+                                {selectedApplicationRounds.length > 0 ? (
+                                    selectedApplicationRounds.map((round) => {
+                                        // Handle if status is an ID or string
+                                        const appStatusName = getStatusName(round.status) !== 'Unknown' ? getStatusName(round.status) : round.status;
+
+                                        return (
+                                            <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
+                                                <div className="flex gap-2">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getRoundStatusColor(round.status)}`}>
+                                                        {capitalizeFirstLetter(appStatusName)}
+                                                    </span>
+                                                    {round.interviewProgressStatus && round.interviewProgressStatus !== 'Upcoming' && (
+                                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getRoundStatusColor(round.interviewProgressStatus)}`}>
+                                                            {capitalizeFirstLetter(round.interviewProgressStatus)}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <Clock className="h-4 w-4 text-gray-400" />
+                                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            {formatDate(round.date)} at {round.scheduledTime}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>T</div>
+                                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{capitalizeFirstLetter(round.interviewerType)} Interview</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
+                                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {getInterviewerName(round?.interviewerID)}</span>
+                                                    </div>
+
+                                                    {/* Meeting Link for Online Interviews */}
+                                                    {round.interviewerType === 'online' && round.meetingLink && !getInterviewRoundStatus(round.date, round.scheduledTime, round).isDone && (
+                                                        <div className="mt-3 pt-3 border-t border-purple-100/50">
+                                                            {isMeetingActive(round.date, round.scheduledTime) ? (
+                                                                <div className="flex flex-col gap-1">
+                                                                    <button
+                                                                        onClick={() => handleJoinMeeting(round._id, round.meetingLink)}
+                                                                        className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                    >
+                                                                        <Video className="w-4 h-4" />
+                                                                        Join Meeting Now
+                                                                    </button>
+                                                                    {getTimeLeft(round.date, round.scheduledTime) && (
+                                                                        <div className={`text-[11px] font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                                            Interview starts in {getTimeLeft(round.date, round.scheduledTime)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    {isMeetingExpired(round.date, round.scheduledTime) ? (
+                                                                        <div className="flex items-center gap-2 text-[11px] text-red-600 font-medium">
+                                                                            <Clock className="w-4 h-4" />
+                                                                            Link expired
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center gap-2 text-[11px] text-amber-600 font-medium">
+                                                                            <Clock className="w-4 h-4" />
+                                                                            Link will be active 5 mins before
+                                                                        </div>
+                                                                    )}
+                                                                    {getTimeLeft(round.date, round.scheduledTime) && (
+                                                                        <div className={`text-[10px] font-bold ml-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                            Starts in {getTimeLeft(round.date, round.scheduledTime)}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-center py-8 text-gray-500">
+                                        No interview rounds details found.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div >
+
     );
 };
 
