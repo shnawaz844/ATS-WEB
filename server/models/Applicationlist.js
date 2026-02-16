@@ -9,6 +9,7 @@ const InterviewSchema = new mongoose.Schema(
         interviewerType: { type: String, required: true },
         meetingLink: { type: String },
         status: { type: String, required: false },
+        interviewProgressStatus: { type: String, default: "Upcoming" },
         roundID: { type: mongoose.Schema.Types.ObjectId, ref: "Interview", required: true },
         reasonRescheduled: {
             type: String, required: function () {
