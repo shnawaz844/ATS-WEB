@@ -113,7 +113,7 @@ const Modal = ({ getStatusColor, isOpen, onClose, app, getStatusName }) => {
                                     </div>
                                     <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
                                         <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Location</p>
-                                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>{app?.jobID?.city}, {app?.jobID?.state}</p>
+                                        <p className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}> {[app.jobID?.city, app.jobID?.state, app.jobID?.country].filter(Boolean).join(', ')}</p>
                                     </div>
                                     <div className={`rounded-xl p-4 shadow-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
                                         <p className={`text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Type</p>
