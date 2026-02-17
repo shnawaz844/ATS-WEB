@@ -461,7 +461,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <span className="text-sm text-gray-600 group-hover:text-white">
-                                                            {roundsMap[interview?.roundID] || "N/A"}
+                                                            {roundsMap[interview?.roundID?._id] || "N/A"}
 
                                                         </span>
                                                     </td>
