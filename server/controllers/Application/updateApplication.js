@@ -16,7 +16,8 @@ const updateApplication = async (req, res) => {
         // If a new resume file is provided, handle the upload.
         if (req.file) {
             console.log("Received new file:", req.file.originalname);
-            updateFields.resume = await uploadToS3(req.file);
+            const uploadResult = await uploadToS3(req.file);
+            updateFields.resume = uploadResult.fileUrl;
         }
         console.log("updated", updateFields);
 

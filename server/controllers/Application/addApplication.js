@@ -324,7 +324,8 @@ const addApplication = async (req, res) => {
     // Handle resume upload
     let resumeUrl = null;
     if (req.file) {
-      resumeUrl = await uploadToS3(req.file);
+      const uploadResult = await uploadToS3(req.file);
+      resumeUrl = uploadResult.fileUrl;
     } else {
       return res.status(400).json({ message: "Resume file is required." });
     }

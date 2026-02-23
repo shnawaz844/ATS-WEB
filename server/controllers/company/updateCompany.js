@@ -45,7 +45,9 @@ const addCompany = async (req, res) => {
         console.log("fileinbe", req.file);
 
         if (req.file) {
-            imageUrl = await uploadToS3(req.file);
+            const uploadResult = await uploadToS3(req.file);
+            imageUrl = uploadResult.fileUrl;
+            req.file.key = uploadResult.key;
         }
 
         // Check if email already exists
@@ -85,7 +87,7 @@ const addCompany = async (req, res) => {
         await newCompany.save();
         res.status(201).json(newCompany);
     } catch (error) {
-        if (req.file) {
+        if (req.file && req.file.key) {
             await s3.deleteObject({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
                 Key: req.file.key
@@ -150,8 +152,9 @@ const updateCompany = async (req, res) => {
         // Handle image upload
         if (req.file) {
             // Upload new image
-            const imageUrl = await uploadToS3(req.file);
-            updateData.image = imageUrl;
+            const uploadResult = await uploadToS3(req.file);
+            updateData.image = uploadResult.fileUrl;
+            req.file.key = uploadResult.key;
 
             // Delete the old image from S3 if it exists
             if (currentCompany.image) {

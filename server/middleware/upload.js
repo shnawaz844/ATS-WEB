@@ -21,7 +21,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     console.log("File filter called for file:", file);
     // Accept only image and PDF files
-    if ( file.mimetype.startsWith( "image/" ) || file.mimetype === "application/pdf" || file.mimetype === "application/msword" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+    if (file.mimetype.startsWith("image/") || file.mimetype === "application/pdf" || file.mimetype === "application/msword" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
       cb(null, true);
     } else {
       cb(new Error("Only image and PDF files are allowed!"), false);
@@ -48,10 +48,12 @@ export const uploadToS3 = async (file) => {
 
     await upload.done();
 
-    const fileUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`;
-    console.log("File uploaded successfully:", fileUrl);
+    console.log("File uploaded successfully:", params.Key);
 
-    return fileUrl;
+    return {
+      fileUrl: `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`,
+      key: params.Key
+    };
   } catch (error) {
     console.error("Error uploading to S3:", error);
     throw new Error("File upload failed");
