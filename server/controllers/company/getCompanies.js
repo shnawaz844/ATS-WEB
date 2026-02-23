@@ -29,12 +29,12 @@ const getCompanies = async (req, res) => {
 
     // Find Companys with pagination and search
     const Companies = await Company.find(query)
-      .sort( { createdAt: -1 } )
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
     // Send back Companys array and totalCount
-    res.status(200).json({ 
+    res.status(200).json({
       Companies,
       totalCount,
       currentPage: page,

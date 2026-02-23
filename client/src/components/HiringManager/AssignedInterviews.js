@@ -585,7 +585,7 @@ const AssignedInterviews = () => {
                                         <h2 className={`text-2xl font-bold  bg-clip-text ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                                             Today's Interviews
                                         </h2>
-                                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-white'}`}>
+                                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-black'}`}>
                                             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                                         </p>
                                     </div>
@@ -631,7 +631,7 @@ const AssignedInterviews = () => {
                                                                     {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
                                                                 </p>
                                                             </div>
-                                                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600`}>
+                                                            <span className={`px-2 py-0.5 rounded-xl text-[10px] font-bold bg-gray-100 text-gray-600`}>
                                                                 {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
                                                             </span>
                                                         </div>
@@ -652,7 +652,7 @@ const AssignedInterviews = () => {
                                                                                 : (theme === 'dark' ? 'text-purple-400' : 'text-purple-600');
                                                                     return (
                                                                         <>
-                                                                            <div className={`h-2 w-2 rounded-full ${dotColorClass}`}></div>
+                                                                            <div className={`h-2 w-2 rounded-xl ${dotColorClass}`}></div>
                                                                             <span className={`text-[10px] font-extrabold uppercase tracking-widest ${textColorClass}`}>
                                                                                 {label}
                                                                             </span>
@@ -665,7 +665,7 @@ const AssignedInterviews = () => {
                                                                 if (!round) return null;
                                                                 const appStatus = statuses?.find(s => s._id === round.status)?.applicationStatus || round.status;
                                                                 return (
-                                                                    <div key={round._id} className={`p-3 rounded-lg border relative group/round bg-white/50 border-purple-200 shadow-sm transition-all hover:bg-white/80`}>
+                                                                    <div key={round._id} className={`p-3 rounded-xl border relative group/round bg-gray-200 border-purple-200 shadow-sm transition-all hover:bg-white/80`}>
                                                                         <div className="flex justify-between items-center mb-2">
                                                                             <div className="flex gap-2">
                                                                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getStatusColor(round.status)}`}>
@@ -683,11 +683,11 @@ const AssignedInterviews = () => {
                                                                                 )}
                                                                             </div>
                                                                         </div>
-                                                                        <div className="flex items-center gap-2 text-[11px] text-gray-600 mb-1">
+                                                                        <div className="flex items-center gap-2 text-[11px] text-black mb-1">
                                                                             <Clock className="h-3 w-3" />
-                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span></span>
+                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at : <span className={`px-2 py-0.5 rounded-xl font-bold ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-700'}`}>{round.scheduledTime}</span></span>
                                                                         </div>
-                                                                        <div className="text-[11px] text-gray-500 mb-2">
+                                                                        <div className="text-[11px] text-black mb-2">
                                                                             Interviewer: {round?.interviewerID?.userName || "N/A"}
                                                                         </div>
 

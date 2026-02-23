@@ -39,6 +39,7 @@ const CompanyListing = () => {
     aiFeaturesEnabled: false,
     onlyAiFeaturesEnabled: false,
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -197,6 +198,7 @@ const CompanyListing = () => {
       aiFeaturesEnabled: false,
       onlyAiFeaturesEnabled: false,
     });
+    setFieldErrors({});
     setIsDialogOpen(true);
     toast.info("Ready to add a new company");
   };
@@ -216,17 +218,23 @@ const CompanyListing = () => {
       aiFeaturesEnabled: company.aiFeaturesEnabled || false,
       onlyAiFeaturesEnabled: company.onlyAiFeaturesEnabled || false,
     });
+    setFieldErrors({});
     setIsDialogOpen(true);
   };
 
   const closeDialog = () => {
     setIsDialogOpen(false);
+    setFieldErrors({});
   };
 
   // Handle input changes in the form
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    // Clear error for this field when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: null }));
+    }
   };
 
   // Submit handler for add/edit form
@@ -270,8 +278,18 @@ const CompanyListing = () => {
         if (!isEditing) setCurrentPage(1);
         fetchCompanies();
         closeDialog();
+        toast.success(`Company ${isEditing ? "updated" : "added"} successfully`);
       } else {
-        alert(`Failed to ${isEditing ? "update" : "add"} company`);
+        const errorData = await response.json();
+        const errorMessage = errorData.message || "";
+
+        if (errorMessage.toLowerCase().includes("email")) {
+          setFieldErrors({ email: errorMessage });
+        } else if (errorMessage.toLowerCase().includes("name") || errorMessage.toLowerCase().includes("slug")) {
+          setFieldErrors({ CompanyUserName: errorMessage });
+        } else {
+          toast.error(errorMessage || `Failed to ${isEditing ? "update" : "add"} company`);
+        }
       }
     } catch (error) {
       console.error(
@@ -550,6 +568,9 @@ const CompanyListing = () => {
                             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                             placeholder="Enter email address"
                           />
+                          {fieldErrors.email && (
+                            <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+                          )}
                         </div>
                       </div>
                       <div className="space-y-6">
@@ -567,6 +588,9 @@ const CompanyListing = () => {
                               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-white"
                               placeholder="Enter unique company name"
                             />
+                            {fieldErrors.CompanyUserName && (
+                              <p className="mt-1 text-sm text-red-500">{fieldErrors.CompanyUserName}</p>
+                            )}
                           </div>
                         </div>
                         <div>

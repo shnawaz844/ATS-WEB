@@ -38,7 +38,8 @@ export const uploadFile = async (req, res) => {
         console.log("Uploading to S3...");
 
         if (req.file) {
-            fileUrl = await uploadToS3(req.file);
+            const uploadResult = await uploadToS3(req.file);
+            fileUrl = uploadResult.fileUrl;
         } else {
             return res.status(400).json({ message: "File is required." });
         }
@@ -97,7 +98,8 @@ export const uploadCandidateFile = async (req, res) => {
         console.log("Uploading candidate file to S3...");
 
         if (req.file) {
-            fileUrl = await uploadToS3(req.file);
+            const uploadResult = await uploadToS3(req.file);
+            fileUrl = uploadResult.fileUrl;
         } else {
             return res.status(400).json({ message: "File is required." });
         }
