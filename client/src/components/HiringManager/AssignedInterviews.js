@@ -685,7 +685,7 @@ const AssignedInterviews = () => {
                                                                         </div>
                                                                         <div className="flex items-center gap-2 text-[11px] text-gray-600 mb-1">
                                                                             <Clock className="h-3 w-3" />
-                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at {round.scheduledTime}</span>
+                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span></span>
                                                                         </div>
                                                                         <div className="text-[11px] text-gray-500 mb-2">
                                                                             Interviewer: {round?.interviewerID?.userName || "N/A"}
@@ -885,7 +885,7 @@ const AssignedInterviews = () => {
                                                         <div className="space-y-1.5">
                                                             <div className="flex items-center gap-2 text-xs text-gray-500">
                                                                 <Clock className="h-3.5 w-3.5" />
-                                                                <span>{formatDate(round.date)} at {round.scheduledTime}</span>
+                                                                <span>{formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span></span>
                                                             </div>
                                                             <div className="text-xs text-gray-400">
                                                                 Type: {capitalizeFirstLetter(round.interviewerType)} Interview
@@ -1040,30 +1040,45 @@ const AssignedInterviews = () => {
                                                 </select>
                                             </div>
                                             {editForm.interviewType === 'online' && (
-                                                <div>
-                                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
-                                                    {isMeetingLinkActive(editForm.date, editForm.time) ? (
-                                                        <button
-                                                            onClick={() => handleJoinMeeting(detailedInterview._id, editForm.meetingLink)}
-                                                            className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline p-2 bg-purple-50 rounded-lg w-full"
-                                                        >
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                            </svg>
-                                                            Join Meeting Now
-                                                        </button>
-                                                    ) : (
-                                                        isMeetingExpired(editForm.date, editForm.time) ? (
-                                                            <div className="flex items-center gap-2 text-sm text-red-600 font-medium bg-red-50/50 p-3 rounded-lg border border-red-100">
-                                                                <Clock className="w-5 h-5 flex-shrink-0" />
-                                                                <span>Link expired</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-2 text-sm text-amber-600 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100">
-                                                                <Clock className="w-5 h-5 flex-shrink-0" />
-                                                                <span>Link will be active 5 mins before interview</span>
-                                                            </div>
-                                                        )
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
+                                                        <input
+                                                            type="text"
+                                                            value={editForm.meetingLink}
+                                                            onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
+                                                            placeholder="Enter meeting link (e.g., Google Meet, Zoom)"
+                                                            className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                                                }`}
+                                                        />
+                                                    </div>
+
+                                                    {editForm.meetingLink && (
+                                                        <div>
+                                                            {isMeetingLinkActive(editForm.date, editForm.time) ? (
+                                                                <button
+                                                                    onClick={() => handleJoinMeeting(detailedInterview._id, editForm.meetingLink)}
+                                                                    className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline p-2 bg-purple-50 rounded-lg w-full"
+                                                                >
+                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                    </svg>
+                                                                    Join Meeting Now
+                                                                </button>
+                                                            ) : (
+                                                                isMeetingExpired(editForm.date, editForm.time) ? (
+                                                                    <div className="flex items-center gap-2 text-sm text-red-600 font-medium bg-red-50/50 p-3 rounded-lg border border-red-100">
+                                                                        <Clock className="w-5 h-5 flex-shrink-0" />
+                                                                        <span>Link expired</span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center gap-2 text-sm text-amber-600 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100">
+                                                                        <Clock className="w-5 h-5 flex-shrink-0" />
+                                                                        <span>Link will be active 5 mins before interview</span>
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}
@@ -1207,7 +1222,14 @@ const AssignedInterviews = () => {
                                                     const roundStatus = getInterviewRoundStatus(round.date, round.scheduledTime, round);
                                                     return (
                                                         <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
-                                                            <div className="flex justify-between items-start mb-4">
+                                                            <div className="flex flex-col">
+                                                                <div className="flex items-center gap-2 mb-4">
+                                                                    <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatus.color === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatus.color === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
+                                                                        {roundStatus.label}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex justify-between items-start mb-2">
                                                                 <div className="flex gap-2">
                                                                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
                                                                         {capitalizeFirstLetter(statuses?.find(s => s._id === round.status)?.applicationStatus || round.status)}
@@ -1218,20 +1240,9 @@ const AssignedInterviews = () => {
                                                                         </span>
                                                                     )}
                                                                 </div>
-                                                                <div className="flex flex-col">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatus.color === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatus.color === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
-                                                                            {roundStatus.label}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
+
                                                                 <div className="flex gap-2">
-                                                                    <button
-                                                                        onClick={() => handleInterviewClick(round)}
-                                                                        className={`p-2 rounded-lg border transition-all ${theme === 'dark' ? 'border-gray-700 text-purple-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-indigo-600 hover:shadow-md'}`}
-                                                                    >
-                                                                        <Search className="h-4 w-4" />
-                                                                    </button>
+
                                                                     {(userRole === 'admin' || userRole === 'hiring_manager') && (
                                                                         <button
                                                                             onClick={(e) => handleDeleteInterview(round._id, e)}
@@ -1247,7 +1258,7 @@ const AssignedInterviews = () => {
                                                                 <div className="flex items-center gap-3">
                                                                     <Clock className="h-4 w-4 text-gray-400" />
                                                                     <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                                        {formatDate(round.date)} at {round.scheduledTime}
+                                                                        {formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span>
                                                                     </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-3">

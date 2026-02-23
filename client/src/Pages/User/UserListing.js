@@ -133,6 +133,12 @@ const UserListing = () => {
   }, [])
 
   const handleDeleteUser = (userId) => {
+    const userToDelete = users.find(u => u._id === userId);
+    if (loggedInUser.role === 'admin' && userToDelete?.role === 'admin') {
+      alert('Admin users cannot delete other admin users.');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to delete this user?')) {
       deleteUser(userId, {
         onSuccess: () => {
@@ -274,13 +280,15 @@ const UserListing = () => {
                       >
                         <Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteUser(user._id)}
-                        className="sm:p-2 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                        aria-label="Delete user"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
-                      </button>
+                      {!(loggedInUser?.role === 'admin' && user.role === 'admin') && (
+                        <button
+                          onClick={() => handleDeleteUser(user._id)}
+                          className="sm:p-2 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                          aria-label="Delete user"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500 dark:text-red-400" />
+                        </button>
+                      )}
                     </div>
 
                   </div>

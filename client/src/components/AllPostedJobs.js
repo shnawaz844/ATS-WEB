@@ -183,7 +183,7 @@ const AllPostedJobs = () => {
     if (scheduleType) params.scheduleType = scheduleType.value;
 
     // Add status filter to only show Open and Filled job.
-    params.status = "Open,Filled";
+    params.status = "Open,Filled,Applied";
 
     const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
       params, headers: {
@@ -199,10 +199,6 @@ const AllPostedJobs = () => {
     keepPreviousData: true,
     enabled: !!companyId, // Only fetch when companyId is available
   });
-
-  console.log("Jobs data:", data);
-  console.log("statusMap:", statusMap);
-  console.log("companyId:", companyId);
 
   if (isError) return <div>Error fetching jobs</div>;
   const selectStyles = {

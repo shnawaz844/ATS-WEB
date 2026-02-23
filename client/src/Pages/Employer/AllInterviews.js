@@ -485,7 +485,7 @@ const AllInterviews = () => {
                                     <span key={index} className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                                       {skill}
                                     </span>
-                                  )) || <span className="text-xs text-gray-500 group-hover:text-white">No skills listed</span>}
+                                  ))}
                                 </div>
                               </div>
                             </div>
@@ -530,7 +530,7 @@ const AllInterviews = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
+                            {/* <button
                               onClick={() => {
                                 setDetailedInterview(feedback);
                                 setIsDetailModalOpen(true);
@@ -538,7 +538,7 @@ const AllInterviews = () => {
                               className={`group-hover:text-white mr-3 ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
                             >
                               View
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => {
                                 setDetailedInterview(feedback);

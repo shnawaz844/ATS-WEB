@@ -172,7 +172,7 @@ export const ApplicationForm = ({
     // Prepare FormData
     const formData = new FormData();
     const jobStatus = jobStatuses?.filter(
-      (status) => status.jobStatus === "Filled",
+      (status) => status.jobStatus === "Applied",
     );
     const step1Status = applicationStatusesData?.applicationStatuses?.find(
       (status) => status.applicationStep === "1",

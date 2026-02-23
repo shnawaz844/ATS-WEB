@@ -387,7 +387,7 @@ export default function HiringDashboard() {
                     </div>
 
                     {/* Search and Actions */}
-                    <div className="flex items-center gap-4">
+                    {/* <div className="flex items-center gap-4">
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                                 <SearchIcon />
@@ -415,7 +415,7 @@ export default function HiringDashboard() {
                                 <SettingsIcon />
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Stats Section */}
