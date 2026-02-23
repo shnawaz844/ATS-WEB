@@ -17,11 +17,12 @@ import {
 } from "lucide-react";
 
 export const JobDetails = () => {
-  const { id } = useParams();
+  const { id, companyUserName } = useParams();
   const [job, setJob] = useState(null);
   const [loginData, setLoginData] = useState(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [jobStatuses, setJobStatuses] = useState([]);
+  const [companyInfo, setCompanyInfo] = useState(null);
 
   // 1. Fetch the logged-in user (if any)
   useEffect(() => {
@@ -43,6 +44,15 @@ export const JobDetails = () => {
       .then((data) => setJob(data))
       .catch((err) => console.error("Error fetching job data:", err));
   }, [id]);
+
+  useEffect(() => {
+    if (companyUserName) {
+      fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`)
+        .then((res) => res.json())
+        .then((data) => setCompanyInfo(data))
+        .catch((err) => console.error("Error fetching company info:", err));
+    }
+  }, [companyUserName]);
 
 
   // 3. We also fetch the application statuses (and can pass them to the form)
@@ -147,17 +157,13 @@ export const JobDetails = () => {
                   <div className="flex flex-wrap items-center gap-3 text-gray-600 dark:text-gray-300 text-sm mb-4">
                     <div className="flex items-center">
                       <Building size={16} className="mr-1" />
-                      <span>{job.companyName || "Company Name"}</span>
+                      <span>{companyInfo?.name || job.companyName || "Company Name"}</span>
                     </div>
                     <div className="flex items-center">
                       <MapPin size={16} className="mr-1" />
                       <span>
-                        {job.city}, {job.state}, {job.country}
+                        {[job.city, job.state, job.country].filter(Boolean).join(", ")}
                       </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock size={16} className="mr-1" />
-                      <span>{job.locationStatus}</span>
                     </div>
                   </div>
                 </div>
