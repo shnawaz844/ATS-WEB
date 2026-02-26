@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { MapPin, Clock, DollarSign, Users, Briefcase, Star, ArrowUpRight, ArrowRight } from "lucide-react"
+import { MapPin, Clock, DollarSign, Users, Briefcase, Star, ArrowUpRight, ArrowRight, IndianRupee } from "lucide-react"
 import { motion } from "framer-motion"
 
 export default function About() {
@@ -24,7 +24,7 @@ export default function About() {
                     id: job._id,
                     title: job.title,
                     company: companyNameFromStorage,
-                    location: `${job.city}, ${job.state}`,
+                    location: [job.city, job.state, job.country].filter(Boolean).join(", "),
                     type: job.type,
                     salary: `₹${job.compensation}/Annum`,
                     applicants: job.applicants?.length || 0,
@@ -153,7 +153,7 @@ export default function About() {
                                 <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 rounded-lg bg-green-500/10">
-                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                            <IndianRupee className="h-4 w-4 text-green-600" />
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-bold text-gray-500 uppercase">Salary Range</p>
