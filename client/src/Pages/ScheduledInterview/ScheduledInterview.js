@@ -218,8 +218,15 @@ export const ScheduledInterview = () => {
         const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
         intDate.setHours(hours, minutes, 0, 0);
 
-        if (interview.status === 'completed' || interview.interviewProgressStatus === 'Completed') {
+        // Manual progress status takes priority (set for walk-in interviews)
+        if (interview.interviewProgressStatus === 'Completed' || interview.status === 'completed') {
             return { label: 'Completed', color: 'green', isDone: true };
+        }
+        if (interview.interviewProgressStatus === 'Missed') {
+            return { label: 'Missed', color: 'red', isDone: true };
+        }
+        if (interview.interviewProgressStatus === 'Pending') {
+            return { label: 'Pending', color: 'gray', isDone: true };
         }
 
         const diffMinutes = (intDate.getTime() - now.getTime()) / 60000;
@@ -231,7 +238,6 @@ export const ScheduledInterview = () => {
 
         return { label: 'Upcoming', color: 'purple' };
     };
-
     const groupedInterviews = assignedInterviews?.interviews ? Object.values(assignedInterviews.interviews.reduce((acc, interview) => {
         const appId = interview.applicationID?._id;
         if (!appId) return acc;
@@ -346,6 +352,7 @@ export const ScheduledInterview = () => {
             status: interview.status || "",
             interviewerID: interview.interviewerID?._id || interview.interviewerID || "",
             reasonRescheduled: interview.reasonRescheduled || "",
+            interviewProgressStatus: interview.interviewProgressStatus || "Upcoming",
         });
         setIsEditModalOpen(true);
     };
@@ -432,6 +439,7 @@ export const ScheduledInterview = () => {
                         interviewerID: editForm.interviewerID,
                         reasonRescheduled: editForm.reasonRescheduled,
                         starRating: feedbackForm.starRating,
+                        interviewProgressStatus: editForm.interviewProgressStatus,
                     }),
                 }
             );
@@ -1291,6 +1299,23 @@ export const ScheduledInterview = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Walk-in Progress Status */}
+                                {editForm.interviewType === 'walkin' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Interview Progress Status</label>
+                                        <select
+                                            value={editForm.interviewProgressStatus}
+                                            onChange={(e) => setEditForm({ ...editForm, interviewProgressStatus: e.target.value })}
+                                            className="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 sm:py-3 pl-3 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm sm:text-base"
+                                        >
+                                            <option value="Upcoming">Upcoming Interview</option>
+                                            <option value="Completed">Interview Complete</option>
+                                            <option value="Missed">Interview Missed</option>
+                                            <option value="Pending">Interview Pending</option>
+                                        </select>
+                                    </div>
+                                )}
 
                                 {isAdmin && (
                                     <div>

@@ -270,8 +270,15 @@ const AllInterviews = () => {
     const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
     intDate.setHours(hours, minutes, 0, 0);
 
-    if (interview.status === 'completed' || interview.interviewProgressStatus === 'Completed') {
+    // Manual progress status takes priority (set for walk-in interviews)
+    if (interview.interviewProgressStatus === 'Completed' || interview.status === 'completed') {
       return { label: 'Completed', color: 'green', isDone: true };
+    }
+    if (interview.interviewProgressStatus === 'Missed') {
+      return { label: 'Missed', color: 'red', isDone: true };
+    }
+    if (interview.interviewProgressStatus === 'Pending') {
+      return { label: 'Pending', color: 'gray', isDone: true };
     }
 
     const diffMinutes = (intDate.getTime() - now.getTime()) / 60000;

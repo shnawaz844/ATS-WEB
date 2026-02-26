@@ -220,6 +220,9 @@ const MyJobs = () => {
         if (interview?.interviewProgressStatus === "Missed") {
             return { label: "INTERVIEW MISSED", isDone: true, color: "red" };
         }
+        if (interview?.interviewProgressStatus === "Pending") {
+            return { label: "INTERVIEW PENDING", isDone: true, color: "black" };
+        }
 
         if (!dateString || !timeString) return { label: "UPCOMING INTERVIEW", isDone: false, color: "purple" };
         const interviewDate = new Date(dateString);
