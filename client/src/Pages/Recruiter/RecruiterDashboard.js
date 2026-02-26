@@ -724,7 +724,11 @@ export default function Dashboard() {
                                             </td>
                                             <td className={`px-6 py-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                                                 <div className="flex flex-col">
-                                                    <span className="font-medium">{job.city || 'Not specified'}</span>
+                                                    <span className="font-medium">
+                                                        {job.city || job.state ?
+                                                            `${job.city || ''}${job.city && job.state ? ', ' : ''}${job.state || ''}` :
+                                                            (job.locationType?.toLowerCase() === 'remote' && job.country ? job.country : 'Not specified')}
+                                                    </span>
                                                     {job.locationType && (
                                                         <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} text-xs mt-1`}>({job.locationType})</span>
                                                     )}

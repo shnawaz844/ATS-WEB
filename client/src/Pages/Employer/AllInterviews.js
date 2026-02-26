@@ -3,12 +3,13 @@ import { useTheme } from '../../context/ThemeContext';
 import { toast as toastNotify } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { Search, User, Briefcase, X, ChevronDown } from 'lucide-react';
+import { Search, User, Briefcase, X, ChevronDown, Calendar, Video, MapPin, Clock, ThumbsUp, ThumbsDown, ChevronRight, ChevronLeft } from 'lucide-react';
 import useFeedbacks from '../../hooks/useFeedbacks';
 import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
 import AiGeneratedInterviewsTable from './AiGeneratedInterviewsTable';
+import { ToastContainer, toast } from 'react-toastify';
 
 const AllInterviews = () => {
   const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
@@ -24,6 +25,9 @@ const AllInterviews = () => {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState('');
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
+  const [isRoundsModalOpen, setIsRoundsModalOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [debouncedStatus, setDebouncedStatus] = useState('');
   const [debouncedRating, setDebouncedRating] = useState('all');
@@ -46,6 +50,12 @@ const AllInterviews = () => {
   const limit = 20;
   const companyUserName = localStorage.getItem("companyUserName");
   const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
+
+  // Update current time every second for the countdown
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Fetch company settings to sync AI features
   useEffect(() => {
@@ -209,6 +219,77 @@ const AllInterviews = () => {
     });
   };
 
+  const isToday = (dateString) => {
+    const today = new Date();
+    const date = new Date(dateString);
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
+  };
+
+  const isMeetingLinkActive = (interviewDate, scheduledTime) => {
+    const now = currentTime;
+    const interview = new Date(interviewDate);
+    const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+    interview.setHours(hours, minutes, 0, 0);
+
+    // Active 5 minutes before and until it's finished
+    const activeTime = new Date(interview.getTime() - 5 * 60000);
+    return now >= activeTime;
+  };
+
+  const isMeetingExpired = (interviewDate, scheduledTime) => {
+    const now = currentTime;
+    const interview = new Date(interviewDate);
+    const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+    interview.setHours(hours + 1, minutes, 0, 0); // Assuming 1 hour duration
+    return now > interview;
+  };
+
+  const getTimeLeft = (interviewDate, scheduledTime) => {
+    const now = currentTime;
+    const interview = new Date(interviewDate);
+    const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+    interview.setHours(hours, minutes, 0, 0);
+
+    const diff = interview.getTime() - now.getTime();
+    if (diff <= 0) return null;
+
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(mins / 60);
+    const days = Math.floor(hrs / 24);
+
+    if (days > 0) return `${days}d ${hrs % 24}h`;
+    if (hrs > 0) return `${hrs}h ${mins % 60}m`;
+    return `${mins}m ${Math.floor((diff % 60000) / 1000)}s`;
+  };
+
+  const getInterviewRoundStatus = (date, scheduledTime, interview) => {
+    const now = currentTime;
+    const intDate = new Date(date);
+    const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+    intDate.setHours(hours, minutes, 0, 0);
+
+    if (interview.status === 'completed' || interview.interviewProgressStatus === 'Completed') {
+      return { label: 'Completed', color: 'green', isDone: true };
+    }
+
+    const diffMinutes = (intDate.getTime() - now.getTime()) / 60000;
+
+    if (diffMinutes < -60) return { label: 'Finished', color: 'gray', isDone: true };
+    if (diffMinutes <= 0 && diffMinutes >= -60) return { label: 'In Progress', color: 'blue', isLive: true };
+    if (diffMinutes <= 5 && diffMinutes > 0) return { label: 'Starting Soon', color: 'purple', isLive: true };
+    if (isToday(date)) return { label: 'Today', color: 'blue' };
+
+    return { label: 'Upcoming', color: 'purple' };
+  };
+
+  const handleSeeAllRounds = (applicationId, e) => {
+    if (e) e.stopPropagation();
+    setSelectedApplicationId(applicationId);
+    setIsRoundsModalOpen(true);
+  };
+
 
   // Format time to display only HH:MM AM/PM
   const formatTime = (timeString) => {
@@ -234,7 +315,7 @@ const AllInterviews = () => {
     return dateObj.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true,
+      hour12: false,
     });
   };
 
@@ -278,6 +359,42 @@ const AllInterviews = () => {
       default: return theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800';
     }
   };
+
+  const groupedInterviewsData = filteredInterviews ? Object.values(filteredInterviews.reduce((acc, interview) => {
+    const appId = interview.applicationID?._id;
+    if (!appId) return acc;
+    if (!acc[appId]) {
+      acc[appId] = {
+        applicationID: interview.applicationID,
+        rounds: []
+      };
+    }
+    acc[appId].rounds.push(interview);
+    return acc;
+  }, {})).map(group => {
+    const getCompareValue = (r) => {
+      const d = new Date(r.date);
+      const [h, m] = (r.scheduledTime || "00:00").split(':').map(Number);
+      d.setHours(h || 0, m || 0, 0, 0);
+      return d.getTime();
+    };
+
+    // Sort rounds by date and time
+    const sortedRounds = [...group.rounds].sort((a, b) => getCompareValue(a) - getCompareValue(b));
+
+    // Find the most relevant round:
+    const todayRounds = sortedRounds.filter(r => isToday(r.date));
+    let upcomingRound;
+    if (todayRounds.length > 0) {
+      upcomingRound = todayRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone)
+        || todayRounds[todayRounds.length - 1];
+    } else {
+      upcomingRound = sortedRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone)
+        || sortedRounds[sortedRounds.length - 1];
+    }
+
+    return { ...group, rounds: sortedRounds, upcomingRound };
+  }) : [];
 
   const getRatingStars = (rating) => {
     return Array(5).fill(0)?.map((_, i) => (
@@ -451,109 +568,104 @@ const AllInterviews = () => {
               }
             >
 
-              <div className="overflow-x-auto rounded-t-xl">
-                <table className={`min-w-full divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-20'}`}>
-                  <thead>
-                    <tr className={`${theme === 'dark' ? 'bg-[#313131]' : 'bg-gray-200'}`}>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Job & Candidate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Interviewer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Date & Time</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Rating</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-900 dark:text-white uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groupedInterviewsData.map((group) => {
+                  const interview = group.upcomingRound;
+                  const roundStatus = getInterviewRoundStatus(interview.date, interview.scheduledTime, interview);
 
-                  {filteredInterviews?.length > 0 && (
-                    filteredInterviews?.map((feedback) => (
-                      <tbody key={feedback._id}>
-                        <tr className={`group transition-colors duration-200 ${theme === 'dark' ? 'bg-white/10 hover:bg-gray-800 border-b border-gray-800' : 'hover:bg-gray-700 bg-gray-100'}`}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-start">
-                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <User size={20} className="text-indigo-600" />
-                              </div>
-                              <div className="ml-4">
-                                <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                  {capitalizeFirstLetter(feedback?.applicationID?.candidateID?.userName) || "N/A"}
-                                </div>
-                                <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                  {capitalizeFirstLetter(feedback.applicationID?.jobID?.title) || "N/A"}
-                                </div>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {feedback.skills?.map((skill, index) => (
-                                    <span key={index} className={`px-2 py-0.5 text-xs rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                      {skill}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
+                  return (
+                    <div
+                      key={group.applicationID._id}
+                      className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border ${theme === 'dark'
+                        ? 'bg-gray-800 border-gray-700 text-white'
+                        : 'bg-[#f0f9f9] border-gray-100 text-gray-900'
+                        }`}
+                    >
+                      <div className="p-4">
+                        {/* Header with job title and round count */}
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h3 className={`font-bold text-sm truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                              {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                            </h3>
+                            <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                            </p>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded-xl text-[10px] font-bold ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                            {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
+                          </span>
+                        </div>
+
+                        {/* Upcoming Interview inside card */}
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full ${roundStatus.isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                            <span className={`text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? 'text-green-500' : roundStatus.color === 'blue' ? 'text-blue-500' : 'text-purple-500'}`}>
+                              {roundStatus.label}
+                            </span>
+                          </div>
+
+                          <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-gray-900/50' : 'bg-white'}`}>
+                            <div className="flex items-center gap-3 mb-2">
+                              <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                              <span className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                {formatDate(interview.date)} at {formatTime(interview.scheduledTime)}
+                              </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{capitalizeFirstLetter(feedback?.interviewerID?.userName) || "N/A"}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className={`text-sm group-hover:text-white ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                              {feedback.date ? formatDate(feedback.date) : "No date"}
-                            </div>
-                            <div className="text-xs text-gray-500 group-hover:text-white">
-                              {feedback.scheduledTime ? formatTime(feedback.scheduledTime) : "N/A"}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <select
-                              value={feedback.status || ""}
-                              onChange={(e) => handleStatusChange(feedback._id, e.target.value)}
-                              className={`px-2 py-1 text-xs font-semibold rounded-full border focus:outline-none ${getStatusColor(feedback.status)}`}
-                            >
-                              <option value="">Select status</option>
-                              {statuses?.map((status) => (
-                                <option key={status} value={status._id}>
-                                  {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              {getRatingStars(feedback.starRating || 0)}
-                              {feedback.starRating ? (
-                                <span className="ml-2 text-sm text-gray-600 group-hover:text-white">
-                                  ({feedback.starRating} star)
-                                </span>
+
+                            <div className="flex items-center gap-3 mb-2">
+                              {interview.interviewerType === 'online' ? (
+                                <Video className="h-3.5 w-3.5 text-gray-400" />
                               ) : (
-                                <span className="ml-2 text-sm text-gray-400 group-hover:text-white">
-                                  No rating
-                                </span>
+                                <MapPin className="h-3.5 w-3.5 text-gray-400" />
                               )}
+                              <span className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                {capitalizeFirstLetter(interview.interviewerType)} Interview
+                              </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            {/* <button
-                              onClick={() => {
-                                setDetailedInterview(feedback);
-                                setIsDetailModalOpen(true);
-                              }}
-                              className={`group-hover:text-white mr-3 ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
-                            >
-                              View
-                            </button> */}
-                            <button
-                              onClick={() => {
-                                setDetailedInterview(feedback);
-                                handleFeedbackClick(feedback);
-                              }}
-                              className={`group-hover:text-white ${theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-900'}`}
-                            >
-                              Feedback
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    ))
-                  )}
-                </table>
+
+                            <div className="flex items-center gap-3">
+                              <Clock className="h-3.5 w-3.5 text-gray-400" />
+                              <span className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <span className="font-semibold">Interviewer:</span>{" "}
+                                {interview?.interviewerID?.userName || "N/A"}
+                              </span>
+                            </div>
+
+                            <div className="mt-2">
+                              <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${getStatusColor(interview.status)}`}>
+                                {capitalizeFirstLetter(statuses?.find(s => s._id === interview.status)?.applicationStatus || interview.status)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className={`relative z-10 flex justify-end items-end px-4 py-3 mt-2 gap-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                        <button
+                          onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
+                          className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                          <ThumbsDown className="h-4 w-4" />
+                          Feedback
+                        </button>
+                        {/* <button
+                          onClick={() => {
+                            setDetailedInterview(interview);
+                            setIsFeedbackModalOpen(true);
+                          }}
+                          className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                        >
+                          View Details
+                          <ChevronRight className="h-4 w-4" />
+                        </button> */}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </InfiniteScroll>
           )}
@@ -564,6 +676,103 @@ const AllInterviews = () => {
           )}
 
         </div>
+
+        {/* See All Rounds Modal */}
+        {isRoundsModalOpen && selectedApplicationId && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+            <div className={`rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+              {/* Modal Header */}
+              <div className="p-8 pb-4 flex items-start gap-5">
+                {(() => {
+                  const group = groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId);
+                  const rounds = group?.rounds || [];
+                  const first = rounds[0];
+                  const initial = first?.applicationID?.candidateID?.userName?.[0] || "?";
+                  return (
+                    <>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                        {capitalizeFirstLetter(initial)}
+                      </div>
+                      <div className="flex-1">
+                        <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {capitalizeFirstLetter(first?.applicationID?.jobID?.title) || "N/A"}
+                        </h2>
+                        <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {capitalizeFirstLetter(first?.applicationID?.candidateID?.userName) || "N/A"}
+                        </p>
+                      </div>
+                      <button onClick={() => setIsRoundsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                        <X className="h-6 w-6" />
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Subheader */}
+              <div className="px-8 mb-4 flex justify-between items-center">
+                <h3 className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Scheduled Rounds</h3>
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                  {groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId)?.rounds?.length} Rounds
+                </span>
+              </div>
+
+              {/* Scrollable Rounds List */}
+              <div className="px-8 pb-8 overflow-y-auto space-y-4 text-gray-900 dark:text-gray-100">
+                {groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId)?.rounds
+                  ?.map((round) => {
+                    const roundStatus = getInterviewRoundStatus(round.date, round.scheduledTime, round);
+                    return (
+                      <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatus.color === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatus.color === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
+                              {roundStatus.label}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex gap-2">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                              {capitalizeFirstLetter(statuses?.find(s => s._id === round.status)?.applicationStatus || round.status)}
+                            </span>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleFeedbackClick(round)}
+                              className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-medium ${theme === 'dark' ? 'border-gray-700 text-blue-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-blue-500 hover:shadow-md'}`}
+                            >
+                              <ThumbsUp className="h-4 w-4" />
+                              <ThumbsDown className="h-4 w-4" />
+                              Feedback
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-4 w-4 text-gray-400" />
+                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                              {formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{formatTime(round.scheduledTime)}</span>
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
+                            <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>T</div>
+                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{capitalizeFirstLetter(round.interviewerType)} Interview</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
+                            <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
+                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {round?.interviewerID?.userName || "N/A"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* interview Detail Modal */}
         {isDetailModalOpen && detailedInterview && (

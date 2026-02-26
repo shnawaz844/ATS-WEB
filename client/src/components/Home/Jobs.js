@@ -192,7 +192,7 @@ const Card = ({ job }) => {
                     {job.type} | {job.scheduleType}
                 </p>
                 <p className="text-sm dark:text-white text-gray-800 pt-2">
-                    {job.city}, {job.state} | {job.locationType}
+                    {[job.city, job.state, job.country].filter(Boolean).join(', ')} | {job.locationType}
                 </p>
                 <p className="text-sm dark:text-white text-gray-800 pt-2">₹{job.compensation}/Annum</p>
 

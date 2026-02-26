@@ -530,40 +530,21 @@ const MyJobs = () => {
                                         </div>
 
                                         <div className="space-y-2 mb-4">
-                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                <CircleUser className="h-4 w-4 mr-2" />
-                                                Name : {capitalizeFirstLetter(app.candidateID.userName)}
+                                            <p className={`text-sm flex items-center  ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                <CircleUser className="h-4 w-4 mr-2 " />
+                                                <span className="font-semibold mr-1"><b>Name :</b></span>
+                                                {capitalizeFirstLetter(app.candidateID.userName)}
                                             </p>
                                             <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                                 <Mail className="h-4 w-4 mr-2" />
-                                                Email : {app.candidateID.email}
+                                                <span className="font-semibold mr-1"><b>Email :</b></span>
+                                                {app.candidateID.email}
                                             </p>
                                             <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                                 <FolderDown className="h-4 w-4 mr-2" />
-                                                Location Type : {app.jobID?.locationType}
+                                                <span className="font-semibold mr-1"><b>Location Type :</b></span>
+                                                {app.jobID?.locationType}
                                             </p>
-                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                <MapPin className="h-4 w-4 mr-2" />
-                                                Location : {[app.jobID?.city, app.jobID?.state, app.jobID?.country].filter(Boolean).join(', ')}
-                                            </p>
-                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                <Clock className="h-4 w-4 mr-2" />
-                                                Shift : {app.jobID?.shiftStart} - {app.jobID?.shiftEnd}
-                                            </p>
-                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                <div className="h-14 overflow-y-auto pr-1 flex">
-                                                    <BookText className="h-4 w-4 mr-2" />
-                                                    Experience : {capitalizeFirstLetter(app.experience || 'No experience specified')}
-                                                </div>
-                                            </p>
-                                            {app.submittedAt && (
-                                                <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    <CalendarDays className="h-4 w-4 mr-2" />
-                                                    Applied: {new Date(app.submittedAt).toLocaleDateString()}
-                                                </p>
-                                            )}
-
-
                                             {/* Interview Details Card UI */}
                                             {(() => {
                                                 let interviewsToUse = [];
@@ -573,101 +554,128 @@ const MyJobs = () => {
                                                     interviewsToUse = [app.interview];
                                                 }
 
-                                                if (interviewsToUse.length === 0) return null;
-
                                                 const interview = getUpcomingInterview(interviewsToUse);
-                                                if (!interview) return null;
-
-                                                const { label, isDone, color: roundStatusColor } = getInterviewRoundStatus(interview.date, interview.scheduledTime, interview);
+                                                const showInterviewAddress = interview?.interviewerType === 'walkin' && interview.meetingLink;
 
                                                 return (
                                                     <>
-                                                        <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatusColor === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatusColor === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatusColor === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
-                                                            •  {label}
-                                                        </span>
-                                                        <div className={`mt-3 p-3 rounded-lg border flex flex-col gap-2 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-gray-800/80 border-gray-700' : 'bg-gradient-to-r from-purple-50/50 to-white border-purple-100'}`}>
-                                                            {/* Header: Status & Type */}
-                                                            <div className="flex justify-between items-center">
-                                                                <div className="flex gap-2">
-                                                                    <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${getStatusName(interview.status).toLowerCase().includes('scheduled') || getStatusName(interview.status).toLowerCase().includes('upcoming') ? (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700') : (theme === 'dark' ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100 text-blue-700')}`}>
-                                                                        {getStatusName(interview.status)}
-                                                                    </span>
-
-                                                                </div>
-                                                                <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                    • {capitalizeFirstLetter(interview.interviewerType)}
-                                                                </span>
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); handleSeeAllRounds(app); }}
-                                                                    className={`text-[10px] font-bold hover:underline ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}
-                                                                >
-                                                                    See All
-                                                                </button>
-                                                            </div>
-
-                                                            {/* Content Grid */}
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4">
-                                                                {/* Date & Time */}
-                                                                <div className="flex items-center gap-1.5 text-xs">
-                                                                    <CalendarDays className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
-                                                                    <span className={`font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
-                                                                        {formatDate(interview.date)}
-                                                                    </span>
-                                                                    <span className={`text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                        {interview.scheduledTime}
-                                                                    </span>
-                                                                </div>
-
-                                                                {/* Interviewer */}
-                                                                <div className="flex items-center gap-1.5 text-xs max-w-full">
-                                                                    <CircleUser className={`w-3.5 h-3.5 flex-shrink-0 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
-                                                                    <span className={`truncate ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                                        {getInterviewerName(interview.interviewerID)}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Action / Link */}
-                                                            {interview.interviewerType === 'online' && interview.meetingLink && (
-                                                                <div className="mt-1 flex justify-start">
-                                                                    {isMeetingActive(interview.date, interview.scheduledTime) ? (
-                                                                        <div className="flex flex-col gap-1">
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); handleJoinMeeting(interview._id, interview.meetingLink); }}
-                                                                                className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold rounded-full transition-colors shadow-sm shadow-purple-200 w-fit"
-                                                                            >
-                                                                                <Video className="w-3 h-3" />
-                                                                                Join Meeting Now
-                                                                            </button>
-                                                                            {getTimeLeft(interview.date, interview.scheduledTime) && (
-                                                                                <div className={`text-[10px] font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
-                                                                                    Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex flex-col gap-0.5">
-                                                                            {isMeetingExpired(interview.date, interview.scheduledTime) ? (
-                                                                                <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-red-900/20 text-red-500 border-red-900/50' : 'bg-red-50 text-red-600 border-red-100'}`}>
-                                                                                    <Clock className="w-3 h-3" />
-                                                                                    Link expired
-                                                                                </span>
-                                                                            ) : (
-                                                                                <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-amber-900/20 text-amber-500 border-amber-900/50' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                                                                                    <Clock className="w-3 h-3" />
-                                                                                    Link active 5m before
-                                                                                </span>
-                                                                            )}
-                                                                            {getTimeLeft(interview.date, interview.scheduledTime) && (
-                                                                                <div className={`text-[10px] font-bold ml-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                                    Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
+                                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            <MapPin className="h-4 w-4 mr-2" />
+                                                            {showInterviewAddress ? (
+                                                                <>
+                                                                    <span className="font-semibold mr-1"><b>Address :</b></span>
+                                                                    {interview.meetingLink}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <span className="font-semibold mr-1"><b>Location :</b></span>
+                                                                    {[app.jobID?.city, app.jobID?.state, app.jobID?.country].filter(Boolean).join(', ')}
+                                                                </>
                                                             )}
-                                                        </div>
+                                                        </p>
+                                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            <Clock className="h-4 w-4 mr-2" />
+                                                            <span className="font-semibold mr-1"><b>Shift :</b></span>
+                                                            {app.jobID?.shiftStart} - {app.jobID?.shiftEnd}
+                                                        </p>
+                                                        <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            <div className="h-14 overflow-y-auto pr-1 flex">
+                                                                <BookText className="h-4 w-4 mr-2" />
+                                                                <span className="font-semibold mr-1"><b>Experience :</b></span>
+                                                                {capitalizeFirstLetter(app.experience || 'No experience specified')}
+                                                            </div>
+                                                        </p>
+                                                        {app.submittedAt && (
+                                                            <p className={`text-sm flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                                <CalendarDays className="h-4 w-4 mr-2" />
+                                                                <b>Applied:</b> {new Date(app.submittedAt).toLocaleDateString()}
+                                                            </p>
+                                                        )}
+
+                                                        {interview && (() => {
+                                                            const { label, isDone, color: roundStatusColor } = getInterviewRoundStatus(interview.date, interview.scheduledTime, interview);
+                                                            return (
+                                                                <>
+                                                                    <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatusColor === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatusColor === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatusColor === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
+                                                                        •  {label}
+                                                                    </span>
+                                                                    <div className={`mt-3 p-3 rounded-lg border flex flex-col gap-2 shadow-sm transition-all hover:shadow-md ${theme === 'dark' ? 'bg-gray-800/80 border-gray-700' : 'bg-gradient-to-r from-purple-50/50 to-white border-purple-100'}`}>
+                                                                        <div className="flex justify-between items-center">
+                                                                            <div className="flex gap-2">
+                                                                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${getStatusName(interview.status).toLowerCase().includes('scheduled') || getStatusName(interview.status).toLowerCase().includes('upcoming') ? (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700') : (theme === 'dark' ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100 text-blue-700')}`}>
+                                                                                    {getStatusName(interview.status)}
+                                                                                </span>
+                                                                            </div>
+                                                                            <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                                • {capitalizeFirstLetter(interview.interviewerType)}
+                                                                            </span>
+                                                                            <button
+                                                                                onClick={(e) => { e.stopPropagation(); handleSeeAllRounds(app); }}
+                                                                                className={`text-[10px] font-bold hover:underline ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}
+                                                                            >
+                                                                                See All
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4">
+                                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                                <CalendarDays className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                                                                                <span className={`font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                                                                                    {formatDate(interview.date)}
+                                                                                </span>
+                                                                                <span className={`text-[10px] ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                                    {interview.scheduledTime}
+                                                                                </span>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1.5 text-xs max-w-full">
+                                                                                <CircleUser className={`w-3.5 h-3.5 flex-shrink-0 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                                                                                <span className={`truncate ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                                                    {getInterviewerName(interview.interviewerID)}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        {interview.interviewerType === 'online' && interview.meetingLink && (
+                                                                            <div className="mt-1 flex justify-start">
+                                                                                {isMeetingActive(interview.date, interview.scheduledTime) ? (
+                                                                                    <div className="flex flex-col gap-1">
+                                                                                        <button
+                                                                                            onClick={(e) => { e.stopPropagation(); handleJoinMeeting(interview._id, interview.meetingLink); }}
+                                                                                            className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold rounded-full transition-colors shadow-sm shadow-purple-200 w-fit"
+                                                                                        >
+                                                                                            <Video className="w-3 h-3" />
+                                                                                            Join Meeting Now
+                                                                                        </button>
+                                                                                        {getTimeLeft(interview.date, interview.scheduledTime) && (
+                                                                                            <div className={`text-[10px] font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                                                                Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <div className="flex flex-col gap-0.5">
+                                                                                        {isMeetingExpired(interview.date, interview.scheduledTime) ? (
+                                                                                            <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-red-900/20 text-red-500 border-red-900/50' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                                                                                                <Clock className="w-3 h-3" />
+                                                                                                Link expired
+                                                                                            </span>
+                                                                                        ) : (
+                                                                                            <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border ${theme === 'dark' ? 'bg-amber-900/20 text-amber-500 border-amber-900/50' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                                                                                                <Clock className="w-3 h-3" />
+                                                                                                Link active 5m before
+                                                                                            </span>
+                                                                                        )}
+                                                                                        {getTimeLeft(interview.date, interview.scheduledTime) && (
+                                                                                            <div className={`text-[10px] font-bold ml-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                                                Starts in {getTimeLeft(interview.date, interview.scheduledTime)}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </>
+                                                            );
+                                                        })()}
                                                     </>
                                                 );
                                             })()}
@@ -856,20 +864,25 @@ const MyJobs = () => {
                                 </div>
 
                                 {/* Questions */}
-                                {updatedApplication?.questions?.map((question, index) => (
-                                    <div key={index} className={`p-4 border rounded-xl space-y-2 ${theme === 'dark' ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'}`}>
-                                        <label className={`block text-sm font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>Question {index + 1}</label>
-                                        <div className={`p-3 rounded border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{question}</div>
-                                        <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Your Answer</label>
-                                        <textarea
-                                            value={updatedApplication?.answers[index] || ''}
-                                            onChange={(e) => handleQuestionAnswerChange(index, 'answers', e.target.value)}
-                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                }`}
-                                            rows="3"
-                                        />
-                                    </div>
-                                ))}
+                                {updatedApplication?.questions?.map((question, index) => {
+                                    const isBlank = !question || (typeof question === 'string' && (question.trim() === '' || question === '[]'));
+                                    if (isBlank) return null;
+
+                                    return (
+                                        <div key={index} className={`p-4 border rounded-xl space-y-2 ${theme === 'dark' ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-200'}`}>
+                                            <label className={`block text-sm font-semibold ${theme === 'dark' ? 'text-green-400' : 'text-green-700'}`}>Question {index + 1}</label>
+                                            <div className={`p-3 rounded border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-700'}`}>{question}</div>
+                                            <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Your Answer</label>
+                                            <textarea
+                                                value={updatedApplication?.answers[index] || ''}
+                                                onChange={(e) => handleQuestionAnswerChange(index, 'answers', e.target.value)}
+                                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                    }`}
+                                                rows="3"
+                                            />
+                                        </div>
+                                    );
+                                })}
 
                                 {/* Footer */}
                                 <div className={`flex justify-end space-x-4 pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -967,6 +980,14 @@ const MyJobs = () => {
                                                         <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
                                                         <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {getInterviewerName(round?.interviewerID)}</span>
                                                     </div>
+
+                                                    {/* Interview Address for Walk-in */}
+                                                    {round.interviewerType === 'walkin' && round.meetingLink && (
+                                                        <div className="flex items-center gap-3">
+                                                            <MapPin className="h-4 w-4 text-gray-400" />
+                                                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Address: {round.meetingLink}</span>
+                                                        </div>
+                                                    )}
 
                                                     {/* Meeting Link for Online Interviews */}
                                                     {round.interviewerType === 'online' && round.meetingLink && !getInterviewRoundStatus(round.date, round.scheduledTime, round).isDone && (

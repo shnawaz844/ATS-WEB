@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Briefcase, ChevronLeft, ChevronRight, Filter, Search, X, Clock } from 'lucide-react';
+import { Briefcase, ChevronLeft, ChevronRight, Filter, Search, X, Clock, Trash2, PenTool, Calendar, Video, MapPin, ThumbsUp, ThumbsDown } from 'lucide-react';
 import axios from 'axios';
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -18,6 +18,13 @@ export const ScheduledInterview = () => {
     const limit = 10;
     const companyUserName = localStorage.getItem("companyUserName");
     const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Update current time every second for the countdown
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Fetch company settings to sync AI features
     useEffect(() => {
@@ -153,16 +160,113 @@ export const ScheduledInterview = () => {
     console.log("assignedInterviewseeeeeee", assignedInterviews)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-    const [interviewRounds, setInterviewRounds] = useState([]);
-    const [feedbackForm, setFeedbackForm] = useState({
-        feedbackTitle: "",
-        feedback: "",
-        starRating: "",
-    });
-
+    const [isRoundsModalOpen, setIsRoundsModalOpen] = useState(false);
+    const [selectedApplicationId, setSelectedApplicationId] = useState(null);
 
     const modalRef = useRef();
     const interviewTypes = ["online", "walkin"];
+
+    // Helper functions for interview status
+    const isToday = (dateString) => {
+        const today = new Date();
+        const date = new Date(dateString);
+        return date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
+    };
+
+    const isMeetingLinkActive = (interviewDate, scheduledTime) => {
+        const now = currentTime;
+        const interview = new Date(interviewDate);
+        const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+        interview.setHours(hours, minutes, 0, 0);
+
+        // Active 5 minutes before and until it's finished
+        const activeTime = new Date(interview.getTime() - 5 * 60000);
+        return now >= activeTime;
+    };
+
+    const isMeetingExpired = (interviewDate, scheduledTime) => {
+        const now = currentTime;
+        const interview = new Date(interviewDate);
+        const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+        interview.setHours(hours + 1, minutes, 0, 0); // Assuming 1 hour duration
+        return now > interview;
+    };
+
+    const getTimeLeft = (interviewDate, scheduledTime) => {
+        const now = currentTime;
+        const interview = new Date(interviewDate);
+        const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+        interview.setHours(hours, minutes, 0, 0);
+
+        const diff = interview.getTime() - now.getTime();
+        if (diff <= 0) return null;
+
+        const mins = Math.floor(diff / 60000);
+        const hrs = Math.floor(mins / 60);
+        const days = Math.floor(hrs / 24);
+
+        if (days > 0) return `${days}d ${hrs % 24}h`;
+        if (hrs > 0) return `${hrs}h ${mins % 60}m`;
+        return `${mins}m ${Math.floor((diff % 60000) / 1000)}s`;
+    };
+
+    const getInterviewRoundStatus = (date, scheduledTime, interview) => {
+        const now = currentTime;
+        const intDate = new Date(date);
+        const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
+        intDate.setHours(hours, minutes, 0, 0);
+
+        if (interview.status === 'completed' || interview.interviewProgressStatus === 'Completed') {
+            return { label: 'Completed', color: 'green', isDone: true };
+        }
+
+        const diffMinutes = (intDate.getTime() - now.getTime()) / 60000;
+
+        if (diffMinutes < -60) return { label: 'Finished', color: 'gray', isDone: true };
+        if (diffMinutes <= 0 && diffMinutes >= -60) return { label: 'In Progress', color: 'blue', isLive: true };
+        if (diffMinutes <= 5 && diffMinutes > 0) return { label: 'Starting Soon', color: 'purple', isLive: true };
+        if (isToday(date)) return { label: 'Today', color: 'blue' };
+
+        return { label: 'Upcoming', color: 'purple' };
+    };
+
+    const groupedInterviews = assignedInterviews?.interviews ? Object.values(assignedInterviews.interviews.reduce((acc, interview) => {
+        const appId = interview.applicationID?._id;
+        if (!appId) return acc;
+        if (!acc[appId]) {
+            acc[appId] = {
+                applicationID: interview.applicationID,
+                rounds: []
+            };
+        }
+        acc[appId].rounds.push(interview);
+        return acc;
+    }, {})).map(group => {
+        const getCompareValue = (r) => {
+            const d = new Date(r.date);
+            const [h, m] = (r.scheduledTime || "00:00").split(':').map(Number);
+            d.setHours(h || 0, m || 0, 0, 0);
+            return d.getTime();
+        };
+
+        // Sort rounds by date and time
+        const sortedRounds = [...group.rounds].sort((a, b) => getCompareValue(a) - getCompareValue(b));
+
+        // Find the most relevant round:
+        const todayRounds = sortedRounds.filter(r => isToday(r.date));
+        let upcomingRound;
+        if (todayRounds.length > 0) {
+            upcomingRound = todayRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone)
+                || todayRounds[todayRounds.length - 1];
+        } else {
+            upcomingRound = sortedRounds.find(r => !getInterviewRoundStatus(r.date, r.scheduledTime, r).isDone)
+                || sortedRounds[sortedRounds.length - 1];
+        }
+
+        return { ...group, rounds: sortedRounds, upcomingRound };
+    }) : [];
     const feedbackTitles = [
         "Poor",
         "Below Average",
@@ -347,6 +451,59 @@ export const ScheduledInterview = () => {
             toast.error(error.message || "Error updating interview. Please try again.");
         }
     };
+
+    const handleDeleteInterview = async (id, e) => {
+        if (e) e.stopPropagation();
+
+        if (!window.confirm("Are you sure you want to delete this interview assignment? This action cannot be undone.")) {
+            return;
+        }
+
+        const loadingToast = toast.loading("Deleting interview...");
+
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/delete-interview/${id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to delete interview");
+            }
+
+            await refetchScheduledInterviews();
+            toast.dismiss(loadingToast);
+            toast.success("Interview deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting interview:", error);
+            toast.dismiss(loadingToast);
+            toast.error(error.message || "Error deleting interview. Please try again.");
+        }
+    };
+
+    const handleJoinMeeting = (id, link) => {
+        if (!link) {
+            toast.error("Meeting link not available");
+            return;
+        }
+        window.open(link, '_blank', 'noopener,noreferrer');
+    };
+
+    const handleSeeAllRounds = (applicationId, e) => {
+        if (e) e.stopPropagation();
+        setSelectedApplicationId(applicationId);
+        setIsRoundsModalOpen(true);
+    };
+
+    const [interviewRounds, setInterviewRounds] = useState([]);
+    const [feedbackForm, setFeedbackForm] = useState({
+        feedbackTitle: "",
+        feedback: "",
+        starRating: "",
+    });
 
     const handleFeedbackClick = async (selectedInterview) => {
         setDetailedInterview(selectedInterview);
@@ -696,99 +853,127 @@ export const ScheduledInterview = () => {
             ) : (
                 <>
                     {activeTab === 'scheduled' && (
-                        <div className="overflow-x-auto rounded-t-xl shadow backdrop-blur-xl bg-white/10 border border-white/20">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-200 dark:bg-white/10">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Job Title</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Candidate</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Resume</th>
-                                        {isAdmin && (
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Interviewer</th>
-                                        )}
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Time</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Meet Link</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Feedback</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Action</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Round</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 bg-gray-100 dark:bg-[#1a1a1a] dark:divide-gray-700">
-                                    {assignedInterviews?.interviews?.map((interview) => (
-                                        <tr key={interview?._id} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">
-                                                {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
-                                                {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
-                                            </td>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {groupedInterviews.map((group) => {
+                                const interview = group.upcomingRound;
+                                const roundStatus = getInterviewRoundStatus(interview.date, interview.scheduledTime, interview);
 
-                                            <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
-                                                {interview?.applicationID?.resume ? (
-                                                    <button
-                                                        onClick={() => handleResumeView(interview.applicationID.resume)}
-                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 break-words"
-                                                    >
-                                                        Open Resume
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-gray-500 dark:text-gray-400">No Resume</span>
-                                                )}
-                                            </td>
-
-                                            {isAdmin && (
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{capitalizeFirstLetter(interview?.interviewerID?.userName) || "N/A"}</td>
-                                            )}
-                                            <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-xs">
-                                                {formatDate(interview.date)}
-                                            </td>
-
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{interview.scheduledTime}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
-                                                    {statuses?.length && statuses?.filter(status => status._id === interview?.status)[0]?.applicationStatus}
+                                return (
+                                    <div
+                                        key={group.applicationID._id}
+                                        className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border flex flex-col ${currentTheme === 'dark'
+                                            ? 'bg-gray-800 border-gray-700'
+                                            : 'bg-[#f0f9f9] border-gray-100'
+                                            }`}
+                                    >
+                                        <div className="p-4 flex-1">
+                                            {/* Header with job title and round count */}
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex-1">
+                                                    <h3 className={`font-bold text-sm truncate ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                        {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                    </h3>
+                                                    <p className={`text-xs ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                        {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                                    </p>
+                                                </div>
+                                                <span className={`px-2 py-0.5 rounded-xl text-[10px] font-bold bg-gray-100 text-gray-600`}
+                                                >
+                                                    {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
                                                 </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm whitespace-normal break-words max-w-xs">
-                                                {interview?.meetingLink ? (
-                                                    <a
-                                                        href={interview.meetingLink}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium transition-colors duration-200 underline break-words"
-                                                    >
-                                                        Join Meeting
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-gray-500 dark:text-gray-400">Walk In</span>
-                                                )}
-                                            </td>
+                                            </div>
 
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <button
-                                                    onClick={() => handleFeedbackClick(interview)}
-                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
-                                                >
-                                                    {interview?.feedbackTitle || "Add Feedback"}
-                                                </button>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                <button
-                                                    onClick={() => handleEdit(interview)}
-                                                    className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium"
-                                                >
-                                                    Edit
-                                                </button>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {interview?.roundID?.roundName || (interviewRounds?.length && interviewRounds?.find(round => round._id === interview?.roundID)?.roundName) || "N/A"}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            {/* Upcoming Interview inside card */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${roundStatus.isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? 'text-green-500' : roundStatus.color === 'blue' ? 'text-blue-500' : 'text-purple-500'}`}>
+                                                        {roundStatus.label}
+                                                    </span>
+                                                </div>
+
+                                                <div className={`p-3 rounded-xl ${currentTheme === 'dark' ? 'bg-gray-900/50' : 'bg-white'}`}>
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                                        <span className={`text-xs font-medium ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {formatDate(interview.date)} at {interview.scheduledTime}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        {interview.interviewerType === 'online' ? (
+                                                            <Video className="h-3.5 w-3.5 text-gray-400" />
+                                                        ) : (
+                                                            <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                                                        )}
+                                                        <span className={`text-xs ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            {capitalizeFirstLetter(interview.interviewerType)} Interview
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3">
+                                                        <Clock className="h-3.5 w-3.5 text-gray-400" />
+                                                        <span className={`text-xs ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            <span className="font-semibold">Interviewer:</span>{" "}
+                                                            {interview?.interviewerID?.userName || "N/A"}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Join Button & Countdown */}
+                                                    <div className="mt-3 flex flex-col gap-2">
+                                                        {interview.interviewerType === 'online' && interview.meetingLink && !roundStatus.isDone && (
+                                                            <>
+                                                                {isMeetingLinkActive(interview.date, interview.scheduledTime) ? (
+                                                                    <button
+                                                                        onClick={() => handleJoinMeeting(interview._id, interview.meetingLink)}
+                                                                        className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Video className="h-3.5 w-3.5" />
+                                                                        Join Meeting
+                                                                    </button>
+                                                                ) : (
+                                                                    !isMeetingExpired(interview.date, interview.scheduledTime) && (
+                                                                        <div className="flex items-center gap-2 text-[11px] text-amber-600 font-medium">
+                                                                            <Clock className="w-4 h-4" />
+                                                                            Link active 5m before
+                                                                        </div>
+                                                                    )
+                                                                )}
+                                                            </>
+                                                        )}
+
+                                                        {getTimeLeft(interview.date, interview.scheduledTime) && !roundStatus.isDone && (
+                                                            <div className={`text-[11px] font-bold ${isMeetingLinkActive(interview.date, interview.scheduledTime) ? 'text-purple-600' : 'text-gray-400'}`}>
+                                                                Interview starts in {getTimeLeft(interview.date, interview.scheduledTime)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Footer */}
+                                        <div className={`relative z-10 flex justify-between items-center px-4 py-3 gap-3 ${currentTheme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}
+                                        >
+                                            <button
+                                                onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
+                                                className={`text-sm font-medium flex items-center gap-1 ${currentTheme === 'dark' ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
+                                            >
+                                                <ThumbsUp className="h-4 w-4" />
+                                                <ThumbsDown className="h-4 w-4" />
+                                                Feedback
+                                            </button>
+                                            <button
+                                                onClick={() => handleEdit(interview)}
+                                                className={`text-sm font-medium flex items-center gap-1 ${currentTheme === 'dark' ? 'text-white' : 'text-black'}`}
+                                            >
+                                                Edit Details
+                                                <ChevronRight className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -802,8 +987,10 @@ export const ScheduledInterview = () => {
                             handleResumeView={handleResumeView}
                             handleFeedbackClick={handleFeedbackClick}
                             handleEdit={handleEdit}
+                            handleDeleteInterview={handleDeleteInterview}
                             statuses={statuses}
                             interviewRounds={interviewRounds}
+                            currentTheme={currentTheme}
                         />
                     )}
 
@@ -839,6 +1026,148 @@ export const ScheduledInterview = () => {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* See All Rounds Modal */}
+            {isRoundsModalOpen && selectedApplicationId && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
+                    <div className={`rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${currentTheme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+                        {/* Modal Header */}
+                        <div className="p-8 pb-4 flex items-start gap-5">
+                            {(() => {
+                                const rounds = assignedInterviews?.interviews?.filter(i => i.applicationID?._id === selectedApplicationId) || [];
+                                const first = rounds[0];
+                                const initial = first?.applicationID?.candidateID?.userName?.[0] || "?";
+                                return (
+                                    <>
+                                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${currentTheme === 'dark' ? 'bg-purple-900/40 text-purple-400' : 'bg-indigo-100 text-indigo-600'}`}>
+                                            {capitalizeFirstLetter(initial)}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h2 className={`text-2xl font-bold ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                                {capitalizeFirstLetter(first?.applicationID?.jobID?.title) || "N/A"}
+                                            </h2>
+                                            <p className={`text-lg ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                {capitalizeFirstLetter(first?.applicationID?.candidateID?.userName) || "N/A"}
+                                            </p>
+                                        </div>
+                                        <button onClick={() => setIsRoundsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                            <X className="h-6 w-6" />
+                                        </button>
+                                    </>
+                                );
+                            })()}
+                        </div>
+
+                        {/* Subheader */}
+                        <div className="px-8 mb-4 flex justify-between items-center">
+                            <h3 className={`text-xs font-bold uppercase tracking-widest ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Scheduled Rounds</h3>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${currentTheme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+                                {assignedInterviews?.interviews?.filter(i => i.applicationID?._id === selectedApplicationId).length} Rounds
+                            </span>
+                        </div>
+
+                        {/* Scrollable Rounds List */}
+                        <div className="px-8 pb-8 overflow-y-auto space-y-4 text-gray-900 dark:text-gray-100">
+                            {assignedInterviews?.interviews
+                                ?.filter(i => i.applicationID?._id === selectedApplicationId)
+                                .sort((a, b) => {
+                                    const getCompareValue = (r) => {
+                                        const d = new Date(r.date);
+                                        const [h, m] = (r.scheduledTime || "00:00").split(':').map(Number);
+                                        d.setHours(h || 0, m || 0, 0, 0);
+                                        return d.getTime();
+                                    };
+                                    return getCompareValue(a) - getCompareValue(b);
+                                })
+                                .map((round) => {
+                                    const roundStatus = getInterviewRoundStatus(round.date, round.scheduledTime, round);
+                                    return (
+                                        <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${currentTheme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                    <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (currentTheme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatus.color === 'blue' ? (currentTheme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatus.color === 'red' ? (currentTheme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (currentTheme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
+                                                        {roundStatus.label}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex gap-2">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                                                        {capitalizeFirstLetter(statuses?.find(s => s._id === round.status)?.applicationStatus || round.status)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleFeedbackClick(round)}
+                                                        className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-medium ${currentTheme === 'dark' ? 'border-gray-700 text-blue-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-blue-500 hover:shadow-md'}`}
+                                                    >
+                                                        <ThumbsUp className="h-4 w-4" />
+                                                        <ThumbsDown className="h-4 w-4" />
+                                                        Give feedback
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-3">
+                                                    <Clock className="h-4 w-4 text-gray-400" />
+                                                    <span className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                        {formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${currentTheme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span>
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
+                                                    <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${currentTheme === 'dark' ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>T</div>
+                                                    <span className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{capitalizeFirstLetter(round.interviewerType)} Interview</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
+                                                    <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${currentTheme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
+                                                    <span className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {round?.interviewerID?.userName || "N/A"}</span>
+                                                </div>
+
+                                                {/* Meeting Link for Online Interviews */}
+                                                {round.interviewerType === 'online' && round.meetingLink && !getInterviewRoundStatus(round.date, round.scheduledTime, round).isDone && (
+                                                    <div className="mt-3 pt-3 border-t border-purple-100/50">
+                                                        {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                            <div className="flex flex-col gap-1">
+                                                                <button
+                                                                    onClick={() => handleJoinMeeting(round._id, round.meetingLink)}
+                                                                    className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                >
+                                                                    <Video className="w-4 h-4" />
+                                                                    Join Meeting Now
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-col gap-0.5">
+                                                                {isMeetingExpired(round.date, round.scheduledTime) ? (
+                                                                    <div className="flex items-center gap-2 text-[11px] text-red-600 font-medium">
+                                                                        <Clock className="w-4 h-4" />
+                                                                        Link expired
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center gap-2 text-[11px] text-amber-600 font-medium">
+                                                                        <Clock className="w-4 h-4" />
+                                                                        Link active 5m before
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {getTimeLeft(round.date, round.scheduledTime) && !isMeetingExpired(round.date, round.scheduledTime) && (
+                                                            <div className={`text-[11px] font-bold mt-1 ${isMeetingLinkActive(round.date, round.scheduledTime) ? 'text-purple-600' : 'text-gray-400'}`}>
+                                                                Interview starts in {getTimeLeft(round.date, round.scheduledTime)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Edit Modal */}
@@ -1044,22 +1373,27 @@ export const ScheduledInterview = () => {
 
                                 {/* Conditional Meeting Link */}
                                 {editForm.interviewType === 'online' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
-                                        <div className="relative">
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                                </svg>
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Link</label>
+                                        {(isMeetingLinkActive(detailedInterview?.date, detailedInterview?.scheduledTime) || isAdmin) ? (
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                    <Video className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                                                </div>
+                                                <input
+                                                    type="url"
+                                                    value={editForm.meetingLink}
+                                                    onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
+                                                    className="block w-full border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+                                                    placeholder="https://..."
+                                                />
                                             </div>
-                                            <input
-                                                type="url"
-                                                value={editForm.meetingLink}
-                                                onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                                className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 sm:py-3 pl-8 sm:pl-10 pr-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                                                placeholder="https://..."
-                                            />
-                                        </div>
+                                        ) : (
+                                            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2">
+                                                <Clock className="h-4 w-4" />
+                                                Meeting link will be visible 5 minutes before the scheduled time.
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 

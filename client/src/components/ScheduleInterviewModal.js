@@ -229,6 +229,9 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
         if (editForm.interviewType === 'online' && !editForm.meetingLink) {
             errors.meetingLink = 'Meeting link is required for online interviews';
         }
+        if (editForm.interviewType === 'walkin' && !editForm.meetingLink) {
+            errors.meetingLink = 'Address is required for walk-in interviews';
+        }
         if (!editForm.interviewerId) {
             errors.interviewerId = 'Interviewer is required';
         }
@@ -298,7 +301,7 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
             date: editForm.date,
             scheduledTime: editForm.time,
             interviewerType: editForm.interviewType,
-            meetingLink: editForm.interviewType === "online" ? editForm.meetingLink : "",
+            meetingLink: editForm.meetingLink || "",
             roundID: editForm.roundName,
             status: editForm.status,
             company_id: companyId,
@@ -592,7 +595,12 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     <select
                                         value={editForm.interviewType}
                                         onChange={(e) => {
-                                            setEditForm({ ...editForm, interviewType: e.target.value });
+                                            const type = e.target.value;
+                                            let address = editForm.meetingLink;
+                                            if (type === 'walkin') {
+                                                address = companyDetails?.address || "";
+                                            }
+                                            setEditForm({ ...editForm, interviewType: type, meetingLink: type === 'walkin' ? address : (type === 'online' ? "" : "") });
                                             if (formErrors.interviewType) setFormErrors({ ...formErrors, interviewType: "" });
                                         }}
                                         className={`w-full border rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-gray-500 ${formErrors.interviewType ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
@@ -631,18 +639,20 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
 
                             </div>
 
-                            {editForm.interviewType === 'online' && (
+                            {(editForm.interviewType === 'online' || editForm.interviewType === 'walkin') && (
                                 <div>
-                                    <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
+                                    <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        {editForm.interviewType === 'online' ? 'Meeting Link' : 'Interview Address'}
+                                    </label>
                                     <input
-                                        type="url"
+                                        type="text"
                                         value={editForm.meetingLink}
                                         onChange={(e) => {
                                             setEditForm({ ...editForm, meetingLink: e.target.value });
                                             if (formErrors.meetingLink) setFormErrors({ ...formErrors, meetingLink: "" });
                                         }}
                                         className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.meetingLink ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
-                                        placeholder="https://meet.google.com/..."
+                                        placeholder={editForm.interviewType === 'online' ? "https://meet.google.com/..." : "Enter walk-in address"}
                                         required
                                     />
                                     {formErrors.meetingLink && <p className="text-red-500 text-xs mt-1">{formErrors.meetingLink}</p>}

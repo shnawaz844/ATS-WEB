@@ -1,141 +1,160 @@
-import { Users, Building, CheckCircle, Bot, ArrowRight } from "lucide-react"
+import React, { useEffect, useState, useRef } from "react";
+import { Users, Building, CheckCircle, Bot, ArrowRight, TrendingUp } from "lucide-react";
+import { motion, useInView, useAnimation } from "framer-motion";
 
 const stats = [
     {
         icon: Users,
-        value: "10,000+",
+        value: 10000,
+        suffix: "+",
         label: "Active Job Seekers",
         description: "Qualified candidates ready to join your team",
-        gradient: "from-purple-500 to-purple-600",
+        gradient: "from-purple-500 to-indigo-600",
     },
     {
         icon: Building,
-        value: "500+",
+        value: 500,
+        suffix: "+",
         label: "Partner Companies",
         description: "Leading organizations trust our platform",
-        gradient: "from-purple-500 to-purple-600",
+        gradient: "from-indigo-500 to-purple-600",
     },
     {
         icon: CheckCircle,
-        value: "50,000+",
+        value: 50000,
+        suffix: "+",
         label: "Successful Hires",
         description: "Perfect matches made through our system",
-        gradient: "from-green-500 to-emerald-600",
+        gradient: "from-emerald-500 to-teal-600",
     },
     {
         icon: Bot,
-        value: "95%",
+        value: 95,
+        suffix: "%",
         label: "AI Match Accuracy",
         description: "AI-powered precision in candidate matching",
-        gradient: "from-purple-500 to-purple-600",
+        gradient: "from-orange-500 to-red-600",
     },
-]
+];
+
+const Counter = ({ value, suffix }) => {
+    const [count, setCount] = useState(0);
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true });
+
+    useEffect(() => {
+        if (isInView) {
+            let start = 0;
+            const end = value;
+            const duration = 2000;
+            const increment = end / (duration / 16);
+
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= end) {
+                    setCount(end);
+                    clearInterval(timer);
+                } else {
+                    setCount(Math.floor(start));
+                }
+            }, 16);
+            return () => clearInterval(timer);
+        }
+    }, [isInView, value]);
+
+    return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+};
 
 export default function Companies() {
     return (
-        <section className="py-20 relative overflow-hidden ">
-            {/* Background elements */}
-            <div className="absolute inset-0 bg-grid-gray-900/[0.02] dark:bg-grid-white/[0.02] bg-grid opacity-20"></div>
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-
+        <section className="py-24 relative overflow-hidden">
             <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section header */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/10 dark:bg-gradient-to-r dark:from-purple-600/10 dark:to-purple-500/10 border border-purple-600/20 dark:border-purple-500/20 px-4 py-2 mb-4 backdrop-blur-sm">
-                        <div className="w-2 h-2 bg-purple-600 dark:bg-gradient-to-r dark:from-purple-400 dark:to-purple-400 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium text-purple-700 dark:text-gray-300">Platform Performance Metrics</span>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-20"
+                >
+                    <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 mb-6">
+                        <TrendingUp className="h-4 w-4 text-purple-600" />
+                        <span className="text-sm font-bold text-purple-700 uppercase tracking-wider">Impact at Scale</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
-                        Real-time <span className="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400 bg-clip-text text-transparent">Insights</span>
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white sm:text-5xl mb-6">
+                        Real-time <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Insights</span>
                     </h2>
-                    <p className="mt-4 text-lg text-gray-800 dark:text-gray-400 max-w-2xl mx-auto">
-                        Track your recruitment performance with comprehensive analytics and metrics
+                    <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                        We're redefining how talent meets opportunity with measurable results.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                     {stats.map((stat, index) => (
-                        <div
+                        <motion.div
                             key={index}
-                            className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 shadow-md"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            whileHover={{ y: -10 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                            className="group relative p-8 rounded-3xl bg-white/50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all"
                         >
-                            {/* Glow effect on hover */}
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            {/* Decorative background gradient */}
+                            <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
 
                             {/* Icon container */}
-                            <div className="relative flex items-center justify-center mb-6">
-                                <div className={`relative rounded-xl bg-gradient-to-br ${stat.gradient} p-4 shadow-lg`}>
-                                    <stat.icon className="h-7 w-7 text-white" />
-
-                                    {/* AI indicator dot */}
-                                    {stat.label.includes("AI") && (
-                                        <div className="absolute -top-1 -right-1">
-                                            <div className="relative">
-                                                <div className="absolute w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full animate-ping opacity-75"></div>
-                                                <div className="relative w-4 h-4 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full"></div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Optional badge for special stats */}
-                                {index === 0 && (
-                                    <span className="absolute -top-2 right-0 bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                                        Live
-                                    </span>
-                                )}
+                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-8 shadow-lg group-hover:rotate-6 transition-transform`}>
+                                <stat.icon className="h-7 w-7 text-white" />
                             </div>
 
                             {/* Stat value */}
-                            <div className="text-center mb-2">
-                                <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                                    {stat.value}
+                            <div className="mb-4">
+                                <div className="text-5xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+                                    <Counter value={stat.value} suffix={stat.suffix} />
                                 </div>
-
-                                {/* Optional trend indicator */}
-                                {stat.trend && (
-                                    <div className={`inline-flex items-center text-sm font-medium mt-1 px-2 py-0.5 rounded-full ${stat.trend === 'up'
-                                        ? 'bg-green-900/30 text-green-400'
-                                        : 'bg-red-900/30 text-red-400'
-                                        }`}>
-                                        {stat.trend === 'up' ? '↑' : '↓'}
-                                        {stat.trendPercentage && ` ${stat.trendPercentage}`}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Stat label */}
-                            <div className="text-center">
-                                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200">
                                     {stat.label}
                                 </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    {stat.description}
-                                </p>
                             </div>
 
-                            {/* Decorative bottom border */}
-                            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                {stat.description}
+                            </p>
+
+                            {/* Bottom bar */}
+                            <div className={`absolute bottom-0 left-8 right-8 h-1 bg-gradient-to-r ${stat.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full`}></div>
+                        </motion.div>
                     ))}
                 </div>
 
-                {/* Additional info */}
-                <div className="mt-12 pt-8">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="text-center sm:text-left">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Data updated in real-time • Last refresh: Just now
-                            </p>
+                {/* Bottom section */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="mt-20 pt-10 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-6"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="flex -space-x-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-900 bg-gray-200 dark:bg-gray-800 overflow-hidden">
+                                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" className="w-full h-full object-cover" />
+                                </div>
+                            ))}
                         </div>
-                        <button className="inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            <span>View detailed analytics</span>
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </button>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            Joined by <span className="text-purple-600 font-bold">2,000+</span> companies this month
+                        </p>
                     </div>
-                </div>
+                    <motion.button
+                        whileHover={{ x: 5 }}
+                        className="flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white group"
+                    >
+                        Learn more about our impact
+                        <ArrowRight className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                    </motion.button>
+                </motion.div>
             </div>
         </section>
-    )
+    );
 }

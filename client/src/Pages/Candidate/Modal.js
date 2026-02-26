@@ -28,25 +28,38 @@ const Modal = ({ getStatusColor, isOpen, onClose, app, getStatusName }) => {
     // Safe JSON parsing for questions and answers
     const parseQuestionsAndAnswers = () => {
         try {
-            // Check if questions is already an array
+            let rawQuestions = [];
+            let rawAnswers = [];
+
+            // 1. Extract raw questions and answers
             if (Array.isArray(app.questions)) {
-                return {
-                    questions: app.questions,
-                    answers: app.answers || []
-                };
+                rawQuestions = app.questions;
+                rawAnswers = app.answers || [];
+            } else {
+                // Try to parse questions if it's a string-wrapped array
+                rawQuestions = typeof app.questions?.[0] === 'string'
+                    ? JSON.parse(app.questions[0])
+                    : app.questions || [];
+
+                // Try to parse answers if it's a string-wrapped array
+                rawAnswers = typeof app.answers?.[0] === 'string'
+                    ? JSON.parse(app.answers[0])
+                    : app.answers || [];
             }
 
-            // Try to parse questions if it's a string
-            const questions = typeof app.questions?.[0] === 'string'
-                ? JSON.parse(app.questions[0])
-                : app.questions || [];
+            // 2. Filter out invalid/blank questions and their corresponding answers
+            // A question is blank if it's null, empty string, whitespace only, or the literal string "[]"
+            const filtered = rawQuestions.reduce((acc, q, index) => {
+                const isBlank = !q || (typeof q === 'string' && (q.trim() === '' || q === '[]'));
 
-            // Try to parse answers if it's a string
-            const answers = typeof app.answers?.[0] === 'string'
-                ? JSON.parse(app.answers[0])
-                : app.answers || [];
+                if (!isBlank) {
+                    acc.questions.push(q);
+                    acc.answers.push(rawAnswers[index] || '');
+                }
+                return acc;
+            }, { questions: [], answers: [] });
 
-            return { questions, answers };
+            return filtered;
         } catch (error) {
             console.error('Error parsing questions or answers:', error);
             return { questions: [], answers: [] };

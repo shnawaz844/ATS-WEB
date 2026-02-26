@@ -1,113 +1,113 @@
-import { ArrowRight, Users, Briefcase, Bot } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import { ArrowRight, Users, Briefcase, Bot, Sparkles, CheckCircle2, TrendingUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const usps = [
+    "AI-Powered Recruitment",
+    "Automated Resume Screening",
+    "Smart Candidate Matching",
+    "Seamless Hiring Workflow"
+];
 
 export default function Hero() {
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setIndex((prev) => (prev + 1) % usps.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+            },
+        },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    };
+
     return (
-        <section className="relative overflow-hidden px-6 py-20 sm:py-24 lg:px-8 ">
-            {/* Subtle grid background */}
-            <div className="absolute inset-0 bg-grid-gray-900/[0.02] dark:bg-grid-white/[0.02] bg-grid opacity-30"></div>
-
-            {/* Animated gradient orbs */}
-            <div className="absolute top-1/4 -left-20 w-72 h-72 bg-purple-600/10 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-purple-700/10 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-
-            <div className="relative mx-auto max-w-7xl">
-                <div className="text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/10 dark:bg-gradient-to-r dark:from-purple-600/10 dark:to-purple-500/10 border border-purple-600/20 dark:border-purple-500/20 px-4 py-2 mb-8 backdrop-blur-sm">
-                        <div className="w-2 h-2 bg-purple-600 dark:bg-gradient-to-r dark:from-purple-400 dark:to-purple-400 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-medium text-purple-700 dark:bg-gradient-to-r dark:from-purple-400 dark:to-purple-400 dark:bg-clip-text dark:text-transparent">
-                            AI-Powered Recruitment Platform
-                        </span>
-                    </div>
-
-                    {/* Main Heading */}
-                    <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-7xl">
-                        Welcome to{" "}
-                        <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-purple-700 dark:from-purple-400 dark:via-purple-400 dark:to-purple-300 bg-clip-text text-transparent">
-                            Niyukty
-                        </span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="mt-6 text-lg leading-8 text-gray-800 dark:text-gray-300 max-w-2xl mx-auto">
-                        Revolutionizing recruitment with AI-powered solutions. Connect top talent with leading companies through our intelligent hiring platform.
-                    </p>
-
-                    {/* CTA Buttons */}
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="/">
-                            <button className="group relative inline-flex items-center justify-center px-8 py-3.5 font-medium rounded-full bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5">
-                                <span >Get Started</span>
-                                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 blur opacity-50 group-hover:opacity-70 transition-opacity"></div>
-                            </button>
-                        </a>
-
-                        <a href="/">
-                            <button className="inline-flex items-center justify-center px-8 py-3.5 font-medium rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900/50 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white transition-all duration-300 backdrop-blur-sm">
-                                Browse Jobs
-                            </button>
-                        </a>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
-                        {[
-                            {
-                                icon: Users,
-                                value: "10,000+",
-                                label: "Active Candidates",
-                                gradient: "from-purple-500/20 to-purple-600/20",
-                                iconColor: "text-purple-600 dark:text-purple-400"
-                            },
-                            {
-                                icon: Briefcase,
-                                value: "500+",
-                                label: "Partner Companies",
-                                gradient: "from-purple-500/20 to-pink-500/20",
-                                iconColor: "text-purple-600 dark:text-purple-400"
-                            },
-                            {
-                                icon: Bot,
-                                value: "95%",
-                                label: "AI Match Accuracy",
-                                gradient: "from-emerald-500/20 to-green-500/20",
-                                iconColor: "text-emerald-600 dark:text-emerald-400"
-                            }
-                        ].map((stat, index) => (
-                            <div
-                                key={index}
-                                className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-gray-700 transition-all duration-300 hover:scale-105 shadow-md"
-                            >
-                                {/* Hover effect background */}
-                                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-
-                                <div className={`relative w-12 h-12 rounded-lg bg-gradient-to-br ${stat.gradient.replace('/20', '/30')} flex items-center justify-center mb-4 mx-auto`}>
-                                    <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
-                                </div>
-
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</p>
-
-                                {/* Animated border */}
-                                <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-gradient group-hover:from-purple-500 group-hover:via-purple-600 group-hover:to-purple-500 transition-all duration-300"></div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Trust indicator */}
-                    <div className="mt-16 pt-8">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Trusted by leading tech companies worldwide
-                        </p>
-                    </div>
-                </div>
+        <section className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 lg:px-8 overflow-hidden">
+            {/* Background patterns */}
+            <div className="absolute inset-0 z-0 opacity-20">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]"></div>
             </div>
 
-            {/* Floating particles */}
-            <div className="absolute top-1/4 left-10 w-1 h-1 bg-purple-600 dark:bg-purple-400 rounded-full animate-float opacity-60"></div>
-            <div className="absolute top-1/3 right-20 w-1.5 h-1.5 bg-purple-600 dark:bg-purple-400 rounded-full animate-float opacity-40" style={{ animationDelay: "1s" }}></div>
-            <div className="absolute bottom-1/3 left-1/4 w-2 h-2 bg-purple-700 dark:bg-purple-300 rounded-full animate-float opacity-50" style={{ animationDelay: "2s" }}></div>
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="relative z-10 mx-auto max-w-7xl text-center"
+            >
+                {/* Animated Badge */}
+                <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 mb-8 backdrop-blur-md">
+                    <Sparkles className="h-4 w-4 text-purple-600 animate-pulse" />
+                    <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent uppercase tracking-wider">
+                        Niyukty Recruitment Platform
+                    </span>
+                </motion.div>
+
+                {/* Main Heading with Transitions Carousel */}
+                <motion.h1 variants={itemVariants} className="text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-8xl mb-8">
+                    Welcome to <br className="sm:hidden" />
+                    <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-800 bg-clip-text text-transparent">
+                        Niyukty
+                    </span>
+                    <div className="h-[1.2em] relative mt-2 overflow-hidden">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={index}
+                                initial={{ y: 40, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: -40, opacity: 0 }}
+                                transition={{ duration: 0.5, ease: "easeInOut" }}
+                                className="absolute inset-0 text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-600 dark:text-gray-400"
+                            >
+                                {usps[index]}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </motion.h1>
+
+                {/* Subtitle */}
+                <motion.p variants={itemVariants} className="mt-6 text-xl leading-relaxed text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
+                    Transform your recruitment lifecycle with our cutting-edge AI engine. Connect top-tier talent with world-class companies through data-driven precision.
+                </motion.p>
+
+                {/* CTA Buttons */}
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                    <motion.a
+                        href="/"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="group relative inline-flex items-center justify-center px-10 py-4 font-bold rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_10px_20px_-10px_rgba(124,58,237,0.5)] hover:shadow-[0_20px_40px_-15px_rgba(124,58,237,0.6)] transition-all overflow-hidden"
+                    >
+                        <span className="relative z-10">Get Started</span>
+                        <ArrowRight className="relative z-10 ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </motion.a>
+
+                    <motion.a
+                        href="/"
+                        whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                        className="inline-flex items-center justify-center px-10 py-4 font-bold rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 text-gray-800 dark:text-gray-200 backdrop-blur-md transition-all"
+                    >
+                        Browse Jobs
+                    </motion.a>
+                </motion.div>
+
+                {/* Floating Icons/Elements for visual flair */}
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+            </motion.div>
         </section>
-    )
+    );
 }

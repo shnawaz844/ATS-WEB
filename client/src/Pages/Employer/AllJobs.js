@@ -11,7 +11,8 @@ import {
     Briefcase, MapPin, Clock, RefreshCw, Filter,
     Calendar1,
     IndianRupee,
-    Share2
+    Share2,
+    Users
 } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
@@ -671,6 +672,15 @@ export const AllJobs = () => {
 
                                                         <div className="space-y-3">
                                                             <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <Users className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm">
+                                                                    Vacancy:{" "}
+                                                                    <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
+                                                                        {job.requiredResources || "N/A"}
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                                 <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
                                                                 <span className="text-sm font-medium">
                                                                     Compensation: {formatIndianRupee(job.compensation)}
@@ -703,6 +713,7 @@ export const AllJobs = () => {
                                                                     </span>
                                                                 </span>
                                                             </div>
+
                                                         </div>
 
                                                         <div className="mt-6 pt-4 border-t border-gray-200 group-hover:border-gray-500 flex justify-between gap-3">

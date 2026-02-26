@@ -1,54 +1,107 @@
-import { useState } from 'react';
+import React from 'react';
+import { motion } from "framer-motion";
+import { ArrowRight, Phone, Sparkles } from "lucide-react";
 
 export default function ReadytoDiv() {
-    const [isHovered, setIsHovered] = useState(false);
-
     return (
-        <>
-            <div className="w-full relative overflow-hidden py-10 ">
-                {/* Subtle background pattern */}
-                <div className="absolute inset-0 opacity-5"
-                    style={{
-                        backgroundImage: `radial-gradient(circle at 25% 25%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
-                             radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.1) 0%, transparent 50%)`
-                    }}>
-                </div>
-
-                <div className="max-w-3xl mx-auto text-center px-6 relative">
-                    <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                        Ready to begin your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400">journey</span>?
-                    </h2>
-
-                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-xl mx-auto">
-                        Start transforming your recruitment process today. Experience the power of AI-driven hiring.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                        <button
-                            className="px-8 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-                            onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}
-                        >
-                            Get Start
-                        </button>
-
-                        <a
-                            href="#learn-more"
-                            className="px-8 py-3.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        >
-                            Connect on call
-                        </a>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-500 text-sm">
-                        <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>No credit card required • 14-day free trial • Cancel anytime</span>
-                    </div>
-                </div>
+        <section className="py-32 relative overflow-hidden">
+            {/* High-impact background */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[120px]"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
             </div>
-        </>
 
+            <div className="relative z-10 max-w-5xl mx-auto px-6">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="relative p-12 sm:p-20 rounded-[3rem] bg-gray-900 border border-white/10 overflow-hidden shadow-2xl"
+                >
+                    {/* Inner glow */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/20 rounded-full blur-[80px]"></div>
+                    <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-600/20 rounded-full blur-[80px]"></div>
+
+                    <div className="relative z-20 text-center max-w-3xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md"
+                        >
+                            <Sparkles className="h-4 w-4 text-purple-400" />
+                            <span className="text-sm font-bold text-gray-300 uppercase tracking-widest">Limited Opportunity</span>
+                        </motion.div>
+
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="text-5xl sm:text-7xl font-black text-white mb-8 tracking-tighter"
+                        >
+                            Ready to begin your <br />
+                            <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                                journey
+                            </span>?
+                        </motion.h2>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-xl text-gray-400 mb-12 max-w-xl mx-auto leading-relaxed"
+                        >
+                            Start transforming your recruitment process today. Join 2,000+ companies experiencing the power of AI-driven hiring.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12"
+                        >
+                            <motion.button
+                                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(168,85,247,0.4)" }}
+                                whileTap={{ scale: 0.95 }}
+                                className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 group"
+                            >
+                                Get Started Now
+                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            </motion.button>
+
+                            <motion.a
+                                href="#learn-more"
+                                whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.05)" }}
+                                whileTap={{ scale: 0.95 }}
+                                className="w-full sm:w-auto px-10 py-5 border-2 border-white/10 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2"
+                            >
+                                <Phone className="h-5 w-5" />
+                                Connect on call
+                            </motion.a>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            whileInView={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex flex-wrap items-center justify-center gap-6 text-gray-500 text-sm font-medium"
+                        >
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                <span>No credit card required</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                <span>14-day free trial</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                <span>Cancel anytime</span>
+                            </div>
+                        </motion.div>
+                    </div>
+                </motion.div>
+            </div>
+        </section>
     );
 }
