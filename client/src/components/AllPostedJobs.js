@@ -498,7 +498,7 @@ const Card = ({ job, onViewDetails, companyUserName, jobStatusLabel, theme, isAp
         </p>
         <p className={`text-sm pt-2 font-medium ${theme === "dark" ? "text-green-400" : "text-gray-600"
           }`}>
-          ₹{formatIndianRupee(job.compensation)}/Annum
+          ₹{formatIndianRupee(job.compensation)}/Month
         </p>
 
         <div className={`text-sm mb-4 min-h-16 line-clamp-3 pt-2 mt-2 ${theme === "dark" ? "text-purple-300" : "text-purple-800"
