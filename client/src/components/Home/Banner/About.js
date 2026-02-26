@@ -66,7 +66,7 @@ export default function About() {
     }
 
     return (
-        <section className="py-24 relative overflow-hidden bg-white/30 dark:bg-black/30 backdrop-blur-sm">
+        <section className="py-14 relative overflow-hidden bg-white/30 dark:bg-black/30 backdrop-blur-sm">
             <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section Header */}
                 <div className="text-center mb-20">

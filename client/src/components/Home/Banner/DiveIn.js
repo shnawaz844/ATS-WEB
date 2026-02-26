@@ -4,7 +4,7 @@ import { ArrowRight, Phone, Sparkles } from "lucide-react";
 
 export default function ReadytoDiv() {
     return (
-        <section className="py-32 relative overflow-hidden">
+        <section className="py-12 relative overflow-hidden">
             {/* High-impact background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[120px]"></div>

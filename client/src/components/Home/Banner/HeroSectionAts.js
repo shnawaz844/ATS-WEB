@@ -35,7 +35,7 @@ export default function Hero() {
     };
 
     return (
-        <section className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 lg:px-8 overflow-hidden">
+        <section className="relative min-h-[90vh] flex items-center justify-center px-6 py-0 lg:px-8 overflow-hidden">
             {/* Background patterns */}
             <div className="absolute inset-0 z-0 opacity-20">
                 <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]"></div>

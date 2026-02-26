@@ -24,7 +24,7 @@ const companies = [
 
 export default function NewsCarousel() {
     return (
-        <section className="py-32 relative overflow-hidden bg-gray-50/50 dark:bg-gray-900/20">
+        <section className="py-12 relative overflow-hidden bg-gray-50/50 dark:bg-gray-900/20">
             <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

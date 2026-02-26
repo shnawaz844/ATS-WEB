@@ -61,7 +61,7 @@ export default function WhyAts() {
   };
 
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-10 relative overflow-hidden">
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-24">
