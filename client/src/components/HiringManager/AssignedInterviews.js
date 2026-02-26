@@ -615,12 +615,12 @@ const AssignedInterviews = () => {
                                             return (
                                                 <div
                                                     key={group.applicationID._id}
-                                                    className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border ${theme === 'dark'
+                                                    className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border flex flex-col h-full ${theme === 'dark'
                                                         ? 'bg-gray-800 border-gray-700'
                                                         : 'bg-[#f0f9f9] border-gray-100'
                                                         }`}
                                                 >
-                                                    <div className="p-4">
+                                                    <div className="p-4 flex-1 flex flex-col">
                                                         {/* Header with job title and round count */}
                                                         <div className="flex justify-between items-start mb-3">
                                                             <div>
@@ -685,10 +685,11 @@ const AssignedInterviews = () => {
                                                                         </div>
                                                                         <div className="flex items-center gap-2 text-[11px] text-black mb-1">
                                                                             <Clock className="h-3 w-3" />
-                                                                            <span>{isToday(round.date) ? 'Today' : formatDate(round.date)} at : <span className={`px-2 py-0.5 rounded-xl font-bold ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-700'}`}>{round.scheduledTime}</span></span>
+                                                                            <span className="font-semibold">{isToday(round.date) ? 'Today' : formatDate(round.date)} at : <span className={`px-2 py-0.5 rounded-xl font-bold ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-700'}`}>{round.scheduledTime}</span></span>
                                                                         </div>
                                                                         <div className="text-[11px] text-black mb-2">
-                                                                            Interviewer: {round?.interviewerID?.userName || "N/A"}
+                                                                            <span className="font-semibold">Interviewer:</span>{" "}
+                                                                            {round?.interviewerID?.userName || "N/A"}
                                                                         </div>
 
                                                                         {/* Meeting Link for Online Interviews */}
@@ -705,11 +706,6 @@ const AssignedInterviews = () => {
                                                                                             </svg>
                                                                                             Join Meeting Now
                                                                                         </button>
-                                                                                        {getTimeLeft(round.date, round.scheduledTime) && (
-                                                                                            <div className="text-[10px] text-purple-600 font-bold">
-                                                                                                Interview starts in {getTimeLeft(round.date, round.scheduledTime)}
-                                                                                            </div>
-                                                                                        )}
                                                                                     </div>
                                                                                 ) : (
                                                                                     <div className="flex flex-col gap-0.5">
@@ -724,11 +720,6 @@ const AssignedInterviews = () => {
                                                                                                 Link will be active 5 mins before
                                                                                             </div>
                                                                                         )}
-                                                                                        {getTimeLeft(round.date, round.scheduledTime) && (
-                                                                                            <div className="text-[10px] text-gray-500 font-bold ml-4.5">
-                                                                                                Starts in {getTimeLeft(round.date, round.scheduledTime)}
-                                                                                            </div>
-                                                                                        )}
                                                                                     </div>
                                                                                 )}
                                                                             </div>
@@ -740,7 +731,7 @@ const AssignedInterviews = () => {
                                                     </div>
 
                                                     {/* Footer */}
-                                                    <div className={`relative z-10 flex justify-between items-center px-4 py-3 mt-2 gap-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                                                    <div className={`relative z-10 flex justify-between items-center px-4 py-3 gap-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
                                                         <button
                                                             onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
                                                             className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
@@ -823,126 +814,142 @@ const AssignedInterviews = () => {
                                         return (
                                             <div
                                                 key={group.applicationID._id}
-                                                className={`p-6 rounded-xl border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group ${theme === 'dark'
-                                                    ? 'bg-white/10 border-gray-700 hover:border-purple-500/50'
-                                                    : 'bg-white border-gray-100 hover:border-indigo-50'
+                                                className={`group rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 border flex flex-col h-full ${theme === 'dark'
+                                                    ? 'bg-gray-800 border-gray-700'
+                                                    : 'bg-white border-gray-100'
                                                     }`}
                                             >
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div>
-                                                        <h3 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white group-hover:text-purple-500' : 'text-gray-900 group-hover:text-purple-500'}`}>
-                                                            {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
-                                                        </h3>
-                                                        <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                            Applicant Name : {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
-                                                        </p>
+                                                <div className="p-4 flex-1 flex flex-col">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div>
+                                                            <h3 className={`text-lg font-semibold line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                                                                {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
+                                                            </h3>
+                                                            <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                Applicant: {capitalizeFirstLetter(interview?.applicationID?.candidateID?.userName) || "N/A"}
+                                                            </p>
+                                                        </div>
+                                                        <span className={`px-2 py-0.5 rounded-xl text-[10px] font-bold bg-gray-100 text-gray-600`}>
+                                                            {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
+                                                        </span>
                                                     </div>
-                                                </div>
 
-                                                <div className="space-y-4">
-                                                    <div className="flex items-center justify-between">
+                                                    <div className="space-y-4">
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
-                                                                const { label, isDone } = getInterviewRoundStatus(round?.date, round?.scheduledTime, round);
+                                                                const { label, isDone, color } = getInterviewRoundStatus(round?.date, round?.scheduledTime, round);
+                                                                const dotColorClass = color === 'green' ? (theme === 'dark' ? 'bg-green-400' : 'bg-green-600 shadow-[0_0_8px_rgba(34,197,94,0.5)]')
+                                                                    : color === 'blue' ? (theme === 'dark' ? 'bg-blue-400' : 'bg-blue-600 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse')
+                                                                        : color === 'red' ? (theme === 'dark' ? 'bg-red-400' : 'bg-red-600 shadow-[0_0_8px_rgba(239,68,68,0.5)]')
+                                                                            : (theme === 'dark' ? 'bg-purple-400 animate-pulse' : 'bg-purple-600 shadow-[0_0_8px_rgba(147,51,234,0.5)] animate-pulse');
+
+                                                                const textColorClass = color === 'green' ? (theme === 'dark' ? 'text-green-400' : 'text-green-600')
+                                                                    : color === 'blue' ? (theme === 'dark' ? 'text-blue-400' : 'text-blue-600')
+                                                                        : color === 'red' ? (theme === 'dark' ? 'text-red-400' : 'text-red-600')
+                                                                            : (theme === 'dark' ? 'text-purple-400' : 'text-purple-600');
                                                                 return (
                                                                     <>
-                                                                        <div className={`h-2 w-2 rounded-full ${isDone ? (theme === 'dark' ? 'bg-green-400' : 'bg-green-600 shadow-[0_0_8px_rgba(34,197,94,0.5)]') : (theme === 'dark' ? 'bg-purple-400 animate-pulse' : 'bg-purple-600 shadow-[0_0_8px_rgba(147,51,234,0.5)] animate-pulse')}`}></div>
-                                                                        <span className={`text-[10px] font-extrabold uppercase tracking-widest ${isDone ? (theme === 'dark' ? 'text-green-400' : 'text-green-600') : (theme === 'dark' ? 'text-purple-400' : 'text-purple-600')}`}>
+                                                                        <div className={`h-2 w-2 rounded-xl ${dotColorClass}`}></div>
+                                                                        <span className={`text-[10px] font-extrabold uppercase tracking-widest ${textColorClass}`}>
                                                                             {label}
                                                                         </span>
                                                                     </>
                                                                 );
                                                             })()}
                                                         </div>
-                                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600`}>
-                                                            {group.rounds.length} {group.rounds.length === 1 ? 'Round' : 'Rounds'}
-                                                        </span>
-                                                    </div>
 
-                                                    <div className={`p-4 rounded-xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50/50 border-gray-100'} hover:shadow-sm`}>
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <div className="flex gap-2">
-                                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
-                                                                    {capitalizeFirstLetter(appStatus)}
-                                                                </span>
-                                                                {round.interviewProgressStatus !== 'Upcoming' && (
-                                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.interviewProgressStatus)}`}>
-                                                                        {capitalizeFirstLetter(round.interviewProgressStatus)}
+                                                        <div className={`p-3 rounded-xl border relative group/round ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-purple-200 shadow-sm'} transition-all hover:bg-white/80`}>
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <div className="flex gap-2">
+                                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getStatusColor(round.status)}`}>
+                                                                        {capitalizeFirstLetter(appStatus)}
                                                                     </span>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <button onClick={() => handleInterviewClick(round)} className="p-1 rounded hover:bg-gray-200 text-gray-500">
-                                                                    <PenTool className="h-5 w-5" />
-                                                                </button>
-                                                                {(userRole === 'admin' || userRole === 'hiring_manager') && (
-                                                                    <button onClick={(e) => handleDeleteInterview(round._id, e)} className="p-1 rounded hover:bg-red-50 text-red-400">
-                                                                        <Trash2 className="h-5 w-5" />
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <button onClick={() => handleInterviewClick(round)} className="p-1 rounded hover:bg-gray-200 text-gray-500">
+                                                                        <PenTool className="h-5 w-5" />
                                                                     </button>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-1.5">
-                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                                <Clock className="h-3.5 w-3.5" />
-                                                                <span>{formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{round.scheduledTime}</span></span>
-                                                            </div>
-                                                            <div className="text-xs text-gray-400">
-                                                                Type: {capitalizeFirstLetter(round.interviewerType)} Interview
-                                                            </div>
-
-                                                            {/* Meeting Link for Online Interviews */}
-                                                            {round.interviewerType === 'online' && round.meetingLink && (
-                                                                <div className="mt-2 pt-2 border-t border-purple-50">
-                                                                    {isMeetingLinkActive(round.date, round.scheduledTime) ? (
-                                                                        <a
-                                                                            href={round.meetingLink}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="inline-flex items-center gap-2 text-xs font-bold text-purple-600 hover:text-purple-700 underline"
-                                                                        >
-                                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                                            </svg>
-                                                                            Join Meeting Now
-                                                                        </a>
-                                                                    ) : (
-                                                                        <div className="flex items-center gap-2 text-[10px] text-amber-600 font-medium bg-amber-50/50 p-1.5 rounded-lg">
-                                                                            <Clock className="w-3.5 h-3.5" />
-                                                                            Link will be active 5 mins before
-                                                                        </div>
+                                                                    {(userRole === 'admin' || userRole === 'hiring_manager') && (
+                                                                        <button onClick={(e) => handleDeleteInterview(round._id, e)} className="p-1 rounded hover:bg-red-50 text-red-400">
+                                                                            <Trash2 className="h-5 w-5" />
+                                                                        </button>
                                                                     )}
                                                                 </div>
-                                                            )}
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                                    <Clock className="h-3.5 w-3.5" />
+                                                                    <span>{formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white border text-gray-700'}`}>{round.scheduledTime}</span></span>
+                                                                </div>
+                                                                <div className="text-xs text-gray-400">
+                                                                    Type: {capitalizeFirstLetter(round.interviewerType)} Interview
+                                                                </div>
+
+                                                                {/* Meeting Link for Online Interviews */}
+                                                                {round.interviewerType === 'online' && round.meetingLink && (
+                                                                    <div className="mt-2 pt-2 border-t border-purple-100">
+                                                                        {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                                            <a
+                                                                                href={round.meetingLink}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 hover:text-purple-700 underline"
+                                                                            >
+                                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                                </svg>
+                                                                                Join Meeting Now
+                                                                            </a>
+                                                                        ) : (
+                                                                            <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-medium">
+                                                                                <Clock className="w-3 h-3" />
+                                                                                Link will be active 5 mins before
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Shared Countdown Logic */}
+                                                                {(() => {
+                                                                    const timeLeft = getTimeLeft(round?.date, round?.scheduledTime);
+                                                                    if (!timeLeft) return null;
+                                                                    return (
+                                                                        <div className="mt-2 text-[10px] text-gray-400 font-medium">
+                                                                            Interview starts in {timeLeft}
+                                                                        </div>
+                                                                    );
+                                                                })()}
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <div className="mt-2 flex justify-between gap-4">
-                                                        <button
-                                                            onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
-                                                            className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-500'} hover:underline`}
-                                                        >
-                                                            See All Rounds
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleInterviewClick(interview)}
-                                                            className={`text-sm font-medium flex items-center ${theme === 'dark' ? 'text-purple-400' : 'text-purple-500'} hover:underline`}
-                                                        >
-                                                            View Details
-                                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                {/* Footer */}
+                                                <div className={`relative z-10 flex justify-between items-center px-4 py-3 gap-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'}`}>
+                                                    <button
+                                                        onClick={(e) => handleSeeAllRounds(interview?.applicationID?._id, e)}
+                                                        className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'} hover:underline`}
+                                                    >
+                                                        See All Rounds
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleInterviewClick(interview)}
+                                                        className={`text-sm font-medium flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-black'}`}
+                                                    >
+                                                        View Details
+                                                        <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
                                     })}
                             </div>
-                        )
-                        }
+                        )}
                     </>
-                )}
+                )
+                }
 
                 {
                     (activeTab === 'manage' || activeTab === 'ai') && (
@@ -1368,7 +1375,7 @@ const AssignedInterviews = () => {
                     )
                 }
 
-            </div>
+            </div >
         </div >
     );
 };

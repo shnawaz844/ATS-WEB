@@ -58,7 +58,10 @@ const ApplicationsTable = ({
             company_id: app.company_id || user.company_id,
             jobDetails: {
                 id: app.jobID._id,
-                title: app.jobID?.title || app.jobTitle || 'N/A'
+                title: app.jobID?.title || app.jobTitle || 'N/A',
+                city: app.jobID?.city,
+                state: app.jobID?.state,
+                locationType: app.jobID?.locationType
             },
             candidateDetails: {
                 userName: app.candidateID?.userName || 'N/A',

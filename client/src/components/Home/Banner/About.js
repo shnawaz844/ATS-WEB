@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { MapPin, Clock, DollarSign, Users, Briefcase } from "lucide-react"
+import { MapPin, Clock, DollarSign, Users, Briefcase, Star, ArrowUpRight, ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function About() {
     const [jobs, setJobs] = useState([])
@@ -29,7 +30,7 @@ export default function About() {
                     applicants: job.applicants?.length || 0,
                     posted: formatRelativeTime(job.createdAt),
                     skills: [job.type, job.scheduleType, job.hireType],
-                    logo: companyNameFromStorage.charAt(0).toUpperCase() || "�",
+                    logo: companyNameFromStorage.charAt(0).toUpperCase() || "T",
                     featured: true
                 }))
 
@@ -57,180 +58,161 @@ export default function About() {
 
     if (loading) {
         return (
-            <section className="py-20 flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            </section>
+            <div className="py-20 flex flex-col items-center justify-center min-h-[400px]">
+                <div className="h-10 w-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-500 font-medium">Discovering opportunities...</p>
+            </div>
         )
     }
 
     return (
-        <section className="py-20 relative overflow-hidden">
-            {/* Background pattern */}
-            <div className="absolute inset-0 bg-grid-gray-900/[0.02] dark:bg-grid-white/[0.02] bg-grid opacity-10"></div>
-
+        <section className="py-24 relative overflow-hidden bg-white/30 dark:bg-black/30 backdrop-blur-sm">
             <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
                 {/* Section Header */}
-                <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-purple-600/10 dark:bg-gradient-to-r dark:from-purple-900/20 dark:to-purple-900/20 border border-purple-600/20 dark:border-purple-800/30 px-4 py-2.5 mb-6 backdrop-blur-sm">
-                        <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                            <span className="text-sm font-medium text-purple-700 dark:text-gray-300">
-                                Featured Opportunities
-                            </span>
-                        </div>
-                    </div>
+                <div className="text-center mb-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 border border-purple-500/20 px-4 py-2 mb-6"
+                    >
+                        <Star className="h-4 w-4 text-purple-600 fill-purple-600" />
+                        <span className="text-sm font-bold text-purple-700 uppercase tracking-widest">Premium Selection</span>
+                    </motion.div>
 
-                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                        Top <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-400">Career Roles</span>
-                    </h2>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-4xl font-black text-gray-900 dark:text-white sm:text-5xl mb-6 tracking-tight"
+                    >
+                        Top <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Career Roles</span>
+                    </motion.h2>
 
-                    <p className="text-lg text-gray-800 dark:text-gray-400 max-w-2xl mx-auto">
-                        Discover exclusive opportunities from industry-leading companies
-                    </p>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+                    >
+                        Explore hand-picked roles from industry leaders tailored for your growth.
+                    </motion.p>
                 </div>
 
                 {/* Jobs Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {jobs.map((job) => (
-                        <div
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {jobs.map((job, index) => (
+                        <motion.div
                             key={job.id}
-                            className="group relative p-6 rounded-2xl bg-white/60 dark:bg-white/5 border border-white/50 dark:border-gray-800 backdrop-blur-md hover:border-purple-200 dark:hover:border-purple-800/50 transition-all duration-300 hover:-translate-y-1 shadow-md h-full flex flex-col"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            whileHover={{ y: -10 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.1 }}
+                            className="group relative p-8 rounded-[2rem] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl hover:shadow-2xl transition-all flex flex-col"
                         >
-                            {/* Glow effect */}
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
                             {/* Job Header */}
-                            <div className="relative mb-6">
+                            <div className="relative mb-8">
                                 <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-4">
-                                        {/* Company Logo */}
-                                        <div className="w-12 h-12 rounded-xl bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                                            <span className="text-2xl font-bold text-gray-800 dark:text-gray-300">
-                                                {job.logo}
-                                            </span>
+                                    <div className="flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-2xl font-black text-purple-600">
+                                            {job.logo}
                                         </div>
-
-                                        {/* Job Title & Company */}
                                         <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-gray-800 dark:group-hover:text-gray-100">
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-purple-600 transition-colors">
                                                 {job.title}
                                             </h3>
-                                            <p className="text-sm text-gray-700 dark:text-gray-400 font-medium mt-1">
+                                            <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
                                                 {job.company}
                                             </p>
                                         </div>
                                     </div>
-
-                                    {/* Job Type Badge */}
-                                    <span className={`inline-flex items-center px-4 py-1 rounded-full text-xs font-medium ${job.type === 'Full-time'
-                                        ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800'
-                                        : job.type === 'Remote'
-                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-800'
-                                            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+                                    <div className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-widest ${job.type === 'Full-time'
+                                        ? 'bg-purple-100 text-purple-700'
+                                        : 'bg-green-100 text-green-700'
                                         }`}>
                                         {job.type}
-                                    </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Job Details */}
-                            <div className="space-y-5 relative flex-grow flex flex-col">
-                                {/* Location & Time */}
-                                <div className="flex items-center gap-4 text-sm">
-                                    <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300">
-                                        <MapPin className="h-4 w-4 text-gray-600" />
-                                        <span>{job.location}</span>
+                            {/* Job Content */}
+                            <div className="space-y-6 flex-grow">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400">
+                                        <MapPin className="h-4 w-4 text-purple-500" />
+                                        {job.location}
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-700 dark:text-gray-400">
-                                        <Clock className="h-4 w-4 text-gray-600" />
-                                        <span>{job.posted}</span>
-                                    </div>
-                                </div>
-
-                                {/* Salary & Applicants */}
-                                <div className="flex items-center gap-6 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                            <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-600">Salary</p>
-                                            <p className="font-semibold text-green-700 dark:text-green-300">{job.salary}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                            <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-600">Applicants</p>
-                                            <p className="font-semibold text-purple-700 dark:text-purple-300">{job.applicants}</p>
-                                        </div>
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400">
+                                        <Clock className="h-4 w-4 text-purple-500" />
+                                        {job.posted}
                                     </div>
                                 </div>
 
-                                {/* Skills */}
-                                <div className="pt-4 border-t border-gray-200 dark:border-gray-800 flex-grow">
-                                    <p className="text-sm text-gray-600 mb-3">Required Tags</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {job.skills.map((skill, index) => (
-                                            <span
-                                                key={index}
-                                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white/80 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-                                            >
-                                                {skill}
-                                            </span>
+                                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-green-500/10">
+                                            <DollarSign className="h-4 w-4 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase">Salary Range</p>
+                                            <p className="text-sm font-black text-gray-900 dark:text-white">{job.salary}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <img key={i} src={`https://i.pravatar.cc/100?img=${i + 20}`} className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-900" alt="user" />
                                         ))}
+                                        <div className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-900 bg-purple-100 flex items-center justify-center text-[10px] font-bold text-purple-700">
+                                            +{job.applicants}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Apply Button */}
-                                <div className="pt-4 mt-auto">
-                                    <a href={`/login`} className="w-full">
-                                        <button className="group w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                                            <span>Apply Now</span>
-                                            <svg
-                                                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
-                                        </button>
-                                    </a>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.skills.map((skill, idx) => (
+                                        <span key={idx} className="px-3 py-1 rounded-lg bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                            {skill}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
 
-                            {/* Featured badge */}
+                            {/* Apply Action */}
+                            <div className="mt-8">
+                                <motion.a
+                                    href="/login"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="w-full h-14 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-black flex items-center justify-center gap-2 group shadow-xl transition-all"
+                                >
+                                    Apply Now
+                                    <ArrowUpRight className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                </motion.a>
+                            </div>
+
+                            {/* Featured Badge */}
                             {job.featured && (
-                                <div className="absolute -top-2 -right-2">
-                                    <div className="px-3 py-1 bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold rounded-full shadow-lg">
-                                        FEATURED
-                                    </div>
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black rounded-full shadow-lg">
+                                    FEATURED OPPORTUNITY
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
-                {/* View All CTA */}
-                <div className="mt-12 text-center">
-                    <a href="/login">
-                        <button className="group inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-300 backdrop-blur-sm">
-                            <span>Explore All Opportunities</span>
-                            <svg
-                                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </button>
+                {/* Footer CTA */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    className="mt-20 text-center"
+                >
+                    <a href="/login" className="inline-flex items-center gap-2 text-gray-900 dark:text-white font-black group">
+                        Explore all opportunities
+                        <ArrowRight className="h-5 w-5 text-purple-600 group-hover:translate-x-2 transition-transform" />
                     </a>
-                </div>
+                </motion.div>
             </div>
         </section>
     )
