@@ -16,6 +16,7 @@ const AssignedInterviews = () => {
     const limit = 9; // Set the number of items per page
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
+    const [filterInterviewType, setFilterInterviewType] = useState("all");
     const companyUserName = localStorage.getItem("companyUserName");
     const [aiFeaturesEnabled, setAiFeaturesEnabled] = useState(localStorage.getItem(`ai_features_${companyUserName}`) === 'true');
     const [activeTab, setActiveTab] = useState('manage'); // 'manage' or 'ai'
@@ -300,6 +301,10 @@ const AssignedInterviews = () => {
         }
 
         return { ...group, rounds: sortedRounds, upcomingRound };
+    }).filter(group => {
+        if (filterInterviewType === 'all') return true;
+        // Keep group if ANY round matches the selected type
+        return group.rounds.some(r => r.interviewerType === filterInterviewType);
     }) : [];
 
     const modalRef = useRef();
@@ -540,6 +545,18 @@ const AssignedInterviews = () => {
                                     ))}
                                 </select>
                             </div>
+                            <div className="relative">
+                                <select
+                                    value={filterInterviewType}
+                                    onChange={(e) => setFilterInterviewType(e.target.value)}
+                                    className={`appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900'
+                                        }`}
+                                >
+                                    <option value="all">All Types</option>
+                                    <option value="online">Online</option>
+                                    <option value="walkin">Walk-in</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -695,7 +712,7 @@ const AssignedInterviews = () => {
                                                                         {/* Meeting Link for Online Interviews */}
                                                                         {round.interviewerType === 'online' && round.meetingLink && !getInterviewRoundStatus(round.date, round.scheduledTime, round).isDone && (
                                                                             <div className="mt-2 pt-2 border-t border-purple-100">
-                                                                                {isMeetingLinkActive(round.date, round.scheduledTime) ? (
+                                                                                {(isMeetingLinkActive(round.date, round.scheduledTime) || userRole === 'admin') ? (
                                                                                     <div className="flex flex-col gap-1">
                                                                                         <button
                                                                                             onClick={() => handleJoinMeeting(round._id, round.meetingLink)}
@@ -795,9 +812,25 @@ const AssignedInterviews = () => {
                                         No Interviews Found
                                     </h3>
                                     <p className="text-md text-gray-600 max-w-md mx-auto leading-relaxed">
-                                        We’re currently in the process of assigning interviewers.
+                                        We're currently in the process of assigning interviewers.
                                         <br className="hidden sm:block" />
                                         <span className="text-blue-500 font-medium">Please wait</span> while your interview schedule is being prepared.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : groupedInterviews.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                                <div className={`p-5 rounded-full mb-4 ${filterInterviewType === 'walkin' ? 'bg-amber-50' : 'bg-blue-50'}`}>
+                                    <Briefcase className={`h-12 w-12 ${filterInterviewType === 'walkin' ? 'text-amber-400' : 'text-blue-400'}`} />
+                                </div>
+                                <div className="text-center animate-fade-in transition-all duration-500">
+                                    <h3 className={`text-2xl font-bold mb-3 tracking-tight leading-snug ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
+                                        No {filterInterviewType === 'walkin' ? 'Walk-in' : filterInterviewType === 'online' ? 'Online' : ''} Assigned Interviews
+                                    </h3>
+                                    <p className={`text-md max-w-md mx-auto leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                        There are currently no <span className="font-semibold">{filterInterviewType === 'walkin' ? 'walk-in' : 'online'}</span> interviews assigned to you.
+                                        <br className="hidden sm:block" />
+                                        Try switching to <span className={`font-medium ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>All Types</span> to see all interviews.
                                     </p>
                                 </div>
                             </div>
@@ -1050,59 +1083,65 @@ const AssignedInterviews = () => {
                                                 <div className="space-y-3">
                                                     <div>
                                                         <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Meeting Link</label>
-                                                        <input
-                                                            type="text"
-                                                            value={editForm.meetingLink}
-                                                            onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
-                                                            placeholder="Enter meeting link (e.g., Google Meet, Zoom)"
-                                                            className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
-                                                                }`}
-                                                        />
-                                                    </div>
-
-                                                    {editForm.meetingLink && (
-                                                        <div>
-                                                            {isMeetingLinkActive(editForm.date, editForm.time) ? (
-                                                                <button
-                                                                    onClick={() => handleJoinMeeting(detailedInterview._id, editForm.meetingLink)}
-                                                                    className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline p-2 bg-purple-50 rounded-lg w-full"
-                                                                >
-                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                                                    </svg>
-                                                                    Join Meeting Now
-                                                                </button>
-                                                            ) : (
-                                                                isMeetingExpired(editForm.date, editForm.time) ? (
-                                                                    <div className="flex items-center gap-2 text-sm text-red-600 font-medium bg-red-50/50 p-3 rounded-lg border border-red-100">
-                                                                        <Clock className="w-5 h-5 flex-shrink-0" />
-                                                                        <span>Link expired</span>
+                                                        {(isMeetingLinkActive(editForm.date, editForm.time) || userRole === 'admin') ? (
+                                                            <input
+                                                                type="text"
+                                                                value={editForm.meetingLink}
+                                                                onChange={(e) => setEditForm({ ...editForm, meetingLink: e.target.value })}
+                                                                placeholder="Enter meeting link (e.g., Google Meet, Zoom)"
+                                                                className={`w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'
+                                                                    }`}
+                                                            />
+                                                        ) : (
+                                                            <div>
+                                                                {isMeetingExpired(editForm.date, editForm.time) ? (
+                                                                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-lg text-red-700 dark:text-red-400 text-xs flex items-center gap-2">
+                                                                        <Clock className="w-4 h-4" />
+                                                                        Link expired
                                                                     </div>
                                                                 ) : (
-                                                                    <div className="flex items-center gap-2 text-sm text-amber-600 font-medium bg-amber-50/50 p-3 rounded-lg border border-amber-100">
-                                                                        <Clock className="w-5 h-5 flex-shrink-0" />
-                                                                        <span>Link will be active 5 mins before interview</span>
+                                                                    <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2">
+                                                                        <Clock className="h-4 w-4" />
+                                                                        Meeting link will be visible 5 minutes before the scheduled time.
                                                                     </div>
-                                                                )
-                                                            )}
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {editForm.meetingLink && (isMeetingLinkActive(editForm.date, editForm.time) || userRole === 'admin') && (
+                                                        <div>
+                                                            <button
+                                                                onClick={() => handleJoinMeeting(detailedInterview._id, editForm.meetingLink)}
+                                                                className="inline-flex items-center gap-2 text-sm font-bold text-purple-600 hover:text-purple-700 underline p-2 bg-purple-50 rounded-lg w-full"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                                </svg>
+                                                                Join Meeting Now
+                                                            </button>
                                                         </div>
                                                     )}
                                                 </div>
                                             )}
 
-                                            {/* <div>
-                                                <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Progress Status</label>
-                                                <select
-                                                    value={editForm.interviewProgressStatus}
-                                                    onChange={(e) => setEditForm({ ...editForm, interviewProgressStatus: e.target.value })}
-                                                    className={`sm:w-full w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
-                                                        }`}
-                                                >
-                                                    <option value="Upcoming">Upcoming Interview</option>
-                                                    <option value="Completed">Interview complete</option>
-                                                    <option value="Missed">Interview missed</option>
-                                                </select>
-                                            </div> */}
+                                            {/* Manual progress status – only for walk-in interviews */}
+                                            {editForm.interviewType === 'walkin' && (
+                                                <div>
+                                                    <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Interview Progress Status</label>
+                                                    <select
+                                                        value={editForm.interviewProgressStatus}
+                                                        onChange={(e) => setEditForm({ ...editForm, interviewProgressStatus: e.target.value })}
+                                                        className={`sm:w-full w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <option value="Upcoming">Upcoming Interview</option>
+                                                        <option value="Completed">Interview Complete</option>
+                                                        <option value="Missed">Interview Missed</option>
+                                                        <option value="Pending">Interview Pending</option>
+                                                    </select>
+                                                </div>
+                                            )}
 
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1.5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Update Application Status</label>

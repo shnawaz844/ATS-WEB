@@ -270,8 +270,15 @@ const AllInterviews = () => {
     const [hours, minutes] = (scheduledTime || "00:00").split(':').map(Number);
     intDate.setHours(hours, minutes, 0, 0);
 
-    if (interview.status === 'completed' || interview.interviewProgressStatus === 'Completed') {
+    // Manual progress status takes priority (set for walk-in interviews)
+    if (interview.interviewProgressStatus === 'Completed' || interview.status === 'completed') {
       return { label: 'Completed', color: 'green', isDone: true };
+    }
+    if (interview.interviewProgressStatus === 'Missed') {
+      return { label: 'Missed', color: 'red', isDone: true };
+    }
+    if (interview.interviewProgressStatus === 'Pending') {
+      return { label: 'Pending', color: 'gray', isDone: true };
     }
 
     const diffMinutes = (intDate.getTime() - now.getTime()) / 60000;
@@ -720,51 +727,72 @@ const AllInterviews = () => {
               {/* Scrollable Rounds List */}
               <div className="px-8 pb-8 overflow-y-auto space-y-4 text-gray-900 dark:text-gray-100">
                 {groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId)?.rounds
-                  ?.map((round) => {
+                  ?.map((round, index) => {
                     const roundStatus = getInterviewRoundStatus(round.date, round.scheduledTime, round);
                     return (
-                      <div key={round._id} className={`p-5 rounded-2xl border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700 hover:border-purple-500/30' : 'bg-[#f8fafc] border-gray-100 hover:border-indigo-100'}`}>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2 mb-4">
-                            <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (theme === 'dark' ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : roundStatus.color === 'blue' ? (theme === 'dark' ? 'bg-blue-900/40 text-blue-400' : 'bg-blue-100 text-blue-700') : roundStatus.color === 'red' ? (theme === 'dark' ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700') : (theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700')}`}>
-                              {roundStatus.label}
-                            </span>
+                      <div key={round._id} className={`group relative p-6 rounded-3xl border transition-all duration-300 ${theme === 'dark' ? 'bg-gray-800/40 border-gray-700/50 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10' : 'bg-white border-gray-100 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-500/5'}`}>
+                        <div className="flex justify-between items-start mb-6">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${roundStatus.color === 'green' ? (theme === 'dark' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-emerald-50 text-emerald-700 border border-emerald-100') : roundStatus.color === 'blue' ? (theme === 'dark' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-blue-50 text-blue-700 border border-blue-100') : roundStatus.color === 'red' ? (theme === 'dark' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-rose-50 text-rose-700 border border-rose-100') : (theme === 'dark' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-violet-50 text-violet-700 border border-violet-100')}`}>
+                                {roundStatus.label}
+                              </span>
+                              <span className={`text-[10px] font-bold uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Round {index + 1}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex justify-between items-start mb-2">
                           <div className="flex gap-2">
                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
                               {capitalizeFirstLetter(statuses?.find(s => s._id === round.status)?.applicationStatus || round.status)}
                             </span>
                           </div>
+                        </div>
 
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleFeedbackClick(round)}
-                              className={`px-3 py-2 rounded-xl border transition-all flex items-center gap-2 text-xs font-medium ${theme === 'dark' ? 'border-gray-700 text-blue-400 hover:bg-gray-700' : 'bg-white border-gray-200 text-blue-500 hover:shadow-md'}`}
-                            >
-                              <ThumbsUp className="h-4 w-4" />
-                              <ThumbsDown className="h-4 w-4" />
-                              Feedback
-                            </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                              <Calendar className="h-4 w-4 text-purple-500" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Date & Time</span>
+                              <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                                {formatDate(round.date)} at {formatTime(round.scheduledTime)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                              {round.interviewerType === 'online' ? <Video className="h-4 w-4 text-blue-500" /> : <MapPin className="h-4 w-4 text-blue-500" />}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Type</span>
+                              <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                                {capitalizeFirstLetter(round.interviewerType)} Interview
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl ${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                              <User className="h-4 w-4 text-orange-500" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className={`text-[10px] font-medium ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Interviewer</span>
+                              <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                                {round?.interviewerID?.userName || "N/A"}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                              {formatDate(round.date)} at <span className={`px-2 py-0.5 rounded-md font-bold ${theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-50 text-purple-700'}`}>{formatTime(round.scheduledTime)}</span>
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
-                            <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-blue-900/20 border-blue-800 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>T</div>
-                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{capitalizeFirstLetter(round.interviewerType)} Interview</span>
-                          </div>
-                          <div className="flex items-center gap-3 text-gray-900 dark:text-gray-100">
-                            <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold border ${theme === 'dark' ? 'bg-purple-900/40 border-purple-800 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>I</div>
-                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>Interviewer: {round?.interviewerID?.userName || "N/A"}</span>
-                          </div>
+                        <div className="flex justify-end pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                          <button
+                            onClick={() => handleFeedbackClick(round)}
+                            className={`group/btn px-4 py-2 rounded-xl transition-all flex items-center gap-2 text-xs font-bold ${theme === 'dark' ? 'bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-white' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}
+                          >
+                            <ThumbsUp className="h-3.5 w-3.5 transition-transform group-hover/btn:-translate-y-0.5" />
+                            Show Feedback
+                          </button>
                         </div>
                       </div>
                     );
@@ -904,7 +932,7 @@ const AllInterviews = () => {
 
         {/* Feedback Modal */}
         {isFeedbackModalOpen && detailedInterview && (
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 z-[60]">
             <div className={`rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-hidden flex flex-col border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'}`}>
               <div className={`flex justify-between items-center border-b px-6 py-4 ${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-700 border-gray-200'}`}>
                 <div>
