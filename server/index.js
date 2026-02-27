@@ -47,8 +47,8 @@ app.use("/application-statuses", applicationStatusesRoutes);
 app.use("/job-statuses", jobStatusesRoutes);
 app.use("/", fileUploadRoute);
 app.use("/interviewer-app", interviewerappRoutes);
-app.use("/companies", companyRoutes),
-  app.use("/applicationscheduledlist", applicationlistRoutes);
+app.use("/companies", companyRoutes);
+app.use("/applicationscheduledlist", applicationlistRoutes);
 app.use("/interviewerfeedback", feedbackRoutes);
 app.use("/upload", fileUploadRoute);
 app.use("/ai", geminiRoutes);
