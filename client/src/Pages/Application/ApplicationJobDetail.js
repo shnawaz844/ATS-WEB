@@ -18,6 +18,7 @@ const ApplicationJobDetail = () => {
     const [monthFilter, setMonthFilter] = useState('');
     const [yearFilter, setYearFilter] = useState();
     const [applications, setApplications] = useState({ applications: [], totalApplications: 0, statusCounts: {} });
+    const [statusFilter, setStatusFilter] = useState('');
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState('');
@@ -52,6 +53,10 @@ const ApplicationJobDetail = () => {
                     search: search
                 });
 
+                if (statusFilter) {
+                    params.append('status', statusFilter);
+                }
+
                 if (monthFilter) {
                     params.append('month', monthFilter);
                 }
@@ -77,7 +82,7 @@ const ApplicationJobDetail = () => {
         };
 
         fetchData();
-    }, [id, page, limit, search, monthFilter, yearFilter, toggleCount]);
+    }, [id, page, limit, search, monthFilter, yearFilter, toggleCount, statusFilter]);
 
     // NEW: fetch job-statuses on mount
     useEffect(() => {
@@ -148,6 +153,7 @@ const ApplicationJobDetail = () => {
         setMonthFilter('');
         setYearFilter(new Date().getFullYear());
         setSearch('');
+        setStatusFilter('');
         setPage('1');
     };
 
@@ -299,6 +305,11 @@ const ApplicationJobDetail = () => {
                                 page={page}
                                 limit={limit}
                                 search={search}
+                                statusFilter={statusFilter}
+                                setStatusFilter={(val) => {
+                                    setStatusFilter(val);
+                                    setPage('1');
+                                }}
                                 setPage={setPage}
                                 setLimit={setLimit}
                                 setSearch={setSearch}

@@ -1,15 +1,18 @@
 import Company from '../../models/company.js';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
-import AWS from 'aws-sdk';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import path from 'path';
 import { uploadToS3 } from '../../middleware/upload.js';
 
 // Configure AWS SDK
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
+// Configure AWS SDK v3
+const s3 = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
 });
 
 // Configure multer to use S3
@@ -54,22 +57,21 @@ const addCompany = async (req, res) => {
         if (existingCompany) {
             // If we uploaded a file but validation failed, delete it from S3
             if (req.file) {
-                await s3.deleteObject({
+                await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
                     Key: req.file.key
-                }).promise();
+                }));
             }
             return res.status(409).json({ message: "Email already registered." });
         }
 
-        const existingCompanyUserName = await Company.findOne({ CompanyUserName });
         if (existingCompanyUserName) {
             // If we uploaded a file but validation failed, delete it from S3
             if (req.file) {
-                await s3.deleteObject({
+                await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
                     Key: req.file.key
-                }).promise();
+                }));
             }
             return res.status(409).json({ message: "Company Unique Name already registered." });
         }
@@ -92,10 +94,10 @@ const addCompany = async (req, res) => {
     } catch (error) {
         // If we uploaded a file but an error occurred, delete it from S3
         if (req.file && req.file.key) {
-            await s3.deleteObject({
+            await s3.send(new DeleteObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
                 Key: req.file.key
-            }).promise();
+            }));
         }
         res.status(500).json({ message: error.message });
     }
@@ -127,10 +129,10 @@ const updateCompany = async (req, res) => {
             // Delete the old image from S3 if it exists
             if (currentCompany.image) {
                 const oldImageKey = currentCompany.image.split('/').pop();
-                await s3.deleteObject({
+                await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
                     Key: `companies/${oldImageKey}`
-                }).promise();
+                }));
             }
         }
 
@@ -144,10 +146,10 @@ const updateCompany = async (req, res) => {
     } catch (error) {
         // If we uploaded a file but an error occurred, delete it from S3
         if (req.file) {
-            await s3.deleteObject({
+            await s3.send(new DeleteObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
                 Key: req.file.key
-            }).promise();
+            }));
         }
         res.status(500).json({ message: error.message });
     }
@@ -166,10 +168,10 @@ const deleteCompany = async (req, res) => {
         // Delete the image from S3 if it exists
         if (company.image) {
             const imageKey = company.image.split('/').pop();
-            await s3.deleteObject({
+            await s3.send(new DeleteObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
                 Key: `companies/${imageKey}`
-            }).promise();
+            }));
         }
 
         await Company.findByIdAndDelete(id);

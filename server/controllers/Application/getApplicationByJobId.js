@@ -13,7 +13,7 @@ const getApplicationsByJobId = async (req, res) => {
     const { jobId } = req.params;
 
     // Extract query parameters, provide defaults
-    let { page = 1, limit = 10, search = '', month, year } = req.query;
+    let { page = 1, limit = 10, search = '', month, year, status } = req.query;
 
     // Convert page and limit to integers
     page = parseInt(page, 10);
@@ -55,17 +55,11 @@ const getApplicationsByJobId = async (req, res) => {
       };
     }
 
-    // Get total count of matching documents for pagination
-    const total = await Application.countDocuments(filter);
-
-    // NEW: Get counts for each applicationStatusId
+    // NEW: Get counts for each applicationStatusId BEFORE adding status filter
     // We use aggregate to get counts for all statuses across all pages
     const statusCountsRaw = await Application.aggregate([
       {
-        $match: {
-          jobID: jobId,
-          ...filter // Spread other filters (search, date)
-        }
+        $match: filter
       },
       {
         $group: {
@@ -82,6 +76,14 @@ const getApplicationsByJobId = async (req, res) => {
         statusCounts[item._id.toString()] = item.count;
       }
     });
+
+    // Add status filter if provided (after counts calculation)
+    if (status) {
+      filter.applicationStatusId = status;
+    }
+
+    // Get total count of matching documents for pagination
+    const total = await Application.countDocuments(filter);
 
     const skip = (page - 1) * limit;
 

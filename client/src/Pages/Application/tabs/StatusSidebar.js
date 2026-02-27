@@ -4,6 +4,10 @@ import { useTheme } from '../../../context/ThemeContext';
 
 const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getStatusCount, statusCounts, totalApplications }) => {
     const { theme } = useTheme();
+    const computedTotal = statusCounts 
+        ? Object.values(statusCounts).reduce((acc, curr) => acc + (curr || 0), 0)
+        : (totalApplications || allApps?.length);
+
     return (
         <div className="flex-shrink-0 self-start">
             <div className={`p-4 rounded-xl border sm:w-64 w-80 shadow-sm transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -21,7 +25,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                             <span>All Applications</span>
                             <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                 }`}>
-                                {totalApplications || allApps?.length}
+                                {computedTotal}
                             </span>
                         </div>
                     </button>
