@@ -26,13 +26,14 @@ const ApplicationsListTab = ({
     getMonthOptions,
     getYearOptions,
     clearFilters,
-    totalApplications, // ✅ ADD THIS
+    totalApplications,
+    statusCounts,
 }) => {
     const [allApps, setAllApps] = useState(applications);
     const [statusFilter, setStatusFilter] = useState('');
     const [statuses, setStatuses] = useState([]);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    const [showFilters, setShowFilters] = useState(false); // ✅ toggle state
+    const [showFilters, setShowFilters] = useState(false);
 
     const { theme } = useTheme();
 
@@ -49,11 +50,9 @@ const ApplicationsListTab = ({
         setAllApps(applications);
     }, [applications]);
 
-    // ✅ Filter Section UI
     const FilterSection = () => (
         <div className={`shadow-md rounded-xl p-5 border transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-white border-gray-100'
             }`}>
-            {/* Header */}
             <div className={`flex items-center justify-between mb-5 border-b pb-2 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
                 <h3 className="text-base font-semibold bg-[#9333ea] bg-clip-text text-transparent">
                     Filter Applications
@@ -70,9 +69,7 @@ const ApplicationsListTab = ({
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="grid grid-cols-2 gap-5">
-                {/* Month */}
                 <div>
                     <label className={`text-xs font-medium mb-2 block ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                         Month
@@ -85,7 +82,6 @@ const ApplicationsListTab = ({
                             : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
                             }`}
                     >
-                        {/* Add "All Months" option */}
                         <option value="">All Months</option>
                         {getMonthOptions().map((option) => (
                             <option key={option.value} value={option.value}>
@@ -95,7 +91,6 @@ const ApplicationsListTab = ({
                     </select>
                 </div>
 
-                {/* Year */}
                 <div>
                     <label className={`text-xs font-medium mb-2 block ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                         Year
@@ -108,7 +103,6 @@ const ApplicationsListTab = ({
                             : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
                             }`}
                     >
-                        {/* Add "All Years" option */}
                         <option value="">All Years</option>
                         {getYearOptions().map((year) => (
                             <option key={year} value={year}>
@@ -121,7 +115,6 @@ const ApplicationsListTab = ({
         </div>
     );
 
-    // Status change functions
     const [confirmDialog, setConfirmDialog] = useState({
         isOpen: false,
         title: '',
@@ -268,7 +261,6 @@ const ApplicationsListTab = ({
                     <div className="flex-1 space-y-6 w-80">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Applications List</h2>
-                            {/* ✅ Toggle Button */}
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`text-sm px-3 py-1 rounded-lg border transition ${theme === 'dark'
@@ -280,7 +272,6 @@ const ApplicationsListTab = ({
                             </button>
                         </div>
 
-                        {/* ✅ Conditional Rendering */}
                         {showFilters && <FilterSection />}
 
                         <ApplicationsTable
@@ -298,7 +289,6 @@ const ApplicationsListTab = ({
                             currentPage={currentPage}
                             totalApplications={totalApplications}
                             totalPages={totalPages}
-
                         />
                     </div>
 
@@ -308,6 +298,8 @@ const ApplicationsListTab = ({
                         setStatusFilter={setStatusFilter}
                         allApps={allApps}
                         getStatusCount={getStatusCount}
+                        statusCounts={statusCounts}
+                        totalApplications={totalApplications}
                     />
                 </>
             )}
@@ -321,13 +313,14 @@ const ApplicationsListTab = ({
                         setStatusFilter={setStatusFilter}
                         allApps={allApps}
                         getStatusCount={getStatusCount}
+                        statusCounts={statusCounts}
+                        totalApplications={totalApplications}
                     />
 
                     <div className="flex-1 space-y-6 w-[70vw]">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Applications List </h2>
 
-                            {/* ✅ Stylish Toggle Button */}
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
@@ -339,7 +332,6 @@ const ApplicationsListTab = ({
                             </button>
                         </div>
 
-                        {/* ✅ Conditional Rendering */}
                         {showFilters && <FilterSection />}
 
                         <ApplicationsTable
