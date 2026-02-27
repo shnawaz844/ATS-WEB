@@ -28,9 +28,11 @@ const ApplicationsListTab = ({
     clearFilters,
     totalApplications,
     statusCounts,
+    statusFilter,
+    setStatusFilter
 }) => {
     const [allApps, setAllApps] = useState(applications);
-    const [statusFilter, setStatusFilter] = useState('');
+    // const [statusFilter, setStatusFilter] = useState('');
     const [statuses, setStatuses] = useState([]);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [showFilters, setShowFilters] = useState(false);
@@ -244,14 +246,7 @@ const ApplicationsListTab = ({
         }
     };
 
-    const filteredApps = allApps
-        ?.filter(app => statusFilter ? app.applicationStatusId === statusFilter : true)
-        ?.filter(app =>
-            search
-                ? app.candidateID?.userName?.toLowerCase().includes(search.toLowerCase()) ||
-                app.contactInfo?.toLowerCase().includes(search.toLowerCase())
-                : true
-        );
+    const filteredApps = allApps;
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
