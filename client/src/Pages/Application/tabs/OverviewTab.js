@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 
-const OverviewTab = ({ job, applications }) => {
+const OverviewTab = ({ job, applications, statusCounts: backendStatusCounts, totalApplications }) => {
     const { theme } = useTheme();
     const [statuses, setStatuses] = useState([]);
 
@@ -33,16 +33,17 @@ const OverviewTab = ({ job, applications }) => {
         fetchApplicationStatuses();
     }, []);
 
-    const totalApps = applications.length;
+    const totalApps = totalApplications || applications.length;
 
     const statusCounts = useMemo(() => {
+        if (backendStatusCounts) return backendStatusCounts;
         return statuses.reduce((acc, status) => {
             acc[status._id] = applications.filter(
                 app => app.applicationStatusId === status._id
             ).length;
             return acc;
         }, {});
-    }, [statuses, applications]);
+    }, [statuses, applications, backendStatusCounts]);
 
     // Color palette for status cards
     const statusColors = [

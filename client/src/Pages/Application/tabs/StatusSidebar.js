@@ -2,7 +2,7 @@ import React from 'react';
 import { getStatusColor, getColorStyles } from './utils';
 import { useTheme } from '../../../context/ThemeContext';
 
-const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getStatusCount }) => {
+const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getStatusCount, statusCounts, totalApplications }) => {
     const { theme } = useTheme();
     return (
         <div className="flex-shrink-0 self-start">
@@ -21,13 +21,14 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                             <span>All Applications</span>
                             <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                 }`}>
-                                {allApps?.length}
+                                {totalApplications || allApps?.length}
                             </span>
                         </div>
                     </button>
                     {statuses?.map(status => {
                         const colorName = status.color || getStatusColor(status.applicationStatus);
                         const isSelected = statusFilter === status._id;
+                        const count = statusCounts ? (statusCounts[status._id] || 0) : getStatusCount(status._id);
 
                         return (
                             <button
@@ -57,7 +58,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                                             color: theme === 'dark' ? getColorStyles(colorName, 100) : getColorStyles(colorName, 700)
                                         }}
                                     >
-                                        {getStatusCount(status._id)}
+                                        {count}
                                     </span>
                                 </div>
                             </button>

@@ -1,12 +1,10 @@
-import { Box } from 'lucide-react';
-import React from 'react';
 import HeroSectionAts from './HeroSectionAts'
 import Companies from './Companies';
 import About from './About';
 import WhyAts from './Why';
 import NewsCarousel from './News';
 import DiveIn from './DiveIn';
-import ParticlesComponent from '../../Login/Particles';
+
 const Banner = () => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#fdfaff] dark:bg-black selection:bg-purple-200 selection:text-purple-900">
@@ -21,7 +19,7 @@ const Banner = () => {
         <HeroSectionAts />
         <Companies />
         <WhyAts />
-        <About />
+        {/* <About /> */}
         <NewsCarousel />
         <DiveIn />
       </div>

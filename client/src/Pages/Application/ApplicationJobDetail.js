@@ -17,7 +17,7 @@ const ApplicationJobDetail = () => {
     const [search, setSearch] = useState('');
     const [monthFilter, setMonthFilter] = useState('');
     const [yearFilter, setYearFilter] = useState();
-    const [applications, setApplications] = useState([]);
+    const [applications, setApplications] = useState({ applications: [], totalApplications: 0, statusCounts: {} });
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState('');
@@ -65,6 +65,7 @@ const ApplicationJobDetail = () => {
                 if (!appsRes.ok) throw new Error('Error fetching applications');
                 const appsData = await appsRes.json();
 
+                console.log('Fetched Applications Data:', appsData);
                 setJob(jobData);
                 setApplications(appsData);
             } catch (err) {
@@ -160,7 +161,13 @@ const ApplicationJobDetail = () => {
 
     const { title, status: statusId } = job;
     const displayStatus = statusMap[statusId] || statusId;
-    const candidateCount = applications.applications.length;
+
+    // Safety check for applications structure
+    const appsList = applications.applications || [];
+    const totalApps = applications.totalApplications || 0;
+    const statusCounts = applications.statusCounts || {};
+
+    const candidateCount = totalApps || appsList.length;
 
     const getStatusColor = (status) => {
         const isDark = theme === 'dark';
@@ -283,24 +290,25 @@ const ApplicationJobDetail = () => {
 
                     {/* Tab Content */}
                     <div className="p-4 sm:p-6">
-                        {activeTab === 'overview' && <OverviewTab job={job} applications={applications.applications} />}
+                        {activeTab === 'overview' && <OverviewTab job={job} applications={appsList} statusCounts={statusCounts} totalApplications={totalApps} />}
                         {activeTab === 'applications' &&
                             <ApplicationsListTab
                                 job={job}
                                 onStatusChange={onStatusChange}
-                                applications={applications.applications}
+                                applications={appsList}
                                 page={page}
                                 limit={limit}
                                 search={search}
                                 setPage={setPage}
                                 setLimit={setLimit}
                                 setSearch={setSearch}
-                                setMonthFilter={setMonthFilter}   // ✅ add this
-                                setYearFilter={setYearFilter}     // ✅ add this
-                                monthFilter={monthFilter}         // ✅ also pass values
-                                yearFilter={yearFilter}           // ✅ also pass values
+                                setMonthFilter={setMonthFilter}
+                                setYearFilter={setYearFilter}
+                                monthFilter={monthFilter}
+                                yearFilter={yearFilter}
                                 currentPage={applications.currentPage}
-                                totalApplications={applications.totalApplications}
+                                totalApplications={totalApps}
+                                statusCounts={statusCounts}
                                 totalPages={applications.totalPages}
                                 getMonthOptions={getMonthOptions}
                                 getYearOptions={getYearOptions}
