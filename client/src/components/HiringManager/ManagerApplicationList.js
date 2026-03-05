@@ -149,6 +149,11 @@ const ApplicationList = () => {
         menu: (provided) => ({
             ...provided,
             backgroundColor: theme === 'dark' ? '#1f2937' : 'white',
+            zIndex: 9999, // Ensure menu is above other elements
+        }),
+        menuPortal: (provided) => ({
+            ...provided,
+            zIndex: 9999,
         }),
     };
 
@@ -178,24 +183,24 @@ const ApplicationList = () => {
             <div className="max-w-screen-2xl">
                 <div>
                     {/* Header Section */}
-                    <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
+                    <div className={`mb-6 h-auto md:h-[12vh] flex items-center rounded-xl p-3 md:p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
                         }`}>
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
-                            <div>
-                                <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
-                                    <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
-                                        <Briefcase className="h-5 w-5 md:h-6 md:w-6 text-gray-900 dark:text-white" />
+                        <div className="flex flex-col md:flex-row justify-between items-center w-full gap-4">
+                            <div className="w-full md:w-auto flex justify-start md:justify-start">
+                                <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-[#9333ea] flex items-center">
+                                    <div className="p-2 md:p-3 mr-2 bg-[#9333ea]/10 rounded-full">
+                                        <Briefcase className="h-4 w-4 md:h-6 md:w-6 text-gray-900 dark:text-white" />
                                     </div>
                                     Manage Applications
                                 </h2>
                             </div>
 
                             {/* Search and Filters */}
-                            <div className='flex items-center gap-3 ml-auto'>
+                            <div className="flex flex-row items-center gap-2 md:gap-3 w-full md:w-auto justify-between md:justify-end">
                                 {/* Search Bar */}
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <Search className="h-4 w-4 text-gray-400" />
+                                <div className="relative md:flex-none">
+                                    <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                        <Search className="h-3 w-3 md:h-4 md:w-4 text-gray-400" />
                                     </div>
                                     <input
                                         type="text"
@@ -203,20 +208,20 @@ const ApplicationList = () => {
                                         value={formInputs.title}
                                         onChange={handleFilterChange}
                                         placeholder="Search job"
-                                        className={`w-48 pl-10 pr-4 py-2 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-sm ${theme === 'dark'
+                                        className={`w-32 md:w-40 pl-8 md:pl-10 pr-3 py-1.5 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-[10px] md:text-sm ${theme === 'dark'
                                             ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
                                             : 'bg-white border-gray-300 text-gray-900'
                                             }`}
                                     />
                                 </div>
                                 <button
-                                    className={`inline-flex border items-center px-4 py-2 rounded-xl font-medium transition-colors duration-200 shadow-sm text-sm ${theme === 'dark'
+                                    className={`inline-flex shrink-0 border items-center px-3 md:px-4 py-2 rounded-xl font-medium transition-colors duration-200 shadow-sm text-xs md:text-sm ${theme === 'dark'
                                         ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700'
                                         : 'bg-gray-300 border-gray-300 text-black hover:bg-gray-700 hover:text-white hover:border-gray-200'
                                         }`}
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                 >
-                                    {isFilterOpen ? "Hide Filters" : "Show Filters"}
+                                    {isFilterOpen ? "Hide" : "Filters"}
                                 </button>
                             </div>
                         </div>
@@ -270,11 +275,11 @@ const ApplicationList = () => {
                                 <div className={isFilterOpen ? 'block' : 'hidden'}>
                                     <div className={`max-w-7xl mx-auto p-6 rounded-2xl shadow-lg border-0 ${theme === 'dark' ? 'bg-white/10 border border-gray-800' : 'bg-gradient-to-br from-gray-300 to-gray-100'
                                         }`}>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-end">
+                                        <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-6 items-end">
                                             {/* Location Search */}
-                                            <div className="lg:col-span-3">
-                                                <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                                                    <MapPin className="mr-2 h-4 w-4 text-blue-500" />
+                                            <div className="col-span-2 md:col-span-3">
+                                                <div className={`flex items-center mb-1 text-[10px] md:text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                    <MapPin className="mr-1 h-3 w-3 md:h-4 md:w-4 text-blue-500" />
                                                     <span>Location</span>
                                                 </div>
                                                 <input
@@ -283,7 +288,7 @@ const ApplicationList = () => {
                                                     value={formInputs.city}
                                                     onChange={handleFilterChange}
                                                     placeholder="Any location"
-                                                    className={`w-full px-4 py-3.5 border-0 backdrop-blur-sm shadow-md rounded-2xl focus:outline-none focus:ring-3 focus:ring-blue-300/50 transition-all duration-300 h-[6.3vh] ${theme === 'dark'
+                                                    className={`w-full px-3 py-2 border-0 backdrop-blur-sm shadow-md rounded-xl focus:outline-none focus:ring-3 focus:ring-blue-300/50 transition-all duration-300 text-[10px] md:text-sm ${theme === 'dark'
                                                         ? 'bg-gray-800/80 text-white placeholder-gray-500 focus:bg-gray-800'
                                                         : 'bg-white/80 text-slate-700 placeholder-slate-400 focus:bg-white'
                                                         }`}
@@ -291,25 +296,29 @@ const ApplicationList = () => {
                                             </div>
 
                                             {/* Employment Type Dropdown */}
-                                            <div className="lg:col-span-2">
-                                                <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                                                    <Briefcase className="mr-2 h-4 w-4 text-emerald-500" />
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className={`flex items-center mb-1 text-[10px] md:text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                    <Briefcase className="mr-1 h-3 w-3 md:h-4 md:w-4 text-emerald-500" />
                                                     <span>Job Type</span>
                                                 </div>
-                                                <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                <div className={`backdrop-blur-sm rounded-xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                     <Select
                                                         options={employmentTypes}
                                                         value={employmentTypes.find(opt => opt.value === formInputs.type)}
                                                         onChange={(selectedOption) => setFormInputs({ ...formInputs, type: selectedOption?.value || '' })}
                                                         placeholder="Any type"
                                                         isClearable
+                                                        menuPortalTarget={document.body}
+                                                        menuPosition="fixed"
                                                         styles={{
                                                             ...customSelectStyles,
                                                             control: (provided, state) => ({
                                                                 ...provided,
                                                                 border: 'none',
-                                                                borderRadius: '16px',
+                                                                borderRadius: '12px',
                                                                 background: 'transparent',
+                                                                minHeight: '35px',
+                                                                height: '35px',
                                                                 boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
                                                                 '&:hover': {
                                                                     border: 'none'
@@ -317,34 +326,44 @@ const ApplicationList = () => {
                                                             }),
                                                             placeholder: (provided) => ({
                                                                 ...provided,
-                                                                color: '#94a3b8'
+                                                                color: '#94a3b8',
+                                                                fontSize: '10px'
+                                                            }),
+                                                            valueContainer: (provided) => ({
+                                                                ...provided,
+                                                                padding: '0 8px',
+                                                                fontSize: '10px'
                                                             })
                                                         }}
-                                                        className="text-sm"
+                                                        className="text-[10px] md:text-sm"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Schedule Type Dropdown */}
-                                            <div className="lg:col-span-2">
-                                                <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                                                    <Clock className="mr-2 h-4 w-4 text-purple-500" />
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className={`flex items-center mb-1 text-[10px] md:text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                    <Clock className="mr-1 h-3 w-3 md:h-4 md:w-4 text-purple-500" />
                                                     <span>Schedule</span>
                                                 </div>
-                                                <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                <div className={`backdrop-blur-sm rounded-xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                     <Select
                                                         options={scheduleTypes}
                                                         value={scheduleTypes.find(opt => opt.value === formInputs.scheduleType)}
                                                         onChange={(selectedOption) => setFormInputs({ ...formInputs, scheduleType: selectedOption?.value || '' })}
                                                         placeholder="Any schedule"
                                                         isClearable
+                                                        menuPortalTarget={document.body}
+                                                        menuPosition="fixed"
                                                         styles={{
                                                             ...customSelectStyles,
                                                             control: (provided, state) => ({
                                                                 ...provided,
                                                                 border: 'none',
-                                                                borderRadius: '16px',
+                                                                borderRadius: '12px',
                                                                 background: 'transparent',
+                                                                minHeight: '35px',
+                                                                height: '35px',
                                                                 boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
                                                                 '&:hover': {
                                                                     border: 'none'
@@ -352,34 +371,44 @@ const ApplicationList = () => {
                                                             }),
                                                             placeholder: (provided) => ({
                                                                 ...provided,
-                                                                color: '#94a3b8'
+                                                                color: '#94a3b8',
+                                                                fontSize: '10px'
+                                                            }),
+                                                            valueContainer: (provided) => ({
+                                                                ...provided,
+                                                                padding: '0 8px',
+                                                                fontSize: '10px'
                                                             })
                                                         }}
-                                                        className="text-sm"
+                                                        className="text-[10px] md:text-sm"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Hire Type Dropdown */}
-                                            <div className="lg:col-span-2">
-                                                <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                                                    <Briefcase className="mr-2 h-4 w-4 text-orange-500" />
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className={`flex items-center mb-1 text-[10px] md:text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                    <Briefcase className="mr-1 h-3 w-3 md:h-4 md:w-4 text-orange-500" />
                                                     <span>Hire Type</span>
                                                 </div>
-                                                <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                <div className={`backdrop-blur-sm rounded-xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                     <Select
                                                         options={hireTypes}
                                                         value={hireTypes.find(opt => opt.value === formInputs.hireType)}
                                                         onChange={(selectedOption) => setFormInputs({ ...formInputs, hireType: selectedOption?.value || '' })}
                                                         placeholder="Any hire type"
                                                         isClearable
+                                                        menuPortalTarget={document.body}
+                                                        menuPosition="fixed"
                                                         styles={{
                                                             ...customSelectStyles,
                                                             control: (provided, state) => ({
                                                                 ...provided,
                                                                 border: 'none',
-                                                                borderRadius: '16px',
+                                                                borderRadius: '12px',
                                                                 background: 'transparent',
+                                                                minHeight: '35px',
+                                                                height: '35px',
                                                                 boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
                                                                 '&:hover': {
                                                                     border: 'none'
@@ -387,34 +416,44 @@ const ApplicationList = () => {
                                                             }),
                                                             placeholder: (provided) => ({
                                                                 ...provided,
-                                                                color: '#94a3b8'
+                                                                color: '#94a3b8',
+                                                                fontSize: '10px'
+                                                            }),
+                                                            valueContainer: (provided) => ({
+                                                                ...provided,
+                                                                padding: '0 8px',
+                                                                fontSize: '10px'
                                                             })
                                                         }}
-                                                        className="text-sm"
+                                                        className="text-[10px] md:text-sm"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Location Type Dropdown */}
-                                            <div className="lg:col-span-2">
-                                                <div className={`flex items-center mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
-                                                    <MapPin className="mr-2 h-4 w-4 text-teal-500" />
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className={`flex items-center mb-1 text-[10px] md:text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-slate-600'}`}>
+                                                    <MapPin className="mr-1 h-3 w-3 md:h-4 md:w-4 text-teal-500" />
                                                     <span>Location Type</span>
                                                 </div>
-                                                <div className={`backdrop-blur-sm rounded-2xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
+                                                <div className={`backdrop-blur-sm rounded-xl shadow-md ${theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'}`}>
                                                     <Select
                                                         options={locationTypes}
                                                         value={locationTypes.find(opt => opt.value === formInputs.locationType)}
                                                         onChange={(selectedOption) => setFormInputs({ ...formInputs, locationType: selectedOption?.value || '' })}
                                                         placeholder="Any location type"
                                                         isClearable
+                                                        menuPortalTarget={document.body}
+                                                        menuPosition="fixed"
                                                         styles={{
                                                             ...customSelectStyles,
                                                             control: (provided, state) => ({
                                                                 ...provided,
                                                                 border: 'none',
-                                                                borderRadius: '16px',
+                                                                borderRadius: '12px',
                                                                 background: 'transparent',
+                                                                minHeight: '35px',
+                                                                height: '35px',
                                                                 boxShadow: state.isFocused ? '0 0 0 3px rgba(59, 130, 246, 0.1)' : 'none',
                                                                 '&:hover': {
                                                                     border: 'none'
@@ -422,21 +461,27 @@ const ApplicationList = () => {
                                                             }),
                                                             placeholder: (provided) => ({
                                                                 ...provided,
-                                                                color: '#94a3b8'
+                                                                color: '#94a3b8',
+                                                                fontSize: '10px'
+                                                            }),
+                                                            valueContainer: (provided) => ({
+                                                                ...provided,
+                                                                padding: '0 8px',
+                                                                fontSize: '10px'
                                                             })
                                                         }}
-                                                        className="text-sm"
+                                                        className="text-[10px] md:text-sm"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="lg:col-span-1">
+                                            <div className="col-span-2 md:col-span-1">
                                                 <button
                                                     type="button"
                                                     onClick={handleResetFilters}
-                                                    className="group flex items-center justify-center w-full px-1 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-2xl hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                                    className="group flex items-center justify-center w-full px-1 py-1.5 md:py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl md:rounded-2xl hover:from-slate-700 hover:to-slate-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                                                 >
-                                                    <RefreshCw className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
+                                                    <RefreshCw className="h-3 w-3 md:h-4 md:w-4 group-hover:rotate-180 transition-transform duration-300" />
                                                 </button>
                                             </div>
                                         </div>

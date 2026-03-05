@@ -4,7 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAssignedInterview from "../../hooks/useAssignedInterview";
 import { useTheme } from "../../context/ThemeContext";
-import { Briefcase, Search, Clock, Trash2, PenTool } from "lucide-react";
+import { Briefcase, Search, Clock, Trash2, PenTool, ChevronDown } from "lucide-react";
 import BackButtonMobile from "../Mob-back-btn";
 import AiGeneratedInterviews from "./AiGeneratedInterviews";
 
@@ -101,10 +101,9 @@ const AssignedInterviews = () => {
     }, [companyId]);
 
     const capitalizeFirstLetter = (string) => {
-        if (string) {
-            return string?.charAt(0).toUpperCase() + string.slice(1);
-        }
-        return;
+        if (string == null) return '';
+        const str = (typeof string === 'object') ? (string?.applicationStatus || String(string)) : String(string);
+        return str.charAt(0).toUpperCase() + str.slice(1);
     };
 
     // Format date for better display
@@ -125,7 +124,8 @@ const AssignedInterviews = () => {
     // Get status color for visual indication // 
     const getStatusColor = (status) => {
         const isDark = theme === 'dark';
-        switch (status?.toLowerCase()) {
+        const statusStr = (status?.applicationStatus || status || "").toString().toLowerCase();
+        switch (statusStr) {
             case 'scheduled':
                 return isDark ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800';
             case 'completed':
@@ -495,14 +495,14 @@ const AssignedInterviews = () => {
 
 
     return (
-        <div className={`px-8 py-4 w-full min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+        <div className={`px-4 md:px-8 py-4 w-full min-h-screen overflow-x-hidden transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'
             }`}>
             <BackButtonMobile />
             <div className="max-w-screen-2xl">
                 {/* Header Section */}
-                <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
+                <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-3 md:p-6 transition-colors duration-300 ${theme === 'dark' ? ' border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'backdrop-blur-xl bg-gray-200 shadow-md'
                     }`}>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center w-full gap-4">
                         <div>
                             <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
                                 <div className="p-3 mx-2 bg-[#9333ea]/10 rounded-full">
@@ -513,49 +513,57 @@ const AssignedInterviews = () => {
                         </div>
 
                         {/* Search and Filters */}
-                        <div className='flex items-center gap-3 ml-auto'>
+                        <div className='flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full lg:w-auto'>
                             {/* Search Bar */}
-                            <div className="relative">
+                            <div className="relative flex-1 lg:flex-initial">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Search className="h-4 w-4 text-gray-400" />
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Search by job, candidate"
+                                    placeholder="Search by job, candidate..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className={`w-48 pl-10 pr-4 py-2 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-sm ${theme === 'dark'
+                                    className={`w-full md:w-48 lg:w-64 pl-10 pr-4 py-2 border shadow-sm rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500 duration-200 text-sm ${theme === 'dark'
                                         ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400'
                                         : 'bg-white border-gray-300 text-gray-900'
                                         }`}
                                 />
                             </div>
-                            <div className="relative">
-                                <select
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                    className={`appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
-                                >
-                                    <option value="all">All Statuses</option>
-                                    {statuses?.map(status => (
-                                        <option key={status._id} value={status._id}>
-                                            {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="relative">
-                                <select
-                                    value={filterInterviewType}
-                                    onChange={(e) => setFilterInterviewType(e.target.value)}
-                                    className={`appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900'
-                                        }`}
-                                >
-                                    <option value="all">All Types</option>
-                                    <option value="online">Online</option>
-                                    <option value="walkin">Walk-in</option>
-                                </select>
+                            <div className="flex flex-row gap-3">
+                                <div className="relative flex-1 md:flex-none md:w-40 lg:w-44">
+                                    <select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        className={`w-full appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900 hover:border-gray-400'
+                                            }`}
+                                    >
+                                        <option value="all">All Statuses</option>
+                                        {statuses?.map(status => (
+                                            <option key={status._id} value={status._id}>
+                                                {status.applicationStatus.charAt(0).toUpperCase() + status.applicationStatus.slice(1)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </div>
+                                <div className="relative flex-1 md:flex-none md:w-40 lg:w-44">
+                                    <select
+                                        value={filterInterviewType}
+                                        onChange={(e) => setFilterInterviewType(e.target.value)}
+                                        className={`w-full appearance-none rounded-xl py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-purple-500 text-sm border transition-all duration-200 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : 'bg-white border-gray-300 text-gray-900 hover:border-gray-400'
+                                            }`}
+                                    >
+                                        <option value="all">All Types</option>
+                                        <option value="online">Online</option>
+                                        <option value="walkin">Walk-in</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -622,8 +630,8 @@ const AssignedInterviews = () => {
                                                 "Scheduled": "bg-blue-500 text-blue-800 bg-blue-50"
                                             };
 
-                                            const status = interview.status;
-                                            const colorString = statusColors[status] || "bg-gray-500 text-gray-800 bg-gray-50";
+                                            const status = interview.status?.applicationStatus || interview.status;
+                                            const colorString = statusColors[status] || statusColors[interview.status] || "bg-gray-500 text-gray-800 bg-gray-50";
                                             const [bgColor, textColor, bgLight] = colorString.split(" ");
 
                                             // Get candidate initial
@@ -680,7 +688,9 @@ const AssignedInterviews = () => {
                                                             {(() => {
                                                                 const round = group.upcomingRound;
                                                                 if (!round) return null;
-                                                                const appStatus = statuses?.find(s => s._id === round.status)?.applicationStatus || round.status;
+                                                                const roundStatus = round.status?.applicationStatus || round.status;
+                                                                const roundStatusId = round.status?._id || round.status;
+                                                                const appStatus = statuses?.find(s => s._id === roundStatusId)?.applicationStatus || roundStatus;
                                                                 return (
                                                                     <div key={round._id} className={`p-3 rounded-xl border relative group/round bg-gray-200 border-purple-200 shadow-sm transition-all hover:bg-white/80`}>
                                                                         <div className="flex justify-between items-center mb-2">
@@ -1032,9 +1042,12 @@ const AssignedInterviews = () => {
                                                 <div className="space-y-1">
                                                     <p className={`text-xs font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>STATUS</p>
                                                     <span className={`font-medium ${getStatusColor(detailedInterview?.status)} inline-flex items-center px-2.5 py-0.5 rounded-full text-xs`}>
-                                                        {statuses?.length && statuses.find(statusItem => statusItem._id === detailedInterview?.status)?.applicationStatus
-                                                            ? capitalizeFirstLetter(statuses.find(statusItem => statusItem._id === detailedInterview?.status).applicationStatus)
-                                                            : capitalizeFirstLetter(detailedInterview?.status) || "N/A"}
+                                                        {(() => {
+                                                            const statusId = detailedInterview?.status?._id || detailedInterview?.status;
+                                                            const statusObj = statuses?.find(s => s._id === statusId);
+                                                            const statusName = statusObj?.applicationStatus || detailedInterview?.status?.applicationStatus || detailedInterview?.status;
+                                                            return capitalizeFirstLetter(statusName) || "N/A";
+                                                        })()}
                                                     </span>
                                                 </div>
                                             </div>

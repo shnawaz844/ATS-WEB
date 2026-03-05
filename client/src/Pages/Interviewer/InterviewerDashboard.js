@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Search, Filter } from 'lucide-react';
+import { Calendar, Clock, MapPin, Search, Filter, ChevronRight, User, Briefcase, ExternalLink, AlertCircle } from 'lucide-react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -14,6 +14,7 @@ import {
     Legend,
     ArcElement
 } from 'chart.js';
+import axios from 'axios';
 
 ChartJS.register(
     CategoryScale,
@@ -29,154 +30,94 @@ const InterviewerDashboard = () => {
     const { theme } = useTheme();
     const navigate = useNavigate();
     const [interviews, setInterviews] = useState([]);
-    const [allInterviews, setAllInterviews] = useState([]); // For stats
+    const [allInterviews, setAllInterviews] = useState([]);
+    const [stats, setStats] = useState({ total: 0, scheduled: 0, completed: 0, cancelled: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [page, setPage] = useState(1);
-    const [limit] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('');
-    const [roundFilter, setRoundFilter] = useState('');
-    const [totalPages, setTotalPages] = useState(1);
-    const [chartView, setChartView] = useState('daily'); // 'daily', 'monthly'
+    const [chartView, setChartView] = useState('daily');
+    const companyUserName = localStorage.getItem("companyUserName");
+    const [companyDetails, setCompanyDetails] = useState(null);
 
-    const companyUserName = localStorage.getItem('companyUserName');
+    const companyId = localStorage.getItem('companyId') || '';
+    const user = JSON.parse(localStorage.getItem('user'));
+    const interviewerID = user?._id || user?.id;
 
-    // Fetch paginated data for the list
     useEffect(() => {
-        const fetchInterviews = async () => {
+        const fetchData = async () => {
+            if (!interviewerID) {
+                setError("Interviewer ID not found. Please log in again.");
+                setLoading(false);
+                return;
+            }
+
             setLoading(true);
             try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                const interviewerID = user?._id || user?.id;
-                const companyId = localStorage.getItem('companyId') || '';
-
-                if (!interviewerID) {
-                    throw new Error("Interviewer ID not found. Please log in again.");
+                // Fetch Stats
+                const statsResponse = await fetch(
+                    `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/interviewer-stats?interviewerID=${interviewerID}`,
+                    { headers: { 'company_id': companyId } }
+                );
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    setStats(statsData);
                 }
 
+                // Fetch Recent/Upcoming Interviews (paginated or limited)
                 const queryParams = new URLSearchParams({
-                    page,
-                    limit,
-                    searchTerm,
+                    page: 1,
+                    limit: 5,
                     interviewerID,
                     jobID: ''
                 });
 
-                if (statusFilter) queryParams.append('filterStatus', statusFilter);
-                // if (roundFilter) queryParams.append('filterRound', roundFilter);
-
-                const response = await fetch(
+                const interviewsResponse = await fetch(
                     `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/scheduled-interviewer-app?${queryParams.toString()}`,
-                    {
-                        headers: {
-                            'company_id': companyId
-                        }
-                    }
+                    { headers: { 'company_id': companyId } }
                 );
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (interviewsResponse.ok) {
+                    const data = await interviewsResponse.json();
+                    setInterviews(data.interviews || []);
                 }
 
-                const data = await response.json();
-
-                if (data.interviews) {
-                    setInterviews(data.interviews);
-                    setTotalPages(data.totalPages || 1);
-                } else if (Array.isArray(data)) {
-                    setInterviews(data);
-                } else {
-                    setInterviews([]);
+                // Fetch all for charts
+                const allInterviewsResponse = await fetch(
+                    `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/scheduled-interviewer-app?page=1&limit=1000&interviewerID=${interviewerID}`,
+                    { headers: { 'company_id': companyId } }
+                );
+                if (allInterviewsResponse.ok) {
+                    const allData = await allInterviewsResponse.json();
+                    setAllInterviews(allData.interviews || []);
                 }
 
             } catch (err) {
-                console.error("Error fetching interviews:", err);
-                setError(err.message);
+                console.error("Error fetching dashboard data:", err);
+                setError("Failed to load dashboard data. Please try again.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchInterviews();
-    }, [page, limit, searchTerm, statusFilter, roundFilter]);
+        fetchData();
+    }, [interviewerID, companyId]);
 
-    // Fetch all data for stats
+    // Fetch company details based on companyUserName
     useEffect(() => {
-        const fetchAllInterviews = async () => {
-            try {
-                const user = JSON.parse(localStorage.getItem('user'));
-                const interviewerID = user?._id || user?.id;
-                const companyId = localStorage.getItem('companyId') || '';
+        const stored = localStorage.getItem("companyUserName");
+        const company = companyUserName || stored;
+        if (!company) return;
 
-                if (!interviewerID) return;
-
-                const queryParams = new URLSearchParams({
-                    page: 1,
-                    limit: 1000,
-                    interviewerID,
-                    jobID: ''
-                });
-
-                const response = await fetch(
-                    `${process.env.REACT_APP_BASE_URL}/applicationscheduledlist/scheduled-interviewer-app?${queryParams.toString()}`,
-                    {
-                        headers: {
-                            'company_id': companyId
-                        }
-                    }
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.interviews) {
-                        setAllInterviews(data.interviews);
-                    }
-                }
-            } catch (err) {
-                console.error("Error fetching stats data:", err);
-            }
-        };
-
-        fetchAllInterviews();
-    }, []);
-
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-        setPage(1);
-    };
-
-    // Calculate Stats
-    const stats = useMemo(() => {
-        const total = allInterviews.length;
-        const now = new Date();
-        const scheduled = allInterviews.filter(i => {
-            if (!i.status || i.status.toLowerCase() !== 'scheduled') return false;
-            const interviewDate = new Date(i.date || i.interviewDate);
-            if (isNaN(interviewDate.getTime())) return false;
-
-            // Check if date is in future
-            if (interviewDate > now) return true;
-
-            // Check if date is same day and time is in future
-            if (interviewDate.toDateString() === now.toDateString()) {
-                if (i.scheduledTime) {
-                    const [time, period] = i.scheduledTime.split(' ');
-                    let [hours, minutes] = time.split(':').map(Number);
-                    if (period === 'PM' && hours !== 12) hours += 12;
-                    if (period === 'AM' && hours === 12) hours = 0;
-                    const interviewTime = new Date(interviewDate);
-                    interviewTime.setHours(hours, minutes, 0, 0);
-                    return interviewTime > now;
-                }
-                return true; // Default to upcoming if no time
-            }
-            return false;
-        }).length;
-        const completed = allInterviews.filter(i => i.status === 'Completed').length;
-        const cancelled = allInterviews.filter(i => i.status === 'Cancelled').length;
-        return { total, scheduled, completed, cancelled };
-    }, [allInterviews]);
+        axios
+            .get(`${process.env.REACT_APP_BASE_URL}/companies/companies/${company}`)
+            .then((res) => {
+                setCompanyDetails(res.data);
+                localStorage.setItem("companyUserName", company);
+            })
+            .catch((err) => {
+                console.error("Error fetching company details:", err);
+            });
+    }, [companyUserName]);
 
     // Prepare Chart Data
     const chartData = useMemo(() => {
@@ -184,34 +125,32 @@ const InterviewerDashboard = () => {
         const roundMap = {};
 
         allInterviews.forEach(interview => {
-            // Date Grouping
             const dateObj = new Date(interview.date || interview.interviewDate);
             if (!isNaN(dateObj)) {
                 let key = '';
                 if (chartView === 'daily') {
-                    key = dateObj.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                    key = dateObj.toLocaleDateString('en-CA');
                 } else {
-                    key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+                    key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
                 }
                 dateMap[key] = (dateMap[key] || 0) + 1;
             }
 
-            // Round Grouping
-            const roundName = interview?.roundID?.roundName || 'Unknown';
+            const roundName = interview?.roundID?.roundName || 'General';
             roundMap[roundName] = (roundMap[roundName] || 0) + 1;
         });
 
-        // Sort dates
         const sortedDates = Object.keys(dateMap).sort();
 
         return {
             bar: {
-                labels: sortedDates,
+                labels: sortedDates.slice(-7), // Last 7 periods
                 datasets: [{
                     label: 'Interviews',
-                    data: sortedDates.map(date => dateMap[date]),
-                    backgroundColor: theme === 'dark' ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)',
-                    borderRadius: 4,
+                    data: sortedDates.slice(-7).map(date => dateMap[date]),
+                    backgroundColor: theme === 'dark' ? '#3B82F6' : '#2563EB',
+                    borderRadius: 8,
+                    barThickness: 20,
                 }]
             },
             doughnut: {
@@ -219,14 +158,10 @@ const InterviewerDashboard = () => {
                 datasets: [{
                     data: Object.values(roundMap),
                     backgroundColor: [
-                        '#3B82F6', // Blue
-                        '#10B981', // Green
-                        '#EF4444', // Red
-                        '#F59E0B', // Yellow
-                        '#8B5CF6', // Purple
-                        '#EC4899', // Pink
+                        '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
                     ],
                     borderWidth: 0,
+                    hoverOffset: 10
                 }]
             }
         };
@@ -234,25 +169,36 @@ const InterviewerDashboard = () => {
 
     const chartOptions = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { display: false },
-            title: { display: false }
+            tooltip: {
+                backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+                titleColor: theme === 'dark' ? '#ffffff' : '#1f2937',
+                bodyColor: theme === 'dark' ? '#9ca3af' : '#4b5563',
+                borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8,
+                displayColors: false
+            }
         },
         scales: {
             x: {
                 grid: { display: false },
-                ticks: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280' }
+                ticks: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280', font: { size: 11 } }
             },
             y: {
-                grid: { color: theme === 'dark' ? '#374151' : '#E5E7EB' },
-                ticks: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280', stepSize: 1 }
+                grid: { color: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+                ticks: { color: theme === 'dark' ? '#9CA3AF' : '#6B7280', stepSize: 1, font: { size: 11 } }
             }
         }
     };
 
     const doughnutOptions = {
         responsive: true,
-        cutout: '70%',
+        maintainAspectRatio: false,
+        cutout: '75%',
         plugins: {
             legend: {
                 position: 'bottom',
@@ -260,79 +206,200 @@ const InterviewerDashboard = () => {
                     padding: 20,
                     usePointStyle: true,
                     pointStyle: 'circle',
-                    color: theme === 'dark' ? '#9CA3AF' : '#6B7280'
+                    color: theme === 'dark' ? '#9CA3AF' : '#6B7280',
+                    font: { size: 12 }
                 }
+            },
+            tooltip: {
+                backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+                titleColor: theme === 'dark' ? '#ffffff' : '#1f2937',
+                bodyColor: theme === 'dark' ? '#9ca3af' : '#4b5563',
+                borderColor: theme === 'dark' ? '#374151' : '#e5e7eb',
+                borderWidth: 1,
+                padding: 12,
+                cornerRadius: 8
             }
         }
     };
 
+    if (loading && !interviews.length) {
+        return (
+            <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-gray-50'}`}>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className={`min-h-screen p-4 md:p-8 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-gray-50 text-gray-900'}`}>
             <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Interviewer Dashboard</h1>
-                    <p className={`mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Overview of your interview schedule and performance.
-                    </p>
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
+                            Interviewer Dashboard
+                        </h1>
+                        <p className={`mt-2 text-sm md:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Manage your schedules, evaluate candidates, and track your performance.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => navigate(`/${companyUserName}/scheduled-interview`)}
+                        className="inline-flex items-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+                    >
+                        View All Interviews
+                        <ChevronRight className="ml-2 w-4 h-4" />
+                    </button>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                     {[
-                        { label: 'Total Scheduled', value: stats.total, color: 'bg-blue-500', icon: Calendar },
-                        { label: 'Upcoming', value: stats.scheduled, color: 'bg-purple-500', icon: Clock },
-                        { label: 'Completed', value: stats.completed, color: 'bg-green-500', icon: MapPin },
-                        { label: 'Cancelled', value: stats.cancelled, color: 'bg-red-500', icon: Filter },
+                        { label: 'Total Assigned', value: stats.total, color: 'from-blue-500 to-blue-600', icon: Briefcase, shadow: 'shadow-blue-500/20' },
+                        { label: 'Upcoming', value: stats.scheduled, color: 'from-amber-500 to-orange-600', icon: Clock, shadow: 'shadow-orange-500/20' },
+                        { label: 'Completed', value: stats.completed, color: 'from-emerald-500 to-teal-600', icon: Calendar, shadow: 'shadow-emerald-500/20' },
+                        { label: 'Success Rate', value: `${stats.total ? Math.round((stats.completed / (stats.total - stats.cancelled || 1)) * 100) : 0}%`, color: 'from-indigo-500 to-purple-600', icon: User, shadow: 'shadow-purple-500/20' },
                     ].map((stat, idx) => (
-                        <div key={idx} className={`p-6 rounded-xl border flex items-center justify-between transition-all hover:shadow-lg ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} shadow-sm`}>
-                            <div>
-                                <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{stat.label}</p>
-                                <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                        <div key={idx} className={`relative overflow-hidden p-6 rounded-2xl border transition-all hover:-translate-y-1 ${theme === 'dark' ? 'bg-[#121212]/50 border-gray-800 backdrop-blur-xl' : 'bg-white border-gray-100 shadow-sm'} ${stat.shadow}`}>
+                            <div className="flex items-center justify-between relative z-10">
+                                <div>
+                                    <p className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{stat.label}</p>
+                                    <p className="text-3xl font-black mt-1">{stat.value}</p>
+                                </div>
+                                <div className={`p-4 rounded-2xl bg-gradient-to-br ${stat.color} text-white`}>
+                                    <stat.icon className="w-6 h-6" />
+                                </div>
                             </div>
-                            <div className={`p-3 rounded-lg ${stat.color} bg-opacity-10`}>
-                                <stat.icon className={`w-6 h-6 ${stat.color.replace('bg-', 'text-')}`} />
-                            </div>
+                            <div className={`absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-[0.03] rounded-full`}></div>
                         </div>
                     ))}
                 </div>
 
-                {/* Charts Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    {/* Bar Chart */}
-                    <div className={`lg:col-span-2 p-6 rounded-xl border transition-all hover:shadow-md ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} shadow-sm`}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold">Interview Trends</h2>
-                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                                <button
-                                    onClick={() => setChartView('daily')}
-                                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${chartView === 'daily' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                >
-                                    Daily
-                                </button>
-                                <button
-                                    onClick={() => setChartView('monthly')}
-                                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${chartView === 'monthly' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
-                                >
-                                    Monthly
-                                </button>
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+                    {/* Charts Column */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Bar Chart */}
+                        <div className={`p-6 rounded-3xl border transition-all ${theme === 'dark' ? 'bg-[#121212]/50 border-gray-800 backdrop-blur-xl' : 'bg-white border-gray-100 shadow-sm'}`}>
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-bold flex items-center">
+                                    <span className="w-1.5 h-6 bg-blue-500 rounded-full mr-3"></span>
+                                    Interview Activity
+                                </h2>
+                                <div className="flex bg-gray-100 dark:bg-gray-800/50 p-1 rounded-xl">
+                                    {['daily', 'monthly'].map((view) => (
+                                        <button
+                                            key={view}
+                                            onClick={() => setChartView(view)}
+                                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${chartView === view ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
+                                        >
+                                            {view.charAt(0).toUpperCase() + view.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="h-[300px]">
+                                <Bar data={chartData.bar} options={chartOptions} />
                             </div>
                         </div>
-                        <div className="h-64">
-                            <Bar data={chartData.bar} options={chartOptions} />
+
+                        {/* Recent Interviews Table */}
+                        <div className={`overflow-hidden rounded-3xl border ${theme === 'dark' ? 'bg-[#121212]/50 border-gray-800 backdrop-blur-xl' : 'bg-white border-gray-100 shadow-sm'}`}>
+                            <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                                <h2 className="text-xl font-bold flex items-center">
+                                    <span className="w-1.5 h-6 bg-emerald-500 rounded-full mr-3"></span>
+                                    Recent & Upcoming
+                                </h2>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'bg-gray-800/30 text-gray-500' : 'bg-gray-50 text-gray-400'}`}>
+                                            <th className="px-6 py-4">Candidate</th>
+                                            <th className="px-6 py-4">Job Role</th>
+                                            <th className="px-6 py-4">Date & Time</th>
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                        {interviews.length > 0 ? (
+                                            interviews.map((item, idx) => (
+                                                <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center">
+                                                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mr-3 text-blue-600 dark:text-blue-400 font-bold text-xs">
+                                                                {item.applicationID?.candidateID?.userName?.charAt(0) || 'C'}
+                                                            </div>
+                                                            <span className="font-semibold">{item.applicationID?.candidateID?.userName || 'N/A'}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{item.applicationID?.jobID?.title || 'N/A'}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium">{item.date || item.interviewDate}</span>
+                                                            <span className="text-xs text-gray-400">{item.scheduledTime}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${String(item.status?.applicationStatus || item.status || "").toLowerCase() === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                            String(item.status?.applicationStatus || item.status || "").toLowerCase() === 'cancelled' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' :
+                                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                            }`}>
+                                                            {item.status?.applicationStatus || item.status || 'Scheduled'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <button
+                                                            onClick={() => navigate(`/interviewer/interview/${item._id}`)}
+                                                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-blue-500"
+                                                        >
+                                                            <ExternalLink className="w-4 h-4" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="5" className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                                                    No interviews found.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Doughnut Chart */}
-                    <div className={`p-6 rounded-xl border transition-all hover:shadow-md ${theme === 'dark' ? 'bg-[#121212] border-gray-800' : 'bg-white border-gray-200'} shadow-sm`}>
-                        <h2 className="text-lg font-semibold mb-6">Rounds Distribution</h2>
-                        <div className="h-80 flex justify-center relative">
-                            <Doughnut data={chartData.doughnut} options={doughnutOptions} />
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-center">
-                                    <span className="text-3xl font-bold block">{stats.total}</span>
-                                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Total</span>
+                    {/* Sidebar Column */}
+                    <div className="space-y-8">
+                        {/* Rounds Distribution */}
+                        <div className={`p-6 rounded-3xl border transition-all ${theme === 'dark' ? 'bg-[#121212]/50 border-gray-800 backdrop-blur-xl' : 'bg-white border-gray-100 shadow-sm'}`}>
+                            <h2 className="text-xl font-bold mb-8 flex items-center">
+                                <span className="w-1.5 h-6 bg-purple-500 rounded-full mr-3"></span>
+                                Round Types
+                            </h2>
+                            <div className="h-[280px] flex justify-center relative">
+                                <Doughnut data={chartData.doughnut} options={doughnutOptions} />
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none mb-10">
+                                    <div className="text-center">
+                                        <span className="text-4xl font-black block">{stats.total}</span>
+                                        <span className={`text-[10px] uppercase font-bold tracking-[0.2em] ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Total</span>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Daily Tip / Quote */}
+                        <div className={`p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-xl shadow-indigo-600/20`}>
+                            <AlertCircle className="w-8 h-8 mb-4 opacity-50" />
+                            <h3 className="text-lg font-bold mb-2">Interviewer Tip</h3>
+                            <p className="text-indigo-100 text-sm leading-relaxed italic">
+                                "The goal of an interview is not to find a reason to say 'no', but to find the unique strengths the candidate can bring to the team."
+                            </p>
                         </div>
                     </div>
                 </div>

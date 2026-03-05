@@ -474,146 +474,193 @@ export const Navbar = () => {
         </div>
 
         {/* MOBILE MENU */}
-        <div>
-          {isMenuOpen && (
+        <div className="xl:hidden">
+          {/* Backdrop Overlay */}
+          <div
+            className={`fixed inset-0 z-[60] transition-opacity duration-300 ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              }`}
+          >
             <div
-              className="fixed inset-0 z-50 xl:hidden bg-black bg-opacity-70"
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               onClick={() => setIsMenuOpen(false)}
+            />
+
+            {/* Side Drawer */}
+            <div
+              className={`absolute top-0 right-0 w-[85%] max-w-sm h-full shadow-2xl transition-transform duration-500 ease-out transform ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+                } ${theme === "dark"
+                  ? "bg-gray-900/90 border-l border-gray-800"
+                  : "bg-white/90 border-l border-gray-200"
+                } backdrop-blur-xl flex flex-col`}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div
-                className={`absolute top-0 left-0 w-4/5 max-w-xs h-full p-4 overflow-y-auto transition-colors duration-300 ${theme === "dark" ? "bg-gray-900" : "bg-white"
-                  }`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Navigation Items */}
-                <div className="flex flex-col space-y-2 px-3">
-                  {/* Show normalNavItems when not logged in, or navItems when logged in */}
-                  {(loginData ? navItems : normalNavItem).map((item) => {
-                    // Handle items with subItems (dropdown)
-                    if (item.subItems) {
-                      return (
-                        <div key={item.label} className="flex flex-col">
-                          <button
-                            className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${item.subItems.some(subItem => location.pathname === (loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`))
-                              ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
-                              : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
-                              }`}
-                            onClick={() => {
-                              // Toggle subitems visibility for mobile
-                              const subItems = document.getElementById(`subitems-${item.label}`);
-                              subItems.classList.toggle('hidden');
-                            }}
-                          >
-                            {item.icon}
-                            <span>{item.label}</span>
-                            <ChevronDown className="w-4 h-4 ml-1" />
-                          </button>
+              {/* Drawer Header */}
+              <div className="p-6 flex items-center justify-between border-b border-gray-200/10 dark:border-gray-800/50">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={companyUserName && company?.image ? company.image : "/ATSLOGO.png"}
+                    className="h-10 w-10 rounded-full ring-2 ring-purple-500/20"
+                    alt="Logo"
+                  />
+                  <span className="font-bold text-lg bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                    {companyUserName ? company?.CompanyUserName?.toUpperCase() : "ATS"}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`p-2 rounded-full transition-colors ${theme === "dark" ? "hover:bg-gray-800 text-gray-400" : "hover:bg-gray-100 text-gray-500"
+                    }`}
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
 
-                          <div id={`subitems-${item.label}`} className="hidden pl-4">
-                            {item.subItems.map((subItem) => {
-                              const to = loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`;
-                              return (
-                                <NavLink
-                                  key={subItem.path}
-                                  to={to}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className={({ isActive }) =>
-                                    `flex items-center px-3 py-2 rounded-md text-base font-medium ${isActive
-                                      ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
-                                      : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
-                                    }`
-                                  }
-                                >
-                                  {subItem.icon && <span className="mr-3">{subItem.icon}</span>}
-                                  {subItem.label}
-                                </NavLink>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // Handle regular items
-                    const path = item.path;
-                    const to = path === "/" ? `/${companyUserName}` : loginData?.role === "super" ? path : `/${companyUserName}${path}`;
+              {/* Navigation Items - Scrollable Area */}
+              <div className="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar">
+                {(loginData ? navItems : normalNavItem).map((item) => {
+                  if (item.subItems) {
+                    const hasActiveSubItem = item.subItems.some(subItem =>
+                      location.pathname === (loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`)
+                    );
 
                     return (
-                      <NavLink
-                        key={path}
-                        to={to}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center space-x-2 px-3 py-2 rounded-xl text-base font-medium ${isActive
-                            ? (theme === "dark" ? "text-white bg-gray-800" : "text-purple-700 bg-purple-50")
-                            : (theme === "dark" ? "text-gray-300 hover:text-white hover:bg-gray-800" : "text-gray-600 hover:text-purple-700 hover:bg-purple-50")
-                          }`
-                        }
-                      >
-                        {item.icon}
-                        <span>{item.label}</span>
-                      </NavLink>
-                    );
-                  })}
-                </div>
+                      <div key={item.label} className="space-y-1">
+                        <button
+                          className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-base font-semibold transition-all duration-300 ${hasActiveSubItem
+                            ? (theme === "dark" ? "bg-purple-500/10 text-purple-400" : "bg-purple-50 text-purple-700")
+                            : (theme === "dark" ? "text-gray-300 hover:bg-gray-800/50" : "text-gray-600 hover:bg-gray-50")
+                            }`}
+                          onClick={() => {
+                            const subItems = document.getElementById(`subitems-${item.label}`);
+                            const icon = document.getElementById(`icon-${item.label}`);
+                            subItems.classList.toggle('hidden');
+                            icon.classList.toggle('rotate-180');
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="p-2 rounded-xl bg-gray-500/5">{item.icon}</span>
+                            <span>{item.label}</span>
+                          </div>
+                          <ChevronDown id={`icon-${item.label}`} className="w-4 h-4 transition-transform duration-300" />
+                        </button>
 
-                {/* Theme Toggle - Mobile */}
-                <div className="px-3 py-2 border-t border-gray-800">
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>Theme:</span>
+                        <div id={`subitems-${item.label}`} className="hidden pl-4 space-y-1 mt-1 border-l-2 border-gray-100 dark:border-gray-800 ml-6">
+                          {item.subItems.map((subItem) => {
+                            const to = loginData?.role === "super" ? subItem.path : `/${companyUserName}${subItem.path}`;
+                            return (
+                              <NavLink
+                                key={subItem.path}
+                                to={to}
+                                onClick={() => setIsMenuOpen(false)}
+                                className={({ isActive }) =>
+                                  `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+                                    ? (theme === "dark" ? "text-white bg-white/5" : "text-purple-700 bg-purple-50/50")
+                                    : (theme === "dark" ? "text-gray-400 hover:text-white" : "text-gray-500 hover:text-purple-600")
+                                  }`
+                                }
+                              >
+                                {subItem.label}
+                              </NavLink>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  const path = item.path;
+                  const to = path === "/" ? `/${companyUserName}` : loginData?.role === "super" ? path : `/${companyUserName}${path}`;
+
+                  return (
+                    <NavLink
+                      key={path}
+                      to={to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-semibold transition-all duration-300 ${isActive
+                          ? (theme === "dark" ? "bg-purple-500/10 text-purple-400" : "bg-purple-50 text-purple-700 shadow-sm")
+                          : (theme === "dark" ? "text-gray-300 hover:bg-gray-800/50" : "text-gray-600 hover:bg-gray-50")
+                        }`
+                      }
+                    >
+                      <span className="p-2 rounded-xl bg-gray-500/5">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+
+              {/* Drawer Footer - User Session & Theme */}
+              <div className={`p-6 space-y-6 border-t ${theme === "dark" ? "border-gray-800 bg-black/20" : "border-gray-100 bg-gray-50/50"}`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm font-medium ${theme === "dark" ? "text-gray-400" : "text-gray-500"}`}>Appearance</span>
+                  <div className="scale-110">
                     <ThemeToggle />
                   </div>
                 </div>
 
-                {/* User Actions */}
-                <div className="mt-6 pt-4 border-t border-gray-800 space-y-2">
-                  {loginData ? (
-                    <>
-                      <div className="flex items-center px-3 py-2 text-base font-medium dark:text-gray-300 ">
-                        <UserCheck className="w-5 h-5 mr-3" />
-                        <span > Signed in as {loginData?.userName}</span>
+                {loginData ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">
+                        {loginData?.userName?.charAt(0).toUpperCase()}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-bold truncate ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                          {loginData?.userName}
+                        </p>
+                        <p className="text-xs text-gray-400 truncate capitalize">{loginData?.role?.replace('_', ' ')}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
                       <Link
                         to={`/${companyUserName}/profile`}
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800"
+                        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${theme === "dark"
+                          ? "bg-gray-800 text-white hover:bg-gray-700"
+                          : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                          }`}
                       >
-                        <UserPen className="w-5 h-5 mr-3 " />
-                        <span>Profile</span>
+                        <UserPen className="w-4 h-4" />
+                        Profile
                       </Link>
                       <button
                         onClick={() => {
                           logoutHandler();
                           setIsMenuOpen(false);
                         }}
-                        className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-800"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                       >
-                        <LogOut className="w-5 h-5 mr-3" />
-                        <span>Logout</span>
+                        <LogOut className="w-4 h-4" />
+                        Logout
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to={companyUserName ? `/${companyUserName}/login` : "/login"}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-gray-800 rounded-xl hover:bg-gray-700"
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-center w-full px-4 py-2 text-base font-medium text-white bg-gray-800 rounded-xl hover:bg-gray-700"
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      to={companyUserName ? `/${companyUserName}/login` : "/login"}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full py-3 rounded-2xl text-center text-base font-bold bg-purple-600 text-white shadow-lg shadow-purple-500/20 hover:bg-purple-700 active:scale-95 transition-all"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`w-full py-3 rounded-2xl text-center text-base font-bold border-2 transition-all ${theme === "dark"
+                        ? "border-gray-800 text-white hover:bg-gray-800"
+                        : "border-gray-100 text-gray-700 hover:border-gray-200"
+                        }`}
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </nav>
     </div>
