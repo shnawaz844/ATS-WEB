@@ -256,7 +256,8 @@ const AssignedInterviews = () => {
     // Get status color for visual indication // 
     const getStatusColor = (status) => {
         const isDark = theme === 'dark';
-        switch (status?.toLowerCase()) {
+        const statusStr = (status?.applicationStatus || status || "").toString().toLowerCase();
+        switch (statusStr) {
             case 'scheduled':
                 return isDark ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-800';
             case 'completed':
@@ -348,9 +349,13 @@ const AssignedInterviews = () => {
                                                                 {capitalizeFirstLetter(interview?.applicationID?.jobID?.title) || "N/A"}
                                                             </h3>
                                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${textColor} ${bgLight}`}>
-                                                                {statuses?.length && statuses.find(statusItem => statusItem._id === interview.status)?.applicationStatus
-                                                                    ? statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.charAt(0).toUpperCase() + statuses.find(statusItem => statusItem._id === interview.status).applicationStatus.slice(1)
-                                                                    : capitalizeFirstLetter(status)}
+                                                                {(() => {
+                                                                    const statusStr = (interview.status?.applicationStatus || interview.status || "");
+                                                                    const statusId = interview.status?._id || interview.status;
+                                                                    const statusObj = statuses?.find(s => s._id === statusId);
+                                                                    const finalName = statusObj?.applicationStatus || statusStr;
+                                                                    return capitalizeFirstLetter(finalName);
+                                                                })()}
                                                             </span>
                                                         </div>
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { toast as toastNotify } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Search, User, Briefcase, X, ChevronDown, Calendar, Video, MapPin, Clock, ThumbsUp, ThumbsDown, ChevronRight, ChevronLeft } from 'lucide-react';
@@ -9,7 +8,6 @@ import useScheduledInterview from '../../hooks/useAssignedInterview';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
 import AiGeneratedInterviewsTable from './AiGeneratedInterviewsTable';
-import { ToastContainer, toast } from 'react-toastify';
 
 const AllInterviews = () => {
   const companyId = JSON.parse(localStorage.getItem("user"))?.company_id;
@@ -356,7 +354,8 @@ const AllInterviews = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    const statusStr = (status?.applicationStatus || status || '').toString();
+    switch (statusStr) {
       case 'Completed': return theme === 'dark' ? 'bg-green-900/40 text-green-300' : 'bg-green-100 text-green-800';
       case 'In Process': return theme === 'dark' ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100 text-blue-800';
       case 'Scheduled': return theme === 'dark' ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-800';
@@ -410,8 +409,9 @@ const AllInterviews = () => {
   };
 
   const capitalizeFirstLetter = (string) => {
-    if (!string) return '';
-    return string?.charAt(0).toUpperCase() + string?.slice(1);
+    if (string == null) return '';
+    const str = (typeof string === 'object') ? (string?.applicationStatus || String(string)) : String(string);
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   const handleSearchChange = (e) => {
@@ -434,7 +434,7 @@ const AllInterviews = () => {
   };
 
   const renderRatingFilter = () => (
-    <div className="relative w-full">
+    <div className="relative flex-1 lg:w-auto">
       <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
         Filter by Rating:
       </label>
@@ -456,12 +456,12 @@ const AllInterviews = () => {
   );
 
   return (
-    <div className={`px-8 py-4 w-full min-h-screen ${theme === 'dark' ? 'bg-black' : ''}`}
+    <div className={`px-4 sm:px-8 py-4 w-full min-h-screen ${theme === 'dark' ? 'bg-black' : ''}`}
 
     >
       <BackButtonMobile />
       <div className="max-w-screen-2xl">
-        <div className={`mb-6 h-auto md:h-[15vh] flex items-center rounded-xl p-4 ${theme === 'dark' ? 'border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'bg-gray-200 backdrop-blur-xl shadow-md'}`}>
+        <div className={`mb-6 h-auto flex items-center rounded-xl p-4 ${theme === 'dark' ? 'border border-gray-600 hover:shadow-xl hover:border-purple-500/50' : 'bg-gray-200 backdrop-blur-xl shadow-md'}`}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
             <div>
               <h2 className="text-xl md:text-3xl font-bold text-[#9333ea] flex items-center">
@@ -474,8 +474,8 @@ const AllInterviews = () => {
 
             {/* Search and Filter */}
             <div className='flex items-center w-full lg:w-auto px-4 sm:px-0'>
-              <div className="flex flex-col lg:flex-row lg:justify-between gap-4 w-full lg:w-[50vw]">
-                <div className="w-full lg:w-[67%]">
+              <div className="flex flex-col lg:flex-row lg:justify-between gap-4 w-full lg:flex-1 lg:max-w-4xl">
+                <div className="w-full lg:flex-[2]">
                   <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
                     Search:
                   </label>
@@ -505,8 +505,8 @@ const AllInterviews = () => {
                   </form>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                  <div className="relative w-full sm:flex-1 lg:w-auto">
+                <div className="flex flex-row gap-3 w-full lg:w-auto">
+                  <div className="relative flex-1 lg:w-auto">
                     <label className="block text-gray-900 dark:text-white text-xs font-bold mb-2">
                       Filter by Status:
                     </label>
@@ -537,8 +537,8 @@ const AllInterviews = () => {
           <div className="flex border-b rounded-t-xl">
             <button
               onClick={() => setActiveTab('interviews')}
-              className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'interviews'
-                ? `border-b-2 border-indigo-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-black'}`
+              className={`px-3 sm:px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'interviews'
+                ? `border-b-2 border-indigo-500 text-lg sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-black'}`
                 : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                 }`}
             >
@@ -547,8 +547,8 @@ const AllInterviews = () => {
             {(aiFeaturesEnabled || localStorage.getItem('ai_features_debug') === 'true') && (
               <button
                 onClick={() => setActiveTab('ai')}
-                className={`px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
-                  ? `border-b-2 border-purple-500 text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
+                className={`px-3 sm:px-6 py-4 font-medium text-sm focus:outline-none ${activeTab === 'ai'
+                  ? `border-b-2 border-purple-500 text-lg sm:text-xl ${theme === 'dark' ? 'text-white' : 'text-purple-600'}`
                   : `hover:border-b-2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`
                   }`}
               >
@@ -641,9 +641,16 @@ const AllInterviews = () => {
                             </div>
 
                             <div className="mt-2">
-                              <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${getStatusColor(interview.status)}`}>
-                                {capitalizeFirstLetter(statuses?.find(s => s._id === interview.status)?.applicationStatus || interview.status)}
-                              </span>
+                              {(() => {
+                                const statusId = interview.status?._id || interview.status;
+                                const statusObj = statuses?.find(s => s._id === statusId);
+                                const statusName = statusObj?.applicationStatus || interview.status?.applicationStatus || interview.status;
+                                return (
+                                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${getStatusColor(statusName)}`}>
+                                    {capitalizeFirstLetter(statusName)}
+                                  </span>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -689,7 +696,7 @@ const AllInterviews = () => {
           <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-all duration-300">
             <div className={`rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
               {/* Modal Header */}
-              <div className="p-8 pb-4 flex items-start gap-5">
+              <div className="p-4 sm:p-8 pb-4 flex items-start gap-5">
                 {(() => {
                   const group = groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId);
                   const rounds = group?.rounds || [];
@@ -725,7 +732,7 @@ const AllInterviews = () => {
               </div>
 
               {/* Scrollable Rounds List */}
-              <div className="px-8 pb-8 overflow-y-auto space-y-4 text-gray-900 dark:text-gray-100">
+              <div className="px-4 sm:px-8 pb-8 overflow-y-auto space-y-4 text-gray-900 dark:text-gray-100">
                 {groupedInterviewsData.find(g => g.applicationID?._id === selectedApplicationId)?.rounds
                   ?.map((round, index) => {
                     const roundStatus = getInterviewRoundStatus(round.date, round.scheduledTime, round);
@@ -741,9 +748,16 @@ const AllInterviews = () => {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(round.status)}`}>
-                              {capitalizeFirstLetter(statuses?.find(s => s._id === round.status)?.applicationStatus || round.status)}
-                            </span>
+                            {(() => {
+                              const statusId = round.status?._id || round.status;
+                              const statusObj = statuses?.find(s => s._id === statusId);
+                              const statusName = statusObj?.applicationStatus || round.status?.applicationStatus || round.status;
+                              return (
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${getStatusColor(statusName)}`}>
+                                  {capitalizeFirstLetter(statusName)}
+                                </span>
+                              );
+                            })()}
                           </div>
                         </div>
 
