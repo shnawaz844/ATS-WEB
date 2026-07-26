@@ -35,8 +35,8 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const { company_id } = req.headers;
 
-    const payload = company_id === 'super'
-      ? { email, role: 'admin' }
+    const payload = (company_id === 'super' || !company_id)
+      ? { email }
       : { email, company_id };
 
     const user = await User.findOne(payload);
