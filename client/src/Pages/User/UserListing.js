@@ -3,6 +3,8 @@ import { useUsers, useAddUser, useUpdateUser, useDeleteUser } from '../../hooks/
 import UserDialog from '../../components/UserDialog';
 import { Search, Plus, Edit, MapPin, User, Users, ChevronLeft, ChevronRight, Loader, Trash2 } from 'lucide-react';
 import BackButtonMobile from '../../components/Mob-back-btn';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UserListing = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,10 +163,13 @@ const UserListing = () => {
     if (dialogMode === 'add') {
       addUser(formData, {
         onSuccess: () => {
+          toast.success('User created successfully!');
           handleCloseDialog();
         },
         onError: (error) => {
           console.error('Failed to add user:', error);
+          const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to add user';
+          toast.error(errorMsg);
           if (error.response && error.response.data && error.response.data.error) {
             setServerErrors({ email: error.response.data.error });
           }
@@ -180,10 +185,13 @@ const UserListing = () => {
         { userId: selectedUser._id, formData: updatedData },
         {
           onSuccess: () => {
+            toast.success('User updated successfully!');
             handleCloseDialog();
           },
           onError: (error) => {
             console.error('Failed to update user:', error);
+            const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to update user';
+            toast.error(errorMsg);
             if (error.response && error.response.data && error.response.data.error) {
               setServerErrors({ email: error.response.data.error });
             }
@@ -390,6 +398,7 @@ const UserListing = () => {
           serverErrors={serverErrors}
         />
       )}
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>
   );
 };
