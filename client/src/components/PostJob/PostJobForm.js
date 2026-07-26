@@ -216,7 +216,7 @@ const ShiftPicker = ({
     <FormField label="Shift Start" error={errors?.shiftStart}>
       <TimePicker
         onChange={setShiftStart}
-        value={formatExcelTime(shiftStart)}
+        value={formatExcelTime(shiftStart) || "08:00"}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -225,7 +225,7 @@ const ShiftPicker = ({
     <FormField label="Shift End" error={errors?.shiftEnd}>
       <TimePicker
         onChange={setShiftEnd}
-        value={formatExcelTime(shiftEnd)}
+        value={formatExcelTime(shiftEnd) || "17:00"}
         disableClock={true}
         format="hh:mm a"
         className="w-full"
@@ -388,7 +388,7 @@ export const PostJobForm = ({
 
     try {
       const companyUserName = localStorage.getItem("companyUserName");
-      const compensation = watch("compensation");
+      const compensation = watch("compensationVal");
       const experience = watch("experienceRequired");
 
       const response = await fetch(
@@ -581,7 +581,7 @@ export const PostJobForm = ({
         "shiftStart",
         "shiftEnd",
         "hireType",
-        "compensation",
+        "compensationVal",
         "experienceRequired",
         "requiredResources",
         "status",
@@ -725,14 +725,31 @@ export const PostJobForm = ({
                     error={errors?.hireType}
                   />
 
-                  <FormInput
-                    label="Compensation"
-                    register={register}
-                    name="compensation"
-                    rules={{ required: "Compensation is required" }}
-                    error={errors?.compensation}
-                    placeholder="Ex: 50000"
-                  />
+                  <div className="grid grid-cols-3 gap-4 items-start">
+                    <div className="col-span-2">
+                      <FormInput
+                        label="Compensation"
+                        register={register}
+                        name="compensationVal"
+                        rules={{ required: "Compensation is required" }}
+                        error={errors?.compensationVal}
+                        placeholder="Ex: 50000"
+                      />
+                    </div>
+                    <div>
+                      <FormField label="Period" error={errors?.compensationPeriod}>
+                        <select
+                          {...register("compensationPeriod")}
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                            theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+                          }`}
+                        >
+                          <option value="Month">Monthly</option>
+                          <option value="Year">Yearly</option>
+                        </select>
+                      </FormField>
+                    </div>
+                  </div>
 
                   <FormInput
                     label="Experience Required (years)"
@@ -804,29 +821,7 @@ export const PostJobForm = ({
                     </FormField>
                   )}
 
-                  <FormField
-                    label="Hiring Manager"
-                    error={errors?.hiringManagerId}
-                  >
-                    <select
-                      value={jobToEdit?.hiringManagerId}
-                      {...register("hiringManagerId", {
-                        required: "Hiring Manager is required",
-                      })}
-                      className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
-                    >
-                      <option value="">Select Hiring Manager</option>
-                      {hiringManagersList && hiringManagersList.length > 0 ? (
-                        hiringManagersList.map((manager) => (
-                          <option key={manager._id} value={manager._id}>
-                            {manager.userName}
-                          </option>
-                        ))
-                      ) : (
-                        <option disabled>No hiring managers found</option>
-                      )}
-                    </select>
-                  </FormField>
+
 
                   <FormField
                     label="Interview Mode"

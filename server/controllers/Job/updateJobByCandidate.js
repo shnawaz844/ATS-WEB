@@ -1,24 +1,35 @@
-import Job from '../../models/Job.js'
+import Job from '../../models/Job.js';
+import supabase, { fromDB } from '../../config/supabaseClient.js';
 
 const updateJobByCandidate = async (req, res) => {
-    try {
-        const { jobID, candidateID, status } = req.body;
+  try {
+    const { jobID, candidateID, status } = req.body;
 
-        // Find the job by jobId
-        const updatedJob = await Job.findByIdAndUpdate(
-            jobID,
-            { $push: { applicants: { applicant: candidateID, status:status } } },
-            { new: true } // To return the updated document
-        );
+    console.log("Update job by candidate");
+    console.log(req.body);
 
-        if (!updatedJob) {
-            return res.status(404).json({ error: 'Job not found' });
-        }
-
-        res.status(200).json(updatedJob);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to update job by candidate' });
+    const job = await Job.findById(jobID);
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
     }
+
+    const applicants = Array.isArray(job.applicants) ? job.applicants : [];
+    applicants.push({ applicant: candidateID, status });
+
+    const { data: updatedJob, error } = await supabase
+      .from('jobs')
+      .update({ applicants })
+      .eq('id', job.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json(fromDB(updatedJob));
+  } catch (error) {
+    console.error("Failed to update job by candidate:", error);
+    res.status(500).json({ error: 'Failed to update job by candidate' });
+  }
 }
 
 export { updateJobByCandidate };

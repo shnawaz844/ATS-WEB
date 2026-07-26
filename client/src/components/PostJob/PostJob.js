@@ -54,7 +54,7 @@ export const PostJob = () => {
 
   // Shift time states
   const [shiftStart, setShiftStart] = useState(
-    formatExcelTime(jobToEdit?.shiftStart) || "09:00",
+    formatExcelTime(jobToEdit?.shiftStart) || "08:00",
   );
   const [shiftEnd, setShiftEnd] = useState(
     formatExcelTime(jobToEdit?.shiftEnd) || "17:00",
@@ -131,6 +131,8 @@ export const PostJob = () => {
       state: "",
       city: "",
       compensation: "",
+      compensationVal: "",
+      compensationPeriod: "Month",
       experienceRequired: "",
       requiredResources: "",
       status: jobToEdit?.status || "",
@@ -165,6 +167,14 @@ export const PostJob = () => {
 
       if (jobToEdit.description) setValue("description", jobToEdit.description);
 
+      if (jobToEdit.compensation) {
+        const compStr = jobToEdit.compensation.toString();
+        const cleanVal = compStr.split('/')[0].split('(')[0].trim();
+        const hasMo = compStr.toLowerCase().includes("month") || compStr.toLowerCase().includes("/mo");
+        setValue("compensationVal", cleanVal);
+        setValue("compensationPeriod", hasMo ? "Month" : "Year");
+      }
+
       if (jobToEdit.country) setSelectedCountry(jobToEdit.country);
       if (jobToEdit.state) setSelectedState(jobToEdit.state);
       if (jobToEdit.city) setSelectedCity(jobToEdit.city);
@@ -173,16 +183,6 @@ export const PostJob = () => {
 
   // The form submit handler
   const onSubmit = (data) => {
-    // Find the selected hiring manager
-    const selectedHiringManager = hiringManagersList.find(
-      (manager) => manager._id === data.hiringManagerId,
-    );
-
-    if (!selectedHiringManager) {
-      toast.error("Please select a valid hiring manager");
-      return;
-    }
-
     // Find the selected interview round if AI mode is selected
     let interviewTypeData = null;
     if (interviewMode === "AI" && data.interviewType) {
@@ -212,10 +212,10 @@ export const PostJob = () => {
       country: countryName,
       state: stateName,
       city: selectedCity,
-      compensation: String(data.compensation),
+      compensation: `${data.compensationVal}/${data.compensationPeriod}`,
       experienceRequired: String(data.experienceRequired),
       company_id: companyId,
-      hiringManagerId: selectedHiringManager._id,
+      hiringManagerId: "",
       interviewMode: interviewMode,
       interviewType: interviewTypeData,
       applicationForm: {
@@ -223,6 +223,8 @@ export const PostJob = () => {
         answer: questions.map((q) => q.answer),
       },
     };
+    delete formattedData.compensationVal;
+    delete formattedData.compensationPeriod;
 
     if (jobToEdit) {
       updateJob(formattedData, {

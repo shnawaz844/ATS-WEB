@@ -177,7 +177,7 @@ export const JobDetails = () => {
                 <IndianRupee size={20} className="text-[#9333ea] mr-3 mt-1" />
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Compensation</p>
-                  <p className="font-semibold text-gray-800 dark:text-white">₹{formatIndianRupee(job.compensation)}</p>
+                  <p className="font-semibold text-gray-800 dark:text-white">₹{formatIndianRupee(job.compensation)}{job.compensation?.toString().toLowerCase().includes("month") || job.compensation?.toString().toLowerCase().includes("/mo") ? "/Month" : "/Year"}</p>
                 </div>
               </div>
               <div className="flex items-start">
@@ -247,19 +247,16 @@ export const JobDetails = () => {
         {/* -- Right: Application Form Section -- */}
         <div className="lg:col-span-4">
           <div className="sticky top-24">
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-6 rounded-xl shadow-sm mb-6">
-              <h2 className="text-xl font-semibold mb-4 text-[#9333ea]">Apply Now</h2>
-              <ApplicationForm
-                job={job}
-                loginData={loginData}
-                applicationStatusesData={applicationStatusesData}
-                jobStatuses={jobStatuses}
-              />
-            </div>
+            <ApplicationForm
+              job={job}
+              loginData={loginData}
+              applicationStatusesData={applicationStatusesData}
+              jobStatuses={jobStatuses}
+            />
 
             {job.postedDate && (
-              <div className="backdrop-blur-xl bg-white/10 border border-white/20 p-6 rounded-xl shadow-sm text-sm text-gray-500 dark:text-gray-400">
-                <p>Posted {new Date(job.postedDate).toLocaleDateString()}</p>
+              <div className="mt-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20 text-center text-xs text-gray-500 dark:text-gray-400 font-medium">
+                Posted on {new Date(job.postedDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </div>
             )}
           </div>

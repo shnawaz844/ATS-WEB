@@ -4,8 +4,8 @@ import multerS3 from 'multer-s3';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import path from 'path';
 import { uploadToS3 } from '../../middleware/upload.js';
+import supabase from '../../config/supabaseClient.js';
 
-// Configure AWS SDK
 // Configure AWS SDK v3
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -53,7 +53,6 @@ const addCompany = async (req, res) => {
             req.file.key = uploadResult.key;
         }
 
-        // Check if email already exists
         const existingCompany = await Company.findOne({ email });
         if (existingCompany) {
             if (req.file) {
@@ -76,7 +75,7 @@ const addCompany = async (req, res) => {
             return res.status(409).json({ message: "Company Unique Name already registered." });
         }
 
-        const newCompany = new Company({
+        const newCompany = await Company.create({
             CompanyUserName,
             address,
             email,
@@ -86,8 +85,6 @@ const addCompany = async (req, res) => {
             image: imageUrl,
             onlyAiFeaturesEnabled: req.body.onlyAiFeaturesEnabled === 'true' || req.body.onlyAiFeaturesEnabled === true
         });
-
-        await newCompany.save();
         res.status(201).json(newCompany);
     } catch (error) {
         if (req.file && req.file.key) {
@@ -105,17 +102,14 @@ const updateCompany = async (req, res) => {
         const { id } = req.params;
         const { CompanyUserName, address, email, name, phone, website, aiFeaturesEnabled } = req.body;
 
-        // Get the current company to check for existing image
         const currentCompany = await Company.findById(id);
         if (!currentCompany) {
             return res.status(404).json({ message: "Company not found." });
         }
 
-        // Check if email is being changed and if new email already exists
         if (email && email !== currentCompany.email) {
             const existingCompany = await Company.findOne({ email });
             if (existingCompany) {
-                // If we uploaded a file but validation failed, delete it from S3
                 if (req.file) {
                     await s3.send(new DeleteObjectCommand({
                         Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -126,16 +120,14 @@ const updateCompany = async (req, res) => {
             }
         }
 
-        // Check if CompanyUserName is being changed and if new username already exists
         if (CompanyUserName && CompanyUserName !== currentCompany.CompanyUserName) {
             const existingCompanyUserName = await Company.findOne({ CompanyUserName });
             if (existingCompanyUserName) {
-                // If we uploaded a file but validation failed, delete it from S3
                 if (req.file) {
-                    await s3.deleteObject({
+                    await s3.send(new DeleteObjectCommand({
                         Bucket: process.env.AWS_S3_BUCKET_NAME,
                         Key: req.file.key
-                    }).promise();
+                    }));
                 }
                 return res.status(409).json({ message: "Company Unique Name already registered." });
             }
@@ -152,19 +144,15 @@ const updateCompany = async (req, res) => {
             onlyAiFeaturesEnabled: req.body.onlyAiFeaturesEnabled === 'true' || req.body.onlyAiFeaturesEnabled === true
         };
 
-        // Handle image upload
         if (req.file) {
-            // Upload new image
             const uploadResult = await uploadToS3(req.file);
             updateData.image = uploadResult.fileUrl;
             req.file.key = uploadResult.key;
 
-            // Delete the old image from S3 if it exists
             if (currentCompany.image) {
                 try {
-                    // Extract the key from the full S3 URL
                     const urlParts = currentCompany.image.split('/');
-                    const oldImageKey = urlParts.slice(-2).join('/'); // Get 'companies/filename'
+                    const oldImageKey = urlParts.slice(-2).join('/');
 
                     await s3.send(new DeleteObjectCommand({
                         Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -172,15 +160,13 @@ const updateCompany = async (req, res) => {
                     }));
                 } catch (deleteError) {
                     console.log('Error deleting old image:', deleteError.message);
-                    // Continue with update even if old image deletion fails
                 }
             }
         }
 
         const updatedCompany = await Company.findByIdAndUpdate(
             id,
-            updateData,
-            { new: true }
+            updateData
         );
 
         res.status(200).json({
@@ -188,7 +174,6 @@ const updateCompany = async (req, res) => {
             company: updatedCompany
         });
     } catch (error) {
-        // If we uploaded a file but an error occurred, delete it from S3
         if (req.file) {
             try {
                 await s3.send(new DeleteObjectCommand({
@@ -212,12 +197,10 @@ const deleteCompany = async (req, res) => {
             return res.status(404).json({ message: "Company not found." });
         }
 
-        // Delete the image from S3 if it exists
         if (company.image) {
             try {
-                // Extract the key from the full S3 URL
                 const urlParts = company.image.split('/');
-                const imageKey = urlParts.slice(-2).join('/'); // Get 'companies/filename'
+                const imageKey = urlParts.slice(-2).join('/');
 
                 await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -225,7 +208,6 @@ const deleteCompany = async (req, res) => {
                 }));
             } catch (deleteError) {
                 console.log('Error deleting image:', deleteError.message);
-                // Continue with company deletion even if image deletion fails
             }
         }
 

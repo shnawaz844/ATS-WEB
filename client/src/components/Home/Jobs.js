@@ -259,7 +259,9 @@ const JobCard = ({ job }) => {
                             <IndianRupee className="w-3 h-3" />
                             Compensation
                         </div>
-                        <span className="font-bold text-gray-900 dark:text-white text-sm">₹{job.compensation}/yr</span>
+                        <span className="font-bold text-gray-900 dark:text-white text-sm">
+                            ₹{job.compensation?.toString().split('/')[0].split('(')[0].trim()}{job.compensation?.toString().toLowerCase().includes("month") || job.compensation?.toString().toLowerCase().includes("/mo") ? "/mo" : "/yr"}
+                        </span>
                     </div>
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-500 text-[10px] uppercase font-bold tracking-widest">

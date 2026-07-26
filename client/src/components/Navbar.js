@@ -26,16 +26,16 @@ const superNavItems = [
 
 const adminNavItems = [
   { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-4 h-5" /> },
-  {
-    label: "Hiring Manager",
-    icon: <FileText className="w-4 h-5" />,
-    subItems: [
-      { label: "Application List", path: "/application-list", icon: <FileText className="hidden lg:block w-5 h-5" /> },
-      { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
-      { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> },
-      // { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
-    ]
-  },
+  // {
+  //   label: "Hiring Manager",
+  //   icon: <FileText className="w-4 h-5" />,
+  //   subItems: [
+  //     { label: "Application List", path: "/application-list", icon: <FileText className="hidden lg:block w-5 h-5" /> },
+  //     { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
+  //     { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> },
+  //     { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
+  //   ]
+  // },
   {
     label: "Recruiter Manager",
     icon: <FileText className="w-4 h-5" />,
@@ -45,13 +45,13 @@ const adminNavItems = [
       { label: "Interviews", path: "/all-interviews", icon: <BriefcaseBusiness className="w-4 h-5" /> },
     ]
   },
-  {
-    label: "Interviewer",
-    icon: <FileText className="w-4 h-5" />,
-    subItems: [
-      { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
-    ]
-  },
+  // {
+  //   label: "Interviewer",
+  //   icon: <FileText className="w-4 h-5" />,
+  //   subItems: [
+  //     { label: "Scheduled Interviews", path: "/scheduled-interview", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
+  //   ]
+  // },
   {
     label: "Configuration",
     icon: <FileText className="w-4 h-5" />,
@@ -82,7 +82,8 @@ const recruiterNavItems = [
   { label: "Dashboard", path: "/recruiter-dashboard", icon: <Home className="hidden lg:block w-5 h-5 " /> },
   { label: "Jobs", path: "/all-jobs", icon: <Briefcase className="hidden lg:block w-5 h-5" /> },
   { label: "Applications", path: "/all-applications", icon: <FileText className="hidden lg:block w-5 h-5" /> },
-  { label: "Interviews", path: "/all-interviews" },
+  { label: "Assigned Interviews", path: "/assigned-interviews", icon: <Calendar className="hidden lg:block w-5 h-5" /> },
+  // { label: "Interviews", path: "/all-interviews" },
   // { label: "Import Application", path: "/import-application", icon: <BriefcaseBusiness className="w-4 h-5" /> }
 ];
 

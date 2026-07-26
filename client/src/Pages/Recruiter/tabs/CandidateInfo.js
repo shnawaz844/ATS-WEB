@@ -1,52 +1,83 @@
 import React from 'react';
-import { User, Mail, Phone, MapPin, Briefcase, UserCircle2, BadgeInfo } from 'lucide-react';
+import { User, Mail, Phone, MapPin, UserCircle2, BadgeInfo } from 'lucide-react';
 
-const CandidateInfo = ({ applicationData }) => {
-    const { candidateID, contactInfo } = applicationData;
+const CandidateInfo = ({ applicationData = {} }) => {
+    const { candidateID = {}, contactInfo, emailInfo, fullName, experience } = applicationData;
 
-    const capitalizeFirstLetter = (string) => {
-        return string?.charAt(0).toUpperCase() + string?.slice(1);
+    // Helper to extract Name/City from experience string if present
+    const parseExperienceMetadata = (expStr) => {
+        if (!expStr) return {};
+        const res = {};
+        expStr.split(/\s*\|\s*/).forEach(part => {
+            const clean = part.replace(/^Details:\s*/i, "");
+            const idx = clean.indexOf(":");
+            if (idx !== -1) {
+                res[clean.substring(0, idx).trim().toLowerCase()] = clean.substring(idx + 1).trim();
+            }
+        });
+        return res;
     };
 
-    return (
-        <div className="max-w-none mx-auto rounded-xl overflow-hidden transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-            <div className="p-6 space-y-4">
+    const expMeta = parseExperienceMetadata(experience);
 
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 animate-fade-in">
-                    <BadgeInfo className="text-blue-500" />
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+
+    const displayName = candidateID?.userName || fullName || expMeta.name || 'N/A';
+    const displayEmail = candidateID?.email || emailInfo || 'N/A';
+    const displayGender = candidateID?.gender || 'N/A';
+    const displayAddress = candidateID?.address || expMeta.city || 'N/A';
+    const displayContact = contactInfo || candidateID?.contact || 'N/A';
+
+    return (
+        <div className="max-w-none mx-auto rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm mb-6">
+            <div className="p-6 space-y-4">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                    <BadgeInfo className="text-blue-600" size={22} />
                     Candidate Profile
                 </h2>
 
-                <div className="grid grid-cols-[auto,1fr] gap-4">
-                    <div className="space-y-3">
-                        <div className="flex items-center space-x-3">
-                            <User className="text-blue-500 w-5 h-5" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300"><strong>Name:</strong></span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <Mail className="text-green-500 w-5 h-5" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300"><strong>Email:</strong></span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <UserCircle2 className="text-purple-500 w-5 h-5" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300"><strong>Gender:</strong></span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <MapPin className="text-red-500 w-5 h-5" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300"><strong>Address:</strong></span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            <Phone className="text-teal-500 w-5 h-5" />
-                            <span className="font-medium text-gray-700 dark:text-gray-300"><strong>Contact:</strong></span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <User className="text-blue-500 w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Full Name</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayName)}</p>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        <p className="text-gray-700 dark:text-gray-300">{capitalizeFirstLetter(candidateID?.userName) || 'N/A'}</p>
-                        <p className="text-gray-700 dark:text-gray-300">{candidateID?.email || 'N/A'}</p>
-                        <p className="text-gray-700 dark:text-gray-300">{candidateID?.gender || 'N/A'}</p>
-                        <p className="text-gray-700 dark:text-gray-300">{capitalizeFirstLetter(candidateID?.address) || 'N/A'}</p>
-                        <p className="text-gray-700 dark:text-gray-300">{contactInfo || 'N/A'}</p>
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <Mail className="text-emerald-500 w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Email Address</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{displayEmail}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <Phone className="text-teal-500 w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Contact Number</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{displayContact}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <UserCircle2 className="text-purple-500 w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Gender</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayGender)}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <MapPin className="text-rose-500 w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">City / Address</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayAddress)}</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,17 +1,17 @@
-import User from '../../models/User.js'
+import User from '../../models/User.js';
 
-const allHiringmanager = async ( req, res ) => {
-    try {
-        const companyId = req.headers[ 'company_id' ];  // Get the company_id from request headers
+const allHiringmanager = async (req, res) => {
+  try {
+    const companyId = req.headers['company_id'];
 
-        if ( !companyId ) {
-            return res.status( 400 ).json( { message: 'company_id is required' } );
-        }
-        const hiringmanager = await User.find( { role: 'hiring_manager', head: false, company_id: companyId } );
-        res.status( 200 ).json( hiringmanager );
-    } catch ( error ) {
-        res.status( 500 ).json( { message: 'Server error' } );
+    if (!companyId) {
+      return res.status(400).json({ message: 'company_id is required' });
     }
+    const hiringmanager = await User.find({ role: 'hiring_manager', head: false, company_id: companyId });
+    res.status(200).json(hiringmanager);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };
 
 export { allHiringmanager };

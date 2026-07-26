@@ -1,37 +1,34 @@
 import ApplicationStatus from "../../models/ApplicationStatus.js";
+import supabase, { fromDB } from "../../config/supabaseClient.js";
 
-const updateApplicationStatusCandidate = async ( req, res ) => {
+const updateApplicationStatusCandidate = async (req, res) => {
   try {
     const { jobID, candidateID, status } = req.body;
 
-    // Log the request body for debugging
-    console.log( "Update application type by candidate" );
-    console.log( req.body );
+    console.log("Update application type by candidate");
+    console.log(req.body);
 
-    // Find the application status by candidateID and update it
-    const updatedApplicationStatus = await ApplicationStatus.findByIdAndUpdate(
-      candidateID,
-      {
-        $push: {
-          applications: {
-            jobID: jobID,
-            candidateID: candidateID,
-            status: status,
-          },
-        },
-      },
-      { new: true } // To return the updated document
-    );
-
-    if ( !updatedApplicationStatus ) {
-      return res.status( 404 ).json( { error: "Application status not found" } );
+    const doc = await ApplicationStatus.findById(candidateID);
+    if (!doc) {
+      return res.status(404).json({ error: "Application status not found" });
     }
 
-    res.status( 200 ).json( updatedApplicationStatus );
-  } catch ( error ) {
-    res
-      .status( 500 )
-      .json( { error: "Failed to update application status by candidate" } );
+    const apps = Array.isArray(doc.applications) ? doc.applications : [];
+    apps.push({ jobID, candidateID, status });
+
+    const { data: updated, error } = await supabase
+      .from('application_statuses')
+      .update({ applications: apps })
+      .eq('id', candidateID)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json(fromDB(updated));
+  } catch (error) {
+    console.error("Failed to update application status by candidate:", error);
+    res.status(500).json({ error: "Failed to update application status by candidate" });
   }
 };
 

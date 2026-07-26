@@ -1,32 +1,26 @@
 import File from "../../models/ImportApplication.js";
 import Job from "../../models/Job.js";
 import User from "../../models/User.js";
-import CandidateApplication from "../../models/CandidateApplication.js";
 import CandidateFile from "../../models/CandidateApplication.js";
-import connectDB from "../../config/connectDB.js";
 import upload, { uploadToS3 } from "../../middleware/upload.js";
 import fetch from 'node-fetch';
 import uniqid from 'uniqid';
 import * as XLSX from 'xlsx';
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
 import { generateSimpleTitleCode, generateTitleCode } from "../utils.js";
 import Application from "../../models/Application.js";
 import ApplicationStatus from "../../models/ApplicationStatus.js";
 import { generateDescriptionText } from "../../utils/aiHelper.js";
+import supabase, { fromDB, fromDBArray } from "../../config/supabaseClient.js";
 
 export const uploadFile = async (req, res) => {
     try {
-        await connectDB();
-
-        // Make sure file exists
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
 
-        // Extract user data from request body
         const { userId, companyId, userName } = req.body;
 
-        // Validate required user data
         if (!userId || !companyId) {
             return res.status(400).json({
                 error: "User ID and Company ID are required",
@@ -48,15 +42,14 @@ export const uploadFile = async (req, res) => {
             filename: req.file.originalname,
             mimetype: req.file.mimetype,
             size: req.file.size,
-            file: fileUrl, // S3 URL
+            file: fileUrl,
             userId: userId,
             companyId: companyId,
             userName: userName || 'Unknown User',
-            uploadDate: new Date()
+            uploadDate: new Date().toISOString()
         };
 
-        const newFile = new File(fileData);
-        await newFile.save();
+        const newFile = await File.create(fileData);
 
         res.status(200).json({
             message: "File uploaded successfully",
@@ -73,20 +66,14 @@ export const uploadFile = async (req, res) => {
     }
 };
 
-// Candidate File Upload - Saves to CandidateFile model instead of ImportApplication
 export const uploadCandidateFile = async (req, res) => {
     try {
-        await connectDB();
-
-        // Make sure file exists
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
         }
 
-        // Extract user data from request body
         const { userId, companyId, userName, fileName } = req.body;
 
-        // Validate required user data
         if (!userId || !companyId) {
             return res.status(400).json({
                 error: "User ID and Company ID are required",
@@ -104,27 +91,25 @@ export const uploadCandidateFile = async (req, res) => {
             return res.status(400).json({ message: "File is required." });
         }
 
-        // Save to CandidateFile model instead of ImportApplication model
         const candidateFileData = {
             fileName: fileName || req.file.originalname,
             originalName: req.file.originalname,
             mimetype: req.file.mimetype,
             size: req.file.size,
-            fileUrl: fileUrl, // S3 URL
+            fileUrl: fileUrl,
             userId: userId,
             companyId: companyId,
             userName: userName || 'Unknown User',
-            uploadDate: new Date(),
+            uploadDate: new Date().toISOString(),
             status: 'processing'
         };
 
-        const newCandidateFile = new CandidateFile(candidateFileData);
-        await newCandidateFile.save();
+        const newCandidateFile = await CandidateFile.create(candidateFileData);
 
         res.status(200).json({
             message: "Candidate file uploaded successfully",
             fileId: newCandidateFile._id,
-            candidateFileId: newCandidateFile._id, // Specific ID for candidate files
+            candidateFileId: newCandidateFile._id,
             fileName: newCandidateFile.fileName,
             fileUrl: newCandidateFile.fileUrl,
             status: newCandidateFile.status
@@ -138,49 +123,30 @@ export const uploadCandidateFile = async (req, res) => {
     }
 };
 
-// Get candidate files for a user/company
 export const getCandidateFiles = async (req, res) => {
     try {
-        await connectDB();
-
         const { userId, companyId, userName, role } = req.query;
 
         console.log("Fetching candidate files with filters:", { userId, companyId, userName, role });
 
-        let query = {};
+        let query = supabase.from('candidate_files').select('*').order('"uploadDate"', { ascending: false });
 
-        // Apply filters
-        if (userId && companyId) {
-            query = { userId, companyId };
-        } else if (userId) {
-            query = { userId };
-        } else if (companyId) {
-            query = { companyId };
+        if (role !== 'admin') {
+            if (userId) query = query.eq('"userId"', userId);
+            if (companyId) query = query.eq('"companyId"', companyId);
         }
 
-        // Add userName filter if provided
         if (userName && userName !== 'all') {
-            query.userName = { $regex: userName, $options: 'i' };
+            query = query.ilike('"userName"', `%${userName}%`);
         }
 
-        // For admin users, they can see all files regardless of user
-        if (role === 'admin') {
-            // If admin is searching by userName, apply the filter
-            if (userName && userName !== 'all') {
-                query.userName = { $regex: userName, $options: 'i' };
-            } else {
-                // If no userName filter, remove user-specific filters for admin
-                delete query.userId;
-                delete query.companyId;
-            }
-        }
+        const { data: files, error } = await query;
+        if (error) throw error;
 
-        const candidateFiles = await CandidateFile.find(query).sort({ uploadDate: -1 });
-
-        const transformedFiles = candidateFiles.map(file => ({
-            _id: file._id,
-            fileName: file.fileName || file.filename,
-            originalName: file.originalName || file.fileName || file.filename,
+        const transformedFiles = (files || []).map(file => ({
+            _id: file.id,
+            fileName: file.fileName,
+            originalName: file.originalName || file.fileName,
             fileSize: file.size,
             fileUrl: file.fileUrl,
             uploadDate: file.uploadDate,
@@ -194,8 +160,6 @@ export const getCandidateFiles = async (req, res) => {
             status: file.status,
             processingErrors: file.processingErrors
         }));
-
-        console.log(`Fetched ${transformedFiles.length} candidate files`);
 
         res.status(200).json({
             files: transformedFiles,
@@ -211,11 +175,8 @@ export const getCandidateFiles = async (req, res) => {
     }
 };
 
-// Get specific candidate file details
 export const getCandidateFileDetails = async (req, res) => {
     try {
-        await connectDB();
-
         const { id } = req.params;
 
         if (!id) {
@@ -228,10 +189,31 @@ export const getCandidateFileDetails = async (req, res) => {
             return res.status(404).json({ error: "Candidate file not found" });
         }
 
-        // Get related candidate applications
-        const applications = await CandidateApplication.find({
-            source_file: id
-        }).populate('candidate_id', 'userName email contactInfo');
+        // Get related candidate applications (source_file field in candidate_files - if the developer queries it, we look in candidate_files table or handle gracefully)
+        let applications = [];
+        try {
+            const { data: rawApps } = await supabase
+                .from('candidate_files')
+                .select('*')
+                .eq('source_file', id);
+            
+            if (rawApps && rawApps.length > 0) {
+                // Populate candidate details (users table)
+                const candidateIds = rawApps.map(app => app.candidate_id).filter(Boolean);
+                let candMap = {};
+                if (candidateIds.length > 0) {
+                    const { data: candidates } = await supabase.from('users').select('id, "userName", email, "contactInfo"').in('id', candidateIds);
+                    (candidates || []).forEach(c => { candMap[c.id] = c; });
+                }
+                applications = rawApps.map(app => ({
+                    ...app,
+                    _id: app.id,
+                    candidate_id: candMap[app.candidate_id] || app.candidate_id
+                }));
+            }
+        } catch (dbErr) {
+            console.warn("Could not find applications using source_file key", dbErr.message);
+        }
 
         res.status(200).json({
             file: candidateFile,
@@ -253,20 +235,17 @@ export const getCandidateFileDetails = async (req, res) => {
     }
 };
 
-// Updated createCandidateApplications function with CandidateFile tracking
 export const createCandidateApplications = async (req, res) => {
     try {
         const { userId, companyId, candidates, candidateFileId } = req.body;
         console.log("🔍 DEBUG - Received candidates data:", candidates);
 
-        // Step 1: Validate user & company
         if (!userId || !companyId) {
             return res.status(400).json({
                 error: 'User ID and company ID are required'
             });
         }
 
-        // Step 2: Validate candidates array
         if (!candidates || !Array.isArray(candidates)) {
             return res.status(400).json({
                 error: 'Candidates data is required and must be an array'
@@ -278,46 +257,42 @@ export const createCandidateApplications = async (req, res) => {
         const jobApplications = [];
         let candidateFile = null;
 
-        // Step 3: Candidate file setup
         if (candidateFileId) {
             candidateFile = await CandidateFile.findById(candidateFileId);
             if (candidateFile) {
                 console.log("🔍 DEBUG: CandidateFile found, updating status to processing");
-                candidateFile.status = 'processing';
-                candidateFile.totalCandidates = candidates.length;
-                await candidateFile.save();
+                await CandidateFile.findByIdAndUpdate(candidateFileId, {
+                    status: 'processing',
+                    totalCandidates: candidates.length
+                });
             }
         }
 
-        // Step 4: Get the first application status
         console.log("🔍 DEBUG: Fetching first application status for company:", companyId);
-        const firstApplicationStatus = await ApplicationStatus.findOne({
-            company_id: companyId
-        }).sort({ applicationStep: 1 }); // Sort by applicationStep ascending to get the first step
+        const { data: firstStatusDoc } = await supabase
+            .from('application_statuses')
+            .select('*')
+            .eq('company_id', companyId)
+            .order('"applicationStep"', { ascending: true })
+            .limit(1)
+            .maybeSingle();
 
-        if (!firstApplicationStatus) {
+        if (!firstStatusDoc) {
             return res.status(400).json({
                 error: 'No application status found for this company. Please set up application statuses first.'
             });
         }
 
-        const firstStatusId = firstApplicationStatus._id.toString();
+        const firstStatusId = firstStatusDoc.id;
 
-        // Step 5: Check available jobs first
-        const availableJobs = await Job.find({ company_id: companyId });
-
-        // Step 5: Loop over candidates
         for (let i = 0; i < candidates.length; i++) {
             const candidateData = candidates[i];
 
             try {
-                // Validation
                 if (!candidateData.userName || !candidateData.email) {
                     throw new Error('Candidate name and email are required');
                 }
 
-
-                // Existing candidate check
                 const existingCandidate = await User.findOne({
                     email: candidateData.email,
                     company_id: companyId,
@@ -335,25 +310,21 @@ export const createCandidateApplications = async (req, res) => {
                         message: 'Candidate already exists'
                     });
                 } else {
-                    // Create new candidate
                     const hashPassword = await bcrypt.hashSync(candidateData.password || 'DefaultPassword123!', 10);
 
-                    const newCandidate = new User({
+                    const savedCandidate = await User.create({
                         userName: candidateData.userName,
                         email: candidateData.email,
                         password: hashPassword,
                         address: candidateData.address || '',
                         gender: candidateData.gender || '',
-                        titleCode: candidateData.titleCode || '',
-                        contactInfo: candidateData.contactInfo || '',
-                        experience: candidateData.experience || '',
                         role: 'candidate',
                         company_id: companyId,
-                        created_by: userId,
+                        contactInfo: candidateData.contactInfo || '',
+                        experience: candidateData.experience || '',
                         status: 'active'
                     });
 
-                    const savedCandidate = await newCandidate.save();
                     candidateId = savedCandidate._id;
                     isNewCandidate = true;
 
@@ -364,7 +335,6 @@ export const createCandidateApplications = async (req, res) => {
                     });
                 }
 
-                // Step 6: Apply candidate to jobs based on titleCode
                 if (candidateData.titleCode && candidateData.titleCode.length > 0) {
                     console.log(`🔍 DEBUG: Processing titleCodes for ${candidateData.userName}:`, candidateData.titleCode);
 
@@ -375,16 +345,14 @@ export const createCandidateApplications = async (req, res) => {
                         try {
                             console.log(`🔍 DEBUG: Looking for job with titleCode: "${trimmedCode}"`);
 
-                            // Find job by titleCode
                             const job = await Job.findOne({
                                 titleCode: trimmedCode,
                                 company_id: companyId
                             });
 
                             if (job) {
-                                console.log(`✅ DEBUG: Found job: ${job.jobTitle} (${job.titleCode})`);
+                                console.log(`✅ DEBUG: Found job: ${job.title} (${job.titleCode})`);
 
-                                // Check if application already exists
                                 const existingApplication = await Application.findOne({
                                     candidateID: candidateId.toString(),
                                     jobID: job._id.toString(),
@@ -392,8 +360,7 @@ export const createCandidateApplications = async (req, res) => {
                                 });
 
                                 if (!existingApplication) {
-                                    // Create job application
-                                    const jobApplication = new Application({
+                                    const savedApplication = await Application.create({
                                         jobID: job._id.toString(),
                                         candidateID: candidateId.toString(),
                                         applicationStatusId: firstStatusId,
@@ -407,34 +374,33 @@ export const createCandidateApplications = async (req, res) => {
                                         company_id: companyId
                                     });
 
-                                    const savedApplication = await jobApplication.save();
                                     jobApplications.push({
                                         candidateId: candidateId,
                                         candidateName: candidateData.userName,
                                         jobId: job._id,
-                                        jobTitle: job.jobTitle,
+                                        jobTitle: job.title,
                                         titleCode: trimmedCode,
                                         applicationId: savedApplication._id,
                                         status: 'applied',
                                         applicationStatus: {
                                             id: firstStatusId,
-                                            step: firstApplicationStatus.applicationStep,
-                                            name: firstApplicationStatus.applicationStatus
+                                            step: firstStatusDoc.applicationStep,
+                                            name: firstStatusDoc.applicationStatus
                                         }
                                     });
 
-                                    console.log(`✅ SUCCESS: Applied ${candidateData.userName} to job ${job.jobTitle} (${trimmedCode}) with status: ${firstApplicationStatus.applicationStatus}`);
+                                    console.log(`✅ SUCCESS: Applied ${candidateData.userName} to job ${job.title} (${trimmedCode})`);
                                 } else {
                                     jobApplications.push({
                                         candidateId: candidateId,
                                         candidateName: candidateData.userName,
                                         jobId: job._id,
-                                        jobTitle: job.jobTitle,
+                                        jobTitle: job.title,
                                         titleCode: trimmedCode,
                                         applicationId: existingApplication._id,
                                         status: 'already_applied'
                                     });
-                                    console.log(`ℹ️ INFO: ${candidateData.userName} already applied to ${job.jobTitle}`);
+                                    console.log(`ℹ️ INFO: ${candidateData.userName} already applied to ${job.title}`);
                                 }
                             } else {
                                 console.log(`❌ DEBUG: No job found for titleCode: "${trimmedCode}"`);
@@ -463,32 +429,23 @@ export const createCandidateApplications = async (req, res) => {
 
             } catch (error) {
                 console.error(`❌ ERROR processing candidate row ${i + 1}:`, error);
-                const errorData = {
+                errors.push({
                     row: i + 1,
                     error: error.message,
                     candidateData: candidateData
-                };
-                errors.push(errorData);
+                });
             }
         }
 
-        // Step 7: Update candidate file
-        if (candidateFile) {
-            candidateFile.processedCandidates = createdCandidates.length;
-            candidateFile.failedCandidates = errors.length;
-            candidateFile.status = errors.length === 0 ? 'completed' :
-                createdCandidates.length === 0 ? 'failed' : 'partial';
-            await candidateFile.save();
+        if (candidateFileId) {
+            await CandidateFile.findByIdAndUpdate(candidateFileId, {
+                processedCandidates: createdCandidates.length,
+                failedCandidates: errors.length,
+                status: errors.length === 0 ? 'completed' :
+                    createdCandidates.length === 0 ? 'failed' : 'partial',
+                processingErrors: errors
+            });
         }
-
-        console.log("📊 DEBUG: Final Results:", {
-            totalProcessed: candidates.length,
-            created: createdCandidates.filter(c => c.status === 'created').length,
-            existing: createdCandidates.filter(c => c.status === 'existing').length,
-            errors: errors.length,
-            jobApplications: jobApplications.filter(app => app.status === 'applied').length,
-            jobApplicationsDetail: jobApplications
-        });
 
         return res.status(201).json({
             message: 'Candidate processing completed',
@@ -503,8 +460,8 @@ export const createCandidateApplications = async (req, res) => {
             processingStatus: candidateFile ? candidateFile.status : 'unknown',
             applicationStatusUsed: {
                 id: firstStatusId,
-                step: firstApplicationStatus.applicationStep,
-                name: firstApplicationStatus.applicationStatus
+                step: firstStatusDoc.applicationStep,
+                name: firstStatusDoc.applicationStatus
             }
         });
 
@@ -529,12 +486,9 @@ export const createCandidateApplications = async (req, res) => {
     }
 };
 
-
 const formatExcelTime = (value) => {
     if (value === null || value === undefined || value === "") return "";
-
     let numValue = typeof value === 'number' ? value : parseFloat(value);
-
     if (!isNaN(numValue) && numValue >= 0 && numValue <= 1 && (typeof value === 'number' || (value.toString && value.toString().includes('.')))) {
         const totalMinutes = Math.round(numValue * 24 * 60);
         const hours = Math.floor(totalMinutes / 60);
@@ -543,8 +497,6 @@ const formatExcelTime = (value) => {
     }
     return value.toString() || "";
 };
-
-// controllers/ImportApplication/importApplication.js - Add this function
 
 export const createJobsFromFile = async (req, res) => {
     try {
@@ -559,13 +511,10 @@ export const createJobsFromFile = async (req, res) => {
         let headers = [];
         let data = [];
 
-        // Check if fileData is provided directly (from frontend)
         if (fileData && fileData.headers && fileData.data) {
             headers = fileData.headers;
             data = fileData.data;
-        }
-        // Otherwise, fetch from URL (existing logic)
-        else if (fileUrl) {
+        } else if (fileUrl) {
             const response = await fetch(fileUrl);
             if (!response.ok) {
                 throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
@@ -605,17 +554,14 @@ export const createJobsFromFile = async (req, res) => {
             });
         }
 
-        // Get existing jobs for title code generation
         const existingJobs = await Job.find({ company_id: companyId });
         console.log(`Found ${existingJobs.length} existing jobs for title code generation`);
 
-        // Process data and create jobs
         const jobs = [];
         const errors = [];
 
         const headerMap = headers.map(h => h.toLowerCase().trim());
 
-        // Find column indices
         const titleIndex = headerMap.findIndex(h => h.includes('title'));
         const statusIndex = headerMap.findIndex(h => h.includes('status') || h.includes('applicationstatus'));
         const hiringManagerIndex = headerMap.findIndex(h =>
@@ -624,15 +570,12 @@ export const createJobsFromFile = async (req, res) => {
             h.includes('manager') ||
             h.includes('hiring manager name')
         );
-
-        // Recruiter manager index
         const recruiterManagerIndex = headerMap.findIndex(h =>
             h.includes('recruter manager') ||
             h.includes('recruiter manager') ||
             h.includes('recruiter_manager') ||
             h.includes('recruiter')
         );
-
         const experienceRequiredIndex = headerMap.findIndex(h =>
             h.includes('experience required') ||
             h.includes('experience') ||
@@ -651,50 +594,39 @@ export const createJobsFromFile = async (req, res) => {
 
                 let statusId = '';
 
-                // Use the status ID sent from frontend via jobStatusMap
                 if (jobStatusMap && jobStatusMap[statusName]) {
                     statusId = jobStatusMap[statusName];
                 } else {
-                    console.warn(`Status "${statusName}" not found in jobStatusMap`);
-                    // Try to find any status as fallback
                     const firstStatus = Object.values(jobStatusMap)[0];
                     statusId = firstStatus || '';
                 }
 
-                // Handle hiring manager mapping
-                let hiringManagerId = userId; // Default to current user
-
+                let hiringManagerId = userId;
                 if (hiringManagerName && hiringManagerName.toString().trim() !== '') {
                     const hiringManagerNameStr = hiringManagerName.toString().trim();
-
-                    // Try to find hiring manager ID using different variations
                     let foundId = null;
 
                     if (hiringManagerMap) {
-                        // Create an array of possible variations to check
                         const variations = [
-                            hiringManagerNameStr, // Exact match: "shah_nawaz_ahmad"
-                            hiringManagerNameStr.toLowerCase(), // Lowercase: "shah_nawaz_ahmad"
-                            hiringManagerNameStr.replace(/_/g, ' '), // Replace underscores with spaces: "shah nawaz ahmad"
-                            hiringManagerNameStr.replace(/_/g, ' ').toLowerCase(), // "shah nawaz ahmad"
-                            hiringManagerNameStr.replace(/\s+/g, '_'), // Replace spaces with underscores: "shah_nawaz_ahmad"
-                            hiringManagerNameStr.replace(/\s+/g, '_').toLowerCase(), // "shah_nawaz_ahmad"
-                            // Title case variations
+                            hiringManagerNameStr,
+                            hiringManagerNameStr.toLowerCase(),
+                            hiringManagerNameStr.replace(/_/g, ' '),
+                            hiringManagerNameStr.replace(/_/g, ' ').toLowerCase(),
+                            hiringManagerNameStr.replace(/\s+/g, '_'),
+                            hiringManagerNameStr.replace(/\s+/g, '_').toLowerCase(),
                             hiringManagerNameStr.replace(/_/g, ' ')
                                 .split(' ')
                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                                .join(' '), // "Shah Nawaz Ahmad"
+                                .join(' '),
                             hiringManagerNameStr.replace(/_/g, ' ')
                                 .split(' ')
                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                                .join(' ').toLowerCase() // "shah nawaz ahmad"
+                                .join(' ').toLowerCase()
                         ];
 
-                        // Try each variation
                         for (const variation of variations) {
                             if (hiringManagerMap[variation]) {
                                 foundId = hiringManagerMap[variation];
-                                console.log(`✅ Found hiring manager match with variation "${variation}" -> ID: ${foundId}`);
                                 break;
                             }
                         }
@@ -702,50 +634,35 @@ export const createJobsFromFile = async (req, res) => {
 
                     if (foundId) {
                         hiringManagerId = foundId;
-                        console.log(`✅ Final hiring manager mapping: "${hiringManagerNameStr}" -> ID: ${hiringManagerId}`);
-                    } else {
-                        console.warn(`❌ Hiring manager "${hiringManagerNameStr}" not found in map. Using current user as default.`);
                     }
-                } else {
-                    console.log('ℹ️ No hiring manager specified, using current user as default');
                 }
 
-                // Handle recruiter manager mapping
-                let recruiterManagerId = userId; // Default to current user
-
+                let recruiterManagerId = userId;
                 if (recruiterManagerName && recruiterManagerName.toString().trim() !== '') {
                     const recruiterManagerNameStr = recruiterManagerName.toString().trim();
-
-                    console.log(`Looking up recruiter manager: "${recruiterManagerNameStr}"`);
-
-                    // Try to find recruiter manager ID using different variations
                     let foundId = null;
 
                     if (recruiterMap) {
-                        // Create an array of possible variations to check
                         const variations = [
-                            recruiterManagerNameStr, // Exact match
-                            recruiterManagerNameStr.toLowerCase(), // Lowercase
-                            recruiterManagerNameStr.replace(/_/g, ' '), // Replace underscores with spaces
+                            recruiterManagerNameStr,
+                            recruiterManagerNameStr.toLowerCase(),
+                            recruiterManagerNameStr.replace(/_/g, ' '),
                             recruiterManagerNameStr.replace(/_/g, ' ').toLowerCase(),
-                            recruiterManagerNameStr.replace(/\s+/g, '_'), // Replace spaces with underscores
+                            recruiterManagerNameStr.replace(/\s+/g, '_'),
                             recruiterManagerNameStr.replace(/\s+/g, '_').toLowerCase(),
-                            // Title case variations
                             recruiterManagerNameStr.replace(/_/g, ' ')
                                 .split(' ')
                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                                .join(' '), // "Shah Nawaz Ahmad"
+                                .join(' '),
                             recruiterManagerNameStr.replace(/_/g, ' ')
                                 .split(' ')
                                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                                .join(' ').toLowerCase() // "shah nawaz ahmad"
+                                .join(' ').toLowerCase()
                         ];
 
-                        // Try each variation
                         for (const variation of variations) {
                             if (recruiterMap[variation]) {
                                 foundId = recruiterMap[variation];
-                                console.log(`✅ Found recruiter manager match with variation "${variation}" -> ID: ${foundId}`);
                                 break;
                             }
                         }
@@ -753,48 +670,35 @@ export const createJobsFromFile = async (req, res) => {
 
                     if (foundId) {
                         recruiterManagerId = foundId;
-                        console.log(`✅ Final recruiter manager mapping: "${recruiterManagerNameStr}" -> ID: ${recruiterManagerId}`);
-                    } else {
-                        console.warn(`❌ Recruiter manager "${recruiterManagerNameStr}" not found in map. Using current user as default.`);
                     }
-                } else {
-                    console.log('ℹ️ No recruiter manager specified, using current user as default');
                 }
 
-                // Handle experience required - keep as string/slot format
                 const experienceRequiredValue = experienceRequiredIndex >= 0 ? row[experienceRequiredIndex] : undefined;
-                let experienceRequired = '0'; // default as string
+                let experienceRequired = '0';
 
                 if (experienceRequiredValue !== undefined && experienceRequiredValue !== null) {
-                    // Keep as string, don't parse to integer
                     experienceRequired = experienceRequiredValue.toString().trim();
-
-                    // Optional: Validate and clean up
                     if (experienceRequired === '') {
                         experienceRequired = '0';
                     }
                 }
 
-                // Extract job title for title code generation
                 const jobTitle = row[titleIndex] || 'Untitled Position';
 
-                // Generate title code
                 let titleCode;
                 try {
                     titleCode = generateTitleCode(jobTitle, existingJobs);
                 } catch (error) {
-                    console.error('Error generating title code, using fallback:', error);
                     titleCode = generateSimpleTitleCode(jobTitle);
                 }
 
-                // Extract job data with better field mapping
                 const jobData = {
                     title: jobTitle,
-                    titleCode: titleCode, // ADD THIS FIELD - THIS IS WHAT'S MISSING
+                    titleCode: titleCode,
                     locationType: row[headerMap.findIndex(h => h.includes('location type') || h.includes('locationtype'))] || 'On-Site',
                     type: row[headerMap.findIndex(h => h.includes('type') && !h.includes('location') && !h.includes('schedule') && !h.includes('hire'))] || 'Full-Time',
                     scheduleType: row[headerMap.findIndex(h => h.includes('schedule type') || h.includes('scheduletype'))] || 'Flexible',
-                    shiftStart: formatExcelTime(row[headerMap.findIndex(h => h.includes('shift start') || h.includes('shiftstart'))]) || '09:00',
+                    shiftStart: formatExcelTime(row[headerMap.findIndex(h => h.includes('shift start') || h.includes('shiftstart'))]) || '08:00',
                     shiftEnd: formatExcelTime(row[headerMap.findIndex(h => h.includes('shift end') || h.includes('shiftend'))]) || '17:00',
                     hireType: row[headerMap.findIndex(h => h.includes('hire type') || h.includes('hiretype'))] || 'New',
                     country: row[headerMap.findIndex(h => h.includes('country'))] || 'India',
@@ -812,63 +716,41 @@ export const createJobsFromFile = async (req, res) => {
                     company_id: companyId
                 };
 
-                // Generate AI description if requested
                 if (useAiDescription) {
                     try {
-                        console.log(`Generating AI description for job title: ${jobTitle}`);
                         jobData.description = await generateDescriptionText(
                             jobTitle,
                             companyUserName,
                             jobData.compensation,
                             jobData.experienceRequired
                         );
-                        console.log(`✅ AI description generated for: ${jobTitle}`);
-
-                        // Add delay between requests to avoid rate limiting (1 second)
-                        if (i < data.length - 1) { // Don't delay after the last job
+                        if (i < data.length - 1) {
                             await new Promise(resolve => setTimeout(resolve, 1000));
                         }
                     } catch (aiError) {
                         console.error(`Error generating AI description for ${jobTitle}:`, aiError);
-                        // Fallback to default description if AI fails
                     }
                 }
 
-                console.log(`Job data for row ${i + 1}:`, {
-                    title: jobData.title,
-                    titleCode: jobData.titleCode, // Log the generated title code
-                    recruiterId: jobData.recruiterId,
-                    hiringManagerId: jobData.hiringManagerId
-                });
-
-                // Validate that we have at least a title
                 if (!jobData.title || jobData.title.trim() === '' || jobData.title === 'Untitled Position') {
                     throw new Error('Job title is required and cannot be empty');
                 }
 
-                // Validate status ID if required
                 if (!statusId) {
                     throw new Error(`Status ID not found for status: ${statusName}`);
                 }
 
-                // Create job using your existing job creation logic
-                const job = new Job({
+                const savedJob = await Job.create({
                     jobID: uniqid(),
                     ...jobData
                 });
-
-                const savedJob = await job.save();
                 jobs.push(savedJob);
-
-                console.log(`✅ Job created successfully: ${savedJob.title} (Code: ${savedJob.titleCode}, ID: ${savedJob._id})`);
 
             } catch (error) {
                 console.error(`Error processing row ${i + 1}:`, error);
                 errors.push(`Row ${i + 1}: ${error.message}`);
             }
         }
-
-        console.log(`Job creation summary: ${jobs.length} created, ${errors.length} errors`);
 
         res.json({
             success: true,
@@ -886,72 +768,47 @@ export const createJobsFromFile = async (req, res) => {
     }
 };
 
-// In uploadFile backend code
 export const getUserFiles = async (req, res) => {
     try {
-        await connectDB();
-
         const { userId, companyId, role, fileType, userName } = req.query;
 
         console.log("Fetching files with filters:", { userId, companyId, role, fileType, userName });
 
-        let query = {};
+        let query = supabase.from('import_files').select('*').order('"uploadDate"', { ascending: false });
 
-        // If user is admin, show all files (no user/company filter)
-        if (role === 'admin') {
-            // Admin can see all files across the system
-            query = {};
-
-            // If admin is filtering by userName, apply that filter
-            if (userName && userName !== 'all') {
-                query.userName = { $regex: userName, $options: 'i' };
-            }
-        }
-        // For non-admin users, apply normal filters
-        else if (userId && companyId) {
-            query = { userId, companyId };
-        } else if (userId) {
-            query = { userId };
-        } else if (companyId) {
-            query = { companyId };
+        if (role !== 'admin') {
+            if (userId) query = query.eq('"userId"', userId);
+            if (companyId) query = query.eq('"companyId"', companyId);
         }
 
-        // File type filter (for candidate files)
+        if (userName && userName !== 'all') {
+            query = query.ilike('"userName"', `%${userName}%`);
+        }
+
+        // Apply file type constraints if candidate
         if (fileType === 'candidate') {
-            query.mimetype = {
-                $in: [
-                    'application/vnd.ms-excel',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'text/csv',
-                    'application/vnd.ms-excel.sheet.macroEnabled.12'
-                ]
-            };
-        }
-
-        // For non-admin users, if userName filter is provided
-        if (role !== 'admin' && userName && userName !== 'all') {
-            query.userName = { $regex: userName, $options: 'i' };
+            query = query.in('mimetype', [
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'text/csv',
+                'application/vnd.ms-excel.sheet.macroEnabled.12'
+            ]);
         }
 
         // Role filter for non-admin users (optional)
         if (role && role !== 'admin') {
-            const usersWithRole = await User.find({ role }).select('_id');
-            const userIds = usersWithRole.map(user => user._id.toString());
-
-            if (query.userId) {
-                // If userId filter already exists, ensure it matches the role
-                query.userId = { $in: userIds.filter(id => id === query.userId) };
-            } else {
-                query.userId = { $in: userIds };
+            const { data: roleUsers } = await supabase.from('users').select('id').eq('role', role);
+            const userIds = (roleUsers || []).map(user => user.id);
+            if (userIds.length > 0) {
+                query = query.in('"userId"', userIds);
             }
         }
 
-        console.log("Final database query:", query);
+        const { data: files, error } = await query;
+        if (error) throw error;
 
-        const files = await File.find(query).sort({ uploadDate: -1 });
-
-        const transformedFiles = files.map(file => ({
-            _id: file._id,
+        const transformedFiles = (files || []).map(file => ({
+            _id: file.id,
             fileName: file.filename,
             fileSize: file.size,
             fileUrl: file.file,
@@ -962,8 +819,6 @@ export const getUserFiles = async (req, res) => {
             mimetype: file.mimetype,
             userRole: file.userRole || ''
         }));
-
-        console.log(`Fetched ${transformedFiles.length} files for role: ${role}`);
 
         res.status(200).json({
             files: transformedFiles,
@@ -992,9 +847,7 @@ export const proxyFile = async (req, res) => {
         const fileName = urlParts[urlParts.length - 1].split("-")[1];
 
         console.log(`Proxying file request for: ${fileName}`);
-        console.log(`File URL: ${fileUrl}`);
 
-        // Fetch the file from S3
         const response = await fetch(fileUrl, {
             method: 'GET',
             headers: {
@@ -1007,10 +860,9 @@ export const proxyFile = async (req, res) => {
             throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
         }
 
-        // Get the file data
-        const buffer = await response.buffer();
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
-        // Set appropriate headers
         const contentType = response.headers.get('content-type') ||
             (fileName.toLowerCase().endsWith('.csv') ? 'text/csv' :
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1024,9 +876,7 @@ export const proxyFile = async (req, res) => {
             'Access-Control-Allow-Headers': 'Content-Type'
         });
 
-        // Send the file data
         res.send(buffer);
-
     } catch (error) {
         console.error('Proxy file error:', error);
         res.status(500).json({
@@ -1038,36 +888,27 @@ export const proxyFile = async (req, res) => {
 
 export const getFile = async (req, res) => {
     try {
-        await connectDB();
-
-        const { id } = req.query;
-        const { userId, companyId } = req.query; // Optional security check
+        const { id, userId, companyId } = req.query;
 
         if (!id) {
             return res.status(400).json({ error: "File ID is required" });
         }
 
-        // Build query with security filters
-        let query = { _id: id };
+        let query = supabase.from('import_files').select('*').eq('id', id);
+        if (userId) query = query.eq('"userId"', userId);
+        if (companyId) query = query.eq('"companyId"', companyId);
 
-        // Add user/company filters for additional security
-        if (userId && companyId) {
-            query.userId = userId;
-            query.companyId = companyId;
-        }
-
-        const file = await File.findOne(query);
+        const { data: file, error } = await query.maybeSingle();
+        if (error) throw error;
 
         if (!file) {
             return res.status(404).json({ error: "File not found or access denied" });
         }
 
-        // For S3 URLs, redirect to the file
         if (file.file.startsWith('http')) {
             return res.redirect(file.file);
         }
 
-        // For binary data stored in database (legacy support)
         res.setHeader("Content-Type", file.mimetype);
         res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
         res.send(file.file);
@@ -1080,11 +921,8 @@ export const getFile = async (req, res) => {
     }
 };
 
-// New function to delete user files
 export const deleteUserFile = async (req, res) => {
     try {
-        await connectDB();
-
         const { id } = req.params;
         const { userId, companyId } = req.body;
 
@@ -1096,12 +934,16 @@ export const deleteUserFile = async (req, res) => {
             return res.status(400).json({ error: "User ID and Company ID are required" });
         }
 
-        // Find and delete file only if it belongs to the user/company
-        const deletedFile = await File.findOneAndDelete({
-            _id: id,
-            userId: userId,
-            companyId: companyId
-        });
+        const { data: deletedFile, error } = await supabase
+            .from('import_files')
+            .delete()
+            .eq('id', id)
+            .eq('"userId"', userId)
+            .eq('"companyId"', companyId)
+            .select()
+            .maybeSingle();
+
+        if (error) throw error;
 
         if (!deletedFile) {
             return res.status(404).json({ error: "File not found or access denied" });
@@ -1110,7 +952,7 @@ export const deleteUserFile = async (req, res) => {
         res.status(200).json({
             message: "File deleted successfully",
             deletedFile: {
-                id: deletedFile._id,
+                id: deletedFile.id,
                 filename: deletedFile.filename
             }
         });
@@ -1123,42 +965,43 @@ export const deleteUserFile = async (req, res) => {
     }
 };
 
-// Function to get file statistics for a company
 export const getCompanyFileStats = async (req, res) => {
     try {
-        await connectDB();
-
         const { companyId } = req.query;
 
         if (!companyId) {
             return res.status(400).json({ error: "Company ID is required" });
         }
 
-        const stats = await File.aggregate([
-            { $match: { companyId: companyId } },
-            {
-                $group: {
-                    _id: null,
-                    totalFiles: { $sum: 1 },
-                    totalSize: { $sum: "$size" },
-                    users: { $addToSet: "$userId" },
-                    latestUpload: { $max: "$uploadDate" },
-                    oldestUpload: { $min: "$uploadDate" }
-                }
-            }
-        ]);
+        const { data: files, error } = await supabase
+            .from('import_files')
+            .select('*')
+            .eq('"companyId"', companyId);
+        
+        if (error) throw error;
 
-        const result = stats[0] || {
-            totalFiles: 0,
-            totalSize: 0,
-            users: [],
-            latestUpload: null,
-            oldestUpload: null
-        };
+        let totalFiles = 0;
+        let totalSize = 0;
+        let userIds = new Set();
+        let latestUpload = null;
+        let oldestUpload = null;
 
-        result.uniqueUsers = result.users.length;
+        (files || []).forEach(file => {
+            totalFiles++;
+            totalSize += file.size || 0;
+            if (file.userId) userIds.add(file.userId);
+            const uploadTime = new Date(file.uploadDate).getTime();
+            if (!latestUpload || uploadTime > new Date(latestUpload).getTime()) latestUpload = file.uploadDate;
+            if (!oldestUpload || uploadTime < new Date(oldestUpload).getTime()) oldestUpload = file.uploadDate;
+        });
 
-        res.status(200).json(result);
+        res.status(200).json({
+            totalFiles,
+            totalSize,
+            uniqueUsers: userIds.size,
+            latestUpload,
+            oldestUpload
+        });
     } catch (error) {
         console.error("Error fetching company stats:", error);
         res.status(500).json({
@@ -1168,7 +1011,6 @@ export const getCompanyFileStats = async (req, res) => {
     }
 };
 
-// Alternative approach using streams (more memory efficient for large files)
 export const proxyFileStream = async (req, res) => {
     try {
         const { fileUrl, fileName } = req.body;
@@ -1181,14 +1023,11 @@ export const proxyFileStream = async (req, res) => {
 
         console.log(`Streaming file request for: ${fileName}`);
 
-        // Create a fetch request
         const response = await fetch(fileUrl);
-
         if (!response.ok) {
             throw new Error(`Failed to fetch file: ${response.status}`);
         }
 
-        // Set headers before streaming
         const contentType = response.headers.get('content-type') ||
             (fileName.toLowerCase().endsWith('.csv') ? 'text/csv' :
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1201,9 +1040,7 @@ export const proxyFileStream = async (req, res) => {
             'Access-Control-Allow-Headers': 'Content-Type'
         });
 
-        // Pipe the response directly
         response.body.pipe(res);
-
     } catch (error) {
         console.error('Proxy file stream error:', error);
         if (!res.headersSent) {
@@ -1215,7 +1052,6 @@ export const proxyFileStream = async (req, res) => {
     }
 };
 
-// Add CORS middleware for the proxy endpoint
 export const corsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

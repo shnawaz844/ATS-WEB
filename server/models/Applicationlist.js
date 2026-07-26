@@ -1,30 +1,61 @@
-import mongoose from "mongoose";
+import supabase, { fromDB, fromDBArray } from '../config/supabaseClient.js';
 
-const InterviewSchema = new mongoose.Schema(
-    {
-        applicationID: { type: mongoose.Schema.Types.ObjectId, ref: "Application", required: true },
-        interviewerID: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false },
-        date: { type: String, required: true },
-        scheduledTime: { type: String, required: true },
-        interviewerType: { type: String, required: true },
-        meetingLink: { type: String },
-        status: { type: String, required: false },
-        interviewProgressStatus: { type: String, default: "Upcoming" },
-        roundID: { type: mongoose.Schema.Types.ObjectId, ref: "Interview", required: true },
-        reasonRescheduled: {
-            type: String, required: function () {
-                return this.status === 'rescheduled';
-            }
-        },
-        company_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Company",  // Assuming you have a "Company" model
-            required: true  // Set to true if company_id is mandatory for every interview
-        },
+const TABLE = 'interview_schedules';
 
-    },
-    { timestamps: true } // Adds createdAt and updatedAt timestamps
-);
+const InterviewSchedule = {
+  async findOne(filter) {
+    let query = supabase.from(TABLE).select('*').order('"createdAt"', { ascending: false });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query.limit(1).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
+  },
 
-const InterviewSchedule = mongoose.model("InterviewSchedule", InterviewSchema);
+  async findById(id) {
+    const { data, error } = await supabase.from(TABLE).select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async find(filter = {}) {
+    let query = supabase.from(TABLE).select('*').order('"createdAt"', { ascending: false });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return fromDBArray(data);
+  },
+
+  async create(scheduleData) {
+    const { data, error } = await supabase.from(TABLE).insert(scheduleData).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async findByIdAndUpdate(id, updateData) {
+    const { data, error } = await supabase.from(TABLE).update({ ...updateData, "updatedAt": new Date().toISOString() }).eq('id', id).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async findByIdAndDelete(id) {
+    const { data, error } = await supabase.from(TABLE).delete().eq('id', id).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async countDocuments(filter = {}) {
+    let query = supabase.from(TABLE).select('*', { count: 'exact', head: true });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { count, error } = await query;
+    if (error) throw error;
+    return count;
+  }
+};
+
 export default InterviewSchedule;

@@ -683,7 +683,7 @@ export const AllJobs = () => {
                                                             <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
                                                                 <IndianRupee className="h-4 w-4 mr-3 flex-shrink-0" />
                                                                 <span className="text-sm font-medium">
-                                                                    Compensation: {formatIndianRupee(job.compensation)}
+                                                                    Compensation: {formatIndianRupee(job.compensation)}{job.compensation?.toString().toLowerCase().includes("month") || job.compensation?.toString().toLowerCase().includes("/mo") ? "/Month" : "/Year"}
                                                                 </span>
                                                             </div>
 

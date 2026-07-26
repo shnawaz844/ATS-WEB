@@ -2,6 +2,9 @@ import Application from "../../models/Application.js";
 import upload, { uploadToS3 } from "../../middleware/upload.js";
 import Job from "../../models/Job.js";
 import jwt from "jsonwebtoken";
+import supabase from "../../config/supabaseClient.js";
+
+const isUUID = (str) => typeof str === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
 
 const generateInterviewToken = ({ applicationId, companyId, roundId }) => {
   return jwt.sign(
@@ -12,23 +15,20 @@ const generateInterviewToken = ({ applicationId, companyId, roundId }) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: "48h", // matches your email copy 👌
+      expiresIn: "48h",
     }
   );
 }
 
-// Pure API-based email function with interview scheduling
 const sendApplicationConfirmationEmail = async (
   applicationData,
   jobData,
   candidateData,
 ) => {
   try {
-
     let interviewScheduleUrl;
 
     if (jobData.interviewMode == "AI") {
-      console.log("Jobdata", jobData.interviewType)
       const token = generateInterviewToken({
         applicationId: applicationData.applicationId,
         companyId: jobData.company_id,
@@ -37,9 +37,7 @@ const sendApplicationConfirmationEmail = async (
 
       interviewScheduleUrl =
         `${process.env.ASTRANYX_AI}/interview/${jobData.interview_id}/schedule-interview?token=${token}`;
-
     }
-
 
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -233,7 +231,6 @@ const sendApplicationConfirmationEmail = async (
   `
           }
 
-
                   <div class="divider"></div>
 
                   <div class="next-steps">
@@ -301,11 +298,22 @@ const addApplication = async (req, res) => {
     interviewMode,
     interviewType,
     companyUserName,
-    candidateName
+    candidateName,
+    fullName,
+    qualification,
+    city,
+    relocate,
+    hasExperience,
+    experiences,
+    willingToWorkShift,
+    whyJoin,
+    hasReferral,
+    referralName,
+    referralDesignation,
+    referralDepartment
   } = req.body;
 
   try {
-    // Validation
     if (
       !jobID ||
       !candidateID ||
@@ -321,7 +329,12 @@ const addApplication = async (req, res) => {
         .json({ message: "All required fields must be provided." });
     }
 
-    // Handle resume upload
+    // Check if applicant has already applied for this specific job
+    const existingApplication = await Application.findOne({ candidateID, jobID });
+    if (existingApplication) {
+      return res.status(400).json({ message: "You have already submitted an application for this position." });
+    }
+
     let resumeUrl = null;
     if (req.file) {
       const uploadResult = await uploadToS3(req.file);
@@ -330,8 +343,42 @@ const addApplication = async (req, res) => {
       return res.status(400).json({ message: "Resume file is required." });
     }
 
-    // Create application
-    const newApplication = new Application({
+    // Format additional stepper details into experience text so full data is preserved in Supabase
+    let formattedExperience = experience || "";
+    const extraDetails = [];
+    if (fullName) extraDetails.push(`Name: ${fullName}`);
+    if (qualification) extraDetails.push(`Qualification: ${qualification}`);
+    if (city) extraDetails.push(`City: ${city}`);
+    if (relocate !== undefined && relocate !== null) extraDetails.push(`Relocate: ${relocate}`);
+    
+    if (experiences) {
+      let expList = [];
+      try {
+        const parsed = typeof experiences === 'string' ? JSON.parse(experiences) : experiences;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          expList = parsed.map((b, i) => `Exp ${i+1}: ${b.years||0} yrs in ${b.field||'Field'} as ${b.role||'Role'} (Salary: ${b.salary||'N/A'})`);
+        }
+      } catch (e) {}
+      if (expList.length > 0) {
+        extraDetails.push(`Work Experiences: ${expList.join(" ; ")}`);
+      }
+    }
+
+    if (willingToWorkShift !== undefined && willingToWorkShift !== null) extraDetails.push(`Flexible Shift: ${willingToWorkShift}`);
+    if (whyJoin) extraDetails.push(`Why Join: ${whyJoin}`);
+    if (hasReferral === "true" || hasReferral === true) {
+      extraDetails.push(`Referral: Yes - ${referralName || 'Employee'} (${referralDesignation || ''} in ${referralDepartment || ''})`);
+    } else if (hasReferral === "false" || hasReferral === false) {
+      extraDetails.push(`Referral: No`);
+    } else if (referralName) {
+      extraDetails.push(`Referral: ${referralName} (${referralDesignation || ''} in ${referralDepartment || ''})`);
+    }
+
+    if (extraDetails.length > 0) {
+      formattedExperience = `${formattedExperience ? formattedExperience + " | " : ""}Details: ${extraDetails.join(" | ")}`;
+    }
+
+    const newApplication = await Application.create({
       jobID,
       candidateID,
       applicationStatusId,
@@ -339,41 +386,59 @@ const addApplication = async (req, res) => {
       resume: resumeUrl,
       contactInfo,
       emailInfo,
-      experience,
-      questions: questions || [],
-      answers: answers || [],
+      experience: formattedExperience,
+      qualification,
+      city,
+      relocate,
+      willingToWorkShift,
+      whyJoin,
+      hasReferral: hasReferral !== undefined ? String(hasReferral) : null,
+      referralName,
+      referralDesignation,
+      referralDepartment,
+      experiences: typeof experiences === 'string' ? experiences : JSON.stringify(experiences || []),
+      questions: typeof questions === 'string' ? JSON.parse(questions) : (questions || []),
+      answers: typeof answers === 'string' ? JSON.parse(answers) : (answers || []),
       company_id,
-      interview_id
+      interview_id: interview_id || null,
     });
 
-    await newApplication.save();
     const applicationId = newApplication._id;
-    console.log("✅ Application saved to database");
+    console.log("✅ Application saved to database:", applicationId);
 
-    // Update job status if first application
-    const existingApplications = await Application.find({ jobID });
-    if (existingApplications.length === 1) {
-      await Job.findByIdAndUpdate(jobID, { status: jobStatusId });
+    const isUUID = (str) => typeof str === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
+    try {
+      if (isUUID(jobID)) {
+        const existingApplicationsCount = await Application.countDocuments({ jobID });
+        if (existingApplicationsCount === 1 && isUUID(jobStatusId)) {
+          await Job.findByIdAndUpdate(jobID, { status: jobStatusId });
+        }
+      }
+    } catch (statusErr) {
+      console.warn("⚠️ Could not update job status ID:", statusErr.message);
     }
 
-    // Fetch job data for email (make sure to select interview_id field)
-    const jobData = await Job.findById(jobID).select(
-      "title companyName interview_id description interviewType",
-    );
+    let jobData = null;
+    try {
+      if (isUUID(jobID)) {
+        jobData = await Job.findById(jobID);
+      }
+    } catch (e) {
+      console.warn("⚠️ Job lookup failed:", e.message);
+    }
     const candidateData = { name: candidateName || "Applicant" };
-    console.log("Jobdata interview", jobData.interviewType)
-    console.log("Jobdata roundId ", jobData.interviewType.roundId)
-    // Send confirmation email (non-blocking)
+    
     sendApplicationConfirmationEmail(
       { emailInfo, contactInfo, experience, applicationId },
       {
         title: jobData?.title,
         companyName: companyUserName,
         company_id,
-        interview_id: jobData?.interview_id, // Pass interview_id to email function
+        interview_id: jobData?.interview_id,
         description: jobData?.description,
         interviewMode,
-        interviewType: jobData?.interviewType.roundId,
+        interviewType: jobData?.interviewType?.roundId,
       },
       candidateData,
     ).then((emailResult) => {

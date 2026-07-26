@@ -37,6 +37,7 @@ const ApplicationsTable = ({
     const isHiringManager = userRole === 'hiring_manager';
     const isRecruiterManager = userRole === 'recruiter_manager';
     const isAdmin = userRole === 'admin';
+    const isInternalRole = ['admin', 'recruiter_manager', 'hiring_manager', 'recruiter'].includes(userRole) || ['hiring_manager', 'recruiter_manager'].includes(subUserRole);
 
     const [apps, setApps] = useState(filteredApps);
 
@@ -160,12 +161,16 @@ const ApplicationsTable = ({
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Contact
                             </th>
-                            {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
-                                Resume
-                            </th>)}
-                            {((!subUserRole || subUserRole === 'hiring_manager') && !isRecruiterManager) && (<th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
-                                Actions
-                            </th>)}
+                            {isInternalRole && (
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
+                                    Resume
+                                </th>
+                            )}
+                            {isInternalRole && (
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            )}
                             {/* { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button
@@ -238,21 +243,21 @@ const ApplicationsTable = ({
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
                                             {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
                                         </td>
-                                        {((!subUserRole || subUserRole === 'recruiter_manager') && !isHiringManager) && (
+                                        {isInternalRole && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={() => onViewResume(app)}
-                                                    className="text-[#9333ea] hover:text-purple-800 hover:underline group-hover:text-white"
+                                                    className="text-[#9333ea] hover:text-purple-800 hover:underline group-hover:text-white font-medium"
                                                 >
                                                     View Resume
                                                 </button>
                                             </td>
                                         )}
-                                        {(isHiringManager || subUserRole === 'hiring_manager') && (
+                                        {isInternalRole && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={() => handleScheduleInterview(app)}
-                                                    className="p-1 block w-full rounded-xl bg-gray-500 text-white border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                    className="px-3 py-1.5 rounded-xl bg-[#9333ea] hover:bg-purple-700 text-white text-xs font-semibold shadow-sm transition-all duration-200"
                                                 >
                                                     Schedule Interview
                                                 </button>

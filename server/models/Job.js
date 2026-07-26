@@ -1,135 +1,98 @@
-import mongoose from "mongoose";
+import supabase, { fromDB, fromDBArray } from '../config/supabaseClient.js';
 
-const JobSchema = new mongoose.Schema(
-  {
-    jobID: {
-      type: String,
-      required: true,
-    },
-    titleCode: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    },
-    locationType: {
-      type: String,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-    scheduleType: {
-      type: String,
-      required: true,
-    },
-    shiftStart: {
-      type: String,
-      required: function () {
-        return this.scheduleType !== "Flexible";
-      },
-    },
-    shiftEnd: {
-      type: String,
-      required: function () {
-        return this.scheduleType !== "Flexible";
-      },
-    },
-    hireType: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      required: true,
-    },
-    state: {
-      type: String,
-      required: function () {
-        return this.locationType !== "Remote";
-      },
-    },
-    city: {
-      type: String,
-      required: function () {
-        return this.locationType !== "Remote";
-      },
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    compensation: {
-      type: String,
-      required: true,
-    },
-    experienceRequired: {
-      type: String,
-      required: true,
-    },
-    requiredResources: {
-      type: Number,
-      required: true,
-    },
-    status: {
-      type: String,
-      required: true,
-    },
-    recruiterId: {
-      type: String,
-      required: true,
-    },
-    hiringManagerId: {
-      type: String,
-      required: true,
-    },
-    applicationForm: {
-      question: [{ type: String }],
-      answer: [{ type: String }],
-    },
-    applicants: [
-      {
-        applicant: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        status: {
-          type: String,
-          default: "active",
-        },
-      },
-    ],
-    company_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
-      required: true,
-    },
-    interview_id: { type: String, required: false },
-    interviewMode: {
-      type: String,
-      enum: ['AI', 'Manual'],
-      required: false,
-    },
-    interviewType: {
-      roundId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Interview", // Reference to your Interview Round model
-        required: false,
-      },
-      roundName: {
-        type: String,
-        required: false,
-      },
-    },
+const TABLE = 'jobs';
+
+const Job = {
+  async findOne(filter) {
+    let query = supabase.from(TABLE).select('*');
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query.limit(1).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
   },
-  { timestamps: true },
-);
 
-const Job = mongoose.model("Job", JobSchema);
+  async findById(id) {
+    // id can be the row uuid OR the jobID string field
+    // Try uuid first
+    let { data, error } = await supabase.from(TABLE).select('*').eq('id', id).maybeSingle();
+    if (error || !data) {
+      // fallback: try jobID field
+      ({ data, error } = await supabase.from(TABLE).select('*').eq('"jobID"', id).maybeSingle());
+    }
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async find(filter = {}, select = '*') {
+    let query = supabase.from(TABLE).select(select).order('"createdAt"', { ascending: false });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) {
+        if (Array.isArray(val)) {
+          query = query.in(key, val);
+        } else {
+          query = query.eq(key, val);
+        }
+      }
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return fromDBArray(data);
+  },
+
+  async findWithCompany(filter = {}, page = 1, limit = 12) {
+    let query = supabase.from(TABLE)
+      .select('*, company:companies(name, image, "CompanyUserName")')
+      .order('"createdAt"', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) {
+        if (Array.isArray(val)) {
+          query = query.in(key, val);
+        } else {
+          query = query.eq(key, val);
+        }
+      }
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return fromDBArray(data);
+  },
+
+  async create(jobData) {
+    const { data, error } = await supabase.from(TABLE).insert(jobData).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async findByIdAndUpdate(id, updateData, options = {}) {
+    const { data, error } = await supabase.from(TABLE).update({ ...updateData, "updatedAt": new Date().toISOString() }).eq('id', id).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async findByIdAndDelete(id) {
+    const { data, error } = await supabase.from(TABLE).delete().eq('id', id).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async countDocuments(filter = {}) {
+    let query = supabase.from(TABLE).select('*', { count: 'exact', head: true });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) {
+        if (Array.isArray(val)) {
+          query = query.in(key, val);
+        } else {
+          query = query.eq(key, val);
+        }
+      }
+    }
+    const { count, error } = await query;
+    if (error) throw error;
+    return count;
+  }
+};
 
 export default Job;

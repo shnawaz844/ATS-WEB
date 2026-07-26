@@ -103,7 +103,7 @@ export const generateDescriptionStream = async (jobTitle, companyUserName, compe
 
         return await retryWithBackoff(async () => {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
             const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation);
             const result = await model.generateContentStream(prompt);
             return result.stream;
@@ -136,5 +136,5 @@ export const getGeminiModel = () => {
         throw new Error("Gemini API key not configured");
     }
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    return genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    return genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 };

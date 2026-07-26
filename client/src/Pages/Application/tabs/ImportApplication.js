@@ -591,7 +591,7 @@ export default function ImportApplication() {
                         locationType: row[locationTypeIndex] || 'On-Site',
                         type: row[typeIndex] || 'Full-Time',
                         scheduleType: row[scheduleTypeIndex] || 'Flexible',
-                        shiftStart: formatExcelTime(row[shiftStartIndex]) || '09:00',
+                        shiftStart: formatExcelTime(row[shiftStartIndex]) || '08:00',
                         shiftEnd: formatExcelTime(row[shiftEndIndex]) || '17:00',
                         hireType: row[hireTypeIndex] || 'New',
                         country: row[countryIndex] || 'India',

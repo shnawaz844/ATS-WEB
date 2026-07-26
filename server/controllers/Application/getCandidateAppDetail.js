@@ -1,51 +1,65 @@
 import Application from '../../models/Application.js';
 import InterviewSchedule from '../../models/Applicationlist.js';
+import supabase from '../../config/supabaseClient.js';
 
 const getCandidateAppDetail = async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.params;      // e.g., /api/applications/candidate/:candidateId
-        let { page = 1, limit = 10, search = '' } = req.query;
+  try {
+    const { candidateId, jobId } = req.params;
+    let { page = 1, limit = 10, search = '' } = req.query;
 
-        // Convert to numbers
-        page = parseInt(page, 10);
-        limit = parseInt(limit, 10);
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
 
-        // Define a filter
-        // Only applications for this candidate
-        const filter = { candidateID: candidateId, jobID: jobId };
+    let query = supabase
+      .from('applications')
+      .select('*', { count: 'exact' })
+      .eq('"candidateID"', candidateId)
+      .eq('"jobID"', jobId);
 
-        // Example: searching on an application's "status" field (string match)
-        // Adjust as needed for your own use case
-        if (search) {
-            filter.status = { $regex: search, $options: 'i' };
-        }
-
-        // Get total count for pagination
-        const total = await Application.countDocuments(filter);
-        const skip = (page - 1) * limit;
-
-        // Retrieve applications with pagination & population
-        const application = await Application.findOne(filter)
-            .sort({ createdAt: -1 })
-            .populate('candidateID')
-            .populate('jobID')
-            .lean();
-
-        if (application) {
-            const latestInterview = await InterviewSchedule.findOne({ applicationID: application._id }).sort({ createdAt: -1 }).lean();
-            application.interview = latestInterview;
-        }
-
-        return res.status(200).json({
-            applications: application,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalApplications: total
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+    if (search) {
+      query = query.ilike('status', `%${search}%`);
     }
+
+    const { data: rawApps, count: total, error } = await query
+      .order('"createdAt"', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    const application = rawApps && rawApps.length > 0 ? { ...rawApps[0], _id: rawApps[0].id } : null;
+
+    if (application) {
+      // Populate candidate details (users table) and job details (jobs table)
+      const [candRes, jobRes] = await Promise.all([
+        supabase.from('users').select('*').eq('id', application.candidateID).maybeSingle(),
+        supabase.from('jobs').select('*').eq('id', application.jobID).maybeSingle()
+      ]);
+
+      application.candidateID = candRes.data ? { ...candRes.data, _id: candRes.data.id } : application.candidateID;
+      application.jobID = jobRes.data ? { ...jobRes.data, _id: jobRes.data.id } : application.jobID;
+
+      // Get latest interview
+      const { data: latestInterview } = await supabase
+        .from('interview_schedules')
+        .select('*')
+        .eq('"applicationID"', application.id)
+        .order('"createdAt"', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      application.interview = latestInterview ? { ...latestInterview, _id: latestInterview.id } : null;
+    }
+
+    return res.status(200).json({
+      applications: application,
+      currentPage: page,
+      totalPages: Math.ceil((total || 0) / limit),
+      totalApplications: total || 0
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
 };
 
 export { getCandidateAppDetail };

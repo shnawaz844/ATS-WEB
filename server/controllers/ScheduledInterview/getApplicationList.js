@@ -1,138 +1,119 @@
-import InterviewSchedule from "../../models/Applicationlist.js";
-import User from "../../models/User.js"; // Import the User model
-import mongoose from "mongoose";
+import supabase from '../../config/supabaseClient.js';
 
-// Function to fetch interviews
 export const getInterviews = async (req, res) => {
-    console.log("api called")
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 9;
-        const candidateID = req.query.candidateID
-        const jobId = req.query.jobID
-        const interviewerID = req.query.interviewerID !== 'admin' ? decodeURIComponent(req.query.interviewerID || "") : "";
-        const searchTerm = req.query.searchTerm || '';
-        const filterStatus = req.query.filterStatus || '';
-        const filterRound = req.query.filterRound || '';
-        const { company_id } = req.headers;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const candidateID = req.query.candidateID;
+    const jobId = req.query.jobID;
+    const interviewerID = req.query.interviewerID !== 'admin' ? decodeURIComponent(req.query.interviewerID || '') : '';
+    const searchTerm = req.query.searchTerm || '';
+    const filterStatus = req.query.filterStatus || '';
+    const filterRound = req.query.filterRound || '';
+    const { company_id } = req.headers;
 
-        // Pagination calculation
-        const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
-        // Build the base filter
-        let filter = {};
+    // Build base Supabase query
+    let query = supabase.from('interview_schedules').select('*').order('"createdAt"', { ascending: false });
+    if (company_id) query = query.eq('company_id', company_id);
+    if (interviewerID) query = query.eq('"interviewerID"', interviewerID);
+    if (filterStatus && filterStatus.trim() !== '' && filterStatus !== 'all') query = query.eq('status', filterStatus);
+    if (filterRound && filterRound.trim() !== '' && filterRound !== 'all') query = query.eq('"roundID"', filterRound);
 
-        // If company_id is provided in the headers, add it to the filter
-        if (company_id) {
-            filter.company_id = company_id;
+    const { data: rawSchedules, error } = await query;
+    if (error) throw error;
 
-            const company = await mongoose.model('Company').findById(company_id);
-            if (company && company.onlyAiFeaturesEnabled) {
-                filter.interviewerType = 'AI';
-            }
-        }
+    let schedules = rawSchedules || [];
 
-        // Add filter for interviewerEmail if provided
-        if (interviewerID) {
-            filter.interviewerID = interviewerID; // Filter by interviewer ObjectId
-        }
-
-        // Add status filter if provided directly to the initial database query
-        if (filterStatus && filterStatus.trim() !== '' && filterStatus.trim() !== 'all') {
-            filter.status = filterStatus;
-        }
-        // Add round filter if provided directly to the initial database query
-        if (filterRound && filterRound.trim() !== '' && filterRound.trim() !== 'all') {
-            filter.roundID = filterRound;
-        }
-
-
-        // Get interviews that match the base filter (without search term and candidateID)
-        // We'll do the search term and candidateID filtering after populating the fields
-        console.log('test filter', filter);
-        const interviewsQuery = InterviewSchedule
-            .find(filter)
-            .populate({
-                path: 'applicationID',
-                select: 'jobID candidateID resume',
-                populate: [
-                    {
-                        path: 'jobID',
-                        select: 'title'
-                    },
-                    {
-                        path: 'candidateID',
-                        select: 'userName'
-                    },
-                ],
-            })
-            .populate({
-                path: 'interviewerID',
-                select: 'email name interviewer userName',
-            })
-            .sort({ createdAt: -1 })
-            .populate({
-                path: 'roundID',
-                select: 'roundName'
-            });
-
-        // Get all interviews that match the base filter
-        let allInterviews = await interviewsQuery.exec();
-        console.log("allInterviews before", allInterviews);
-
-
-        // Filter by candidateID if provided (after population)
-        if (candidateID) {
-            allInterviews = allInterviews.filter(interview => interview.applicationID?.candidateID?._id?.toString() === candidateID);
-        }
-
-        if (jobId) {
-            console.log('filter by jobId', jobId);
-            allInterviews = allInterviews.filter(interview => {
-                return interview.applicationID?.jobID?._id?.toString() === jobId;
-            });
-        }
-        console.log("allInterviews after filter", allInterviews);
-
-        // Filter by search term if provided (after population)
-        if (searchTerm && searchTerm.trim() !== '') {
-            const searchRegex = new RegExp(searchTerm, 'i');
-            allInterviews = allInterviews.filter(interview => {
-                // Check job title
-                const jobTitle = interview.applicationID?.jobID?.title || '';
-
-                // Check candidate username
-                const candidateUserName = interview.applicationID?.candidateID?.userName || '';
-
-                // Check interviewer name
-                const interviewerName = interview.interviewerID?.userName || '';
-
-                // Also check interview ID or round name
-                const roundName = interview?.roundName || '';
-
-                return searchRegex.test(jobTitle) ||
-                    searchRegex.test(candidateUserName) ||
-                    searchRegex.test(interviewerName);
-            });
-        }
-
-        // Calculate total after all filters
-        const totalInterviews = allInterviews.length;
-
-        // Apply pagination to filtered results
-        const interviews = allInterviews.slice(skip, skip + limit);
-
-        // Send response
-        res.status(200).json({
-            totalPages: Math.ceil(totalInterviews / limit),
-            currentPage: page,
-            totalInterviews,
-            interviews,
-        });
-    } catch (error) {
-        console.error("Error fetching interviews:", error);
-        res.status(500).json({ message: "Internal server error" });
+    // Check if company has onlyAiFeaturesEnabled
+    if (company_id) {
+      const { data: company } = await supabase.from('companies').select('"onlyAiFeaturesEnabled"').eq('id', company_id).maybeSingle();
+      if (company?.onlyAiFeaturesEnabled) {
+        schedules = schedules.filter(s => s.interviewerType === 'AI');
+      }
     }
+
+    // Enrich with application, job, candidate, interviewer, round details
+    const appIds = [...new Set(schedules.map(s => s.applicationID).filter(Boolean))];
+    const interviewerIds = [...new Set(schedules.map(s => s.interviewerID).filter(Boolean))];
+    const roundIds = [...new Set(schedules.map(s => s.roundID).filter(Boolean))];
+
+    const [appsRes, interviewersRes, roundsRes] = await Promise.all([
+      appIds.length > 0 ? supabase.from('applications').select('id, "jobID", "candidateID", resume').in('id', appIds) : { data: [] },
+      interviewerIds.length > 0 ? supabase.from('users').select('id, "userName", email').in('id', interviewerIds) : { data: [] },
+      roundIds.length > 0 ? supabase.from('interviews').select('id, "roundName"').in('id', roundIds) : { data: [] },
+    ]);
+
+    const appMap = {};
+    (appsRes.data || []).forEach(a => { appMap[a.id] = a; });
+    const interviewerMap = {};
+    (interviewersRes.data || []).forEach(i => { interviewerMap[i.id] = { ...i, _id: i.id }; });
+    const roundMap = {};
+    (roundsRes.data || []).forEach(r => { roundMap[r.id] = { ...r, _id: r.id }; });
+
+    // Fetch jobs and candidates
+    const jobIds = [...new Set(Object.values(appMap).map(a => a.jobID).filter(Boolean))];
+    const candIds = [...new Set(Object.values(appMap).map(a => a.candidateID).filter(Boolean))];
+
+    const [jobsRes, candidatesRes] = await Promise.all([
+      jobIds.length > 0 ? supabase.from('jobs').select('id, title').in('id', jobIds) : { data: [] },
+      candIds.length > 0 ? supabase.from('users').select('id, "userName"').in('id', candIds) : { data: [] },
+    ]);
+
+    const jobMap = {};
+    (jobsRes.data || []).forEach(j => { jobMap[j.id] = { ...j, _id: j.id }; });
+    const candidateMap = {};
+    (candidatesRes.data || []).forEach(c => { candidateMap[c.id] = { ...c, _id: c.id }; });
+
+    // Enrich schedules
+    let enriched = schedules.map(s => {
+      const app = appMap[s.applicationID];
+      const job = app ? jobMap[app.jobID] : null;
+      const candidate = app ? candidateMap[app.candidateID] : null;
+      return {
+        ...s,
+        _id: s.id,
+        applicationID: app ? {
+          ...app, _id: app.id,
+          jobID: job || app.jobID,
+          candidateID: candidate || app.candidateID,
+        } : s.applicationID,
+        interviewerID: interviewerMap[s.interviewerID] || s.interviewerID,
+        roundID: roundMap[s.roundID] || s.roundID,
+      };
+    });
+
+    // Post-population filters
+    if (candidateID) {
+      enriched = enriched.filter(s => s.applicationID?.candidateID?._id === candidateID || s.applicationID?.candidateID?.id === candidateID);
+    }
+    if (jobId) {
+      enriched = enriched.filter(s => s.applicationID?.jobID?._id === jobId || s.applicationID?.jobID?.id === jobId);
+    }
+    if (searchTerm?.trim()) {
+      const regex = new RegExp(searchTerm, 'i');
+      enriched = enriched.filter(s => {
+        const jobTitle = s.applicationID?.jobID?.title || '';
+        const candidateName = s.applicationID?.candidateID?.userName || '';
+        const interviewerName = s.interviewerID?.userName || '';
+        return regex.test(jobTitle) || regex.test(candidateName) || regex.test(interviewerName);
+      });
+    }
+
+    const totalInterviews = enriched.length;
+    const interviews = enriched.slice(skip, skip + limit);
+
+    res.status(200).json({
+      totalPages: Math.ceil(totalInterviews / limit),
+      currentPage: page,
+      totalInterviews,
+      interviews,
+    });
+  } catch (error) {
+    console.error('Error fetching interviews:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
 export default getInterviews;

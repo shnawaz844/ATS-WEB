@@ -305,7 +305,7 @@ const JobDetailsTab = ({ job }) => {
               <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Compensation</p>
                 <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
-                  {compensation ? `${formatIndianRupee(compensation)} yearly` : 'N/A'}
+                  {compensation ? `${formatIndianRupee(compensation)} ${compensation.toString().toLowerCase().includes("month") || compensation.toString().toLowerCase().includes("/mo") ? "monthly" : "yearly"}` : 'N/A'}
                 </p>
               </div>
             </div>

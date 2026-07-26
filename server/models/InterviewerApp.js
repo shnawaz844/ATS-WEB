@@ -1,34 +1,33 @@
-import mongoose from 'mongoose';
+import supabase, { fromDB, fromDBArray } from '../config/supabaseClient.js';
 
-const InterviewerAppSchema = new mongoose.Schema({
-    applicationID: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Job'
-    },
-    interviewerID: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    scheduledTime: {
-        type: String, // Or use Date if it's a full timestamp
-        required: true
-    },
-    interviewerType: {
-        type: String,
-        required: true
-    },
-    meetingLink: {
-        type: String,
-        required: true
-    },
-});
+const TABLE = 'interviewer_apps';
 
-const InterviewerApp = mongoose.model('InterviewerApp', InterviewerAppSchema);
+const InterviewerApp = {
+  async findOne(filter) {
+    let query = supabase.from(TABLE).select('*');
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query.limit(1).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async find(filter = {}) {
+    let query = supabase.from(TABLE).select('*');
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return fromDBArray(data);
+  },
+
+  async create(data) {
+    const { data: result, error } = await supabase.from(TABLE).insert(data).select().single();
+    if (error) throw error;
+    return fromDB(result);
+  }
+};
 
 export default InterviewerApp;

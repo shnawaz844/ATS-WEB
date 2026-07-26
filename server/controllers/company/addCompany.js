@@ -4,8 +4,8 @@ import multerS3 from 'multer-s3';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import path from 'path';
 import { uploadToS3 } from '../../middleware/upload.js';
+import supabase from '../../config/supabaseClient.js';
 
-// Configure AWS SDK
 // Configure AWS SDK v3
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -20,7 +20,7 @@ const upload = multer({
     storage: multerS3({
         s3: s3,
         bucket: process.env.AWS_S3_BUCKET_NAME,
-        acl: 'public-read', // Makes the file publicly readable
+        acl: 'public-read',
         metadata: function (req, file, cb) {
             cb(null, { fieldName: file.fieldname });
         },
@@ -49,13 +49,11 @@ const addCompany = async (req, res) => {
         if (req.file) {
             const uploadResult = await uploadToS3(req.file);
             imageUrl = uploadResult.fileUrl;
-            req.file.key = uploadResult.key; // Set the key so cleanup logic works
+            req.file.key = uploadResult.key;
         }
 
-        // Check if email already exists
         const existingCompany = await Company.findOne({ email });
         if (existingCompany) {
-            // If we uploaded a file but validation failed, delete it from S3
             if (req.file) {
                 await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -65,8 +63,8 @@ const addCompany = async (req, res) => {
             return res.status(409).json({ message: "Email already registered." });
         }
 
+        const existingCompanyUserName = await Company.findOne({ CompanyUserName });
         if (existingCompanyUserName) {
-            // If we uploaded a file but validation failed, delete it from S3
             if (req.file) {
                 await s3.send(new DeleteObjectCommand({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -76,8 +74,7 @@ const addCompany = async (req, res) => {
             return res.status(409).json({ message: "Company Unique Name already registered." });
         }
 
-        // Create new Company
-        const newCompany = new Company({
+        const newCompany = await Company.create({
             CompanyUserName,
             address,
             email,
@@ -88,11 +85,8 @@ const addCompany = async (req, res) => {
             aiFeaturesEnabled: aiFeaturesEnabled === 'true' || aiFeaturesEnabled === true
         });
 
-        await newCompany.save();
-
         res.status(201).json(newCompany);
     } catch (error) {
-        // If we uploaded a file but an error occurred, delete it from S3
         if (req.file && req.file.key) {
             await s3.send(new DeleteObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -108,7 +102,6 @@ const updateCompany = async (req, res) => {
         const { id } = req.params;
         const { CompanyUserName, address, email, name, phone, website } = req.body;
 
-        // Get the current company to check for existing image
         const currentCompany = await Company.findById(id);
         if (!currentCompany) {
             return res.status(404).json({ message: "Company not found." });
@@ -126,7 +119,6 @@ const updateCompany = async (req, res) => {
         if (req.file) {
             updateData.image = req.file.location;
 
-            // Delete the old image from S3 if it exists
             if (currentCompany.image) {
                 const oldImageKey = currentCompany.image.split('/').pop();
                 await s3.send(new DeleteObjectCommand({
@@ -138,13 +130,11 @@ const updateCompany = async (req, res) => {
 
         const updatedCompany = await Company.findByIdAndUpdate(
             id,
-            updateData,
-            { new: true }
+            updateData
         );
 
         res.status(200).json(updatedCompany);
     } catch (error) {
-        // If we uploaded a file but an error occurred, delete it from S3
         if (req.file) {
             await s3.send(new DeleteObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -155,7 +145,6 @@ const updateCompany = async (req, res) => {
     }
 };
 
-// Add a function to handle company deletion (to clean up S3 files)
 const deleteCompany = async (req, res) => {
     try {
         const { id } = req.params;
@@ -165,7 +154,6 @@ const deleteCompany = async (req, res) => {
             return res.status(404).json({ message: "Company not found." });
         }
 
-        // Delete the image from S3 if it exists
         if (company.image) {
             const imageKey = company.image.split('/').pop();
             await s3.send(new DeleteObjectCommand({

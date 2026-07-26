@@ -1,5 +1,3 @@
-// controllers/User/updateUser.js
-
 import Interview from '../../models/Interview.js';
 
 const updateInterview = async (req, res) => {
@@ -15,14 +13,12 @@ const updateInterview = async (req, res) => {
       });
     }
 
-    // Update only if the field is provided, else keep existing
-    if (roundName !== undefined) interview.roundName = roundName;
-    if (roundNumber !== undefined) interview.roundNumber = roundNumber;
+    const updated = await Interview.findByIdAndUpdate(id, {
+      roundName: roundName !== undefined ? roundName : interview.roundName,
+      roundNumber: roundNumber !== undefined ? roundNumber : interview.roundNumber
+    });
 
-
-    await interview.save();
-
-    res.status(200).json({ success: true, data: interview });
+    res.status(200).json({ success: true, data: updated });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

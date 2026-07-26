@@ -1,71 +1,45 @@
-// models/CandidateFile.js
+import supabase, { fromDB, fromDBArray } from '../config/supabaseClient.js';
 
-import mongoose from "mongoose";
+const TABLE = 'candidate_files';
 
-const candidateFileSchema = new mongoose.Schema( {
-    fileName: {
-        type: String,
-        required: true
-    },
-    originalName: {
-        type: String,
-    },
-    mimetype: {
-        type: String,
-    },
-    size: {
-        type: Number,
-    },
-    fileUrl: {
-        type: String,
-        required: true
-    },
-    userId: {
-        type: String,
-        required: true
-    },
-    companyId: {
-        type: String,
-        required: true
-    },
-    userName: {
-        type: String,
-        default: 'Unknown User'
-    },
-    uploadDate: {
-        type: Date,
-        default: Date.now
-    },
-    totalCandidates: {
-        type: Number,
-        default: 0
-    },
-    processedCandidates: {
-        type: Number,
-        default: 0
-    },
-    failedCandidates: {
-        type: Number,
-        default: 0
-    },
-    status: {
-        type: String,
-        enum: [ 'processing', 'completed', 'failed', 'partial' ],
-        default: 'processing'
-    },
-    processingErrors: [ {
-        row: Number,
-        error: String,
-        candidateData: Object
-    } ]
-}, {
-    timestamps: true
-} );
+const CandidateFile = {
+  async findOne(filter) {
+    let query = supabase.from(TABLE).select('*');
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query.limit(1).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
+  },
 
-// Create index for better query performance
-candidateFileSchema.index( { userId: 1, companyId: 1 } );
-candidateFileSchema.index( { uploadDate: -1 } );
+  async findById(id) {
+    const { data, error } = await supabase.from(TABLE).select('*').eq('id', id).maybeSingle();
+    if (error) throw error;
+    return fromDB(data);
+  },
 
-const CandidateFile = mongoose.model( "Candidate-File", candidateFileSchema );
+  async find(filter = {}) {
+    let query = supabase.from(TABLE).select('*').order('"uploadDate"', { ascending: false });
+    for (const [key, val] of Object.entries(filter)) {
+      if (val !== undefined && val !== null) query = query.eq(key, val);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    return fromDBArray(data);
+  },
+
+  async create(fileData) {
+    const { data, error } = await supabase.from(TABLE).insert(fileData).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  },
+
+  async findByIdAndUpdate(id, updateData) {
+    const { data, error } = await supabase.from(TABLE).update({ ...updateData, "updatedAt": new Date().toISOString() }).eq('id', id).select().single();
+    if (error) throw error;
+    return fromDB(data);
+  }
+};
 
 export default CandidateFile;

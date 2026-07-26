@@ -59,8 +59,8 @@ const JobDescriptionModal = ({ job, isOpen, onClose, isApplied }) => {
                     <div className="flex items-center space-x-4">
                         <IndianRupee className={`w-5 h-5 sm:w-6 sm:h-6 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
                         <div>
-                            <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">Annual Compensation</p>
-                            <p className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>{formatIndianRupee(job.compensation)}/Annum</p>
+                            <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wider">{job.compensation?.toString().toLowerCase().includes("month") || job.compensation?.toString().toLowerCase().includes("/mo") ? "Monthly Compensation" : "Annual Compensation"}</p>
+                            <p className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-800'}`}>₹{formatIndianRupee(job.compensation)}{job.compensation?.toString().toLowerCase().includes("month") || job.compensation?.toString().toLowerCase().includes("/mo") ? "/Month" : "/Annum"}</p>
                         </div>
                     </div>
                 </div>

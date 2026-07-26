@@ -204,13 +204,8 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
     // Validate form before submission
     const validateForm = () => {
         const errors = {};
-        if (!editForm.date) {
-            errors.date = 'Interview date is required';
-        }
-        if (!editForm.time) {
-            errors.time = 'Interview time is required';
-        } else {
-            // Time validation for current day
+        // Time validation for current day
+        if (editForm.date && editForm.time) {
             const today = new Date().toISOString().split('T')[0];
             if (editForm.date === today) {
                 const now = new Date();
@@ -231,9 +226,6 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
         }
         if (editForm.interviewType === 'walkin' && !editForm.meetingLink) {
             errors.meetingLink = 'Address is required for walk-in interviews';
-        }
-        if (!editForm.interviewerId) {
-            errors.interviewerId = 'Interviewer is required';
         }
         if (!editForm.status) {
             errors.status = 'Status is required';
@@ -297,9 +289,8 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
 
         const payload = {
             applicationID: editForm.applicationID,
-            interviewerID: editForm.interviewerId,
-            date: editForm.date,
-            scheduledTime: editForm.time,
+            date: editForm.date || "",
+            scheduledTime: editForm.time || "",
             interviewerType: editForm.interviewType,
             meetingLink: editForm.meetingLink || "",
             roundID: editForm.roundName,
@@ -565,7 +556,6 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                         }}
                                         className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.date ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
                                         min={new Date().toISOString().split('T')[0]}
-                                        required
                                     />
                                     {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
                                 </div>
@@ -583,7 +573,6 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                             return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
                                         })() : ""}
                                         className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.time ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : '')}`}
-                                        required
                                     />
                                     {formErrors.time && <p className="text-red-500 text-xs mt-1">{formErrors.time}</p>}
                                 </div>
@@ -615,28 +604,6 @@ const ScheduleInterviewModal = ({ isOpen, onClose, application }) => {
                                     </select>
                                     {formErrors.interviewType && <p className="text-red-500 text-xs mt-1">{formErrors.interviewType}</p>}
                                 </div>
-
-                                <div>
-                                    <label className={`block text-sm font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Assign Interviewer</label>
-                                    <select
-                                        className={`w-full border rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 ${formErrors.interviewerId ? 'border-red-500' : (theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300')}`}
-                                        value={editForm.interviewerId}
-                                        onChange={(e) => {
-                                            setEditForm({ ...editForm, interviewerId: e.target.value });
-                                            if (formErrors.interviewerId) setFormErrors({ ...formErrors, interviewerId: "" });
-                                        }}
-                                        required
-                                    >
-                                        <option value="">Select Interviewer</option>
-                                        {interviewers?.map((interviewer) => (
-                                            <option key={interviewer._id} value={interviewer._id}>
-                                                {interviewer.userName}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {formErrors.interviewerId && <p className="text-red-500 text-xs mt-1">{formErrors.interviewerId}</p>}
-                                </div>
-
                             </div>
 
                             {(editForm.interviewType === 'online' || editForm.interviewType === 'walkin') && (

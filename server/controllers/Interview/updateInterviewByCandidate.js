@@ -1,27 +1,34 @@
 import Interview from '../../models/Interview.js';
-
+import supabase, { fromDB } from '../../config/supabaseClient.js';
 
 const updateInterviewByCandidate = async (req, res) => {
   try {
     const { interviewId, candidateID, status } = req.body;
 
-    // Find the job by jobId
     console.log("Update Interview by candidate");
     console.log(req.body);
 
-    const updatedInterview = await Interview.findByIdAndUpdate(
-      candidateID,
-      { $push: { applications: { interviewId: interviewId, candidateID: candidateID, status: status } } },
-      { new: true } // To return the updated document
-    );
-
-    if (!updatedInterview) {
-      return res.status(404).json({ error: 'Job not found' });
+    const interview = await Interview.findById(candidateID);
+    if (!interview) {
+      return res.status(404).json({ error: 'Interview not found' });
     }
 
-    res.status(200).json(updatedInterview);
+    const apps = Array.isArray(interview.applications) ? interview.applications : [];
+    apps.push({ interviewId, candidateID, status });
+
+    const { data: updated, error } = await supabase
+      .from('interviews')
+      .update({ applications: apps })
+      .eq('id', candidateID)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json(fromDB(updated));
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update job by candidate' });
+    console.error("Failed to update interview by candidate:", error);
+    res.status(500).json({ error: 'Failed to update interview by candidate' });
   }
 }
 

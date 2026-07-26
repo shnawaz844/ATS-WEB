@@ -1,6 +1,4 @@
-// controllers/User/getUsers.js
-
-import User from '../../models/User.js';
+import supabase from '../../config/supabaseClient.js';
 
 const getUsers = async (req, res) => {
   try {
@@ -9,32 +7,25 @@ const getUsers = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const query = {
-      $or: [
-        { userName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-      ],
-    };
+    let query = supabase.from('users').select('*', { count: 'exact' })
+      .order('role', { ascending: true })
+      .order('"createdAt"', { ascending: false })
+      .range((page - 1) * limit, page * limit - 1);
 
-    // If role is provided (e.g., role=admin for super users), add a filter.
-    if (role) {
-      query.role = role;
-    }
-    if (company_id) {
-      query.company_id = company_id
+    if (company_id) query = query.eq('company_id', company_id);
+    if (role) query = query.eq('role', role);
+    if (search) {
+      query = query.or(`"userName".ilike.%${search}%,email.ilike.%${search}%`);
     }
 
-    const totalCount = await User.countDocuments(query);
-    const users = await User.find({ ...query })
-      .sort({ role: 1, createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    const { data: users, count: totalCount, error } = await query;
+    if (error) throw error;
 
     res.status(200).json({
-      users,
-      totalCount,
+      users: (users || []).map(u => ({ ...u, _id: u.id })),
+      totalCount: totalCount || 0,
       currentPage: page,
-      totalPages: Math.ceil(totalCount / limit)
+      totalPages: Math.ceil((totalCount || 0) / limit),
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to get users' });

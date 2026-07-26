@@ -103,7 +103,7 @@ const OtherApplicationsTab = ({ candidateId, statuses }) => {
                                             </p>
                                             <p>
                                                 <strong className="text-gray-800 dark:text-gray-200">Compensation:</strong> ₹
-                                                {formatIndianRupee(app.jobID?.compensation)}
+                                                {formatIndianRupee(app.jobID?.compensation)}{app.jobID?.compensation?.toString().toLowerCase().includes("month") || app.jobID?.compensation?.toString().toLowerCase().includes("/mo") ? "/Month" : "/Year"}
                                             </p>
                                         </div>
                                     </div>
