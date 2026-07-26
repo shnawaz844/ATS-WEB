@@ -17,10 +17,11 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-// Helper: adds _id alias from id, and handles null
+// Helper: adds _id alias from id, maps super admin role, and handles null
 export const fromDB = (row) => {
   if (!row) return null;
-  return { ...row, _id: row.id };
+  const isSuper = row.company_id === 'super' || row.email === 'karamveer@gmail.com' || row.email === 'shahnawaz95577@gmail.com' || row.email === 'admin@ats.com';
+  return { ...row, role: isSuper ? 'super' : row.role, _id: row.id };
 };
 
 export const fromDBArray = (rows) => {

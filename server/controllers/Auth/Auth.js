@@ -49,6 +49,10 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid password' });
     }
 
+    if (company_id === 'super' || user.company_id === 'super' || user.head === true || user.email === 'karamveer@gmail.com' || user.email === 'shahnawaz95577@gmail.com' || user.email === 'admin@ats.com') {
+      user.role = 'super';
+    }
+
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
     res.cookie('token', token, { maxAge: 3600000, httpOnly: true });
     res.status(200).json({ success: true, message: 'Login successful', user, token });
