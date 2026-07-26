@@ -17,9 +17,9 @@ const fetchUsers = async ({ queryKey }) => {
   if (role) {
     url += `&role=${role}`;
   }
-  // Retrieve company_id from localStorage
-  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
-  console.log("companyId",companyId);
+  // Retrieve user & company_id from localStorage
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const companyId = user?.role === 'super' ? 'super' : user?.company_id;
 
   const res = await axios.get(url, {
     headers: {
