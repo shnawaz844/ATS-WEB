@@ -7,20 +7,20 @@ import supabase from '../../config/supabaseClient.js';
 const register = async (req, res) => {
   try {
     const { userName, email, password, gender, address, role, head } = req.body;
-    const company_id = req.body.company_id || req.headers['company_id'];
+    const company_id = req.body.company_id || req.headers['company_id'] || req.headers['Company_id'];
 
     if (!company_id) {
       return res.status(400).json({ error: 'company_id is required' });
     }
 
-    const existingUser = await User.findOne({ email, company_id });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
     const hashPassword = bcrypt.hashSync(password, 10);
     const newUser = await User.create({
-      userName, email, password: hashPassword, gender, address, role, head, company_id
+      userName, email, password: hashPassword, gender, address, role: role || 'admin', head: head ?? true, company_id
     });
 
     res.status(201).json({ message: 'User created successfully', data: newUser._id });

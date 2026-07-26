@@ -43,7 +43,12 @@ export const useUsers = ({ page, limit = 5, search = '', role }) => {
  * 2. ADD USER
  */
 const addUser = async (formData) => {
-  const res = await axios.post(`${ process.env.REACT_APP_BASE_URL }/auth/register`, formData);
+  const companyId = formData.company_id || JSON.parse(localStorage.getItem("user"))?.company_id || "super";
+  const res = await axios.post(`${ process.env.REACT_APP_BASE_URL }/auth/register`, { ...formData, company_id: companyId }, {
+    headers: {
+      'Company_id': companyId
+    }
+  });
   return res.data;
 };
 

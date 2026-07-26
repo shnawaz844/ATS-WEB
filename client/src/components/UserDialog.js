@@ -33,7 +33,9 @@ const UserDialog = ({
         if (dialogMode === 'add' && (!formData.password || formData.password.trim() === '')) {
             newErrors.password = 'Password is required';
         }
-        // Add additional validations if needed (e.g., for gender, address, etc.)
+        if (loggedInUser?.role === 'super' && (!formData.company_id || formData.company_id.trim() === '')) {
+            newErrors.company_id = 'Company selection is required';
+        }
         return newErrors;
     };
 
@@ -203,6 +205,9 @@ const UserDialog = ({
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.company_id && (
+                                        <p className="text-red-500 text-sm mt-1">{errors.company_id}</p>
+                                    )}
                                 </div>
                             )}
 
