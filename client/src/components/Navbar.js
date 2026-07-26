@@ -20,7 +20,7 @@ import {
 import ThemeToggle from "./ThemeToggle";
 
 const superNavItems = [
-  { label: "Users", path: "/all-users", icon: <Users className="hidden lg:block hidden lg:block w-5 h-5" /> },
+  { label: "Users", path: "/all-users", icon: <Users className="hidden lg:block w-5 h-5" /> },
   { label: "Companies", path: "/all-companies", icon: <Building className="hidden lg:block w-5 h-5" /> }
 ];
 
