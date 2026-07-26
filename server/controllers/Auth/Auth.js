@@ -33,7 +33,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { company_id } = req.headers;
+    const company_id = req.headers['company_id'] || req.headers['Company_id'] || req.body?.company_id;
 
     const payload = (company_id === 'super' || !company_id)
       ? { email }
@@ -49,7 +49,7 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Invalid password' });
     }
 
-    if (company_id === 'super' || user.company_id === 'super' || user.head === true || user.email === 'karamveer@gmail.com' || user.email === 'shahnawaz95577@gmail.com' || user.email === 'admin@ats.com') {
+    if (company_id === 'super' || user.company_id === 'super' || user.email === 'karamveer@gmail.com' || user.email === 'shahnawaz95577@gmail.com' || user.email === 'admin@ats.com') {
       user.role = 'super';
     }
 
