@@ -23,7 +23,8 @@ const updateJob = async (req, res) => {
       hiringManagerEmail,
       hiringManagerName,
       applicationForm,
-      applicants
+      applicants,
+      skillsRequired,
     } = req.body;
 
     const updatedJob = await Job.findByIdAndUpdate(
@@ -41,14 +42,15 @@ const updateJob = async (req, res) => {
         city,
         description,
         compensation,
-        experienceRequired,
+        experienceRequired: experienceRequired || [],
         requiredResources,
         status,
         recruiterName,
         hiringManagerEmail,
         hiringManagerName,
         applicationForm,
-        applicants
+        applicants,
+        skillsRequired: skillsRequired || [],
       }
     );
 
