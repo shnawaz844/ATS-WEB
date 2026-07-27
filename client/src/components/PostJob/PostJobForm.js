@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Controller } from "react-hook-form";
 import { Country, State, City } from "country-state-city";
-import TimePicker from "react-time-picker";
 import ReactQuill from "react-quill";
 import CandidateForm from "./CandidateForm";
 import "react-quill/dist/quill.snow.css";
-import "react-time-picker/dist/TimePicker.css";
-import "react-clock/dist/Clock.css";
 import BackButtonMobile from "../Mob-back-btn";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -205,34 +202,187 @@ const LocationPicker = ({
   );
 };
 
+const SHIFT_OPTIONS = [
+  "9 AM - 6 PM",
+  "9:30 AM - 6:30 PM",
+  "10 AM - 7 PM",
+];
+
+const toAmPm = (timeStr) => {
+  if (!timeStr || typeof timeStr !== "string") return timeStr || "";
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+  if (!match) return timeStr;
+
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const existingAmPm = match[3];
+
+  if (existingAmPm) return timeStr;
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  return minutes === "00" ? `${hours} ${ampm}` : `${hours}:${minutes} ${ampm}`;
+};
+
+const formatShiftDisplay = (start, end) => {
+  if (!start && !end) return "9 AM - 6 PM";
+  if (start && end) {
+    if (start.includes("-") || start.includes("to")) return start;
+    return `${toAmPm(start)} - ${toAmPm(end)}`;
+  }
+  return toAmPm(start || end) || "9 AM - 6 PM";
+};
+
 const ShiftPicker = ({
   shiftStart,
   setShiftStart,
   shiftEnd,
   setShiftEnd,
   errors,
-}) => (
-  <div className="grid grid-cols-2 gap-4">
-    <FormField label="Shift Start" error={errors?.shiftStart}>
-      <TimePicker
-        onChange={setShiftStart}
-        value={formatExcelTime(shiftStart) || "08:00"}
-        disableClock={true}
-        format="hh:mm a"
-        className="w-full"
-      />
-    </FormField>
-    <FormField label="Shift End" error={errors?.shiftEnd}>
-      <TimePicker
-        onChange={setShiftEnd}
-        value={formatExcelTime(shiftEnd) || "17:00"}
-        disableClock={true}
-        format="hh:mm a"
-        className="w-full"
-      />
-    </FormField>
-  </div>
-);
+}) => {
+  const { theme } = useTheme();
+  const [inputValue, setInputValue] = useState(() =>
+    formatShiftDisplay(shiftStart, shiftEnd)
+  );
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(formatShiftDisplay(shiftStart, shiftEnd));
+    }
+  }, [shiftStart, shiftEnd, isFocused]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const updateShiftTimes = (val) => {
+    const cleanVal = val.trim();
+    if (!cleanVal) {
+      setShiftStart("");
+      setShiftEnd("");
+      return;
+    }
+
+    const splitRegex = /[-–—]|(?:\s+to\s+)/i;
+    const parts = cleanVal.split(splitRegex);
+
+    if (parts.length >= 2) {
+      setShiftStart(parts[0].trim());
+      setShiftEnd(parts.slice(1).join(" - ").trim());
+    } else {
+      setShiftStart(cleanVal);
+      setShiftEnd("");
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInputValue(val);
+    if (!isOpen) setIsOpen(true);
+    updateShiftTimes(val);
+  };
+
+  const handleSelectOption = (option) => {
+    setInputValue(option);
+    setIsOpen(false);
+    updateShiftTimes(option);
+  };
+
+  const inputClasses = `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-10 ${theme === "dark"
+    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+    }`;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <FormField label="Shift Time" error={errors?.shiftStart || errors?.shiftEnd}>
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            id="shiftStart"
+            name="shiftStart"
+            value={inputValue}
+            onChange={handleInputChange}
+            onFocus={() => {
+              setIsFocused(true);
+              setIsOpen(true);
+            }}
+            onBlur={() => setIsFocused(false)}
+            placeholder="Ex: 9 AM - 6 PM"
+            className={inputClasses}
+            autoComplete="off"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setIsOpen(!isOpen)}
+            className={`absolute right-3 focus:outline-none transition-colors ${theme === "dark"
+              ? "text-gray-400 hover:text-gray-200"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
+            aria-label="Toggle shift time options"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
+      </FormField>
+
+      {isOpen && (
+        <div
+          className={`absolute z-50 w-full mt-1 rounded-lg shadow-lg border max-h-60 overflow-auto focus:outline-none transition-all duration-150 ${theme === "dark"
+            ? "bg-gray-700 border-gray-600 text-white"
+            : "bg-white border-gray-200 text-gray-900"
+            }`}
+        >
+          {SHIFT_OPTIONS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                handleSelectOption(option);
+              }}
+              className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between transition-colors ${theme === "dark"
+                ? "hover:bg-gray-600 focus:bg-gray-600 text-gray-200"
+                : "hover:bg-blue-50 focus:bg-blue-50 text-gray-700 hover:text-blue-600"
+                } ${inputValue === option
+                  ? theme === "dark"
+                    ? "bg-gray-600 font-medium"
+                    : "bg-blue-50 text-blue-600 font-medium"
+                  : ""
+                }`}
+            >
+              <span>{option}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Title Code Preview Component
 const TitleCodePreview = ({ title, existingJobs }) => {
@@ -294,6 +444,25 @@ const TitleCodePreview = ({ title, existingJobs }) => {
   );
 };
 
+const convertNumber = (numStr, factor) => {
+  const cleanNumStr = numStr.replace(/,/g, '');
+  const num = parseFloat(cleanNumStr);
+  if (isNaN(num)) return numStr;
+
+  const res = num * factor;
+
+  if (res >= 10) {
+    return Math.round(res).toString();
+  } else {
+    return Number(res.toFixed(2)).toString();
+  }
+};
+
+const convertCompensationString = (str, factor) => {
+  if (!str || typeof str !== 'string') return str || '';
+  return str.replace(/(\d+(?:,\d+)*(?:\.\d+)?)/g, (match) => convertNumber(match, factor));
+};
+
 export const PostJobForm = ({
   jobToEdit,
   handleSubmit,
@@ -335,6 +504,70 @@ export const PostJobForm = ({
   const [loadingStatuses, setLoadingStatuses] = useState(false);
   const [statusError, setStatusError] = useState(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [skillsExperienceList, setSkillsExperienceList] = useState(() => {
+    if (jobToEdit?.skillsExperienceList && Array.isArray(jobToEdit.skillsExperienceList) && jobToEdit.skillsExperienceList.length > 0) {
+      return jobToEdit.skillsExperienceList;
+    }
+    const exp = String(jobToEdit?.experienceRequired || "");
+    const sk = jobToEdit?.skillsRequired || jobToEdit?.requiredSkills || jobToEdit?.skills || "";
+    const skStr = Array.isArray(sk) ? sk.join(", ") : String(sk);
+    if (exp || skStr) {
+      return [{ skills: skStr, experience: exp }];
+    }
+    return [{ skills: "", experience: "" }];
+  });
+
+  const [showExperienceSkills, setShowExperienceSkills] = useState(() => {
+    return Boolean(
+      (jobToEdit?.skillsExperienceList && jobToEdit.skillsExperienceList.length > 0) ||
+      jobToEdit?.experienceRequired ||
+      jobToEdit?.skillsRequired ||
+      jobToEdit?.requiredSkills ||
+      jobToEdit?.skills
+    );
+  });
+
+  useEffect(() => {
+    if (jobToEdit && (jobToEdit.skillsExperienceList || jobToEdit.experienceRequired || jobToEdit.skillsRequired || jobToEdit.requiredSkills || jobToEdit.skills)) {
+      setShowExperienceSkills(true);
+      if (jobToEdit.skillsExperienceList && Array.isArray(jobToEdit.skillsExperienceList) && jobToEdit.skillsExperienceList.length > 0) {
+        setSkillsExperienceList(jobToEdit.skillsExperienceList);
+      } else {
+        const exp = String(jobToEdit.experienceRequired || "");
+        const sk = jobToEdit.skillsRequired || jobToEdit.requiredSkills || jobToEdit.skills || "";
+        const skStr = Array.isArray(sk) ? sk.join(", ") : String(sk);
+        setSkillsExperienceList([{ skills: skStr, experience: exp }]);
+      }
+    }
+  }, [jobToEdit]);
+
+  useEffect(() => {
+    if (showExperienceSkills) {
+      const allExp = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
+      const allSkills = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+      setValue("experienceRequired", allExp, { shouldDirty: true });
+      setValue("skillsRequired", allSkills, { shouldDirty: true });
+    } else {
+      setValue("experienceRequired", [], { shouldDirty: true });
+      setValue("skillsRequired", [], { shouldDirty: true });
+    }
+  }, [skillsExperienceList, showExperienceSkills, setValue]);
+
+  const handleAddSkillExperience = () => {
+    setSkillsExperienceList((prev) => [...prev, { skills: "", experience: "" }]);
+  };
+
+  const handleRemoveSkillExperience = (indexToRemove) => {
+    setSkillsExperienceList((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleSkillExperienceChange = (index, field, val) => {
+    setSkillsExperienceList((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: val };
+      return updated;
+    });
+  };
 
   const FORM_OPTIONS = {
     location: [
@@ -555,12 +788,30 @@ export const PostJobForm = ({
   // Enhanced onSubmit to handle title code
   const enhancedOnSubmit = async (data) => {
     try {
+      console.log('📋 enhancedOnSubmit called');
+      console.log('📋 showExperienceSkills:', showExperienceSkills);
+      console.log('📋 skillsExperienceList:', JSON.stringify(skillsExperienceList));
+
+      if (showExperienceSkills) {
+        data.skillsRequired = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+        data.experienceRequired = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
+      } else {
+        data.skillsRequired = [];
+        data.experienceRequired = [];
+      }
+      delete data.skillsExperienceList;
+      delete data.requiredSkills;
+      delete data.skills;
+
       // Add title code to data if it's a new job
       if (!jobToEdit) {
         data.titleCode = titleCode;
       }
 
       // Call the original onSubmit function
+      console.log("🔥 Form data before onSubmit:", data);
+      console.log("🔥 skillsRequired being sent:", JSON.stringify(data.skillsRequired));
+      console.log("🔥 experienceRequired being sent:", JSON.stringify(data.experienceRequired));
       await onSubmit(data);
     } catch (error) {
       console.error("Error in form submission:", error);
@@ -583,6 +834,7 @@ export const PostJobForm = ({
         "hireType",
         "compensationVal",
         "experienceRequired",
+        "skillsRequired",
         "requiredResources",
         "status",
         "recruiterId",
@@ -604,6 +856,29 @@ export const PostJobForm = ({
         element?.scrollIntoView({ behavior: "smooth", block: "center" });
         element?.focus();
       }
+    }
+  };
+
+  const { onChange: onPeriodChange, ...periodRegister } = register("compensationPeriod");
+  const currentPeriod = watch("compensationPeriod");
+  const currentCompVal = watch("compensationVal");
+
+  const handlePeriodChange = (e) => {
+    const newPeriod = e.target.value;
+    if (currentPeriod && currentPeriod !== newPeriod && currentCompVal) {
+      let factor = 1;
+      if (currentPeriod === "Month" && newPeriod === "Year") {
+        factor = 12;
+      } else if (currentPeriod === "Year" && newPeriod === "Month") {
+        factor = 1 / 12;
+      }
+      if (factor !== 1) {
+        const convertedVal = convertCompensationString(String(currentCompVal), factor);
+        setValue("compensationVal", convertedVal, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+    if (onPeriodChange) {
+      onPeriodChange(e);
     }
   };
 
@@ -733,16 +1008,16 @@ export const PostJobForm = ({
                         name="compensationVal"
                         rules={{ required: "Compensation is required" }}
                         error={errors?.compensationVal}
-                        placeholder="Ex: 50000"
+                        placeholder="Ex: 50000 - 60000"
                       />
                     </div>
                     <div>
                       <FormField label="Period" error={errors?.compensationPeriod}>
                         <select
-                          {...register("compensationPeriod")}
-                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                            theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
-                          }`}
+                          {...periodRegister}
+                          onChange={handlePeriodChange}
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+                            }`}
                         >
                           <option value="Month">Monthly</option>
                           <option value="Year">Yearly</option>
@@ -751,14 +1026,113 @@ export const PostJobForm = ({
                     </div>
                   </div>
 
-                  <FormInput
-                    label="Experience Required (years)"
-                    register={register}
-                    name="experienceRequired"
-                    rules={{ required: "Experience is required" }}
-                    error={errors?.experienceRequired}
-                    placeholder="Ex: 3"
-                  />
+                  <div className={`p-4 rounded-xl border transition-colors ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id="requireExperienceSkills"
+                          checked={showExperienceSkills}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setShowExperienceSkills(checked);
+                            if (!checked) {
+                              setValue("experienceRequired", "");
+                              setValue("skillsRequired", "");
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+                        />
+                        <label
+                          htmlFor="requireExperienceSkills"
+                          className={`text-sm font-semibold cursor-pointer ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+                        >
+                          Minimum Experience & Skills Required
+                        </label>
+                      </div>
+                    </div>
+
+                    {showExperienceSkills && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                        {skillsExperienceList.map((item, index) => (
+                          <div
+                            key={index}
+                            className={`relative p-4 rounded-lg border ${
+                              theme === "dark"
+                                ? "bg-gray-900/50 border-gray-700"
+                                : "bg-white border-gray-200 shadow-sm"
+                            }`}
+                          >
+                            {skillsExperienceList.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveSkillExperience(index)}
+                                className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors p-1"
+                                title="Remove this field"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-6">
+                              <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                                  Skills Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.skills || ""}
+                                  onChange={(e) => handleSkillExperienceChange(index, "skills", e.target.value)}
+                                  placeholder="Ex: React, Node.js, MongoDB"
+                                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                    theme === "dark"
+                                      ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                                  }`}
+                                  required={showExperienceSkills}
+                                />
+                              </div>
+
+                              <div>
+                                <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                                  Minimum Experience Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.experience || ""}
+                                  onChange={(e) => handleSkillExperienceChange(index, "experience", e.target.value)}
+                                  placeholder="Ex: 3 (Years)"
+                                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                    theme === "dark"
+                                      ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                                  }`}
+                                  required={showExperienceSkills}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          type="button"
+                          onClick={handleAddSkillExperience}
+                          className={`w-full py-2.5 px-4 border border-dashed rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
+                            theme === "dark"
+                              ? "border-gray-600 text-blue-400 hover:bg-gray-800/80 hover:border-blue-500"
+                              : "border-gray-300 text-blue-600 hover:bg-blue-50/50 hover:border-blue-400"
+                          }`}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Add More Skills & Experience</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   <FormInput
                     label="Required Number of Resources"
@@ -836,7 +1210,7 @@ export const PostJobForm = ({
                       className={`w-full px-3 sm:px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm sm:text-base ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"}`}
                     >
                       <option value="">Select Interview Mode</option>
-                      <option value="AI">AI Interview</option>
+                      {/* <option value="AI">AI Interview</option> */}
                       <option value="Manual">Manual Interview</option>
                     </select>
                   </FormField>
@@ -983,3 +1357,4 @@ export const PostJobForm = ({
 };
 
 export default PostJobForm;
+

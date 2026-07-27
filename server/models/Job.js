@@ -61,8 +61,15 @@ const Job = {
   },
 
   async create(jobData) {
+    console.log('🗄️ Job.create inserting skillsRequired:', jobData.skillsRequired);
+    console.log('🗄️ Job.create inserting experienceRequired:', jobData.experienceRequired);
     const { data, error } = await supabase.from(TABLE).insert(jobData).select().single();
-    if (error) throw error;
+    if (error) {
+      console.error('🗄️ Supabase insert error:', error);
+      throw error;
+    }
+    console.log('🗄️ Supabase returned skillsRequired:', data?.skillsRequired);
+    console.log('🗄️ Supabase returned experienceRequired:', data?.experienceRequired);
     return fromDB(data);
   },
 

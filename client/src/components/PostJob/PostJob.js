@@ -54,10 +54,10 @@ export const PostJob = () => {
 
   // Shift time states
   const [shiftStart, setShiftStart] = useState(
-    formatExcelTime(jobToEdit?.shiftStart) || "08:00",
+    formatExcelTime(jobToEdit?.shiftStart) || "9 AM",
   );
   const [shiftEnd, setShiftEnd] = useState(
-    formatExcelTime(jobToEdit?.shiftEnd) || "17:00",
+    formatExcelTime(jobToEdit?.shiftEnd) || "6 PM",
   );
 
   // Fetch the recruiter role from localStorage
@@ -134,6 +134,8 @@ export const PostJob = () => {
       compensationVal: "",
       compensationPeriod: "Month",
       experienceRequired: "",
+      skillsRequired: "",
+      skillsExperienceList: [],
       requiredResources: "",
       status: jobToEdit?.status || "",
       recruiterId: recruiterRole ? "" : user._id,
@@ -204,6 +206,9 @@ export const PostJob = () => {
     const stateName = stateObj ? stateObj.name : selectedState;
 
     // Format the data to include shiftStart, shiftEnd, and separate location fields
+    console.log("🔥 onSubmit data.skillsRequired:", JSON.stringify(data.skillsRequired));
+    console.log("🔥 onSubmit data.experienceRequired:", JSON.stringify(data.experienceRequired));
+
     const formattedData = {
       ...data,
       shiftStart,
@@ -213,7 +218,8 @@ export const PostJob = () => {
       state: stateName,
       city: selectedCity,
       compensation: `${data.compensationVal}/${data.compensationPeriod}`,
-      experienceRequired: String(data.experienceRequired),
+      experienceRequired: Array.isArray(data.experienceRequired) ? data.experienceRequired : [String(data.experienceRequired || "")].filter(Boolean),
+      skillsRequired: Array.isArray(data.skillsRequired) ? data.skillsRequired : [String(data.skillsRequired || "")].filter(Boolean),
       company_id: companyId,
       hiringManagerId: "",
       interviewMode: interviewMode,
@@ -225,6 +231,12 @@ export const PostJob = () => {
     };
     delete formattedData.compensationVal;
     delete formattedData.compensationPeriod;
+    delete formattedData.skillsExperienceList;
+    delete formattedData.requiredSkills;
+    delete formattedData.skills;
+
+    console.log("🔥 Submitting formattedData to backend:", formattedData);
+    console.log("🔥 Final skillsRequired:", JSON.stringify(formattedData.skillsRequired));
 
     if (jobToEdit) {
       updateJob(formattedData, {
@@ -299,3 +311,4 @@ export const PostJob = () => {
 };
 
 export default PostJob;
+

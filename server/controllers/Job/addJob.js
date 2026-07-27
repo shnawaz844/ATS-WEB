@@ -9,7 +9,11 @@ const addJob = async (req, res) => {
       country, state, city, description, compensation, experienceRequired,
       requiredResources, status, recruiterId, hiringManagerId, applicationForm,
       interviewMode, interviewDuration, interviewType, applicants, company_id,
+      skillsRequired,
     } = req.body;
+
+    console.log('📥 addJob req.body skillsRequired:', skillsRequired, '| type:', typeof skillsRequired);
+    console.log('📥 addJob req.body experienceRequired:', experienceRequired, '| type:', typeof experienceRequired);
 
     let interview_id = null;
 
@@ -42,12 +46,26 @@ const addJob = async (req, res) => {
       titleCode = generateSimpleTitleCode(title);
     }
 
+    // Normalize arrays for DB
+    const normalizedSkills = Array.isArray(skillsRequired)
+      ? skillsRequired
+      : (skillsRequired ? [skillsRequired] : []);
+    const normalizedExp = Array.isArray(experienceRequired)
+      ? experienceRequired
+      : (experienceRequired ? [experienceRequired] : []);
+
+    console.log('✅ normalizedSkills:', normalizedSkills);
+    console.log('✅ normalizedExp:', normalizedExp);
+
     const jobData = {
       jobID: uniqid(), titleCode, title, locationType, type, scheduleType,
       shiftStart, shiftEnd, hireType, country, state, city, description,
-      compensation, experienceRequired, requiredResources, status, recruiterId,
+      compensation,
+      experienceRequired: normalizedExp,
+      requiredResources, status, recruiterId,
       hiringManagerId, applicationForm: applicationForm || {}, applicants: applicants || [],
       company_id, interviewMode,
+      skillsRequired: normalizedSkills,
     };
 
     if (interviewMode === 'AI') {
