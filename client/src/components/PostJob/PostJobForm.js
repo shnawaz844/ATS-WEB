@@ -788,10 +788,6 @@ export const PostJobForm = ({
   // Enhanced onSubmit to handle title code
   const enhancedOnSubmit = async (data) => {
     try {
-      console.log('📋 enhancedOnSubmit called');
-      console.log('📋 showExperienceSkills:', showExperienceSkills);
-      console.log('📋 skillsExperienceList:', JSON.stringify(skillsExperienceList));
-
       if (showExperienceSkills) {
         data.skillsRequired = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
         data.experienceRequired = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
@@ -808,10 +804,6 @@ export const PostJobForm = ({
         data.titleCode = titleCode;
       }
 
-      // Call the original onSubmit function
-      console.log("🔥 Form data before onSubmit:", data);
-      console.log("🔥 skillsRequired being sent:", JSON.stringify(data.skillsRequired));
-      console.log("🔥 experienceRequired being sent:", JSON.stringify(data.experienceRequired));
       await onSubmit(data);
     } catch (error) {
       console.error("Error in form submission:", error);

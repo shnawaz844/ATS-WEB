@@ -12,9 +12,6 @@ const addJob = async (req, res) => {
       skillsRequired,
     } = req.body;
 
-    console.log('📥 addJob req.body skillsRequired:', skillsRequired, '| type:', typeof skillsRequired);
-    console.log('📥 addJob req.body experienceRequired:', experienceRequired, '| type:', typeof experienceRequired);
-
     let interview_id = null;
 
     if (interviewMode === 'AI') {
@@ -53,9 +50,6 @@ const addJob = async (req, res) => {
     const normalizedExp = Array.isArray(experienceRequired)
       ? experienceRequired
       : (experienceRequired ? [experienceRequired] : []);
-
-    console.log('✅ normalizedSkills:', normalizedSkills);
-    console.log('✅ normalizedExp:', normalizedExp);
 
     const jobData = {
       jobID: uniqid(), titleCode, title, locationType, type, scheduleType,

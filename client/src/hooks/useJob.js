@@ -21,8 +21,6 @@ const fetchJobs = async ( { filters, page, limit, headers } ) => {
 
 // Post a new job
 const postJob = async ( jobData ) => {
-    console.log('📡 postJob sending skillsRequired:', JSON.stringify(jobData.skillsRequired));
-    console.log('📡 postJob sending experienceRequired:', JSON.stringify(jobData.experienceRequired));
     const response = await fetch( `${ process.env.REACT_APP_BASE_URL }/jobs/post-job`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

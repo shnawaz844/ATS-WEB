@@ -206,9 +206,6 @@ export const PostJob = () => {
     const stateName = stateObj ? stateObj.name : selectedState;
 
     // Format the data to include shiftStart, shiftEnd, and separate location fields
-    console.log("🔥 onSubmit data.skillsRequired:", JSON.stringify(data.skillsRequired));
-    console.log("🔥 onSubmit data.experienceRequired:", JSON.stringify(data.experienceRequired));
-
     const formattedData = {
       ...data,
       shiftStart,
@@ -236,7 +233,6 @@ export const PostJob = () => {
     delete formattedData.skills;
 
     console.log("🔥 Submitting formattedData to backend:", formattedData);
-    console.log("🔥 Final skillsRequired:", JSON.stringify(formattedData.skillsRequired));
 
     if (jobToEdit) {
       updateJob(formattedData, {
