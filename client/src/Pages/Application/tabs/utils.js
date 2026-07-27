@@ -188,3 +188,4 @@ export const getColorStyles = (colorName, variant) => {
 
     return colorMap[colorName]?.[variant] || colorMap.gray[variant];
 };
+

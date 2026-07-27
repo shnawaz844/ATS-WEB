@@ -140,3 +140,4 @@ const OtherApplicationsTab = ({ candidateId, statuses }) => {
 };
 
 export default OtherApplicationsTab;
+

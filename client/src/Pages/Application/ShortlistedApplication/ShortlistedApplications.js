@@ -214,3 +214,4 @@ const ShortlistedApplications = ({ email }) => {
 };
 
 export default ShortlistedApplications;
+

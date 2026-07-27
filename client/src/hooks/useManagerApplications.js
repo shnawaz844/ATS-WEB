@@ -42,3 +42,4 @@ const useManagerApplications = ( hiringManagerId, page = 1, limit = 10, search =
 };
 
 export default useManagerApplications;
+

@@ -978,3 +978,4 @@ export const ApplicationForm = ({ job, loginData, applicationStatusesData, jobSt
     </>
   );
 };
+

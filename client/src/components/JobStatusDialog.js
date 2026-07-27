@@ -98,3 +98,4 @@ JobStatusDialog.propTypes = {
 };
 
 export default JobStatusDialog;
+

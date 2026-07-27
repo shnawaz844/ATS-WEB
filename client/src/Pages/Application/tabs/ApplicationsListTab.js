@@ -371,3 +371,4 @@ const ApplicationsListTab = ({
 };
 
 export default ApplicationsListTab;
+

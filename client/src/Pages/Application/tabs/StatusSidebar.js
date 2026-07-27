@@ -75,3 +75,4 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
 };
 
 export default StatusSidebar;
+

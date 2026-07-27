@@ -19,3 +19,4 @@ const ResumeTab = ({ applicationData }) => (
 );
 
 export default ResumeTab;
+

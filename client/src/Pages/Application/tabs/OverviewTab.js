@@ -238,3 +238,4 @@ const OverviewTab = ({ job, applications, statusCounts: backendStatusCounts, tot
 };
 
 export default OverviewTab;
+

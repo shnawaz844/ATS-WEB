@@ -37,3 +37,4 @@ const useAllInterviews = (page, limit) => {
 };
 
 export default useAllInterviews;
+

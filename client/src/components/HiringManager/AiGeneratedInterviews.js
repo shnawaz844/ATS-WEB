@@ -23,7 +23,7 @@ const AssignedInterviews = () => {
     useEffect(() => {
         const fetchCompanyDetails = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`);
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/companies/${companyUserName}`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data && data.aiFeaturesEnabled !== undefined) {
@@ -754,3 +754,4 @@ const AssignedInterviews = () => {
 };
 
 export default AssignedInterviews;
+

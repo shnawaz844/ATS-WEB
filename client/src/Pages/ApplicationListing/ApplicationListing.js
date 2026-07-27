@@ -269,3 +269,4 @@ const ApplicationList = () => {
 };
 
 export default ApplicationList;
+

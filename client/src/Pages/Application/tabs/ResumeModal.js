@@ -119,3 +119,4 @@ const ResumeModal = ({ isOpen, onClose, resumeData }) => {
 };
 
 export default ResumeModal;
+

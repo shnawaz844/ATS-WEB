@@ -122,3 +122,4 @@ function RenderTableRows({ job, recruiters }) {
         </tr>
     )
 }
+

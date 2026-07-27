@@ -40,3 +40,4 @@ const ApplicationTabs = ({ activeTab, setActiveTab, applicationData }) => {
 };
 
 export default ApplicationTabs;
+

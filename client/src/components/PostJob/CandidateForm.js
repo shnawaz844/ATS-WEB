@@ -105,3 +105,4 @@ export const CandidateForm = ({ questions, setQuestions, addQuestion, handleDele
 };
 
 export default CandidateForm;
+

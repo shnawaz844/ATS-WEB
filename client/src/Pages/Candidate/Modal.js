@@ -269,3 +269,4 @@ const Modal = ({ getStatusColor, isOpen, onClose, app, getStatusName }) => {
 };
 
 export default Modal
+

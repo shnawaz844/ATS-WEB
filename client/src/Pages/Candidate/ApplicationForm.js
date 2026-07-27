@@ -199,3 +199,4 @@ function RenderQuestion({ index, question, register, theme }) {
         </div>
     );
 }
+

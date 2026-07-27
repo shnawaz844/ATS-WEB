@@ -623,3 +623,4 @@ const CandidateApplication = () => {
 };
 
 export default CandidateApplication;
+

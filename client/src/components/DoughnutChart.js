@@ -145,3 +145,4 @@ export default function DoughnutChart({ data = [], title, applicationStatuses = 
         </div>
     );
 }
+

@@ -69,3 +69,4 @@ const CandidateDetailsPage = () => {
 };
 
 export default CandidateDetailsPage;
+

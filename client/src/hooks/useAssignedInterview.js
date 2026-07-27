@@ -56,3 +56,4 @@ const useScheduledInterview = ( page, limit, search, filterStatus ) => {
 };
 
 export default useScheduledInterview;
+

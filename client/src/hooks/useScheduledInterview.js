@@ -64,3 +64,4 @@ const useScheduledInterview = ( { page, limit, searchTerm, candidateID, jobID, f
 };
 
 export default useScheduledInterview;
+

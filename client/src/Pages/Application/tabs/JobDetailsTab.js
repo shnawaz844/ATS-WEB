@@ -339,3 +339,4 @@ const JobDetailsTab = ({ job }) => {
 };
 
 export default JobDetailsTab;
+
