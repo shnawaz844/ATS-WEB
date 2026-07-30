@@ -1070,7 +1070,7 @@ export const PostJobForm = ({
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-6">
-                              <div>
+                              <div className="flex flex-col justify-end h-full">
                                 <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                                   Skills Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
                                 </label>
@@ -1088,7 +1088,7 @@ export const PostJobForm = ({
                                 />
                               </div>
 
-                              <div>
+                              <div className="flex flex-col justify-end h-full">
                                 <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                                   Minimum Experience Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
                                 </label>
