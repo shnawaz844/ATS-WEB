@@ -685,7 +685,7 @@ export const AllJobs = () => {
                                                                 <span className="text-sm">
                                                                     Number of applicants:{" "}
                                                                     <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
-                                                                        {job.applicationCount || "N/A"}
+                                                                        {job.applicants.length || "N/A"}
                                                                     </span>
                                                                 </span>
                                                             </div>

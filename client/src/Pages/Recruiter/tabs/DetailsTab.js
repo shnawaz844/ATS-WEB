@@ -1,22 +1,26 @@
 import React from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Briefcase, 
-  FileText, 
-  HelpCircle, 
-  CheckCircle2, 
-  Calendar, 
-  Clock, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  FileText,
+  HelpCircle,
+  CheckCircle2,
+  Calendar,
+  Clock,
   Award,
   Sparkles,
   Users,
-  GraduationCap
+  GraduationCap,
+  X
 } from 'lucide-react';
 
 const DetailsTab = ({ applicationData = {} }) => {
+  const [modalFile, setModalFile] = React.useState(null);
+  const [modalTitle, setModalTitle] = React.useState("");
+
   const {
     applicationStatus,
     contactInfo,
@@ -74,17 +78,17 @@ const DetailsTab = ({ applicationData = {} }) => {
       let aList = aRaw;
 
       if (typeof qList === 'string') {
-        try { qList = JSON.parse(qList); } catch (e) {}
+        try { qList = JSON.parse(qList); } catch (e) { }
       }
       if (typeof aList === 'string') {
-        try { aList = JSON.parse(aList); } catch (e) {}
+        try { aList = JSON.parse(aList); } catch (e) { }
       }
 
       if (Array.isArray(qList) && qList.length > 0 && typeof qList[0] === 'string' && qList[0].startsWith('[')) {
-        try { qList = JSON.parse(qList[0]); } catch (e) {}
+        try { qList = JSON.parse(qList[0]); } catch (e) { }
       }
       if (Array.isArray(aList) && aList.length > 0 && typeof aList[0] === 'string' && aList[0].startsWith('[')) {
-        try { aList = JSON.parse(aList[0]); } catch (e) {}
+        try { aList = JSON.parse(aList[0]); } catch (e) { }
       }
 
       if (!Array.isArray(qList)) qList = [];
@@ -141,18 +145,28 @@ const DetailsTab = ({ applicationData = {} }) => {
 
   const statusBadge = getStatusBadge(applicationStatus);
 
-  const candidateName = expMeta.Name || fullName || applicationData.candidateID?.userName || 'Applicant';
-  const qualification = appQualification || expMeta.Qualification || 'Not specified';
-  const candidateCity = appCity || expMeta.City || 'Not specified';
-  const relocatePref = appRelocate || expMeta.Relocate || 'Not specified';
-  const shiftPref = appWillingToWorkShift || expMeta['Flexible Shift'] || expMeta['Shift Willingness'] || 'Not specified';
-  const whyJoin = appWhyJoin && appWhyJoin !== 'EMPTY' ? appWhyJoin : (expMeta['Why Join'] || 'Not provided');
-  const referralInfo = expMeta.Referral || 'No';
-  const experiencesList = expMeta['Work Experiences'] || expSummary;
+  const capitalizeWords = (str) => {
+    if (!str || typeof str !== 'string') return str || "";
+
+    return str
+      .toLowerCase()
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const candidateName = capitalizeWords(expMeta.Name || fullName || applicationData.candidateID?.userName || 'Applicant');
+  const qualification = capitalizeWords(appQualification || expMeta.Qualification || 'Not specified');
+  const candidateCity = capitalizeWords(appCity || expMeta.City || 'Not specified');
+  const relocatePref = capitalizeWords(appRelocate || expMeta.Relocate || 'Not specified');
+  const shiftPref = capitalizeWords(appWillingToWorkShift || expMeta['Flexible Shift'] || expMeta['Shift Willingness'] || 'Not specified');
+  const whyJoin = capitalizeWords(appWhyJoin && appWhyJoin !== 'EMPTY' ? appWhyJoin : (expMeta['Why Join'] || 'Not provided'));
+  const referralInfo = capitalizeWords(expMeta.Referral || 'No');
+  const experiencesList = capitalizeWords(expMeta['Work Experiences'] || expSummary);
 
   return (
     <div className="space-y-6 text-gray-900 dark:text-gray-100 font-sans">
-      
+
       {/* ── HEADER STATUS BANNER ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 border border-blue-100 dark:border-gray-700 shadow-sm gap-4">
         <div>
@@ -187,7 +201,7 @@ const DetailsTab = ({ applicationData = {} }) => {
               <User size={16} className="text-blue-600" /> Step 1: Personal Details
             </h3>
           </div>
-          
+
           <div className="space-y-3 text-sm">
             <div className="flex justify-between items-center p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Full Name</span>
@@ -209,7 +223,7 @@ const DetailsTab = ({ applicationData = {} }) => {
               <span className="font-bold text-gray-900 dark:text-gray-100">{qualification}</span>
             </div>
 
-            {qualification === "Professional Certification (CFA, CA, etc.)" && certDetails && (
+            {(appQualification || expMeta.Qualification) === "Professional Certification (CFA, CA, etc.)" && certDetails && (
               <div className="col-span-full mt-2 p-3.5 rounded-xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50">
                 <h4 className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-3 uppercase tracking-wider flex items-center gap-2">
                   <Award size={14} /> Professional Certification Details
@@ -217,11 +231,11 @@ const DetailsTab = ({ applicationData = {} }) => {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Place of Certificate</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">{certDetails.place || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{capitalizeWords(certDetails.place || 'N/A')}</span>
                   </div>
                   <div>
                     <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Subject</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">{certDetails.subject || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{capitalizeWords(certDetails.subject || 'N/A')}</span>
                   </div>
                   <div>
                     <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Marks / Grade</span>
@@ -231,9 +245,12 @@ const DetailsTab = ({ applicationData = {} }) => {
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Certificate File</span>
                       {certDetails.fileUrl ? (
-                        <a href={certDetails.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">
+                        <button 
+                          onClick={(e) => { e.preventDefault(); setModalFile(certDetails.fileUrl); setModalTitle(certDetails.fileName || "Certificate Document"); }}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded-lg border border-blue-200"
+                        >
                           <FileText size={13} /> {certDetails.fileName || 'View Document'}
-                        </a>
+                        </button>
                       ) : (
                         <span className="font-semibold text-gray-900 dark:text-white">{certDetails.fileName}</span>
                       )}
@@ -256,9 +273,12 @@ const DetailsTab = ({ applicationData = {} }) => {
             <div className="flex justify-between items-center p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Resume File</span>
               {resume ? (
-                <a href={resume} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                <button
+                  onClick={(e) => { e.preventDefault(); setModalFile(resume); setModalTitle("Resume PDF"); }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200"
+                >
                   <FileText size={13} /> View Resume PDF
-                </a>
+                </button>
               ) : (
                 <span className="text-gray-400">Not Uploaded</span>
               )}
@@ -280,21 +300,21 @@ const DetailsTab = ({ applicationData = {} }) => {
               experiencesArr.map((exp, idx) => (
                 <div key={idx} className="p-4 rounded-xl bg-blue-50/70 dark:bg-gray-700/50 border border-blue-100 dark:border-gray-600">
                   <div className="flex justify-between items-start mb-2">
-                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Experience {idx + 1}</p>
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Experience {exp.years} years</p>
                     <span className="text-xs font-semibold px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-md shadow-sm border border-gray-100 dark:border-gray-600">{exp.years} Years</span>
                   </div>
                   <div className="grid grid-cols-2 gap-y-3 gap-x-4 mt-3">
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Company Name</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{exp.company || 'N/A'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{capitalizeWords(exp.company || 'N/A')}</span>
                     </div>
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Role</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{exp.role || 'N/A'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{capitalizeWords(exp.role || 'N/A')}</span>
                     </div>
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Field</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{exp.field || 'N/A'}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{capitalizeWords(exp.field || 'N/A')}</span>
                     </div>
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Last Salary</span>
@@ -333,7 +353,7 @@ const DetailsTab = ({ applicationData = {} }) => {
                 <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
                   <div>
                     <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Name</span>
-                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralName || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{capitalizeWords(referralName || 'N/A')}</span>
                   </div>
                   <div>
                     <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Employee Code</span>
@@ -341,11 +361,11 @@ const DetailsTab = ({ applicationData = {} }) => {
                   </div>
                   <div>
                     <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Designation</span>
-                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralDesignation || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{capitalizeWords(referralDesignation || 'N/A')}</span>
                   </div>
                   <div>
                     <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Department</span>
-                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralDepartment || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{capitalizeWords(referralDepartment || 'N/A')}</span>
                   </div>
                 </div>
               ) : (
@@ -365,20 +385,20 @@ const DetailsTab = ({ applicationData = {} }) => {
           </div>
 
           <div className="space-y-3.5 text-sm">
-            {whyJoin && whyJoin !== 'Not provided' && (
-              <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Why Join F2 Fintech</p>
-                <p className="text-xs text-gray-700 dark:text-gray-200 italic leading-relaxed">"{whyJoin}"</p>
-              </div>
-            )}
+
+            <div className="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600">
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Why Join F2 Fintech</p>
+              <p className="text-xs text-gray-700 dark:text-gray-200 italic leading-relaxed">{whyJoin === null ? "N/A" : whyJoin}</p>
+            </div>
+
 
             {qaPairs.length > 0 && (
               <div className="space-y-2 mt-2">
                 <p className="text-xs font-bold text-blue-600 dark:text-blue-400">Custom Questions</p>
                 {qaPairs.map((item, idx) => (
                   <div key={idx} className="p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600">
-                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Q{idx + 1}: {item.question}</p>
-                    <p className="text-xs font-semibold text-emerald-600 mt-1">Ans: {item.answer}</p>
+                    <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Q{idx + 1}: {capitalizeWords(item.question)}</p>
+                    <p className="text-xs font-semibold text-emerald-600 mt-1">Ans: {capitalizeWords(item.answer)}</p>
                   </div>
                 ))}
               </div>
@@ -398,11 +418,41 @@ const DetailsTab = ({ applicationData = {} }) => {
           </div>
         </div>
         {resume && (
-          <a href={resume} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-sm flex-shrink-0">
-            Download CV Resume
-          </a>
+          <button 
+            onClick={(e) => { e.preventDefault(); setModalFile(resume); setModalTitle("Resume PDF"); }}
+            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-sm flex-shrink-0"
+          >
+            View CV Resume
+          </button>
         )}
       </div>
+
+      {/* ── PDF VIEWER MODAL ── */}
+      {modalFile && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="font-bold text-lg text-gray-900 dark:text-white">{modalTitle}</h3>
+              <button 
+                onClick={() => setModalFile(null)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-2 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 p-0 overflow-hidden bg-gray-50 dark:bg-gray-900 flex flex-col">
+              <object data={modalFile} type="application/pdf" className="w-full flex-1 min-h-[75vh]" width="100%" height="100%">
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center min-h-[50vh]">
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">Your browser does not support inline PDFs.</p>
+                  <a href={modalFile} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors inline-block shadow-sm">
+                    Download PDF instead
+                  </a>
+                </div>
+              </object>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -20,9 +20,14 @@ const CandidateInfo = ({ applicationData = {} }) => {
 
     const expMeta = parseExperienceMetadata(experience);
 
-    const capitalizeFirstLetter = (string) => {
-        if (!string) return '';
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    const capitalizeWords = (str) => {
+        if (!str) return "";
+
+        return str
+            .toLowerCase()
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
     };
 
     const displayName = candidateID?.userName || fullName || expMeta.name || 'N/A';
@@ -44,7 +49,7 @@ const CandidateInfo = ({ applicationData = {} }) => {
                         <User className="text-blue-500 w-5 h-5 flex-shrink-0" />
                         <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Full Name</p>
-                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayName)}</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeWords(displayName)}</p>
                         </div>
                     </div>
 
@@ -68,7 +73,7 @@ const CandidateInfo = ({ applicationData = {} }) => {
                         <UserCircle2 className="text-purple-500 w-5 h-5 flex-shrink-0" />
                         <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Gender</p>
-                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayGender)}</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeWords(displayGender)}</p>
                         </div>
                     </div>
 
@@ -76,7 +81,7 @@ const CandidateInfo = ({ applicationData = {} }) => {
                         <MapPin className="text-rose-500 w-5 h-5 flex-shrink-0" />
                         <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">City / Address</p>
-                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeFirstLetter(displayAddress)}</p>
+                            <p className="font-semibold text-gray-800 dark:text-gray-100">{capitalizeWords(displayAddress)}</p>
                         </div>
                     </div>
                 </div>

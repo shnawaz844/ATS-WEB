@@ -47,8 +47,9 @@ export const PostJob = () => {
   const [selectedState, setSelectedState] = useState(jobToEdit?.state || "");
   const [selectedCity, setSelectedCity] = useState(jobToEdit?.city || "");
   const [interviewMode, setInterviewMode] = useState(
-    jobToEdit?.interviewMode || "",
+    jobToEdit?.interviewMode || "Manual",
   );
+  const [isLoading, setIsLoading] = useState(false);
   const [interviewRounds, setInterviewRounds] = useState([]);
   const [roundsMap, setRoundsMap] = useState({});
 
@@ -145,7 +146,7 @@ export const PostJob = () => {
         question: questions.map((q) => q.question),
         answer: questions.map((q) => q.answer),
       },
-      interviewMode: "",
+      interviewMode: jobToEdit?.interviewMode || "Manual",
       interviewDuration: "",
       interviewType: "",
       company_id: companyId,
@@ -234,14 +235,18 @@ export const PostJob = () => {
 
     console.log("🔥 Submitting formattedData to backend:", formattedData);
 
+    setIsLoading(true);
+
     if (jobToEdit) {
       updateJob(formattedData, {
         onSuccess: () => {
           toast.success("Job updated successfully");
+          setIsLoading(false);
           navigate(`/${companyUserName}/all-jobs`);
         },
         onError: () => {
           toast.error("Failed to update job");
+          setIsLoading(false);
         },
       });
     } else {
@@ -249,10 +254,12 @@ export const PostJob = () => {
       postJob(formattedData, {
         onSuccess: () => {
           toast.success("Job posted successfully");
+          setIsLoading(false);
           navigate(`/${companyUserName}/all-jobs`);
         },
         onError: () => {
           toast.error("Failed to post job");
+          setIsLoading(false);
         },
       });
     }
@@ -302,6 +309,7 @@ export const PostJob = () => {
       interviewMode={interviewMode}
       setInterviewMode={setInterviewMode}
       interviewRounds={interviewRounds}
+      isLoading={isLoading}
     />
   );
 };
