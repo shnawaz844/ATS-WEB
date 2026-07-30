@@ -9,7 +9,7 @@ const ApplicationTabs = ({ activeTab, setActiveTab, applicationData }) => {
         { id: 'resume', label: 'CV / Resume' },
         { id: 'details', label: 'Applicant Details' },
         { id: 'qa', label: 'Q&A' },
-        { id: 'other', label: 'Other Applications' }
+        // { id: 'other', label: 'Other Applications' }
     ];
     console.log("applicationData>>>>>", applicationData);
     return (

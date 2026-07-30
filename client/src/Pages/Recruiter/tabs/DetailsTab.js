@@ -28,7 +28,21 @@ const DetailsTab = ({ applicationData = {} }) => {
     createdAt,
     fullName,
     id,
-    _id
+    _id,
+    hasExperience,
+    experiences: rawExperiences,
+    certificationDetails: rawCertDetails,
+    hasReferral,
+    referralName,
+    referralDesignation,
+    referralDepartment,
+    referralCode,
+    EmployeeCode,
+    qualification: appQualification,
+    city: appCity,
+    relocate: appRelocate,
+    willingToWorkShift: appWillingToWorkShift,
+    whyJoin: appWhyJoin
   } = applicationData;
 
   // Helper to parse experience string details formatted during stepper submission
@@ -87,6 +101,29 @@ const DetailsTab = ({ applicationData = {} }) => {
 
   const qaPairs = parseQA(questions, answers);
 
+  let experiencesArr = [];
+  try {
+    if (typeof rawExperiences === 'string') {
+      experiencesArr = JSON.parse(rawExperiences);
+    } else if (Array.isArray(rawExperiences)) {
+      experiencesArr = rawExperiences;
+    }
+  } catch (e) {
+    console.error("Error parsing experiences", e);
+  }
+
+  let certDetails = null;
+  try {
+    if (typeof rawCertDetails === 'string') {
+      const parsed = JSON.parse(rawCertDetails);
+      certDetails = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : parsed;
+    } else if (typeof rawCertDetails === 'object' && rawCertDetails !== null) {
+      certDetails = Array.isArray(rawCertDetails) && rawCertDetails.length > 0 ? rawCertDetails[0] : rawCertDetails;
+    }
+  } catch (e) {
+    console.error("Error parsing certDetails", e);
+  }
+
   const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'applied':
@@ -105,11 +142,11 @@ const DetailsTab = ({ applicationData = {} }) => {
   const statusBadge = getStatusBadge(applicationStatus);
 
   const candidateName = expMeta.Name || fullName || applicationData.candidateID?.userName || 'Applicant';
-  const qualification = expMeta.Qualification || 'Not specified';
-  const candidateCity = expMeta.City || 'Not specified';
-  const relocatePref = expMeta.Relocate || 'Not specified';
-  const shiftPref = expMeta['Flexible Shift'] || expMeta['Shift Willingness'] || 'Not specified';
-  const whyJoin = expMeta['Why Join'] || 'Not provided';
+  const qualification = appQualification || expMeta.Qualification || 'Not specified';
+  const candidateCity = appCity || expMeta.City || 'Not specified';
+  const relocatePref = appRelocate || expMeta.Relocate || 'Not specified';
+  const shiftPref = appWillingToWorkShift || expMeta['Flexible Shift'] || expMeta['Shift Willingness'] || 'Not specified';
+  const whyJoin = appWhyJoin && appWhyJoin !== 'EMPTY' ? appWhyJoin : (expMeta['Why Join'] || 'Not provided');
   const referralInfo = expMeta.Referral || 'No';
   const experiencesList = expMeta['Work Experiences'] || expSummary;
 
@@ -172,6 +209,40 @@ const DetailsTab = ({ applicationData = {} }) => {
               <span className="font-bold text-gray-900 dark:text-gray-100">{qualification}</span>
             </div>
 
+            {qualification === "Professional Certification (CFA, CA, etc.)" && certDetails && (
+              <div className="col-span-full mt-2 p-3.5 rounded-xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50">
+                <h4 className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-3 uppercase tracking-wider flex items-center gap-2">
+                  <Award size={14} /> Professional Certification Details
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Place of Certificate</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{certDetails.place || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Subject</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{certDetails.subject || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Marks / Grade</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{certDetails.marks || 'N/A'}</span>
+                  </div>
+                  {(certDetails.fileUrl || certDetails.fileName) && (
+                    <div>
+                      <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Certificate File</span>
+                      {certDetails.fileUrl ? (
+                        <a href={certDetails.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded-lg border border-blue-200">
+                          <FileText size={13} /> {certDetails.fileName || 'View Document'}
+                        </a>
+                      ) : (
+                        <span className="font-semibold text-gray-900 dark:text-white">{certDetails.fileName}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between items-center p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
               <span className="text-gray-500 dark:text-gray-400 font-medium">City / Location</span>
               <span className="font-bold text-gray-900 dark:text-gray-100">{candidateCity}</span>
@@ -205,10 +276,39 @@ const DetailsTab = ({ applicationData = {} }) => {
           </div>
 
           <div className="space-y-3.5 text-sm">
-            <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-gray-700/50 border border-blue-100 dark:border-gray-600">
-              <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Submitted Experience</p>
-              <p className="font-semibold text-sm text-gray-900 dark:text-white leading-relaxed">{experiencesList}</p>
-            </div>
+            {experiencesArr && experiencesArr.length > 0 ? (
+              experiencesArr.map((exp, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-blue-50/70 dark:bg-gray-700/50 border border-blue-100 dark:border-gray-600">
+                  <div className="flex justify-between items-start mb-2">
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Experience {idx + 1}</p>
+                    <span className="text-xs font-semibold px-2 py-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-md shadow-sm border border-gray-100 dark:border-gray-600">{exp.years} Years</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4 mt-3">
+                    <div>
+                      <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Company Name</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{exp.company || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Role</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{exp.role || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Field</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{exp.field || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Last Salary</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{exp.salary || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-gray-700/50 border border-blue-100 dark:border-gray-600">
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">Submitted Experience</p>
+                <p className="font-semibold text-sm text-gray-900 dark:text-white leading-relaxed">{experiencesList}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -228,8 +328,29 @@ const DetailsTab = ({ applicationData = {} }) => {
             </div>
 
             <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600">
-              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Employee Referral</p>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{referralInfo}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Employee Referral</p>
+              {hasReferral === true || hasReferral === "true" || referralName ? (
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2 mt-1">
+                  <div>
+                    <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Name</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralName || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Employee Code</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralCode || EmployeeCode || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Designation</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralDesignation || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-400 dark:text-gray-500 text-[11px] uppercase font-semibold">Department</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">{referralDepartment || 'N/A'}</span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{referralInfo !== 'No' ? referralInfo : 'No Referral'}</p>
+              )}
             </div>
           </div>
         </div>

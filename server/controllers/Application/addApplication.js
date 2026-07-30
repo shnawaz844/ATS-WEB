@@ -310,7 +310,9 @@ const addApplication = async (req, res) => {
     hasReferral,
     referralName,
     referralDesignation,
-    referralDepartment
+    referralDepartment,
+    referralCode,
+    certificationDetails
   } = req.body;
 
   try {
@@ -336,11 +338,25 @@ const addApplication = async (req, res) => {
     }
 
     let resumeUrl = null;
-    if (req.file) {
-      const uploadResult = await uploadToS3(req.file);
+    let certUrl = null;
+
+    const resumeFile = req.files && req.files['resume'] ? req.files['resume'][0] : req.file;
+    const certFile = req.files && req.files['certificate'] ? req.files['certificate'][0] : (req.files && req.files['certFile'] ? req.files['certFile'][0] : null);
+
+    if (resumeFile) {
+      const uploadResult = await uploadToS3(resumeFile);
       resumeUrl = uploadResult.fileUrl;
     } else {
       return res.status(400).json({ message: "Resume file is required." });
+    }
+
+    if (certFile) {
+      try {
+        const certUploadResult = await uploadToS3(certFile);
+        certUrl = certUploadResult.fileUrl;
+      } catch (e) {
+        console.warn("⚠️ Certificate upload failed:", e.message);
+      }
     }
 
     // Format additional stepper details into experience text so full data is preserved in Supabase
@@ -350,15 +366,15 @@ const addApplication = async (req, res) => {
     if (qualification) extraDetails.push(`Qualification: ${qualification}`);
     if (city) extraDetails.push(`City: ${city}`);
     if (relocate !== undefined && relocate !== null) extraDetails.push(`Relocate: ${relocate}`);
-    
+
     if (experiences) {
       let expList = [];
       try {
         const parsed = typeof experiences === 'string' ? JSON.parse(experiences) : experiences;
         if (Array.isArray(parsed) && parsed.length > 0) {
-          expList = parsed.map((b, i) => `Exp ${i+1}: ${b.years||0} yrs in ${b.field||'Field'} as ${b.role||'Role'} (Salary: ${b.salary||'N/A'})`);
+          expList = parsed.map((b, i) => `Exp ${i + 1}: ${b.years || 0} yrs in ${b.field || 'Field'} at ${b.company || 'Company'} as ${b.role || 'Role'} (Salary: ${b.salary || 'N/A'})`);
         }
-      } catch (e) {}
+      } catch (e) { }
       if (expList.length > 0) {
         extraDetails.push(`Work Experiences: ${expList.join(" ; ")}`);
       }
@@ -366,12 +382,21 @@ const addApplication = async (req, res) => {
 
     if (willingToWorkShift !== undefined && willingToWorkShift !== null) extraDetails.push(`Flexible Shift: ${willingToWorkShift}`);
     if (whyJoin) extraDetails.push(`Why Join: ${whyJoin}`);
+
+    if (certificationDetails) {
+      try {
+        const certParsed = typeof certificationDetails === 'string' ? JSON.parse(certificationDetails) : certificationDetails;
+        extraDetails.push(`Certificate: ${certParsed.subject || ''} from ${certParsed.place || ''} (Marks: ${certParsed.marks || ''})`);
+      } catch (e) { }
+    }
+    if (certUrl) extraDetails.push(`Certificate File: ${certUrl}`);
+
     if (hasReferral === "true" || hasReferral === true) {
-      extraDetails.push(`Referral: Yes - ${referralName || 'Employee'} (${referralDesignation || ''} in ${referralDepartment || ''})`);
+      extraDetails.push(`Referral: Yes - ${referralName || 'Employee'} (${referralDesignation || ''} in ${referralDepartment || ''} - Code: ${referralCode || 'N/A'})`);
     } else if (hasReferral === "false" || hasReferral === false) {
       extraDetails.push(`Referral: No`);
     } else if (referralName) {
-      extraDetails.push(`Referral: ${referralName} (${referralDesignation || ''} in ${referralDepartment || ''})`);
+      extraDetails.push(`Referral: ${referralName} (${referralDesignation || ''} in ${referralDepartment || ''} - Code: ${referralCode || 'N/A'})`);
     }
 
     if (extraDetails.length > 0) {
@@ -386,7 +411,7 @@ const addApplication = async (req, res) => {
       resume: resumeUrl,
       contactInfo,
       emailInfo,
-      experience: formattedExperience,
+      "candidate-info": formattedExperience,
       qualification,
       city,
       relocate,
@@ -401,6 +426,14 @@ const addApplication = async (req, res) => {
       answers: typeof answers === 'string' ? JSON.parse(answers) : (answers || []),
       company_id,
       interview_id: interview_id || null,
+      EmployeeCode: referralCode || null,
+      certificationDetails: (() => {
+        let certObj = certificationDetails ? (typeof certificationDetails === 'string' ? JSON.parse(certificationDetails) : certificationDetails) : null;
+        if (certObj && certUrl) {
+          certObj.fileUrl = certUrl;
+        }
+        return certObj;
+      })(),
     });
 
     const applicationId = newApplication._id;
@@ -408,27 +441,35 @@ const addApplication = async (req, res) => {
 
     const isUUID = (str) => typeof str === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
 
-    try {
-      if (isUUID(jobID)) {
-        const existingApplicationsCount = await Application.countDocuments({ jobID });
-        if (existingApplicationsCount === 1 && isUUID(jobStatusId)) {
-          await Job.findByIdAndUpdate(jobID, { status: jobStatusId });
-        }
-      }
-    } catch (statusErr) {
-      console.warn("⚠️ Could not update job status ID:", statusErr.message);
-    }
-
     let jobData = null;
     try {
-      if (isUUID(jobID)) {
+      if (jobID) {
         jobData = await Job.findById(jobID);
+        if (jobData) {
+          const actualJobId = jobData.id; // Correct UUID from DB
+          const existingApplicationsCount = await Application.countDocuments({ jobID });
+
+          let updateData = {};
+
+          // Status update
+          if (existingApplicationsCount === 1 && jobStatusId) {
+            updateData.status = jobStatusId;
+          }
+
+          // Update applicants (JSONB array in Supabase)
+          let currentApplicants = Array.isArray(jobData.applicants) ? jobData.applicants : [];
+          updateData.applicants = [...currentApplicants, candidateID];
+
+          await Job.findByIdAndUpdate(actualJobId, updateData);
+
+          jobData = { ...jobData, ...updateData };
+        }
       }
-    } catch (e) {
-      console.warn("⚠️ Job lookup failed:", e.message);
+    } catch (err) {
+      console.warn("⚠️ Job lookup or update failed:", err.message);
     }
     const candidateData = { name: candidateName || "Applicant" };
-    
+
     sendApplicationConfirmationEmail(
       { emailInfo, contactInfo, experience, applicationId },
       {

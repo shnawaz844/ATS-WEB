@@ -21,6 +21,7 @@ import applicationlistRoutes from './routes/applicationlistRoutes.js'
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import geminiRoutes from "./routes/geminiRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import waitlistRoutes from "./routes/waitlistRoutes.js";
 
 
 const app = express();
@@ -53,6 +54,7 @@ app.use("/interviewerfeedback", feedbackRoutes);
 app.use("/upload", fileUploadRoute);
 app.use("/ai", geminiRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/waitlist", waitlistRoutes);
 
 // app.use("/interview-result", resultRoutes)
 

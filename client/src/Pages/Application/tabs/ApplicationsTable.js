@@ -155,9 +155,7 @@ const ApplicationsTable = ({
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Email
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
-                                Status
-                            </th>
+
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Contact
                             </th>
@@ -166,11 +164,16 @@ const ApplicationsTable = ({
                                     Resume
                                 </th>
                             )}
-                            {isInternalRole && (
+
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
+                                Status
+                            </th>
+
+                            {/* {isInternalRole && (
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                     Actions
                                 </th>
-                            )}
+                            )} */}
                             {/* { ( ( !subUserRole || subUserRole === 'recruiter_manager' ) && !isHiringManager ) && (
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <button
@@ -219,6 +222,21 @@ const ApplicationsTable = ({
                                         </td>
 
 
+
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
+                                            {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
+                                        </td>
+                                        {isInternalRole && (
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button
+                                                    onClick={() => onViewResume(app)}
+                                                    className="text-[#9333ea] hover:text-purple-800 hover:underline group-hover:text-white font-medium"
+                                                >
+                                                    View Resume
+                                                </button>
+                                            </td>
+                                        )}
+
                                         <td className={`px-6 py-4 whitespace-nowrap text-sm ${theme === 'dark' ? 'text-gray-400 group-hover:text-gray-200' : 'text-gray-500 group-hover:text-white'}`}>
                                             <select
                                                 className={`min-w-32 w-auto px-4 py-2 rounded-xl border shadow-sm focus:border-[#9333ea] focus:ring-2 focus:ring-purple-300 text-sm ${theme === 'dark'
@@ -240,20 +258,7 @@ const ApplicationsTable = ({
                                             </select>
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
-                                            {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
-                                        </td>
-                                        {isInternalRole && (
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <button
-                                                    onClick={() => onViewResume(app)}
-                                                    className="text-[#9333ea] hover:text-purple-800 hover:underline group-hover:text-white font-medium"
-                                                >
-                                                    View Resume
-                                                </button>
-                                            </td>
-                                        )}
-                                        {isInternalRole && (
+                                        {/* {isInternalRole && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 <button
                                                     onClick={() => handleScheduleInterview(app)}
@@ -262,7 +267,7 @@ const ApplicationsTable = ({
                                                     Schedule Interview
                                                 </button>
                                             </td>
-                                        )}
+                                        )} */}
                                     </tr>
                                 );
                             })

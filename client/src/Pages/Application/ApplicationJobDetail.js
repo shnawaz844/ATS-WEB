@@ -227,7 +227,7 @@ const ApplicationJobDetail = () => {
                         </div>
 
                         {/* Right Side: Button */}
-                        <div>
+                        {/* <div>
                             {(isRecruiterManager || isAdmin) && (
                                 <button
                                     onClick={() => navigate(`/${companyUserName}/current-job/${id}`)}
@@ -236,7 +236,7 @@ const ApplicationJobDetail = () => {
                                     Create Application
                                 </button>
                             )}
-                        </div>
+                        </div> */}
 
                     </div>
                 </div>

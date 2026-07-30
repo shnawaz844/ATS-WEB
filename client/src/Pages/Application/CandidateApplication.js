@@ -221,18 +221,18 @@ const CandidateApplication = () => {
                             {/* Search and Filters */}
                             <div className='flex flex-wrap items-center gap-4 ml-auto'>
                                 <div className="flex items-center gap-2">
-                                    <button
+                                    {/* <button
                                         className="px-4 py-2 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-all font-medium active:scale-95 shadow-sm whitespace-nowrap text-sm"
                                         onClick={() => navigate(`/${companyUserName}/import-application`)}
                                     >
                                         Import Job
-                                    </button>
-                                    <button
+                                    </button> */}
+                                    {/* <button
                                         className="px-4 py-2 bg-[#9333ea] text-white rounded-xl hover:bg-[#7e22ce] transition-all font-medium active:scale-95 shadow-sm whitespace-nowrap text-sm"
                                         onClick={() => navigate(`/${companyUserName}/import-candidate-application`)}
                                     >
                                         Import Candidate Application
-                                    </button>
+                                    </button> */}
                                 </div>
 
                                 <div className="flex items-center gap-3">

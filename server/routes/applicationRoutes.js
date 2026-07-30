@@ -14,7 +14,7 @@ import { getCandidateAppDetail } from '../controllers/Application/getCandidateAp
 import { getApplicationById } from '../controllers/Application/getApplicationById.js'
 
 
-router.post("/add-application", upload.single("resume"), addApplication);
+router.post("/add-application", upload.fields([{ name: "resume", maxCount: 1 }, { name: "certificate", maxCount: 1 }, { name: "certFile", maxCount: 1 }]), addApplication);
 router.put("/update-candidate-application/:id", upload.single("resume"), updateApplication);
 router.get('/get-application/:id', getApplication);
 router.get( '/get-application-hm/:id', getApplicationById);

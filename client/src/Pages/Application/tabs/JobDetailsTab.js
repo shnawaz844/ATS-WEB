@@ -149,6 +149,7 @@ const JobDetailsTab = ({ job }) => {
     description,
     compensation,
     experienceRequired,
+    skillsRequired,
     requiredResources,
     status,
     recruiterId,
@@ -295,18 +296,44 @@ const JobDetailsTab = ({ job }) => {
             </h2>
             <div className="space-y-3 sm:space-y-4">
               <div>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Skills Required</p>
+                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{skillsRequired || 'N/A'}</p>
+              </div>
+              <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Experience Required</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{experienceRequired || 'N/A'}</p>
+                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{experienceRequired
+                  ? `${JSON.parse(experienceRequired)[0]} years`
+                  : "N/A"}</p>
               </div>
               <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Resources Required</p>
                 <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{requiredResources || 'N/A'}</p>
               </div>
               <div>
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Compensation</p>
-                <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
-                  {compensation ? `${formatIndianRupee(compensation)} ${compensation.toString().toLowerCase().includes("month") || compensation.toString().toLowerCase().includes("/mo") ? "monthly" : "yearly"}` : 'N/A'}
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Compensation
                 </p>
+
+                {compensation ? (() => {
+                  const [salaryRange] = compensation.split("/");
+                  const [minSalary, maxSalary] = salaryRange.split("-").map(Number);
+
+                  return (
+                    <>
+                      <p className={`font-medium ${theme === "dark" ? "text-gray-200" : "text-gray-900"}`}>
+                        {`${formatIndianRupee(minSalary)} - ${formatIndianRupee(maxSalary)} Monthly`}
+                      </p>
+
+                      <p className={`text-sm mt-1 ${theme === "dark" ? "text-gray-400" : "text-gray-600"}`}>
+                        {`${formatIndianRupee(minSalary * 12)} - ${formatIndianRupee(maxSalary * 12)} Yearly`}
+                      </p>
+                    </>
+                  );
+                })() : (
+                  <p className={`font-medium ${theme === "dark" ? "text-gray-200" : "text-gray-900"}`}>
+                    N/A
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -325,10 +352,10 @@ const JobDetailsTab = ({ job }) => {
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Recruiter Name</p>
                 <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{recruiter?.userName || 'N/A'}</p>
               </div>
-              <div>
+              {/* <div>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Hiring Manager Name</p>
                 <p className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{hiringManager?.userName || 'N/A'}</p>
-              </div>
+              </div> */}
             </div>
           </section>
         </div>
