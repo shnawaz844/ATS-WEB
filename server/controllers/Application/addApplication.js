@@ -312,6 +312,7 @@ const addApplication = async (req, res) => {
     referralDesignation,
     referralDepartment,
     referralCode,
+    applicant_type,
     certificationDetails
   } = req.body;
 
@@ -426,6 +427,7 @@ const addApplication = async (req, res) => {
       answers: typeof answers === 'string' ? JSON.parse(answers) : (answers || []),
       company_id,
       interview_id: interview_id || null,
+      applicant_type,
       EmployeeCode: referralCode || null,
       certificationDetails: (() => {
         let certObj = certificationDetails ? (typeof certificationDetails === 'string' ? JSON.parse(certificationDetails) : certificationDetails) : null;

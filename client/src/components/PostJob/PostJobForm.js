@@ -505,6 +505,7 @@ export const PostJobForm = ({
   const [loadingStatuses, setLoadingStatuses] = useState(false);
   const [statusError, setStatusError] = useState(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [waitlistUsers, setWaitlistUsers] = useState([]);
   const [skillsExperienceList, setSkillsExperienceList] = useState(() => {
     if (jobToEdit?.skillsExperienceList && Array.isArray(jobToEdit.skillsExperienceList) && jobToEdit.skillsExperienceList.length > 0) {
       return jobToEdit.skillsExperienceList;
@@ -518,19 +519,8 @@ export const PostJobForm = ({
     return [{ skills: "", experience: "" }];
   });
 
-  const [showExperienceSkills, setShowExperienceSkills] = useState(() => {
-    return Boolean(
-      (jobToEdit?.skillsExperienceList && jobToEdit.skillsExperienceList.length > 0) ||
-      jobToEdit?.experienceRequired ||
-      jobToEdit?.skillsRequired ||
-      jobToEdit?.requiredSkills ||
-      jobToEdit?.skills
-    );
-  });
-
   useEffect(() => {
     if (jobToEdit && (jobToEdit.skillsExperienceList || jobToEdit.experienceRequired || jobToEdit.skillsRequired || jobToEdit.requiredSkills || jobToEdit.skills)) {
-      setShowExperienceSkills(true);
       if (jobToEdit.skillsExperienceList && Array.isArray(jobToEdit.skillsExperienceList) && jobToEdit.skillsExperienceList.length > 0) {
         setSkillsExperienceList(jobToEdit.skillsExperienceList);
       } else {
@@ -543,16 +533,11 @@ export const PostJobForm = ({
   }, [jobToEdit]);
 
   useEffect(() => {
-    if (showExperienceSkills) {
-      const allExp = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
-      const allSkills = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
-      setValue("experienceRequired", allExp, { shouldDirty: true });
-      setValue("skillsRequired", allSkills, { shouldDirty: true });
-    } else {
-      setValue("experienceRequired", [], { shouldDirty: true });
-      setValue("skillsRequired", [], { shouldDirty: true });
-    }
-  }, [skillsExperienceList, showExperienceSkills, setValue]);
+    const allExp = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
+    const allSkills = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+    setValue("experienceRequired", allExp, { shouldDirty: true });
+    setValue("skillsRequired", allSkills, { shouldDirty: true });
+  }, [skillsExperienceList, setValue]);
 
   const handleAddSkillExperience = () => {
     setSkillsExperienceList((prev) => [...prev, { skills: "", experience: "" }]);
@@ -719,6 +704,51 @@ export const PostJobForm = ({
   }, [companyId]);
 
   useEffect(() => {
+    const fetchWaitlist = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_URL}/waitlist/get-waitlist`,
+          {
+            headers: {
+              Company_id: companyId,
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.success && data.data) {
+          setWaitlistUsers(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching waitlist users:", error);
+      }
+    };
+    fetchWaitlist();
+  }, [companyId]);
+
+  const jobTitleWatch = watch("title");
+  
+  const matchedWaitlist = React.useMemo(() => {
+    if (!jobTitleWatch || !waitlistUsers.length) return { total: 0, autoApplyCount: 0, autoApplyUsers: [] };
+    
+    const titleLower = jobTitleWatch.trim().toLowerCase();
+    if (titleLower.length < 2) return { total: 0, autoApplyCount: 0, autoApplyUsers: [] };
+    
+    const matched = waitlistUsers.filter(item => {
+      const waitlistRole = item.role?.trim().toLowerCase();
+      if (!waitlistRole) return false;
+      return titleLower.includes(waitlistRole) || waitlistRole.includes(titleLower);
+    });
+
+    const pendingMatched = matched.filter(item => item.status === 'Pending' || item.status === 'Reviewed');
+    
+    return {
+      total: matched.length,
+      autoApplyCount: pendingMatched.length,
+      autoApplyUsers: pendingMatched
+    };
+  }, [jobTitleWatch, waitlistUsers]);
+
+  useEffect(() => {
     const fetchRecruiters = async () => {
       try {
         const response = await fetch(
@@ -789,13 +819,8 @@ export const PostJobForm = ({
   // Enhanced onSubmit to handle title code
   const enhancedOnSubmit = async (data) => {
     try {
-      if (showExperienceSkills) {
-        data.skillsRequired = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
-        data.experienceRequired = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
-      } else {
-        data.skillsRequired = [];
-        data.experienceRequired = [];
-      }
+      data.skillsRequired = skillsExperienceList.flatMap(item => (item.skills || "").split(",").map(s => s.trim()).filter(Boolean));
+      data.experienceRequired = skillsExperienceList.map(item => (item.experience || "").trim()).filter(Boolean);
       delete data.skillsExperienceList;
       delete data.requiredSkills;
       delete data.skills;
@@ -925,6 +950,38 @@ export const PostJobForm = ({
                       title={watch?.title}
                       existingJobs={existingJobs}
                     />
+
+                    {/* Waitlist Match Info */}
+                    {matchedWaitlist.total > 0 && (
+                      <div className={`mt-3 p-4 rounded-xl border ${theme === 'dark' ? 'bg-purple-900/20 border-purple-800' : 'bg-purple-50 border-purple-200'}`}>
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-purple-800/50 text-purple-400' : 'bg-purple-100 text-purple-600'}`}>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className={`text-sm font-medium ${theme === 'dark' ? 'text-purple-300' : 'text-purple-800'}`}>
+                              Waitlist Insights: <span className="font-bold">{matchedWaitlist.total}</span> candidates matched for this role.
+                            </p>
+                            <p className={`text-xs mt-1 leading-relaxed ${theme === 'dark' ? 'text-purple-400/80' : 'text-purple-600/80'}`}>
+                              <span className="font-bold">{matchedWaitlist.autoApplyCount}</span> candidate(s) are in Pending or Reviewed status and will automatically apply to this job upon posting.
+                            </p>
+                            {matchedWaitlist.autoApplyUsers.length > 0 && (
+                              <div className="mt-2 text-xs opacity-75">
+                                <strong>Auto-applying users:</strong>{' '}
+                                {matchedWaitlist.autoApplyUsers.map((u, i) => (
+                                  <span key={i}>
+                                    {u.name || u.firstName || u.fullName || u.email || 'Candidate'}
+                                    {i < matchedWaitlist.autoApplyUsers.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {jobToEdit && (
@@ -1022,109 +1079,92 @@ export const PostJobForm = ({
                   <div className={`p-4 rounded-xl border transition-colors ${theme === "dark" ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <input
-                          type="checkbox"
-                          id="requireExperienceSkills"
-                          checked={showExperienceSkills}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            setShowExperienceSkills(checked);
-                            if (!checked) {
-                              setValue("experienceRequired", "");
-                              setValue("skillsRequired", "");
-                            }
-                          }}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
-                        />
                         <label
-                          htmlFor="requireExperienceSkills"
-                          className={`text-sm font-semibold cursor-pointer ${theme === "dark" ? "text-white" : "text-gray-800"}`}
+                          className={`text-sm font-semibold ${theme === "dark" ? "text-white" : "text-gray-800"}`}
                         >
                           Minimum Experience & Skills Required
                         </label>
                       </div>
                     </div>
 
-                    {showExperienceSkills && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
-                        {skillsExperienceList.map((item, index) => (
-                          <div
-                            key={index}
-                            className={`relative p-4 rounded-lg border ${
-                              theme === "dark"
-                                ? "bg-gray-900/50 border-gray-700"
-                                : "bg-white border-gray-200 shadow-sm"
-                            }`}
-                          >
-                            {skillsExperienceList.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveSkillExperience(index)}
-                                className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors p-1"
-                                title="Remove this field"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-6">
-                              <div className="flex flex-col justify-end h-full">
-                                <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                                  Skills Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={item.skills || ""}
-                                  onChange={(e) => handleSkillExperienceChange(index, "skills", e.target.value)}
-                                  placeholder="Ex: React, Node.js, MongoDB"
-                                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                                    theme === "dark"
-                                      ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-                                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                                  }`}
-                                  required={showExperienceSkills}
-                                />
-                              </div>
-
-                              <div className="flex flex-col justify-end h-full">
-                                <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                                  Minimum Experience Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                  type="text"
-                                  value={item.experience || ""}
-                                  onChange={(e) => handleSkillExperienceChange(index, "experience", e.target.value)}
-                                  placeholder="Ex: 3 (Years)"
-                                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                                    theme === "dark"
-                                      ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-                                      : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                                  }`}
-                                  required={showExperienceSkills}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-
-                        <button
-                          type="button"
-                          onClick={handleAddSkillExperience}
-                          className={`w-full py-2.5 px-4 border border-dashed rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                      {skillsExperienceList.map((item, index) => (
+                        <div
+                          key={index}
+                          className={`relative p-4 rounded-lg border ${
                             theme === "dark"
-                              ? "border-gray-600 text-blue-400 hover:bg-gray-800/80 hover:border-blue-500"
-                              : "border-gray-300 text-blue-600 hover:bg-blue-50/50 hover:border-blue-400"
+                              ? "bg-gray-900/50 border-gray-700"
+                              : "bg-white border-gray-200 shadow-sm"
                           }`}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                          </svg>
-                          <span>Add More Skills & Experience</span>
-                        </button>
-                      </div>
-                    )}
+                          {skillsExperienceList.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSkillExperience(index)}
+                              className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors p-1"
+                              title="Remove this field"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-6">
+                            <div className="flex flex-col justify-end h-full">
+                              <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                                Skills Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={item.skills || ""}
+                                onChange={(e) => handleSkillExperienceChange(index, "skills", e.target.value)}
+                                placeholder="Ex: React, Node.js, MongoDB"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                  theme === "dark"
+                                    ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                                }`}
+                                required={true}
+                              />
+                            </div>
+
+                            <div className="flex flex-col justify-end h-full">
+                              <label className={`block text-xs font-semibold uppercase tracking-wider mb-1 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+                                Minimum Experience Required {skillsExperienceList.length > 1 ? `#${index + 1}` : ""} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={item.experience || ""}
+                                onChange={(e) => handleSkillExperienceChange(index, "experience", e.target.value)}
+                                placeholder="Ex: 3 (Years)"
+                                className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                                  theme === "dark"
+                                    ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
+                                }`}
+                                required={true}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={handleAddSkillExperience}
+                        className={`w-full py-2.5 px-4 border border-dashed rounded-lg text-sm font-semibold flex items-center justify-center space-x-2 transition-all ${
+                          theme === "dark"
+                            ? "border-gray-600 text-blue-400 hover:bg-gray-800/80 hover:border-blue-500"
+                            : "border-gray-300 text-blue-600 hover:bg-blue-50/50 hover:border-blue-400"
+                        }`}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add More Skills & Experience</span>
+                      </button>
+                    </div>
                   </div>
 
                   <FormInput
@@ -1309,7 +1349,15 @@ export const PostJobForm = ({
                 <Controller
                   name="description"
                   control={control}
-                  rules={{ required: "Description is required" }}
+                  rules={{ 
+                    required: "Description is required",
+                    validate: (value) => {
+                      if (!value) return "Description is required";
+                      // ReactQuill sometimes leaves empty tags like <p><br></p>
+                      const text = value.replace(/<[^>]*>?/gm, '').trim();
+                      return text.length > 0 || "Description is required";
+                    }
+                  }}
                   render={({ field }) => (
                     <ReactQuill
                       {...field}

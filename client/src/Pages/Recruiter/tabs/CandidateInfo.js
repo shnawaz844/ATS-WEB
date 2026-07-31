@@ -20,6 +20,14 @@ const CandidateInfo = ({ applicationData = {} }) => {
 
     const expMeta = parseExperienceMetadata(experience);
 
+    let waitlistName = '';
+    if (applicationData['candidate-info'] && typeof applicationData['candidate-info'] === 'string') {
+        const namePart = applicationData['candidate-info'].split('|').find(p => p.trim().startsWith('name:'));
+        if (namePart) {
+            waitlistName = namePart.split(':')[1]?.trim();
+        }
+    }
+
     const capitalizeWords = (str) => {
         if (!str) return "";
 
@@ -30,10 +38,10 @@ const CandidateInfo = ({ applicationData = {} }) => {
             .join(" ");
     };
 
-    const displayName = candidateID?.userName || fullName || expMeta.name || 'N/A';
+    const displayName = candidateID?.userName || waitlistName || fullName || expMeta.name || 'N/A';
     const displayEmail = candidateID?.email || emailInfo || 'N/A';
     const displayGender = candidateID?.gender || 'N/A';
-    const displayAddress = candidateID?.address || expMeta.city || 'N/A';
+    const displayAddress = candidateID?.address || expMeta.city || applicationData.city || 'N/A';
     const displayContact = contactInfo || candidateID?.contact || 'N/A';
 
     return (

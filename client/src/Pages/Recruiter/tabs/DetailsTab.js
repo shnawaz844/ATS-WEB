@@ -173,7 +173,7 @@ const DetailsTab = ({ applicationData = {} }) => {
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Application Overview</span>
             <span className="text-gray-300">•</span>
-            <span className="text-xs text-gray-500 font-mono">ID: {_id || id || 'N/A'}</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">{applicationData?.applicant_type}</span>
           </div>
           <h2 className="text-xl font-black text-gray-900 dark:text-white mt-1">
             {candidateName}'s Application Details
@@ -245,7 +245,7 @@ const DetailsTab = ({ applicationData = {} }) => {
                     <div>
                       <span className="block text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-wider font-semibold mb-0.5">Certificate File</span>
                       {certDetails.fileUrl ? (
-                        <button 
+                        <button
                           onClick={(e) => { e.preventDefault(); setModalFile(certDetails.fileUrl); setModalTitle(certDetails.fileName || "Certificate Document"); }}
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:underline bg-blue-50 px-2 py-1 rounded-lg border border-blue-200"
                         >
@@ -335,17 +335,17 @@ const DetailsTab = ({ applicationData = {} }) => {
         {/* ── STEP 3 & STEP 5: WORK SCHEDULE & REFERRAL ── */}
         <div className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">3 &amp; 5</div>
+            <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">3</div>
             <h3 className="font-bold text-base text-gray-900 dark:text-white flex items-center gap-1.5">
-              <Clock size={16} className="text-blue-600" /> Schedule &amp; Referral Details
+              <Clock size={16} className="text-blue-600" /> Referral Details
             </h3>
           </div>
 
           <div className="space-y-3.5 text-sm">
-            <div className="flex justify-between items-center p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
+            {/* <div className="flex justify-between items-center p-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/40">
               <span className="text-gray-500 dark:text-gray-400 font-medium">Shift Willingness</span>
               <span className="font-bold text-gray-900 dark:text-gray-100">{shiftPref}</span>
-            </div>
+            </div> */}
 
             <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 border border-gray-100 dark:border-gray-600">
               <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Employee Referral</p>
@@ -418,7 +418,7 @@ const DetailsTab = ({ applicationData = {} }) => {
           </div>
         </div>
         {resume && (
-          <button 
+          <button
             onClick={(e) => { e.preventDefault(); setModalFile(resume); setModalTitle("Resume PDF"); }}
             className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-sm flex-shrink-0"
           >
@@ -433,7 +433,7 @@ const DetailsTab = ({ applicationData = {} }) => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="font-bold text-lg text-gray-900 dark:text-white">{modalTitle}</h3>
-              <button 
+              <button
                 onClick={() => setModalFile(null)}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-2 rounded-full transition-colors"
               >

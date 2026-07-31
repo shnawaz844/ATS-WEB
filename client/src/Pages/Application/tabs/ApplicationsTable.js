@@ -30,7 +30,6 @@ const ApplicationsTable = ({
     const userRole = user.role;
     const subUserRole = localStorage.getItem("sub_role") || "";
 
-    console.log("subUserRole", subUserRole, user)
 
     // const subrole = ''; //local storage - 'hiring_manager'/'recruiter_manager'
     // const subrole = JSON.parse( localStorage.setItem( "user" ) || "{}" );
@@ -120,6 +119,8 @@ const ApplicationsTable = ({
         }
     };
 
+    console.log("filteredApps", filteredApps)
+
     return (
         <div className="space-y-4 ">
             {/* Search and Limit Controls */}
@@ -159,6 +160,12 @@ const ApplicationsTable = ({
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Contact
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
+                                Applicant Type
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
+                                Applied On
+                            </th>
                             {isInternalRole && (
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                     Resume
@@ -191,9 +198,20 @@ const ApplicationsTable = ({
                         {filteredApps?.length > 0 ? (
                             filteredApps.map((app) => {
                                 // Prepare candidateID & jobID for the link
-                                const candidateId = app.candidateID?._id;
+                                const candidateId = app.candidateID?._id || app.candidateID;
                                 const jobId = app.jobID?._id || app.jobID;
                                 const statusColor = getStatusColor(app.applicationStatusId);
+
+                                let waitlistName = '';
+                                if (app['candidate-info'] && typeof app['candidate-info'] === 'string') {
+                                    const namePart = app['candidate-info'].split('|').find(p => p.trim().startsWith('name:'));
+                                    if (namePart) {
+                                        waitlistName = namePart.split(':')[1]?.trim();
+                                    }
+                                }
+
+                                const candidateName = app.candidateID?.userName || waitlistName || 'N/A';
+                                const candidateInitial = candidateName !== 'N/A' && candidateName.length > 0 ? candidateName[0].toUpperCase() : 'N';
 
                                 return (
                                     <tr key={app._id} className={`group transition-colors duration-200 ${theme === 'dark' ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-700'
@@ -203,7 +221,7 @@ const ApplicationsTable = ({
                                                 <div className="flex-shrink-0 h-10 w-10">
                                                     <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
                                                         <span className="text-lg font-medium text-gray-600">
-                                                            {(app.candidateID?.userName?.[0] || 'N').toUpperCase()}
+                                                            {candidateInitial}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -212,7 +230,7 @@ const ApplicationsTable = ({
                                                         to={`/${companyUserName}/candidate-details/${candidateId}/${jobId}`}
                                                         className="text-sm font-medium text-purple-600 hover:underline group-hover:text-white "
                                                     >
-                                                        {capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
+                                                        {candidateName !== 'N/A' ? capitalizeFirstLetter(candidateName) : 'N/A'}
                                                     </Link>
                                                 </div>
                                             </div>
@@ -225,6 +243,14 @@ const ApplicationsTable = ({
 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
                                             {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
+                                            {(app.applicant_type?.toLowerCase() === 'waitlist' || app.applicant_type?.toLowerCase() === 'applied via waitlist') ? 'Applied via Waitlist' : 
+                                             (app.applicant_type?.toLowerCase() === 'job seeker' || app.applicant_type?.toLowerCase() === 'applied directly') ? 'Applied Directly' : 
+                                             (app.applicant_type ? capitalizeFirstLetter(app.applicant_type) : 'Regular')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
+                                            {app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                                         </td>
                                         {isInternalRole && (
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

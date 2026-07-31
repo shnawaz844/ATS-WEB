@@ -36,6 +36,7 @@ const ApplicationsListTab = ({
     const [statuses, setStatuses] = useState([]);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [showFilters, setShowFilters] = useState(false);
+    const [applicantTypeFilter, setApplicantTypeFilter] = useState('All');
 
     const { theme } = useTheme();
 
@@ -246,7 +247,18 @@ const ApplicationsListTab = ({
         }
     };
 
-    const filteredApps = allApps;
+    const filteredApps = allApps.filter(app => {
+        if (applicantTypeFilter === 'All') return true;
+        
+        const type = app.applicant_type?.toLowerCase();
+        if (applicantTypeFilter === 'Applied via Waitlist') {
+            return type === 'waitlist' || type === 'applied via waitlist';
+        }
+        if (applicantTypeFilter === 'Applied Directly') {
+            return type === 'job seeker' || type === 'applied directly';
+        }
+        return false;
+    });
 
     return (
         <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
@@ -254,17 +266,34 @@ const ApplicationsListTab = ({
             {isMobile && (
                 <>
                     <div className="flex-1 space-y-6 w-80">
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between flex-wrap gap-4">
                             <h2 className="text-xl font-semibold">Applications List</h2>
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className={`text-sm px-3 py-1 rounded-lg border transition ${theme === 'dark'
-                                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                                    : 'border-gray-300 hover:bg-gray-100'
-                                    }`}
-                            >
-                                {showFilters ? "Hide Filters" : "Show Filters"}
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto overflow-x-auto">
+                                    {['All', 'Applied via Waitlist', 'Applied Directly'].map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setApplicantTypeFilter(type)}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md whitespace-nowrap transition-colors ${
+                                                applicantTypeFilter === type 
+                                                    ? 'bg-white text-purple-700 shadow-sm' 
+                                                    : 'text-gray-600 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    onClick={() => setShowFilters(!showFilters)}
+                                    className={`text-sm px-3 py-1 rounded-lg border transition whitespace-nowrap ${theme === 'dark'
+                                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                                        : 'border-gray-300 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {showFilters ? "Hide Filters" : "Show Filters"}
+                                </button>
+                            </div>
                         </div>
 
                         {showFilters && <FilterSection />}
@@ -316,15 +345,33 @@ const ApplicationsListTab = ({
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-semibold">Applications List </h2>
 
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-               bg-[#9333ea] text-white shadow-md
-               hover:bg-purple-700 transition-all duration-300`}
-                            >
-                                <SlidersHorizontal size={16} />
-                                {showFilters ? "Hide Filters" : "Filter By Month"}
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <div className="flex bg-gray-100 rounded-lg p-1">
+                                    {['All', 'Applied via Waitlist', 'Applied Directly'].map(type => (
+                                        <button
+                                            key={type}
+                                            onClick={() => setApplicantTypeFilter(type)}
+                                            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                                                applicantTypeFilter === type 
+                                                    ? 'bg-white text-purple-700 shadow-sm' 
+                                                    : 'text-gray-600 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setShowFilters(!showFilters)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                   bg-[#9333ea] text-white shadow-md
+                   hover:bg-purple-700 transition-all duration-300`}
+                                >
+                                    <SlidersHorizontal size={16} />
+                                    {showFilters ? "Hide Filters" : "Filter By Month"}
+                                </button>
+                            </div>
                         </div>
 
                         {showFilters && <FilterSection />}

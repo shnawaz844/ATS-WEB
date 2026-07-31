@@ -35,6 +35,32 @@ const Waitlist = {
       throw error;
     }
     return (result || []).map(fromDB);
+  },
+
+  async findById(id) {
+    const { data: result, error } = await supabase.from(TABLE).select('*').eq('id', id).maybeSingle();
+    if (error) {
+      if (error.code === '42P01') {
+        const { data: result2, error: error2 } = await supabase.from('waitlist').select('*').eq('id', id).maybeSingle();
+        if (error2) throw error2;
+        return result2 ? fromDB(result2) : null;
+      }
+      throw error;
+    }
+    return result ? fromDB(result) : null;
+  },
+
+  async update(id, updateData) {
+    const { data: result, error } = await supabase.from(TABLE).update(updateData).eq('id', id).select().maybeSingle();
+    if (error) {
+      if (error.code === '42P01') { 
+        const { data: result2, error: error2 } = await supabase.from('waitlist').update(updateData).eq('id', id).select().maybeSingle();
+        if (error2) throw error2;
+        return result2 ? fromDB(result2) : null;
+      }
+      throw error;
+    }
+    return result ? fromDB(result) : null;
   }
 };
 

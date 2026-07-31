@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { Briefcase, Search, Download } from "lucide-react";
+import { Briefcase, Search, Download, Eye, X } from "lucide-react";
 import BackButtonMobile from "../Mob-back-btn";
 import { toast } from "react-toastify";
 
@@ -9,6 +9,9 @@ const AssignedInterviews = () => {
     const [waitlist, setWaitlist] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [selectedResume, setSelectedResume] = useState(null);
+    const [jobs, setJobs] = useState([]);
+    const [applyingId, setApplyingId] = useState(null);
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const companyId = user.company_id;
@@ -35,9 +38,26 @@ const AssignedInterviews = () => {
         }
     };
 
+    const fetchJobs = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`, {
+                headers: {
+                    "Company_id": companyId
+                }
+            });
+            const result = await response.json();
+            if (result && result.jobs) {
+                setJobs(result.jobs);
+            }
+        } catch (error) {
+            console.error("Error fetching jobs:", error);
+        }
+    };
+
     useEffect(() => {
         if (companyId) {
             fetchWaitlist();
+            fetchJobs();
         }
     }, [companyId]);
 
@@ -53,6 +73,42 @@ const AssignedInterviews = () => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric', month: 'short', day: 'numeric'
         });
+    };
+
+    const capitalizeWords = (str) => {
+        if (!str) return "";
+
+        return str
+            .toLowerCase()
+            .split(" ")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+    };
+
+    const handleApply = async (waitlistId, jobId) => {
+        setApplyingId(waitlistId);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/waitlist/apply-to-job`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Company_id": companyId
+                },
+                body: JSON.stringify({ waitlistId, jobId })
+            });
+            const result = await response.json();
+            if (result.success) {
+                toast.success(result.message);
+                fetchWaitlist(); // Refresh list to update status
+            } else {
+                toast.error(result.message || "Failed to apply");
+            }
+        } catch (error) {
+            console.error("Error applying to job:", error);
+            toast.error("An error occurred while applying");
+        } finally {
+            setApplyingId(null);
+        }
     };
 
     return (
@@ -103,12 +159,13 @@ const AssignedInterviews = () => {
                                     <th className="px-6 py-4 font-semibold">Status</th>
                                     <th className="px-6 py-4 font-semibold">Applied On</th>
                                     <th className="px-6 py-4 font-semibold">Resume</th>
+                                    {/* <th className="px-6 py-4 font-semibold">Action</th> */}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan="7" className="px-6 py-12 text-center">
+                                        <td colSpan="8" className="px-6 py-12 text-center">
                                             <div className="flex justify-center items-center">
                                                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
                                             </div>
@@ -116,7 +173,7 @@ const AssignedInterviews = () => {
                                     </tr>
                                 ) : filteredWaitlist.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" className="px-6 py-12 text-center">
+                                        <td colSpan="8" className="px-6 py-12 text-center">
                                             <div className="flex flex-col items-center justify-center">
                                                 <Briefcase className="h-10 w-10 text-gray-400 mb-3" />
                                                 <p className={`text-base font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>No waitlist entries found</p>
@@ -127,23 +184,18 @@ const AssignedInterviews = () => {
                                     filteredWaitlist.map((item, idx) => (
                                         <tr key={item.id || idx} className={`transition-colors hover:${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
                                             <td className="px-6 py-4">
-                                                <div className={`font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{item.name}</div>
-                                                {item.currentEmployee === 'Yes' && (
-                                                    <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
-                                                        Internal
-                                                    </span>
-                                                )}
+                                                <div className={`font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{capitalizeWords(item.name)}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>{item.email}</div>
                                                 <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.phone || "N/A"}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{item.department || "N/A"}</div>
-                                                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.role || "N/A"}</div>
+                                                <div className={`font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>{capitalizeWords(item.department) || "N/A"}</div>
+                                                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{capitalizeWords(item.role) || "N/A"}</div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                                {item.currentCity || "N/A"}
+                                                {capitalizeWords(item.currentCity) || "N/A"}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -159,14 +211,54 @@ const AssignedInterviews = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 {item.resumeUrl || item.resume_url ? (
-                                                    <a href={item.resumeUrl || item.resume_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors">
-                                                        <Download className="w-4 h-4" />
-                                                        Resume
-                                                    </a>
+                                                    <button
+                                                        onClick={() => setSelectedResume(item.resumeUrl || item.resume_url)}
+                                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                        View Resume
+                                                    </button>
                                                 ) : (
                                                     <span className="text-gray-400 text-sm italic">No Resume</span>
                                                 )}
                                             </td>
+                                            {/* <td className="px-6 py-4">
+                                                {(() => {
+                                                    if (item.status === 'Applied') {
+                                                        return <span className="text-xs text-green-600 font-medium italic">Already Applied</span>;
+                                                    }
+
+                                                    // Find matching job (case insensitive and trimmed match on title vs role)
+                                                    const waitlistRole = item.role?.trim().toLowerCase();
+                                                    const matchingJob = jobs.find(job => {
+                                                        const jobTitle = job.title?.trim().toLowerCase();
+                                                        if (!waitlistRole || !jobTitle) return false;
+                                                        return jobTitle.includes(waitlistRole) || waitlistRole.includes(jobTitle);
+                                                    });
+
+                                                    if (matchingJob && item.role) {
+                                                        return (
+                                                            <button
+                                                                onClick={() => handleApply(item.id, matchingJob._id || matchingJob.id)}
+                                                                disabled={applyingId === item.id}
+                                                                className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${applyingId === item.id
+                                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                        : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                                                    }`}
+                                                            >
+                                                                {applyingId === item.id ? (
+                                                                    <div className="w-3 h-3 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                                                                ) : (
+                                                                    <Briefcase className="w-3 h-3" />
+                                                                )}
+                                                                Apply to {matchingJob.title}
+                                                            </button>
+                                                        );
+                                                    }
+
+                                                    return <span className="text-xs text-gray-400 italic">No matching job</span>;
+                                                })()}
+                                            </td> */}
                                         </tr>
                                     ))
                                 )}
@@ -175,6 +267,34 @@ const AssignedInterviews = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Resume Modal */}
+            {selectedResume && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className={`relative w-full max-w-4xl h-[80vh] rounded-xl shadow-2xl flex flex-col overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border border-gray-700' : 'bg-white'}`}>
+                        {/* Modal Header */}
+                        <div className={`flex items-center justify-between p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                Resume View
+                            </h3>
+                            <button
+                                onClick={() => setSelectedResume(null)}
+                                className={`p-2 rounded-lg transition-colors ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-900'}`}
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        {/* Modal Body */}
+                        <div className="flex-1 w-full h-full bg-gray-100 dark:bg-gray-800">
+                            <iframe
+                                src={selectedResume}
+                                title="Resume Preview"
+                                className="w-full h-full border-0"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -252,8 +252,50 @@ export const PostJob = () => {
     } else {
       console.log("formattedData", formattedData);
       postJob(formattedData, {
-        onSuccess: () => {
+        onSuccess: async (data) => {
           toast.success("Job posted successfully");
+          
+          try {
+            // Auto-apply logic for waitlist candidates
+            const waitlistRes = await fetch(`${process.env.REACT_APP_BASE_URL}/waitlist/get-waitlist`, {
+                headers: { "Company_id": companyId }
+            });
+            const waitlistResult = await waitlistRes.json();
+            
+            if (waitlistResult.success && waitlistResult.data) {
+                const waitlist = waitlistResult.data;
+                const jobTitle = formattedData.title?.trim().toLowerCase();
+                const jobId = data?.job?._id || data?.job?.id;
+                
+                if (jobTitle && jobId) {
+                    const matchedWaitlist = waitlist.filter(item => {
+                        const waitlistRole = item.role?.trim().toLowerCase();
+                        if (!waitlistRole) return false;
+                        return jobTitle.includes(waitlistRole) || waitlistRole.includes(jobTitle);
+                    });
+
+                    const pendingMatched = matchedWaitlist.filter(item => item.status === 'Pending' || item.status === 'Reviewed');
+
+                    for (const item of pendingMatched) {
+                        try {
+                            await fetch(`${process.env.REACT_APP_BASE_URL}/waitlist/apply-to-job`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    "Company_id": companyId
+                                },
+                                body: JSON.stringify({ waitlistId: item.id || item._id, jobId: jobId })
+                            });
+                        } catch (err) {
+                            console.error("Error auto-applying waitlist item:", err);
+                        }
+                    }
+                }
+            }
+          } catch (err) {
+             console.error("Error processing auto-apply for waitlist:", err);
+          }
+
           setIsLoading(false);
           navigate(`/${companyUserName}/all-jobs`);
         },
