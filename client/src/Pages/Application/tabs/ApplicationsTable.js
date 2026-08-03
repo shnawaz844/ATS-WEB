@@ -153,9 +153,6 @@ const ApplicationsTable = ({
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Candidate
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
-                                Email
-                            </th>
 
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium dark:text-white text-gray-900 uppercase tracking-wider">
                                 Contact
@@ -228,15 +225,16 @@ const ApplicationsTable = ({
                                                 <div className="ml-4">
                                                     <Link
                                                         to={`/${companyUserName}/candidate-details/${candidateId}/${jobId}`}
-                                                        className="text-sm font-medium text-purple-600 hover:underline group-hover:text-white "
+                                                        className="text-sm font-medium text-purple-600 hover:underline group-hover:text-white block"
                                                     >
                                                         {candidateName !== 'N/A' ? capitalizeFirstLetter(candidateName) : 'N/A'}
+                                                        <div className="text-xs text-gray-500 group-hover:text-gray-200 dark:text-gray-400 mt-1 break-words">
+                                                            {app.emailInfo}
+                                                        </div>
                                                     </Link>
+
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-normal text-sm text-gray-800 group-hover:text-white dark:text-gray-200 max-w-[140px] break-words">
-                                            {app.emailInfo}
                                         </td>
 
 
@@ -245,9 +243,9 @@ const ApplicationsTable = ({
                                             {app.contactInfo ? `+91 ${app.contactInfo}` : 'N/A'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
-                                            {(app.applicant_type?.toLowerCase() === 'waitlist' || app.applicant_type?.toLowerCase() === 'applied via waitlist') ? 'Applied via Waitlist' : 
-                                             (app.applicant_type?.toLowerCase() === 'job seeker' || app.applicant_type?.toLowerCase() === 'applied directly') ? 'Applied Directly' : 
-                                             (app.applicant_type ? capitalizeFirstLetter(app.applicant_type) : 'Regular')}
+                                            {(app.applicant_type?.toLowerCase() === 'waitlist' || app.applicant_type?.toLowerCase() === 'applied via waitlist') ? 'Applied via Waitlist' :
+                                                (app.applicant_type?.toLowerCase() === 'job seeker' || app.applicant_type?.toLowerCase() === 'applied directly') ? 'Applied Directly' :
+                                                    (app.applicant_type ? capitalizeFirstLetter(app.applicant_type) : 'Regular')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 group-hover:text-white dark:text-gray-200">
                                             {app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}

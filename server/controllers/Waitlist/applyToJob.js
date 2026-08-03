@@ -31,6 +31,7 @@ export const applyToJob = async (req, res) => {
                 email: waitlistEntry.email,
                 password: "Password@123", // Default placeholder password
                 role: "candidate",
+                gender: waitlistEntry.gender || "N/A",
                 address: waitlistEntry.currentCity || waitlistEntry.current_city || "N/A",
                 company_id: job.company_id
             });

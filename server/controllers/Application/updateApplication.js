@@ -1,5 +1,7 @@
 import Application from "../../models/Application.js";
 import upload, { uploadToS3 } from "../../middleware/upload.js";
+import ApplicationStatus from "../../models/ApplicationStatus.js";
+import Job from "../../models/Job.js";
 
 const updateApplication = async (req, res) => {
   try {
@@ -26,6 +28,30 @@ const updateApplication = async (req, res) => {
 
     if (!updatedApplication) {
       return res.status(404).json({ message: "Application not found." });
+    }
+
+    // Check if the application status was updated to "Hired"
+    if (updateFields.applicationStatusId) {
+      try {
+        const statusObj = await ApplicationStatus.findById(updateFields.applicationStatusId);
+        if (statusObj && statusObj.applicationStatus && statusObj.applicationStatus.toLowerCase() === 'hired') {
+          const jobId = updatedApplication.jobID || updatedApplication.jobId;
+          const candidateId = updatedApplication.candidateID || updatedApplication.candidateId;
+          
+          if (jobId && candidateId) {
+            const job = await Job.findById(jobId);
+            if (job) {
+              const hiredCandidates = job.hired_candidates || [];
+              if (!hiredCandidates.includes(candidateId)) {
+                hiredCandidates.push(candidateId);
+                await Job.findByIdAndUpdate(job.id, { hired_candidates: hiredCandidates });
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error updating hired_candidates in job:", err);
+      }
     }
 
     res.status(200).json({ message: "Application updated successfully!", application: updatedApplication });

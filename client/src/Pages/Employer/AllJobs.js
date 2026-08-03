@@ -12,7 +12,8 @@ import {
     Calendar1,
     IndianRupee,
     Share2,
-    Users
+    Users,
+    UserCheck
 } from 'lucide-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButtonMobile from '../../components/Mob-back-btn';
@@ -686,6 +687,15 @@ export const AllJobs = () => {
                                                                     Number of applicants:{" "}
                                                                     <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
                                                                         {job.applicants.length || "N/A"}
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                            <div className={`flex items-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700 group-hover:text-black'}`}>
+                                                                <UserCheck className="h-4 w-4 mr-3 flex-shrink-0" />
+                                                                <span className="text-sm">
+                                                                    Number of hired applicants:{" "}
+                                                                    <span className="font-semibold bg-yellow-200 text-gray-800 px-1 rounded">
+                                                                        {job.hired_candidates?.length || 0}
                                                                     </span>
                                                                 </span>
                                                             </div>

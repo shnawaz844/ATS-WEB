@@ -609,6 +609,7 @@ export const PostJobForm = ({
       const companyUserName = localStorage.getItem("companyUserName");
       const compensation = watch("compensationVal");
       const experience = watch("experienceRequired");
+      const compensationPeriod = watch("compensationPeriod");
 
       const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/ai/generate-description`,
@@ -622,6 +623,7 @@ export const PostJobForm = ({
             jobTitle,
             companyUserName,
             compensation,
+            compensationPeriod,
             experience
           }),
         },

@@ -45,18 +45,23 @@ const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 2000) => {
     }
 };
 
-const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
-    return `Write a professional and engaging job description for the role of "${jobTitle}" using the following specific format and emojis. Use HTML tags (<h3>, <p>, <ul>, <li>, <strong>) for detailed formatting.
+const getPrompt = (jobTitle, capitalizedCompany, experience, compensation, compensationPeriod) => {
+    let compText = compensation ? `(<strong>${compensation}</strong>)` : "";
+    if (compensation && compensationPeriod === "Month") compText += " monthly";
+    else if (compensation && compensationPeriod === "Year") compText += " yearly";
+    else if (compensation && compensationPeriod) compText += ` ${compensationPeriod.toLowerCase()}`;
+
+    return `Write a professional and engaging job description for the role of "${jobTitle}" using the following specific format. Do not use emoji icons; instead, use professional typography and unicode icons (e.g., ✦, ❖, ➢, ✓). Use HTML tags (<h3>, <p>, <ul>, <li>, <strong>) for detailed formatting.
 
             Format Structure:
             
-            <h3>🚀 About the Company</h3>
+            <h3>✦ About the Company</h3>
             <p>Write an exciting description about ${capitalizedCompany || "our company"}.</p>
             <br></br>
-            <h3>👨💻 Role Overview</h3>
+            <h3>❖ Role Overview</h3>
             <p>Write a compelling summary of the role. ${experience ? `The ideal candidate should have approximately <strong>${experience} years</strong> of experience.` : ""}</p>
             <br></br>
-            <h3>🛠️ Key Responsibilities</h3>
+            <h3>➢ Key Responsibilities</h3>
             <ul>
                 <li>[Responsibility 1]</li>
                 <li>[Responsibility 2]</li>
@@ -65,7 +70,7 @@ const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
             </ul>
             <br></br>
             
-            <h3>🎯 Required Skills & Qualifications</h3>
+            <h3>✓ Required Skills & Qualifications</h3>
             <ul>
                 ${experience ? `<li>Minimum of <strong>${experience} years</strong> of relevant experience.</li>` : ""}
                 <li>[Skill 1]</li>
@@ -74,11 +79,11 @@ const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
                 <li>...</li>
             </ul>
             <br></br>
-            <h3>🌟 What We Offer</h3>
+            <h3>★ What We Offer</h3>
             <ul>
-                <li>Competitive salary package ${compensation ? `(<strong>${compensation}</strong>)` : ""} 💰</li>
-                <li>Friendly and supportive work culture 🤝</li>
-                <li>Career growth and learning opportunities 📈</li>
+                <li>Competitive salary package ${compText}</li>
+                <li>Friendly and supportive work culture</li>
+                <li>Career growth and learning opportunities</li>
                 <li>Flexible working environment</li>
             </ul>
 
@@ -92,7 +97,7 @@ const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
             Failure to follow this will break the UI formatting.`;
 };
 
-export const generateDescriptionStream = async (jobTitle, companyUserName, compensation = "", experience = "") => {
+export const generateDescriptionStream = async (jobTitle, companyUserName, compensation = "", experience = "", compensationPeriod = "") => {
     try {
         if (!jobTitle) throw new Error("Job title is required");
         if (!process.env.GEMINI_API_KEY) throw new Error("Gemini API key not configured");
@@ -104,7 +109,7 @@ export const generateDescriptionStream = async (jobTitle, companyUserName, compe
         return await retryWithBackoff(async () => {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-            const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation);
+            const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation, compensationPeriod);
             const result = await model.generateContentStream(prompt);
             return result.stream;
         }, 3, 2000);
@@ -114,9 +119,9 @@ export const generateDescriptionStream = async (jobTitle, companyUserName, compe
     }
 };
 
-export const generateDescriptionText = async (jobTitle, companyUserName, compensation = "", experience = "") => {
+export const generateDescriptionText = async (jobTitle, companyUserName, compensation = "", experience = "", compensationPeriod = "") => {
     try {
-        const stream = await generateDescriptionStream(jobTitle, companyUserName, compensation, experience);
+        const stream = await generateDescriptionStream(jobTitle, companyUserName, compensation, experience, compensationPeriod);
         let fullText = "";
         for await (const chunk of stream) {
             fullText += chunk.text();

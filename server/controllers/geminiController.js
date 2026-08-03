@@ -2,7 +2,7 @@ import { generateDescriptionStream } from "../utils/aiHelper.js";
 
 export const generateJobDescription = async (req, res) => {
     try {
-        const { jobTitle, companyUserName, compensation, experience } = req.body;
+        const { jobTitle, companyUserName, compensation, experience, compensationPeriod } = req.body;
         const company_id = req.headers["company_id"]?.trim();
 
         if (!jobTitle) {
@@ -14,7 +14,8 @@ export const generateJobDescription = async (req, res) => {
             jobTitle,
             companyUserName || "",
             compensation || "",
-            experience || ""
+            experience || "",
+            compensationPeriod || ""
         );
 
         // Set appropriate headers for streaming
